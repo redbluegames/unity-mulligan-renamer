@@ -32,46 +32,9 @@ namespace RedBlueGames.Tools
     public class BulkRename : EditorWindow
     {
         private const string MenuPath = "Assets/Rename In Bulk";
-        private const string AddedTextColorTag = "<color=green>";
-        private const string DeletedTextColorTag = "<color=red>";
-        private const string EndColorTag = "</color>";
 
         private List<UnityEngine.Object> objectsToRename;
-
-        private string prefix;
-        private string suffix;
-        private string searchToken;
-        private string replacementString;
-
-        private string RichTextPrefix
-        {
-            get
-            {
-                return string.Concat(AddedTextColorTag, this.prefix, EndColorTag);
-            }
-        }
-
-        private string RichTextSuffix
-        {
-            get
-            {
-                return string.Concat(AddedTextColorTag, this.suffix, EndColorTag);
-            }
-        }
-
-        private string RichTextReplacementString
-        {
-            get
-            {
-                return string.Concat(
-                    DeletedTextColorTag,
-                    this.searchToken,
-                    EndColorTag,
-                    AddedTextColorTag,
-                    this.replacementString,
-                    EndColorTag);
-            }
-        }
+        private BulkRenameConfig bulkRenameConfig;
 
         [MenuItem(MenuPath)]
         private static void ShowRenameSpritesheetWindow()
@@ -99,10 +62,7 @@ namespace RedBlueGames.Tools
         {
             Selection.selectionChanged += this.Repaint;
 
-            this.prefix = string.Empty;
-            this.suffix = string.Empty;
-            this.searchToken = string.Empty;
-            this.replacementString = string.Empty;
+            this.bulkRenameConfig = new BulkRenameConfig();
 
             this.RefreshObjectsToRename();
         }
@@ -144,13 +104,17 @@ namespace RedBlueGames.Tools
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
-            this.prefix = EditorGUILayout.TextField("Prefix", this.prefix);
-            this.suffix = EditorGUILayout.TextField("Suffix", this.suffix);
+            this.bulkRenameConfig.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenameConfig.Prefix);
+            this.bulkRenameConfig.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenameConfig.Suffix);
 
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
 
-            this.searchToken = EditorGUILayout.TextField("Search Token", this.searchToken);
-            this.replacementString = EditorGUILayout.TextField("Replace with", this.replacementString);
+            this.bulkRenameConfig.SearchToken = EditorGUILayout.TextField(
+                "Search Token",
+                this.bulkRenameConfig.SearchToken);
+            this.bulkRenameConfig.ReplacementString = EditorGUILayout.TextField(
+                "Replace with",
+                this.bulkRenameConfig.ReplacementString);
 
             if (GUILayout.Button("Rename"))
             {
@@ -170,13 +134,16 @@ namespace RedBlueGames.Tools
             {
                 EditorGUILayout.BeginHorizontal();
 
-                // Display diff
-                var previewObjectname = this.GetNewNameForAsset(objectToRename, false);
+                // Calculate if names differ for use with styles
+                var previewObjectname = this.bulkRenameConfig.GetRenamedString(objectToRename.name, false);
                 var objectName = objectToRename.name;
                 bool namesDiffer = previewObjectname != objectName;
+
+                // Display diff
                 var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
                 diffStyle.richText = true;
-                EditorGUILayout.LabelField(this.GetNewNameForAsset(objectToRename, true), diffStyle);
+                var diffedName = this.bulkRenameConfig.GetRenamedString(objectToRename.name, true);
+                EditorGUILayout.LabelField(diffedName, diffStyle);
 
                 // Display new name
                 var style = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
@@ -211,35 +178,8 @@ namespace RedBlueGames.Tools
         private void RenameAsset(UnityEngine.Object asset)
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
-            var newName = this.GetNewNameForAsset(asset, false);
+            var newName = this.bulkRenameConfig.GetRenamedString(asset.name, false);
             AssetDatabase.RenameAsset(pathToAsset, newName);
-        }
-
-        private string GetNewNameForAsset(UnityEngine.Object asset, bool useRichText)
-        {
-            var modifiedName = asset.name;
-
-            // Replace strings first so we don't replace the prefix.
-            if (!string.IsNullOrEmpty(this.searchToken))
-            {
-                var replacementString = useRichText ? this.RichTextReplacementString :
-                    this.replacementString;
-                modifiedName = asset.name.Replace(this.searchToken, replacementString);
-            }
-
-            if (!string.IsNullOrEmpty(this.prefix))
-            {
-                var prefix = useRichText ? this.RichTextPrefix : this.prefix;
-                modifiedName = string.Concat(prefix, modifiedName);
-            }
-
-            if (!string.IsNullOrEmpty(this.suffix))
-            {
-                var suffix = useRichText ? this.RichTextSuffix : this.suffix;
-                modifiedName = string.Concat(modifiedName, suffix);
-            }
-
-            return modifiedName;
         }
     }
 }
