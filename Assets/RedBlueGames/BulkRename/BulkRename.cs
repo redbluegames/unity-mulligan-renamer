@@ -32,13 +32,46 @@ namespace RedBlueGames.Tools
     public class BulkRename : EditorWindow
     {
         private const string MenuPath = "Assets/Rename In Bulk";
+        private const string AddedTextColorTag = "<color=green>";
+        private const string DeletedTextColorTag = "<color=red>";
+        private const string EndColorTag = "</color>";
 
         private List<UnityEngine.Object> objectsToRename;
 
-        private string prefix;  
+        private string prefix;
         private string suffix;
         private string searchToken;
         private string replacementString;
+
+        private string RichTextPrefix
+        {
+            get
+            {
+                return string.Concat(AddedTextColorTag, this.prefix, EndColorTag);
+            }
+        }
+
+        private string RichTextSuffix
+        {
+            get
+            {
+                return string.Concat(AddedTextColorTag, this.suffix, EndColorTag);
+            }
+        }
+
+        private string RichTextReplacementString
+        {
+            get
+            {
+                return string.Concat(
+                    DeletedTextColorTag,
+                    this.searchToken,
+                    EndColorTag,
+                    AddedTextColorTag,
+                    this.replacementString,
+                    EndColorTag);
+            }
+        }
 
         [MenuItem(MenuPath)]
         private static void ShowRenameSpritesheetWindow()
@@ -129,7 +162,7 @@ namespace RedBlueGames.Tools
             GUILayout.Box(string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(1) });
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Original Name", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Diff", EditorStyles.boldLabel);
             EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
             EditorGUILayout.EndHorizontal();
 
@@ -137,11 +170,15 @@ namespace RedBlueGames.Tools
             {
                 EditorGUILayout.BeginHorizontal();
 
+                // Display diff
+                var previewObjectname = this.GetNewNameForAsset(objectToRename, false);
                 var objectName = objectToRename.name;
-                var previewObjectname = this.GetNewNameForAsset(objectToRename);
-                EditorGUILayout.LabelField(objectName);
-
                 bool namesDiffer = previewObjectname != objectName;
+                var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
+                diffStyle.richText = true;
+                EditorGUILayout.LabelField(this.GetNewNameForAsset(objectToRename, true), diffStyle);
+
+                // Display new name
                 var style = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
                 EditorGUILayout.LabelField(previewObjectname, style);
 
@@ -174,28 +211,32 @@ namespace RedBlueGames.Tools
         private void RenameAsset(UnityEngine.Object asset)
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
-            var newName = this.GetNewNameForAsset(asset);
+            var newName = this.GetNewNameForAsset(asset, false);
             AssetDatabase.RenameAsset(pathToAsset, newName);
         }
 
-        private string GetNewNameForAsset(UnityEngine.Object asset)
+        private string GetNewNameForAsset(UnityEngine.Object asset, bool useRichText)
         {
             var modifiedName = asset.name;
 
             // Replace strings first so we don't replace the prefix.
             if (!string.IsNullOrEmpty(this.searchToken))
             {
-                modifiedName = asset.name.Replace(this.searchToken, this.replacementString);
+                var replacementString = useRichText ? this.RichTextReplacementString :
+                    this.replacementString;
+                modifiedName = asset.name.Replace(this.searchToken, replacementString);
             }
 
             if (!string.IsNullOrEmpty(this.prefix))
             {
-                modifiedName = string.Concat(this.prefix, modifiedName);
+                var prefix = useRichText ? this.RichTextPrefix : this.prefix;
+                modifiedName = string.Concat(prefix, modifiedName);
             }
 
             if (!string.IsNullOrEmpty(this.suffix))
             {
-                modifiedName = string.Concat(modifiedName, this.suffix);
+                var suffix = useRichText ? this.RichTextSuffix : this.suffix;
+                modifiedName = string.Concat(modifiedName, suffix);
             }
 
             return modifiedName;
