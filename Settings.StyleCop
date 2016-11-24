@@ -1,0 +1,114 @@
+<StyleCopSettings Version="105">
+  <GlobalSettings>
+    <StringProperty Name="LinkedSettingsFile">IgnoreSourceFiles.StyleCop</StringProperty>
+    <CollectionProperty Name="RecognizedWords">
+      <Value>char</Value>
+      <Value>Enum</Value>
+      <Value>int</Value>
+      <Value>stackoverflow</Value>
+      <Value>var</Value>
+      <Value>webplayer</Value>
+      <Value>Anim</Value>
+      <Value>keyframe</Value>
+      <Value>keyframes</Value>
+      <Value>Raycast</Value>
+      <Value>verteces</Value>
+      <Value>Monobehavior</Value>
+      <Value>Monobehaviour</Value>
+      <Value>Monobehaviors</Value>
+      <Value>Monobehaviours</Value>
+      <Value>behaviour</Value>
+      <Value>behaviour's</Value>
+      <Value>Coroutine</Value>
+      <Value>Coroutines</Value>
+      <Value>Coroutine</Value>
+      <Value>unpause</Value>
+      <Value>unpauses</Value>
+      <Value>spritesheet</Value>
+      <Value>php</Value>
+    </CollectionProperty>
+    <BooleanProperty Name="ViolationsAsErrors">True</BooleanProperty>
+  </GlobalSettings>
+  <Analyzers>
+    <Analyzer AnalyzerId="StyleCop.CSharp.DocumentationRules">
+      <Rules>
+        <Rule Name="FileMustHaveHeader">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderMustShowCopyright">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderMustHaveCopyrightText">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderMustContainFileName">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderFileNameDocumentationMustMatchFileName">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderMustHaveValidCompanyText">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="FileHeaderFileNameDocumentationMustMatchTypeName">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+        <Rule Name="ElementDocumentationMustBeSpelledCorrectly">
+          <RuleSettings>
+            <BooleanProperty Name="Enabled">False</BooleanProperty>
+          </RuleSettings>
+        </Rule>
+      </Rules>
+      <AnalyzerSettings>
+        <BooleanProperty Name="IgnorePrivates">True</BooleanProperty>
+        <BooleanProperty Name="IncludeFields">False</BooleanProperty>
+      </AnalyzerSettings>
+    </Analyzer>
+    <Analyzer AnalyzerId="StyleCop.CSharp.NamingRules">
+      <AnalyzerSettings>
+        <CollectionProperty Name="Hungarian">
+          <Value>ai</Value>
+          <Value>cs</Value>
+          <Value>fx</Value>
+          <Value>up</Value>
+          <Value>x</Value>
+          <Value>y</Value>
+          <Value>at</Value>
+        </CollectionProperty>
+      </AnalyzerSettings>
+    </Analyzer>
+  </Analyzers>
+  <Parsers>
+    <Parser ParserId="StyleCop.CSharp.CsParser">
+      <ParserSettings>
+        <CollectionProperty Name="GeneratedFileFilters">
+          <Value>[^a-z ]RBPackageExporter.cs</Value>
+          <Value>[^a-z ]IStyleCopIgnoreUtilityView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtility.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityData.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityDirectoryView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityFileTreeView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityFileView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityPath.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityPrefs.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityWindow.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityXMLTool.cs</Value>
+        </CollectionProperty>
+      </ParserSettings>
+    </Parser>
+  </Parsers>
+</StyleCopSettings>

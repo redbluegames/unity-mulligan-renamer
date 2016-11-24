@@ -22,23 +22,57 @@ SOFTWARE.
 */
 namespace RedBlueGames.Tools
 {
-    using UnityEngine;
     using System.Collections;
+    using UnityEngine;
 
+    /// <summary>
+    /// Bulk renamer handles configuration and renaming of names.
+    /// </summary>
     public class BulkRenamer
     {
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
         private const string EndColorTag = "</color>";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedBlueGames.Tools.BulkRenamer"/> class.
+        /// </summary>
+        public BulkRenamer()
+        {
+            this.Prefix = string.Empty;
+            this.Suffix = string.Empty;
+            this.SearchToken = string.Empty;
+            this.ReplacementString = string.Empty;
+        }
+
+        /// <summary>
+        /// Gets or sets the prefix to add.
+        /// </summary>
+        /// <value>The prefix to add..</value>
         public string Prefix { get; set; }
 
+        /// <summary>
+        /// Gets or sets the suffix to add.
+        /// </summary>
+        /// <value>The suffix to add.</value>
         public string Suffix { get; set; }
 
+        /// <summary>
+        /// Gets or sets the search token, used to determine what text to replace.
+        /// </summary>
+        /// <value>The search token.</value>
         public string SearchToken { get; set; }
 
+        /// <summary>
+        /// Gets or sets the replacement string, which replaces instances of the search token.
+        /// </summary>
+        /// <value>The replacement string.</value>
         public string ReplacementString { get; set; }
 
+        /// <summary>
+        /// Gets the rich text prefix, which includes color tags.
+        /// </summary>
+        /// <value>The rich text prefix.</value>
         public string RichTextPrefix
         {
             get
@@ -47,6 +81,10 @@ namespace RedBlueGames.Tools
             }
         }
 
+        /// <summary>
+        /// Gets the rich text suffix, which includes color tags.
+        /// </summary>
+        /// <value>The rich text suffix.</value>
         public string RichTextSuffix
         {
             get
@@ -55,6 +93,11 @@ namespace RedBlueGames.Tools
             }
         }
 
+        /// <summary>
+        /// Gets the rich text replacement string, which includes the deleted text and added
+        /// text with color tags.
+        /// </summary>
+        /// <value>The rich text replacement string.</value>
         public string RichTextReplacementString
         {
             get
@@ -69,14 +112,12 @@ namespace RedBlueGames.Tools
             }
         }
 
-        public BulkRenamer()
-        {
-            this.Prefix = string.Empty;
-            this.Suffix = string.Empty;
-            this.SearchToken = string.Empty;
-            this.ReplacementString = string.Empty;
-        }
-
+        /// <summary>
+        /// Gets the string, renamed according to the BulkRenamer configuration.
+        /// </summary>
+        /// <returns>The renamed string.</returns>
+        /// <param name="originalName">Original name.</param>
+        /// <param name="useRichText">If set to <c>true</c> outputs the name including rich text tags.</param>
         public string GetRenamedString(string originalName, bool useRichText)
         {
             var modifiedName = originalName;
