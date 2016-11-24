@@ -29,7 +29,7 @@ namespace RedBlueGames.Tools
     /// <summary>
     /// Tool that tries to allow renaming mulitple selections by parsing similar substrings
     /// </summary>
-    public class BulkeRenamerWindow : EditorWindow
+    public class BulkRenamerWindow : EditorWindow
     {
         private const string MenuPath = "Assets/Rename In Bulk";
 
@@ -39,7 +39,7 @@ namespace RedBlueGames.Tools
         [MenuItem(MenuPath)]
         private static void ShowRenameSpritesheetWindow()
         {
-            EditorWindow.GetWindow<BulkeRenamerWindow>(true, "Bulk Rename", true);
+            EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
         }
 
         [MenuItem(MenuPath, true)]
