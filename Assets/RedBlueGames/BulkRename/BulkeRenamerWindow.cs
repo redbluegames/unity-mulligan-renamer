@@ -29,17 +29,17 @@ namespace RedBlueGames.Tools
     /// <summary>
     /// Tool that tries to allow renaming mulitple selections by parsing similar substrings
     /// </summary>
-    public class BulkRename : EditorWindow
+    public class BulkeRenamerWindow : EditorWindow
     {
         private const string MenuPath = "Assets/Rename In Bulk";
 
         private List<UnityEngine.Object> objectsToRename;
-        private BulkRenameConfig bulkRenameConfig;
+        private BulkRenamer bulkRenamer;
 
         [MenuItem(MenuPath)]
         private static void ShowRenameSpritesheetWindow()
         {
-            EditorWindow.GetWindow<BulkRename>(true, "Bulk Rename", true);
+            EditorWindow.GetWindow<BulkeRenamerWindow>(true, "Bulk Rename", true);
         }
 
         [MenuItem(MenuPath, true)]
@@ -62,7 +62,7 @@ namespace RedBlueGames.Tools
         {
             Selection.selectionChanged += this.Repaint;
 
-            this.bulkRenameConfig = new BulkRenameConfig();
+            this.bulkRenamer = new BulkRenamer();
 
             this.RefreshObjectsToRename();
         }
@@ -104,17 +104,17 @@ namespace RedBlueGames.Tools
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
-            this.bulkRenameConfig.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenameConfig.Prefix);
-            this.bulkRenameConfig.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenameConfig.Suffix);
+            this.bulkRenamer.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenamer.Prefix);
+            this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);
 
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
 
-            this.bulkRenameConfig.SearchToken = EditorGUILayout.TextField(
+            this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
                 "Search Token",
-                this.bulkRenameConfig.SearchToken);
-            this.bulkRenameConfig.ReplacementString = EditorGUILayout.TextField(
+                this.bulkRenamer.SearchToken);
+            this.bulkRenamer.ReplacementString = EditorGUILayout.TextField(
                 "Replace with",
-                this.bulkRenameConfig.ReplacementString);
+                this.bulkRenamer.ReplacementString);
 
             if (GUILayout.Button("Rename"))
             {
@@ -135,14 +135,14 @@ namespace RedBlueGames.Tools
                 EditorGUILayout.BeginHorizontal();
 
                 // Calculate if names differ for use with styles
-                var previewObjectname = this.bulkRenameConfig.GetRenamedString(objectToRename.name, false);
+                var previewObjectname = this.bulkRenamer.GetRenamedString(objectToRename.name, false);
                 var objectName = objectToRename.name;
                 bool namesDiffer = previewObjectname != objectName;
 
                 // Display diff
                 var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
                 diffStyle.richText = true;
-                var diffedName = this.bulkRenameConfig.GetRenamedString(objectToRename.name, true);
+                var diffedName = this.bulkRenamer.GetRenamedString(objectToRename.name, true);
                 EditorGUILayout.LabelField(diffedName, diffStyle);
 
                 // Display new name
@@ -178,7 +178,7 @@ namespace RedBlueGames.Tools
         private void RenameAsset(UnityEngine.Object asset)
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
-            var newName = this.bulkRenameConfig.GetRenamedString(asset.name, false);
+            var newName = this.bulkRenamer.GetRenamedString(asset.name, false);
             AssetDatabase.RenameAsset(pathToAsset, newName);
         }
     }
