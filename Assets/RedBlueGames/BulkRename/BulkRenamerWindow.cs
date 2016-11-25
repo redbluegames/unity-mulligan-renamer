@@ -206,6 +206,7 @@ namespace RedBlueGames.Tools
             // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
             Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
 
+            this.bulkRenamer.Count = this.startingCount;
             for (int i = 0; i < this.objectsToRename.Count; ++i)
             {
                 var asset = this.objectsToRename[i];
@@ -221,6 +222,7 @@ namespace RedBlueGames.Tools
                     i / (float)this.objectsToRename.Count);
                 
                 this.RenameObject(asset);
+                this.bulkRenamer.Count++;
             }
 
             EditorUtility.ClearProgressBar();
