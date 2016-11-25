@@ -81,7 +81,7 @@ namespace RedBlueGames.Tools
         /// <value>The number back delete chars.</value>
         public int NumBackDeleteChars { get; set; }
 
-        private string RichTextPrefix
+        private string ColoredPrefix
         {
             get
             {
@@ -89,7 +89,7 @@ namespace RedBlueGames.Tools
             }
         }
 
-        private string RichTextSuffix
+        private string ColoredSuffix
         {
             get
             {
@@ -97,7 +97,7 @@ namespace RedBlueGames.Tools
             }
         }
 
-        private string RichTextReplacementString
+        private string ColoredReplacementString
         {
             get
             {
@@ -116,8 +116,8 @@ namespace RedBlueGames.Tools
         /// </summary>
         /// <returns>The renamed string.</returns>
         /// <param name="originalName">Original name.</param>
-        /// <param name="useRichText">If set to <c>true</c> outputs the name including rich text tags.</param>
-        public string GetRenamedString(string originalName, bool useRichText)
+        /// <param name="showDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
+        public string GetRenamedString(string originalName, bool showDiff)
         {
             var modifiedName = originalName;
 
@@ -143,7 +143,7 @@ namespace RedBlueGames.Tools
             }
 
             // When showing rich text, add back in the trimmed characters
-            if (useRichText)
+            if (showDiff)
             {
                 if (!string.IsNullOrEmpty(trimmedFrontChars))
                 {
@@ -159,20 +159,20 @@ namespace RedBlueGames.Tools
             // Replace strings first so we don't replace the prefix.
             if (!string.IsNullOrEmpty(this.SearchToken))
             {
-                var replacementString = useRichText ? this.RichTextReplacementString :
+                var replacementString = showDiff ? this.ColoredReplacementString :
                 this.ReplacementString;
                 modifiedName = modifiedName.Replace(this.SearchToken, replacementString);
             }
 
             if (!string.IsNullOrEmpty(this.Prefix))
             {
-                var prefix = useRichText ? this.RichTextPrefix : this.Prefix;
+                var prefix = showDiff ? this.ColoredPrefix : this.Prefix;
                 modifiedName = string.Concat(prefix, modifiedName);
             }
 
             if (!string.IsNullOrEmpty(this.Suffix))
             {
-                var suffix = useRichText ? this.RichTextSuffix : this.Suffix;
+                var suffix = showDiff ? this.ColoredSuffix : this.Suffix;
                 modifiedName = string.Concat(modifiedName, suffix);
             }
 

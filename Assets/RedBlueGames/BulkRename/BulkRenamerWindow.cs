@@ -58,7 +58,6 @@ namespace RedBlueGames.Tools
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
         {
-
             if (AssetDatabase.Contains(obj))
             {
                 return true;
@@ -124,12 +123,14 @@ namespace RedBlueGames.Tools
             EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
 
             EditorGUILayout.BeginHorizontal();
-            this.bulkRenamer.NumFrontDeleteChars = Mathf.Max(0, EditorGUILayout.IntField(
-                    "Delete From Front",
-                    this.bulkRenamer.NumFrontDeleteChars));
-            this.bulkRenamer.NumBackDeleteChars = Mathf.Max(0, EditorGUILayout.IntField(
-                    "Delete from Back",
-                    this.bulkRenamer.NumBackDeleteChars));
+            this.bulkRenamer.NumFrontDeleteChars = EditorGUILayout.IntField(
+                "Delete From Front",
+                this.bulkRenamer.NumFrontDeleteChars);
+            this.bulkRenamer.NumFrontDeleteChars = Mathf.Max(0, this.bulkRenamer.NumFrontDeleteChars);
+            this.bulkRenamer.NumBackDeleteChars = EditorGUILayout.IntField(
+                "Delete from Back",
+                this.bulkRenamer.NumBackDeleteChars);
+            this.bulkRenamer.NumBackDeleteChars = Mathf.Max(0, this.bulkRenamer.NumBackDeleteChars);
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
