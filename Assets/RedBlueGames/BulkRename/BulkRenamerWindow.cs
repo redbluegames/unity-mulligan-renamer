@@ -121,6 +121,17 @@ namespace RedBlueGames.Tools
             this.bulkRenamer.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenamer.Prefix);
             this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);
 
+            EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
+
+            EditorGUILayout.BeginHorizontal();
+            this.bulkRenamer.NumFrontDeleteChars = Mathf.Max(0, EditorGUILayout.IntField(
+                    "Delete From Front",
+                    this.bulkRenamer.NumFrontDeleteChars));
+            this.bulkRenamer.NumBackDeleteChars = Mathf.Max(0, EditorGUILayout.IntField(
+                    "Delete from Back",
+                    this.bulkRenamer.NumBackDeleteChars));
+            EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
 
             this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
