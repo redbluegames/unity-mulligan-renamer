@@ -41,7 +41,7 @@ namespace RedBlueGames.Tools
         {
             this.Prefix = string.Empty;
             this.Suffix = string.Empty;
-            this.SearchToken = string.Empty;
+            this.SearchString = string.Empty;
             this.ReplacementString = string.Empty;
         }
 
@@ -58,10 +58,10 @@ namespace RedBlueGames.Tools
         public string Suffix { get; set; }
 
         /// <summary>
-        /// Gets or sets the search token, used to determine what text to replace.
+        /// Gets or sets the search string, used to determine what text to replace.
         /// </summary>
-        /// <value>The search token.</value>
-        public string SearchToken { get; set; }
+        /// <value>The search string.</value>
+        public string SearchString { get; set; }
 
         /// <summary>
         /// Gets or sets the replacement string, which replaces instances of the search token.
@@ -98,7 +98,7 @@ namespace RedBlueGames.Tools
             get
             {
                 return string.Concat(
-                    ColorStringForDelete(this.SearchToken),
+                    ColorStringForDelete(this.SearchString),
                     ColorStringForAdd(this.ReplacementString));
             }
         }
@@ -149,11 +149,11 @@ namespace RedBlueGames.Tools
             }
 
             // Replace strings first so we don't replace the prefix.
-            if (!string.IsNullOrEmpty(this.SearchToken))
+            if (!string.IsNullOrEmpty(this.SearchString))
             {
                 var replacementString = showDiff ? this.ColoredReplacementString :
                 this.ReplacementString;
-                modifiedName = modifiedName.Replace(this.SearchToken, replacementString);
+                modifiedName = modifiedName.Replace(this.SearchString, replacementString);
             }
 
             if (!string.IsNullOrEmpty(this.Prefix))
@@ -170,13 +170,21 @@ namespace RedBlueGames.Tools
 
             if (!string.IsNullOrEmpty(this.CountFormat))
             {
-                var countAsString = this.Count.ToString(this.CountFormat);
-                if (showDiff)
+                try
                 {
-                    countAsString = string.Concat(ColorStringForAdd(countAsString));
-                }
+                    var countAsString = this.Count.ToString(this.CountFormat);
 
-                modifiedName = string.Concat(modifiedName, countAsString);
+                    if (showDiff)
+                    {
+                        countAsString = string.Concat(ColorStringForAdd(countAsString));
+                    }
+
+                    modifiedName = string.Concat(modifiedName, countAsString);
+                }
+                catch (System.FormatException)
+                {
+                    // Can't append anything if format is bad.
+                }
             }
 
             return modifiedName;
