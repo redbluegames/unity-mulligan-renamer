@@ -1,5 +1,7 @@
 # Unity - Bulk Rename Tool
-Bulk Rename tool for Unity allows for quick and safe renaming of many assets or GameObjects.
+Bulk Rename tool for Unity allows for quick and safe renaming of many assets or GameObjects. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
+
+![BulkRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/bulk_rename_gameobjects.gif)
 
 ## Installation
 To install this package follow these steps:
@@ -26,7 +28,7 @@ The tool allows for the following options:
 
 You can use some or all of these options when renaming your assets.
 
-Below these options you will see a preview of the results, and a Rename button, which will rename the Objects.
+Below these options there is a Rename button, which will rename all the selected assets according to the settings. Below this there is a preview of the results, which includes a diff of the original name, and the resulting name. Entries in bold will change, others will remain unchanged.
 
 ## Notes and Considerations
 Currently the tool does not allow for undoing Assets, (though Undoing GameObjects in the scene is possible). This seems to be a limitation of Unity's undo system.
