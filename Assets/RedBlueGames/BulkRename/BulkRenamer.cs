@@ -81,33 +81,25 @@ namespace RedBlueGames.Tools
         /// <value>The number back delete chars.</value>
         public int NumBackDeleteChars { get; set; }
 
-        private string ColoredPrefix
-        {
-            get
-            {
-                return string.Concat(AddedTextColorTag, this.Prefix, EndColorTag);
-            }
-        }
+        /// <summary>
+        /// Gets or sets the count to append to the end of the string.
+        /// </summary>
+        /// <value>The count.</value>
+        public int Count { get; set; }
 
-        private string ColoredSuffix
-        {
-            get
-            {
-                return string.Concat(AddedTextColorTag, this.Suffix, EndColorTag);
-            }
-        }
+        /// <summary>
+        /// Gets or sets the format for the count, appended to the end of the string.
+        /// </summary>
+        /// <value>The count format.</value>
+        public string CountFormat { get; set; }
 
         private string ColoredReplacementString
         {
             get
             {
                 return string.Concat(
-                    DeletedTextColorTag,
-                    this.SearchToken,
-                    EndColorTag,
-                    AddedTextColorTag,
-                    this.ReplacementString,
-                    EndColorTag);
+                    ColorStringForDelete(this.SearchToken),
+                    ColorStringForAdd(this.ReplacementString));
             }
         }
 
@@ -147,12 +139,12 @@ namespace RedBlueGames.Tools
             {
                 if (!string.IsNullOrEmpty(trimmedFrontChars))
                 {
-                    modifiedName = string.Concat(DeletedTextColorTag, trimmedFrontChars, EndColorTag, modifiedName);
+                    modifiedName = string.Concat(ColorStringForDelete(trimmedFrontChars), modifiedName);
                 }
 
                 if (!string.IsNullOrEmpty(trimmedBackChars))
                 {
-                    modifiedName = string.Concat(modifiedName, DeletedTextColorTag, trimmedBackChars, EndColorTag);
+                    modifiedName = string.Concat(modifiedName, ColorStringForDelete(trimmedBackChars));
                 }
             }
 
@@ -166,17 +158,38 @@ namespace RedBlueGames.Tools
 
             if (!string.IsNullOrEmpty(this.Prefix))
             {
-                var prefix = showDiff ? this.ColoredPrefix : this.Prefix;
+                var prefix = showDiff ? ColorStringForAdd(this.Prefix) : this.Prefix;
                 modifiedName = string.Concat(prefix, modifiedName);
             }
 
             if (!string.IsNullOrEmpty(this.Suffix))
             {
-                var suffix = showDiff ? this.ColoredSuffix : this.Suffix;
+                var suffix = showDiff ? ColorStringForAdd(this.Suffix) : this.Suffix;
                 modifiedName = string.Concat(modifiedName, suffix);
             }
 
+            if (!string.IsNullOrEmpty(this.CountFormat))
+            {
+                var countAsString = this.Count.ToString(this.CountFormat);
+                if (showDiff)
+                {
+                    countAsString = string.Concat(ColorStringForAdd(countAsString));
+                }
+
+                modifiedName = string.Concat(modifiedName, countAsString);
+            }
+
             return modifiedName;
+        }
+
+        private static string ColorStringForDelete(string baseString)
+        {
+            return string.Concat(DeletedTextColorTag, baseString, EndColorTag);
+        }
+
+        private static string ColorStringForAdd(string baseString)
+        {
+            return string.Concat(AddedTextColorTag, baseString, EndColorTag);
         }
     }
 }
