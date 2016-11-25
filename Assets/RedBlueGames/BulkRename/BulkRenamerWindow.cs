@@ -118,9 +118,9 @@ namespace RedBlueGames.Tools
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
-            this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
-                "Search Token",
-                this.bulkRenamer.SearchToken);
+            this.bulkRenamer.SearchString = EditorGUILayout.TextField(
+                "Search for String",
+                this.bulkRenamer.SearchString);
             this.bulkRenamer.ReplacementString = EditorGUILayout.TextField(
                 "Replace with",
                 this.bulkRenamer.ReplacementString);
@@ -145,6 +145,20 @@ namespace RedBlueGames.Tools
             this.bulkRenamer.CountFormat = EditorGUILayout.TextField(
                 "Count Format",
                 this.bulkRenamer.CountFormat);
+            
+            try
+            {
+                this.startingCount.ToString(this.bulkRenamer.CountFormat);
+            }
+            catch (System.FormatException)
+            {
+                var helpBoxMessage = "Invalid Count Format. Typical formats are D1 for one digit with no " +
+                                     "leading zeros, D2, for two, etc." +
+                                     "\nSee https://msdn.microsoft.com/en-us/library/dwhawy9k(v=vs.110).aspx" +
+                                     " for more formatting options.";
+                EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
+            }
+
             this.startingCount = EditorGUILayout.IntField("Count From", this.startingCount);
 
             if (GUILayout.Button("Rename"))
