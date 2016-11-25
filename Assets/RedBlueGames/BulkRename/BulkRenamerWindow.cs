@@ -31,31 +31,45 @@ namespace RedBlueGames.Tools
     /// </summary>
     public class BulkRenamerWindow : EditorWindow
     {
-        private const string MenuPath = "Assets/Rename In Bulk";
+        private const string AssetsMenuPath = "Assets/Rename In Bulk";
+        private const string GameObjectMenuPath = "GameObject/Rename In Bulk";
 
         private List<UnityEngine.Object> objectsToRename;
         private BulkRenamer bulkRenamer;
 
-        [MenuItem(MenuPath)]
+        [MenuItem(AssetsMenuPath, false, 1011)]
+        [MenuItem(GameObjectMenuPath, false, 49)]
         private static void ShowRenameSpritesheetWindow()
         {
             EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
         }
 
-        [MenuItem(MenuPath, true)]
-        private static bool IsSelectionValid()
+        [MenuItem(AssetsMenuPath, true)]
+        [MenuItem(GameObjectMenuPath, true)]
+        private static bool IsAssetSelectionValid()
         {
             if (Selection.activeObject == null)
             {
                 return false;
             }
 
-            return true;
+            return ObjectIsValidForRename(Selection.activeObject);
         }
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
         {
-            return AssetDatabase.Contains(obj);
+
+            if (AssetDatabase.Contains(obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() == typeof(GameObject))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private void OnEnable()
@@ -90,14 +104,14 @@ namespace RedBlueGames.Tools
             this.RefreshObjectsToRename();
 
             EditorGUILayout.HelpBox(
-                "The Bulk Rename tool tries to allow renaming mulitple selections by parsing similar substrings",
+                "BulkRename allows renaming mulitple selections at one time via string replacement and other methods.",
                 MessageType.None);
-
-            EditorGUILayout.Space();
-
+            
             if (this.objectsToRename.Count == 0)
             {
-                EditorGUILayout.HelpBox("No objects selected. Select some objects to rename.", MessageType.Error);
+                EditorGUILayout.HelpBox(
+                    "No objects selected. Select some Assets or scene Objects to rename.", 
+                    MessageType.Error);
                 return;
             }
 
@@ -155,6 +169,9 @@ namespace RedBlueGames.Tools
 
         private void RenameAssets()
         {
+            // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
+            Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
+
             for (int i = 0; i < this.objectsToRename.Count; ++i)
             {
                 var asset = this.objectsToRename[i];
@@ -169,10 +186,28 @@ namespace RedBlueGames.Tools
                     infoString,
                     i / (float)this.objectsToRename.Count);
                 
-                this.RenameAsset(asset);
+                this.RenameObject(asset);
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        private void RenameObject(UnityEngine.Object obj)
+        {
+            if (AssetDatabase.Contains(obj))
+            {
+                this.RenameAsset(obj);
+            }
+            else
+            {
+                this.RenameGameObject(obj);
+            }
+        }
+
+        private void RenameGameObject(UnityEngine.Object gameObject)
+        {
+            var newName = this.bulkRenamer.GetRenamedString(gameObject.name, false);
+            gameObject.name = newName;
         }
 
         private void RenameAsset(UnityEngine.Object asset)
