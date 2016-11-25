@@ -69,6 +69,18 @@ namespace RedBlueGames.Tools
         /// <value>The replacement string.</value>
         public string ReplacementString { get; set; }
 
+        /// <summary>
+        /// Gets or sets the number of characters to delete from the front.
+        /// </summary>
+        /// <value>The number front delete chars.</value>
+        public int NumFrontDeleteChars { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of characters to delete from the back.
+        /// </summary>
+        /// <value>The number back delete chars.</value>
+        public int NumBackDeleteChars { get; set; }
+
         private string RichTextPrefix
         {
             get
@@ -108,6 +120,41 @@ namespace RedBlueGames.Tools
         public string GetRenamedString(string originalName, bool useRichText)
         {
             var modifiedName = originalName;
+
+            // Trim Front chars
+            string trimmedFrontChars = string.Empty;
+            if (this.NumFrontDeleteChars > 0)
+            {
+                var numCharsToDelete = Mathf.Min(this.NumFrontDeleteChars, originalName.Length);
+                trimmedFrontChars = originalName.Substring(0, numCharsToDelete);
+
+                modifiedName = modifiedName.Remove(0, numCharsToDelete);
+            }
+
+            // Trim Back chars
+            string trimmedBackChars = string.Empty;
+            if (this.NumBackDeleteChars > 0)
+            {
+                var numCharsToDelete = Mathf.Min(this.NumBackDeleteChars, modifiedName.Length);
+                int startIndex = modifiedName.Length - numCharsToDelete;
+                trimmedBackChars = modifiedName.Substring(startIndex, numCharsToDelete);
+
+                modifiedName = modifiedName.Remove(startIndex, numCharsToDelete);
+            }
+
+            // When showing rich text, add back in the trimmed characters
+            if (useRichText)
+            {
+                if (!string.IsNullOrEmpty(trimmedFrontChars))
+                {
+                    modifiedName = string.Concat(DeletedTextColorTag, trimmedFrontChars, EndColorTag, modifiedName);
+                }
+
+                if (!string.IsNullOrEmpty(trimmedBackChars))
+                {
+                    modifiedName = string.Concat(modifiedName, DeletedTextColorTag, trimmedBackChars, EndColorTag);
+                }
+            }
 
             // Replace strings first so we don't replace the prefix.
             if (!string.IsNullOrEmpty(this.SearchToken))
