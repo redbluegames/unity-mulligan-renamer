@@ -69,11 +69,7 @@ namespace RedBlueGames.Tools
         /// <value>The replacement string.</value>
         public string ReplacementString { get; set; }
 
-        /// <summary>
-        /// Gets the rich text prefix, which includes color tags.
-        /// </summary>
-        /// <value>The rich text prefix.</value>
-        public string RichTextPrefix
+        private string RichTextPrefix
         {
             get
             {
@@ -81,11 +77,7 @@ namespace RedBlueGames.Tools
             }
         }
 
-        /// <summary>
-        /// Gets the rich text suffix, which includes color tags.
-        /// </summary>
-        /// <value>The rich text suffix.</value>
-        public string RichTextSuffix
+        private string RichTextSuffix
         {
             get
             {
@@ -93,12 +85,7 @@ namespace RedBlueGames.Tools
             }
         }
 
-        /// <summary>
-        /// Gets the rich text replacement string, which includes the deleted text and added
-        /// text with color tags.
-        /// </summary>
-        /// <value>The rich text replacement string.</value>
-        public string RichTextReplacementString
+        private string RichTextReplacementString
         {
             get
             {
