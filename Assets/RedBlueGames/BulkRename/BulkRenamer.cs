@@ -81,6 +81,18 @@ namespace RedBlueGames.Tools
         /// <value>The number back delete chars.</value>
         public int NumBackDeleteChars { get; set; }
 
+        /// <summary>
+        /// Gets or sets the count to append to the end of the string.
+        /// </summary>
+        /// <value>The count.</value>
+        public int Count { get; set; }
+
+        /// <summary>
+        /// Gets or sets the format for the count, appended to the end of the string.
+        /// </summary>
+        /// <value>The count format.</value>
+        public string CountFormat { get; set; }
+
         private string ColoredPrefix
         {
             get
@@ -174,6 +186,17 @@ namespace RedBlueGames.Tools
             {
                 var suffix = showDiff ? this.ColoredSuffix : this.Suffix;
                 modifiedName = string.Concat(modifiedName, suffix);
+            }
+
+            if (!string.IsNullOrEmpty(this.CountFormat))
+            {
+                var countAsString = this.Count.ToString(this.CountFormat);
+                if (showDiff)
+                {
+                    countAsString = string.Concat(AddedTextColorTag, countAsString, EndColorTag);
+                }
+
+                modifiedName = string.Concat(modifiedName, countAsString);
             }
 
             return modifiedName;

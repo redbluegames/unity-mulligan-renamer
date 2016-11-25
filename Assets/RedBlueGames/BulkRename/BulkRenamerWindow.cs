@@ -36,6 +36,7 @@ namespace RedBlueGames.Tools
 
         private List<UnityEngine.Object> objectsToRename;
         private BulkRenamer bulkRenamer;
+        private int startingCount;
 
         [MenuItem(AssetsMenuPath, false, 1011)]
         [MenuItem(GameObjectMenuPath, false, 49)]
@@ -121,7 +122,6 @@ namespace RedBlueGames.Tools
             this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);
 
             EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
-
             EditorGUILayout.BeginHorizontal();
             this.bulkRenamer.NumFrontDeleteChars = EditorGUILayout.IntField(
                 "Delete From Front",
@@ -133,8 +133,13 @@ namespace RedBlueGames.Tools
             this.bulkRenamer.NumBackDeleteChars = Mathf.Max(0, this.bulkRenamer.NumBackDeleteChars);
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Enumerating", EditorStyles.boldLabel);
+            this.bulkRenamer.CountFormat = EditorGUILayout.TextField(
+                "Count Format",
+                this.bulkRenamer.CountFormat);
+            this.startingCount = EditorGUILayout.IntField("Count From", this.startingCount);
 
+            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
             this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
                 "Search Token",
                 this.bulkRenamer.SearchToken);
@@ -156,6 +161,7 @@ namespace RedBlueGames.Tools
             EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
             EditorGUILayout.EndHorizontal();
 
+            this.bulkRenamer.Count = this.startingCount;
             foreach (var objectToRename in this.objectsToRename)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -176,6 +182,8 @@ namespace RedBlueGames.Tools
                 EditorGUILayout.LabelField(previewObjectname, style);
 
                 EditorGUILayout.EndHorizontal();
+
+                this.bulkRenamer.Count++;
             }
         }
 
