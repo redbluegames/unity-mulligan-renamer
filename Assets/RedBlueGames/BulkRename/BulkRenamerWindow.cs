@@ -117,6 +117,14 @@ namespace RedBlueGames.Tools
 
             EditorGUILayout.Space();
 
+            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
+            this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
+                "Search Token",
+                this.bulkRenamer.SearchToken);
+            this.bulkRenamer.ReplacementString = EditorGUILayout.TextField(
+                "Replace with",
+                this.bulkRenamer.ReplacementString);
+
             EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
             this.bulkRenamer.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenamer.Prefix);
             this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);
@@ -138,14 +146,6 @@ namespace RedBlueGames.Tools
                 "Count Format",
                 this.bulkRenamer.CountFormat);
             this.startingCount = EditorGUILayout.IntField("Count From", this.startingCount);
-
-            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
-            this.bulkRenamer.SearchToken = EditorGUILayout.TextField(
-                "Search Token",
-                this.bulkRenamer.SearchToken);
-            this.bulkRenamer.ReplacementString = EditorGUILayout.TextField(
-                "Replace with",
-                this.bulkRenamer.ReplacementString);
 
             if (GUILayout.Button("Rename"))
             {
