@@ -107,6 +107,7 @@
           <Value>[^a-z ]StyleCopIgnoreUtilityPrefs.cs</Value>
           <Value>[^a-z ]StyleCopIgnoreUtilityWindow.cs</Value>
           <Value>[^a-z ]StyleCopIgnoreUtilityXMLTool.cs</Value>
+          <Value>[^a-z ]BulkRenamerUnitTests.cs</Value>
         </CollectionProperty>
       </ParserSettings>
     </Parser>
