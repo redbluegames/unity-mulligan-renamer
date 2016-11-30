@@ -82,10 +82,10 @@ namespace RedBlueGames.Tools
         public int NumBackDeleteChars { get; set; }
 
         /// <summary>
-        /// Gets or sets the count to append to the end of the string.
+        /// Gets or sets the starting count.
         /// </summary>
-        /// <value>The count.</value>
-        public int Count { get; set; }
+        /// <value>The starting count.</value>
+        public int StartingCount { get; set; }
 
         /// <summary>
         /// Gets or sets the format for the count, appended to the end of the string.
@@ -106,10 +106,33 @@ namespace RedBlueGames.Tools
         /// <summary>
         /// Gets the string, renamed according to the BulkRenamer configuration.
         /// </summary>
-        /// <returns>The renamed string.</returns>
-        /// <param name="originalName">Original name.</param>
-        /// <param name="showDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
-        public string GetRenamedString(string originalName, bool showDiff)
+        /// <returns>The renamed strings.</returns>
+        /// <param name="includeDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
+        /// <param name="originalNames">Original names to rename.</param>
+        public string[] GetRenamedStrings(bool includeDiff, params string[] originalNames)
+        {
+            var renamedStrings = new string[originalNames.Length];
+
+            for (int i = 0; i < originalNames.Length; ++i)
+            {
+                var count = this.StartingCount + i;
+                renamedStrings[i] = this.GetRenamedString(originalNames[i], count, includeDiff);
+            }
+
+            return renamedStrings;
+        }
+
+        private static string ColorStringForDelete(string baseString)
+        {
+            return string.Concat(DeletedTextColorTag, baseString, EndColorTag);
+        }
+
+        private static string ColorStringForAdd(string baseString)
+        {
+            return string.Concat(AddedTextColorTag, baseString, EndColorTag);
+        }
+
+        private string GetRenamedString(string originalName, int count, bool includeDiff)
         {
             var modifiedName = originalName;
 
@@ -135,7 +158,7 @@ namespace RedBlueGames.Tools
             }
 
             // When showing rich text, add back in the trimmed characters
-            if (showDiff)
+            if (includeDiff)
             {
                 if (!string.IsNullOrEmpty(trimmedFrontChars))
                 {
@@ -151,20 +174,20 @@ namespace RedBlueGames.Tools
             // Replace strings first so we don't replace the prefix.
             if (!string.IsNullOrEmpty(this.SearchString))
             {
-                var replacementString = showDiff ? this.ColoredReplacementString :
+                var replacementString = includeDiff ? this.ColoredReplacementString :
                 this.ReplacementString;
                 modifiedName = modifiedName.Replace(this.SearchString, replacementString);
             }
 
             if (!string.IsNullOrEmpty(this.Prefix))
             {
-                var prefix = showDiff ? ColorStringForAdd(this.Prefix) : this.Prefix;
+                var prefix = includeDiff ? ColorStringForAdd(this.Prefix) : this.Prefix;
                 modifiedName = string.Concat(prefix, modifiedName);
             }
 
             if (!string.IsNullOrEmpty(this.Suffix))
             {
-                var suffix = showDiff ? ColorStringForAdd(this.Suffix) : this.Suffix;
+                var suffix = includeDiff ? ColorStringForAdd(this.Suffix) : this.Suffix;
                 modifiedName = string.Concat(modifiedName, suffix);
             }
 
@@ -172,9 +195,9 @@ namespace RedBlueGames.Tools
             {
                 try
                 {
-                    var countAsString = this.Count.ToString(this.CountFormat);
+                    var countAsString = count.ToString(this.CountFormat);
 
-                    if (showDiff)
+                    if (includeDiff)
                     {
                         countAsString = string.Concat(ColorStringForAdd(countAsString));
                     }
@@ -188,16 +211,6 @@ namespace RedBlueGames.Tools
             }
 
             return modifiedName;
-        }
-
-        private static string ColorStringForDelete(string baseString)
-        {
-            return string.Concat(DeletedTextColorTag, baseString, EndColorTag);
-        }
-
-        private static string ColorStringForAdd(string baseString)
-        {
-            return string.Concat(AddedTextColorTag, baseString, EndColorTag);
         }
     }
 }
