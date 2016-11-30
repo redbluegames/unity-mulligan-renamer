@@ -199,7 +199,6 @@ namespace RedBlueGames.Tools
                 EditorGUILayout.LabelField(previewObjectname, style);
 
                 EditorGUILayout.EndHorizontal();
-
             }
         }
 

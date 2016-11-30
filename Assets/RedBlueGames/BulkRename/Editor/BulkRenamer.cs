@@ -142,6 +142,16 @@ namespace RedBlueGames.Tools
             return renamedStrings;
         }
 
+        private static string ColorStringForDelete(string baseString)
+        {
+            return string.Concat(DeletedTextColorTag, baseString, EndColorTag);
+        }
+
+        private static string ColorStringForAdd(string baseString)
+        {
+            return string.Concat(AddedTextColorTag, baseString, EndColorTag);
+        }
+
         private string GetRenamedString(string originalName, int count, bool includeDiff)
         {
             var modifiedName = originalName;
@@ -221,16 +231,6 @@ namespace RedBlueGames.Tools
             }
 
             return modifiedName;
-        }
-
-        private static string ColorStringForDelete(string baseString)
-        {
-            return string.Concat(DeletedTextColorTag, baseString, EndColorTag);
-        }
-
-        private static string ColorStringForAdd(string baseString)
-        {
-            return string.Concat(AddedTextColorTag, baseString, EndColorTag);
         }
     }
 }
