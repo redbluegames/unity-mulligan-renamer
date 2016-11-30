@@ -320,6 +320,45 @@
         }
 
         [Test]
+        public void Enumerating_CountSeveralTimes_CountsUp()
+        {
+            // Arrange
+            var bulkRenamer = new BulkRenamer();
+            var names = new string[]
+            {
+                "BlockA",
+                "BlockB",
+                "BlockC",
+                "BlockD",
+                "BlockE",
+            };
+            bulkRenamer.CountFormat = "0";
+            bulkRenamer.StartingCount = 1;
+            var expectedNames = new string[]
+            {
+                "BlockA1",
+                "BlockB2",
+                "BlockC3",
+                "BlockD4",
+                "BlockE5",
+            };
+
+            // Act
+            var results = bulkRenamer.GetRenamedStrings(false, false, names);
+
+            // Assert
+            Assert.AreEqual(
+                expectedNames.Length,
+                results.Length,
+                "Expected Results and results should have the same number of entries but didn't.");
+            for (int i = 0; i < results.Length; ++i)
+            {
+                var expected = expectedNames[i];
+                Assert.AreEqual(expected, results[i]);
+            }
+        }
+
+        [Test]
         public void Enumerating_StartFromNonZero_AddsCorrectCount()
         {
             // Arrange
