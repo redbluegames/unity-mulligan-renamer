@@ -177,8 +177,8 @@ namespace RedBlueGames.Tools
             EditorGUILayout.EndHorizontal();
 
             var selectedNames = this.GetNamesFromSelections();
-            var namePreviews = this.bulkRenamer.GetRenamedStrings(false, false, selectedNames);
-            var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, false, selectedNames);
+            var namePreviews = this.bulkRenamer.GetRenamedStrings(false, selectedNames);
+            var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, selectedNames);
             for (int i = 0; i < namePreviews.Length; ++i)
             {
                 EditorGUILayout.BeginHorizontal();
@@ -221,12 +221,24 @@ namespace RedBlueGames.Tools
             Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
 
             var names = this.GetNamesFromSelections();
-            var newNames = this.bulkRenamer.GetRenamedStrings(false, true, names);
+            var newNames = this.bulkRenamer.GetRenamedStrings(false, names);
 
             for (int i = 0; i < newNames.Length; ++i)
             {
+                var infoString = string.Format(
+                    "Renaming asset {0} of {1}",
+                    i,
+                    newNames.Length);
+
+                EditorUtility.DisplayProgressBar(
+                    "Renaming Assets...",
+                    infoString,
+                    i / (float)newNames.Length);
+
                 this.RenameObject(this.objectsToRename[i], newNames[i]);
             }
+
+            EditorUtility.ClearProgressBar();
         }
 
         private void RenameObject(UnityEngine.Object obj, string newName)

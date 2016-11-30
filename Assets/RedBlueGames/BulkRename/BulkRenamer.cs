@@ -23,7 +23,6 @@ SOFTWARE.
 namespace RedBlueGames.Tools
 {
     using System.Collections;
-    using UnityEditor;
     using UnityEngine;
 
     /// <summary>
@@ -109,34 +108,15 @@ namespace RedBlueGames.Tools
         /// </summary>
         /// <returns>The renamed strings.</returns>
         /// <param name="includeDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
-        /// <param name="showProgress">If set to <c>true</c> show progress with a GUI.</param>
         /// <param name="originalNames">Original names to rename.</param>
-        public string[] GetRenamedStrings(bool includeDiff, bool showProgress, params string[] originalNames)
+        public string[] GetRenamedStrings(bool includeDiff, params string[] originalNames)
         {
             var renamedStrings = new string[originalNames.Length];
+
             for (int i = 0; i < originalNames.Length; ++i)
             {
                 var count = this.StartingCount + i;
-
-                if (showProgress)
-                {
-                    var infoString = string.Format(
-                                         "Renaming asset {0} of {1}",
-                                         i,
-                                         originalNames.Length);
-
-                    EditorUtility.DisplayProgressBar(
-                        "Renaming Assets...",
-                        infoString,
-                        i / (float)originalNames.Length);
-                }
-
                 renamedStrings[i] = this.GetRenamedString(originalNames[i], count, includeDiff);
-            }
-
-            if (showProgress)
-            {
-                EditorUtility.ClearProgressBar();
             }
 
             return renamedStrings;

@@ -16,7 +16,7 @@
             var originalInput = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(originalInput, result);
@@ -32,7 +32,7 @@
             var expected = "CHAR__Spawn";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -48,7 +48,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -64,7 +64,7 @@
             var expected = "StlDdad";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -80,7 +80,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -97,7 +97,7 @@
             var expected = "Char_Link_Spawn";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -113,7 +113,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -129,7 +129,7 @@
             var expected = "Char_Hero_Spawn";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -145,7 +145,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -161,7 +161,7 @@
             var expected = "Char_Hero_Spawn";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -178,7 +178,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -195,7 +195,7 @@
             var expected = "har_Hero";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -212,7 +212,7 @@
             var expected = "Char_Her";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -229,7 +229,7 @@
             var expected = "har_Her";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -246,7 +246,7 @@
             var expected = string.Empty;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -263,7 +263,7 @@
             var expected = string.Empty;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -280,7 +280,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -296,7 +296,7 @@
             var expected = name;
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -313,7 +313,7 @@
             var expected = "Char_Hero0";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -344,7 +344,7 @@
             };
 
             // Act
-            var results = bulkRenamer.GetRenamedStrings(false, false, names);
+            var results = bulkRenamer.GetRenamedStrings(false, names);
 
             // Assert
             Assert.AreEqual(
@@ -369,7 +369,7 @@
             var expected = "Char_Hero-1";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -386,7 +386,7 @@
             var expected = "Char_Hero";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -409,7 +409,7 @@
             var expected = "a_hat_ZeroAA0100";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, false, name)[0];
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
 
             // Assert
             Assert.AreEqual(expected, result);
