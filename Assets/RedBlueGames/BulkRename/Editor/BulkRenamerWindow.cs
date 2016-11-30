@@ -36,7 +36,6 @@ namespace RedBlueGames.Tools
 
         private List<UnityEngine.Object> objectsToRename;
         private BulkRenamer bulkRenamer;
-        private int startingCount;
 
         [MenuItem(AssetsMenuPath, false, 1011)]
         [MenuItem(GameObjectMenuPath, false, 49)]
@@ -148,7 +147,7 @@ namespace RedBlueGames.Tools
             
             try
             {
-                this.startingCount.ToString(this.bulkRenamer.CountFormat);
+                this.bulkRenamer.StartingCount.ToString(this.bulkRenamer.CountFormat);
             }
             catch (System.FormatException)
             {
@@ -159,7 +158,9 @@ namespace RedBlueGames.Tools
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
-            this.startingCount = EditorGUILayout.IntField("Count From", this.startingCount);
+            this.bulkRenamer.StartingCount = EditorGUILayout.IntField(
+                "Count From",
+                this.bulkRenamer.StartingCount);
 
             if (GUILayout.Button("Rename"))
             {
@@ -175,20 +176,22 @@ namespace RedBlueGames.Tools
             EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
             EditorGUILayout.EndHorizontal();
 
-            this.bulkRenamer.Count = this.startingCount;
-            foreach (var objectToRename in this.objectsToRename)
+            var selectedNames = this.GetNamesFromSelections();
+            var namePreviews = this.bulkRenamer.GetRenamedStrings(false, false, selectedNames);
+            var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, false, selectedNames);
+            for (int i = 0; i < namePreviews.Length; ++i)
             {
                 EditorGUILayout.BeginHorizontal();
 
                 // Calculate if names differ for use with styles
-                var previewObjectname = this.bulkRenamer.GetRenamedString(objectToRename.name, false);
-                var objectName = objectToRename.name;
+                var previewObjectname = namePreviews[i];
+                var objectName = selectedNames[i];
                 bool namesDiffer = previewObjectname != objectName;
 
                 // Display diff
                 var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
                 diffStyle.richText = true;
-                var diffedName = this.bulkRenamer.GetRenamedString(objectToRename.name, true);
+                var diffedName = nameDiffs[i];
                 EditorGUILayout.LabelField(diffedName, diffStyle);
 
                 // Display new name
@@ -197,8 +200,20 @@ namespace RedBlueGames.Tools
 
                 EditorGUILayout.EndHorizontal();
 
-                this.bulkRenamer.Count++;
             }
+        }
+
+        private string[] GetNamesFromSelections()
+        {
+            var names = new string[this.objectsToRename.Count];
+            for (int i = 0; i < this.objectsToRename.Count; ++i)
+            {
+                var asset = this.objectsToRename[i];
+
+                names[i] = asset.name;
+            }
+
+            return names;
         }
 
         private void RenameAssets()
@@ -206,50 +221,35 @@ namespace RedBlueGames.Tools
             // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
             Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
 
-            this.bulkRenamer.Count = this.startingCount;
-            for (int i = 0; i < this.objectsToRename.Count; ++i)
+            var names = this.GetNamesFromSelections();
+            var newNames = this.bulkRenamer.GetRenamedStrings(false, true, names);
+
+            for (int i = 0; i < newNames.Length; ++i)
             {
-                var asset = this.objectsToRename[i];
-
-                var infoString = string.Format(
-                                     "Renaming asset {0} of {1}",
-                                     i,
-                                     this.objectsToRename.Count);
-
-                EditorUtility.DisplayProgressBar(
-                    "Renaming Assets...",
-                    infoString,
-                    i / (float)this.objectsToRename.Count);
-                
-                this.RenameObject(asset);
-                this.bulkRenamer.Count++;
+                this.RenameObject(this.objectsToRename[i], newNames[i]);
             }
-
-            EditorUtility.ClearProgressBar();
         }
 
-        private void RenameObject(UnityEngine.Object obj)
+        private void RenameObject(UnityEngine.Object obj, string newName)
         {
             if (AssetDatabase.Contains(obj))
             {
-                this.RenameAsset(obj);
+                this.RenameAsset(obj, newName);
             }
             else
             {
-                this.RenameGameObject(obj);
+                this.RenameGameObject(obj, newName);
             }
         }
 
-        private void RenameGameObject(UnityEngine.Object gameObject)
+        private void RenameGameObject(UnityEngine.Object gameObject, string newName)
         {
-            var newName = this.bulkRenamer.GetRenamedString(gameObject.name, false);
             gameObject.name = newName;
         }
 
-        private void RenameAsset(UnityEngine.Object asset)
+        private void RenameAsset(UnityEngine.Object asset, string newName)
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
-            var newName = this.bulkRenamer.GetRenamedString(asset.name, false);
             AssetDatabase.RenameAsset(pathToAsset, newName);
         }
     }
