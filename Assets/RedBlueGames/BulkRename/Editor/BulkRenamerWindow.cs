@@ -34,6 +34,7 @@ namespace RedBlueGames.Tools
         private const string AssetsMenuPath = "Assets/Rename In Bulk";
         private const string GameObjectMenuPath = "GameObject/Rename In Bulk";
 
+        private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
         private BulkRenamer bulkRenamer;
 
@@ -75,6 +76,7 @@ namespace RedBlueGames.Tools
         {
             Selection.selectionChanged += this.Repaint;
 
+            this.previewPanelScrollPosition = Vector2.zero;
             this.bulkRenamer = new BulkRenamer();
 
             this.RefreshObjectsToRename();
@@ -176,6 +178,7 @@ namespace RedBlueGames.Tools
             EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
             EditorGUILayout.EndHorizontal();
 
+            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition);
             var selectedNames = this.GetNamesFromSelections();
             var namePreviews = this.bulkRenamer.GetRenamedStrings(false, selectedNames);
             var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, selectedNames);
@@ -200,6 +203,8 @@ namespace RedBlueGames.Tools
 
                 EditorGUILayout.EndHorizontal();
             }
+
+            EditorGUILayout.EndScrollView();
         }
 
         private string[] GetNamesFromSelections()
@@ -226,9 +231,9 @@ namespace RedBlueGames.Tools
             for (int i = 0; i < newNames.Length; ++i)
             {
                 var infoString = string.Format(
-                    "Renaming asset {0} of {1}",
-                    i,
-                    newNames.Length);
+                                     "Renaming asset {0} of {1}",
+                                     i,
+                                     newNames.Length);
 
                 EditorUtility.DisplayProgressBar(
                     "Renaming Assets...",
