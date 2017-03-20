@@ -213,11 +213,49 @@ namespace RedBlueGames.Tools
 
         private string[] GetNamesFromSelections()
         {
-            var names = new string[this.objectsToRename.Count];
-            var namesAfterSorting = objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();
-            for (int i = 0; i < this.objectsToRename.Count; ++i)
+
+            List<string> allAssetNames = new List<string>();
+            List<Object> allSortedGameObectsNames = new List<Object>();
+
+            int namesCount = this.objectsToRename.Count;
+            var names = new string[namesCount];
+            bool isItAsset = AssetDatabase.GetAssetPath(objectsToRename[0]) != null;
+
+
+            #region Sorting GameObjects in Hierarchy Window
+            if (!isItAsset)
             {
-                names[i] = namesAfterSorting[i].name;
+                allSortedGameObectsNames = objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();
+            }
+            #endregion
+            #region Sorting Assets in Project Window
+            if (isItAsset)
+            {
+                string path = "";
+                int startIndex = 0;
+                int endIndex = 0;
+                for (int i = 0; i < namesCount; ++i)
+                {
+                    path = AssetDatabase.GetAssetPath(objectsToRename[i]);
+                    startIndex = path.LastIndexOf('/') + 1;
+                    endIndex = path.LastIndexOf('.');
+                    string extractedNameOfAsset = path.Substring(startIndex, endIndex - startIndex);
+                    allAssetNames.Add(extractedNameOfAsset);
+                }
+                allAssetNames = allAssetNames.OrderBy(x => x.Length).ThenBy(x => x).ToList();
+            }
+            #endregion
+
+            for (int i = 0; i < namesCount; ++i)
+            {
+                if (!isItAsset)
+                {
+                    names[i] = allSortedGameObectsNames[i].name;
+                }
+                else
+                {
+                    names[i] = allAssetNames[i].ToString();
+                }
             }
 
             return names;
