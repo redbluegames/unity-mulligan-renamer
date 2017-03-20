@@ -20,6 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using System.Linq;
+
+
 namespace RedBlueGames.Tools
 {
     using System.Collections.Generic;
@@ -36,6 +39,7 @@ namespace RedBlueGames.Tools
 
         private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
+        private List<UnityEngine.Object> objectsToRenameSortedLenghtAndByName;
         private BulkRenamer bulkRenamer;
 
         [MenuItem(AssetsMenuPath, false, 1011)]
@@ -107,11 +111,11 @@ namespace RedBlueGames.Tools
             EditorGUILayout.HelpBox(
                 "BulkRename allows renaming mulitple selections at one time via string replacement and other methods.",
                 MessageType.None);
-            
+
             if (this.objectsToRename.Count == 0)
             {
                 EditorGUILayout.HelpBox(
-                    "No objects selected. Select some Assets or scene Objects to rename.", 
+                    "No objects selected. Select some Assets or scene Objects to rename.",
                     MessageType.Error);
                 return;
             }
@@ -146,7 +150,7 @@ namespace RedBlueGames.Tools
             this.bulkRenamer.CountFormat = EditorGUILayout.TextField(
                 "Count Format",
                 this.bulkRenamer.CountFormat);
-            
+
             try
             {
                 this.bulkRenamer.StartingCount.ToString(this.bulkRenamer.CountFormat);
@@ -210,11 +214,10 @@ namespace RedBlueGames.Tools
         private string[] GetNamesFromSelections()
         {
             var names = new string[this.objectsToRename.Count];
+            var namesAfterSorting = objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();
             for (int i = 0; i < this.objectsToRename.Count; ++i)
             {
-                var asset = this.objectsToRename[i];
-
-                names[i] = asset.name;
+                names[i] = namesAfterSorting[i].name;
             }
 
             return names;
@@ -222,8 +225,11 @@ namespace RedBlueGames.Tools
 
         private void RenameAssets()
         {
+
+            objectsToRenameSortedLenghtAndByName = objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();//.ThenBy (x => x.name).
+
             // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
-            Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
+            Undo.RecordObjects(this.objectsToRenameSortedLenghtAndByName.ToArray(), "Bulk Rename");
 
             var names = this.GetNamesFromSelections();
             var newNames = this.bulkRenamer.GetRenamedStrings(false, names);
@@ -240,7 +246,7 @@ namespace RedBlueGames.Tools
                     infoString,
                     i / (float)newNames.Length);
 
-                this.RenameObject(this.objectsToRename[i], newNames[i]);
+                this.RenameObject(this.objectsToRenameSortedLenghtAndByName[i], newNames[i]);
             }
 
             EditorUtility.ClearProgressBar();
