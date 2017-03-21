@@ -219,7 +219,7 @@ namespace RedBlueGames.Tools
 
             int namesCount = this.objectsToRename.Count;
             var names = new string[namesCount];
-            bool isItAsset = AssetDatabase.GetAssetPath(objectsToRename[0]) != null;
+            bool isItAsset = AssetDatabase.GetAssetPath(objectsToRename[0]) != "";
 
 
             #region Sorting GameObjects in Hierarchy Window
@@ -239,6 +239,7 @@ namespace RedBlueGames.Tools
                     path = AssetDatabase.GetAssetPath(objectsToRename[i]);
                     startIndex = path.LastIndexOf('/') + 1;
                     endIndex = path.LastIndexOf('.');
+
                     string extractedNameOfAsset = path.Substring(startIndex, endIndex - startIndex);
                     allAssetNames.Add(extractedNameOfAsset);
                 }
