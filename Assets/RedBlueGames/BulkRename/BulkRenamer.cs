@@ -172,7 +172,8 @@ namespace RedBlueGames.Tools
             if (!string.IsNullOrEmpty(this.SearchString))
             {
                 // Create capture group regex to extract the matched string
-                var searchStringRegexPattern = string.Concat("(", this.SearchString, ")");
+                // Escape the search string to prevent it from being interpretted as regex.
+                var searchStringRegexPattern = string.Concat("(", Regex.Escape(this.SearchString), ")");
                 var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
 
                 var replacement = string.Empty;
