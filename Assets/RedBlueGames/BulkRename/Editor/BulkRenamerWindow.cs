@@ -63,7 +63,9 @@ namespace RedBlueGames.Tools
         {
             if (AssetDatabase.Contains(obj))
             {
-                return true;
+                // Create -> Prefab results in assets that have no name. Typically you can't have Assets that have no name,
+                // so we will just ignore them for the utility.
+                return !string.IsNullOrEmpty(obj.name);
             }
 
             if (obj.GetType() == typeof(GameObject))
