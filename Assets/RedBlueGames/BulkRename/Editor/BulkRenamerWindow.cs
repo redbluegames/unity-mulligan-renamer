@@ -197,7 +197,7 @@ namespace RedBlueGames.Tools
             EditorGUILayout.EndHorizontal();
 
             this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition);
-            var selectedNames = this.GetNamesFromSelections();
+            var selectedNames = this.GetNamesFromObjectsToRename();
             var namePreviews = this.bulkRenamer.GetRenamedStrings(false, selectedNames);
             var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, selectedNames);
             for (int i = 0; i < namePreviews.Length; ++i)
@@ -236,7 +236,7 @@ namespace RedBlueGames.Tools
             this.objectsToRename = this.objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();
         }
 
-        private string[] GetNamesFromSelections()
+        private string[] GetNamesFromObjectsToRename()
         {
             int namesCount = this.objectsToRename.Count;
             var names = new string[namesCount];
@@ -253,7 +253,7 @@ namespace RedBlueGames.Tools
             // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
             Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
 
-            var names = this.GetNamesFromSelections();
+            var names = this.GetNamesFromObjectsToRename();
             var newNames = this.bulkRenamer.GetRenamedStrings(false, names);
 
             for (int i = 0; i < newNames.Length; ++i)
