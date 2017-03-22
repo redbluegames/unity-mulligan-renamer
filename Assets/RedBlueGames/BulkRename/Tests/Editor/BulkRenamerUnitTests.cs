@@ -28,8 +28,9 @@
             // Arrange
             var bulkRenamer = new BulkRenamer();
             bulkRenamer.SearchString = "Hero";
+            bulkRenamer.ReplacementString = "A";
             var name = "CHAR_Hero_Spawn";
-            var expected = "CHAR__Spawn";
+            var expected = "CHAR_A_Spawn";
 
             // Act
             string result = bulkRenamer.GetRenamedStrings(false, name)[0];
@@ -39,23 +40,7 @@
         }
 
         [Test]
-        public void SearchString_DoesNotMatchCase_DoesNotReplace()
-        {
-            // Arrange
-            var bulkRenamer = new BulkRenamer();
-            var name = "ZELDA";
-            bulkRenamer.SearchString = name.ToLower();
-            var expected = name;
-
-            // Act
-            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
-
-            // Assert
-            Assert.AreEqual(expected, result);
-        }
-
-        [Test]
-        public void SearchString_MutlipleMatches_AllAreReplaced()
+        public void SearchString_MultipleMatches_AllAreReplaced()
         {
             // Arrange
             var bulkRenamer = new BulkRenamer();
@@ -98,6 +83,60 @@
 
             // Act
             string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchString_DoesNotMatchCase_Replaces()
+        {
+            // Arrange
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.SearchIsCaseSensitive = false;
+            bulkRenamer.SearchString = "ZelDa";
+            bulkRenamer.ReplacementString = "blah";
+            var objectName = "ZELDAzelda";
+            var expected = "blahblah";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchStringCaseSensitive_DoesNotMatchCase_DoesNotReplace()
+        {
+            // Arrange
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.SearchIsCaseSensitive = true;
+            bulkRenamer.SearchString = "zelda";
+            bulkRenamer.ReplacementString = "blah";
+            var objectName = "ZELDA";
+            var expected = "ZELDA";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchStringCaseSensitive_MatchesCase_Replaces()
+        {
+            // Arrange
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.SearchIsCaseSensitive = true;
+            bulkRenamer.SearchString = "ZeldA";
+            bulkRenamer.ReplacementString = "blah";
+            var objectName = "ZeldA";
+            var expected = "blah";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
 
             // Assert
             Assert.AreEqual(expected, result);

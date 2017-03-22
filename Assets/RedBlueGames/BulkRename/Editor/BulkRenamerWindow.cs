@@ -129,6 +129,10 @@ namespace RedBlueGames.Tools
                 "Replace with",
                 this.bulkRenamer.ReplacementString);
 
+            this.bulkRenamer.SearchIsCaseSensitive = EditorGUILayout.Toggle(
+                "Case Sensitive",
+                this.bulkRenamer.SearchIsCaseSensitive);
+
             EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
             this.bulkRenamer.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenamer.Prefix);
             this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);

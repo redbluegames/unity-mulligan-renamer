@@ -23,6 +23,7 @@ SOFTWARE.
 namespace RedBlueGames.Tools
 {
     using System.Collections;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     /// <summary>
@@ -64,6 +65,12 @@ namespace RedBlueGames.Tools
         public string SearchString { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the search is case sensitive.
+        /// </summary>
+        /// <value><c>true</c> if search is case sensitive; otherwise, <c>false</c>.</value>
+        public bool SearchIsCaseSensitive { get; set; }
+
+        /// <summary>
         /// Gets or sets the replacement string, which replaces instances of the search token.
         /// </summary>
         /// <value>The replacement string.</value>
@@ -92,16 +99,6 @@ namespace RedBlueGames.Tools
         /// </summary>
         /// <value>The count format.</value>
         public string CountFormat { get; set; }
-
-        private string ColoredReplacementString
-        {
-            get
-            {
-                return string.Concat(
-                    ColorStringForDelete(this.SearchString),
-                    ColorStringForAdd(this.ReplacementString));
-            }
-        }
 
         /// <summary>
         /// Gets the string, renamed according to the BulkRenamer configuration.
@@ -174,9 +171,26 @@ namespace RedBlueGames.Tools
             // Replace strings first so we don't replace the prefix.
             if (!string.IsNullOrEmpty(this.SearchString))
             {
-                var replacementString = includeDiff ? this.ColoredReplacementString :
-                this.ReplacementString;
-                modifiedName = modifiedName.Replace(this.SearchString, replacementString);
+                // Create capture group regex to extract the matched string
+                var searchStringRegexPattern = string.Concat("(", this.SearchString, ")");
+                var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
+
+                var replacement = string.Empty;
+                if (includeDiff)
+                {
+                    replacement = ColorStringForDelete("$1");
+                    replacement += ColorStringForAdd(this.ReplacementString);
+                }
+                else
+                {
+                    replacement = this.ReplacementString;
+                }
+
+                // Regex gives us two features - case insensitivity and capture groups. Capture groups
+                // are used so that the diff shows the term that is replaced, not the term that replaces it.
+                // (ex. Char_Herohero searching for hero replacing with 'z' should show "Char_Herozheroz" not 
+                // "Char_herozheroz".
+                modifiedName = Regex.Replace(modifiedName, searchStringRegexPattern, replacement, regexOptions);
             }
 
             if (!string.IsNullOrEmpty(this.Prefix))
