@@ -56,7 +56,16 @@ namespace RedBlueGames.Tools
                 return false;
             }
 
-            return ObjectIsValidForRename(Selection.activeObject);
+            // Allow a rename if any valid object is selected. The invalid ones won't be renamed.
+            foreach (var selection in Selection.objects)
+            {
+                if (ObjectIsValidForRename(selection))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
