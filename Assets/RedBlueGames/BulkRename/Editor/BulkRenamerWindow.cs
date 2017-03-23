@@ -33,8 +33,8 @@ namespace RedBlueGames.Tools
     /// </summary>
     public class BulkRenamerWindow : EditorWindow
     {
-        private const string AssetsMenuPath = "Assets/Rename In Bulk";
-        private const string GameObjectMenuPath = "GameObject/Rename In Bulk";
+        private const string AssetsMenuPath = "Assets/Red Blue/Rename In Bulk";
+        private const string GameObjectMenuPath = "GameObject/Red Blue/Rename In Bulk";
 
         private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
