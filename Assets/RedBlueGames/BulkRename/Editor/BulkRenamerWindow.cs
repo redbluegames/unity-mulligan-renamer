@@ -87,12 +87,10 @@ namespace RedBlueGames.Tools
 
         private void OnEnable()
         {
-            Selection.selectionChanged += this.Repaint;
-
             this.previewPanelScrollPosition = Vector2.zero;
             this.bulkRenamer = new BulkRenamer();
 
-            this.RefreshObjectsToRename();
+            Selection.selectionChanged += this.Repaint;
         }
 
         private void OnDisable()
@@ -102,9 +100,14 @@ namespace RedBlueGames.Tools
 
         private void RefreshObjectsToRename()
         {
-            var selectedObjects = Selection.objects;
-            this.objectsToRename = new List<UnityEngine.Object>();
-            foreach (var selectedObject in selectedObjects)
+            if (this.objectsToRename == null)
+            {
+                this.objectsToRename = new List<Object>();
+            }
+
+            this.objectsToRename.Clear();
+
+            foreach (var selectedObject in RBSelection.SelectedObjectsSortedByTime)
             {
                 if (ObjectIsValidForRename(selectedObject))
                 {
@@ -116,7 +119,6 @@ namespace RedBlueGames.Tools
         private void OnGUI()
         {
             this.RefreshObjectsToRename();
-            this.SortObjectsToRename();
 
             EditorGUILayout.HelpBox(
                 "BulkRename allows renaming mulitple selections at one time via string replacement and other methods.",
@@ -223,17 +225,6 @@ namespace RedBlueGames.Tools
             }
 
             EditorGUILayout.EndScrollView();
-        }
-
-        private void SortObjectsToRename()
-        {
-            // Nothing to sort if objects to rename haven't been initialized
-            if (this.objectsToRename == null)
-            {
-                return;
-            }
-
-            this.objectsToRename = this.objectsToRename.OrderBy(x => x.name.Length).ThenBy(x => x.name).ToList();
         }
 
         private string[] GetNamesFromObjectsToRename()
