@@ -27,16 +27,12 @@ public static class RBSelection
 
     static RBSelection()
     {
+        selectedObjectsSortedByTime = new List<Object>();
         Selection.selectionChanged += RefreshObjectsToRename;
     }
 
     private static void RefreshObjectsToRename()
     {
-        if (selectedObjectsSortedByTime == null)
-        {
-            selectedObjectsSortedByTime = new List<Object>();
-        }
-
         // Get the selection diff
         var unitySelectedObjects = new List<Object>(Selection.objects);
         var addedObjects = GetObjectsInBNotInA(selectedObjectsSortedByTime, unitySelectedObjects);
