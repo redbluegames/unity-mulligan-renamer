@@ -85,6 +85,63 @@ namespace RedBlueGames.Tools
             return false;
         }
 
+        private static void DrawPreviewTitle()
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(32.0f);
+            EditorGUILayout.LabelField("Diff", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawPreviewRow(Texture icon, string originalName, string diffedName, string newName)
+        {
+            EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
+            GUILayout.Space(8.0f);
+            if (icon != null)
+            {
+                GUIStyle boxStyle = GUIStyle.none;
+                GUILayout.Box(icon, boxStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
+            }
+
+            // Calculate if names differ for use with styles
+            bool namesDiffer = newName != originalName;
+
+            // Display diff
+            var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
+            diffStyle.richText = true;
+            EditorGUILayout.LabelField(diffedName, diffStyle);
+
+            // Display new name
+            var style = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
+            EditorGUILayout.LabelField(newName, style);
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static Texture GetIconForObject(UnityEngine.Object unityObject)
+        {
+            var pathToObject = AssetDatabase.GetAssetPath(unityObject);
+            Texture icon = null;
+            if (string.IsNullOrEmpty(pathToObject))
+            {
+                if (unityObject.GetType() == typeof(GameObject))
+                {
+                    icon = EditorGUIUtility.FindTexture("GameObject Icon");
+                }
+                else
+                {
+                    icon = EditorGUIUtility.FindTexture("DefaultAsset Icon");
+                }
+            }
+            else
+            {
+                icon = AssetDatabase.GetCachedIcon(pathToObject);
+            }
+
+            return icon;
+        }
+
         private void OnEnable()
         {
             this.previewPanelScrollPosition = Vector2.zero;
@@ -191,12 +248,9 @@ namespace RedBlueGames.Tools
             }
 
             EditorGUILayout.Space();
-            GUILayout.Box(string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(1) });
+            GUILayout.Box(string.Empty, GUILayout.ExpandWidth(true), GUILayout.Height(1));
 
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Diff", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
-            EditorGUILayout.EndHorizontal();
+            DrawPreviewTitle();
 
             this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition);
             var selectedNames = this.GetNamesFromObjectsToRename();
@@ -204,24 +258,7 @@ namespace RedBlueGames.Tools
             var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, selectedNames);
             for (int i = 0; i < namePreviews.Length; ++i)
             {
-                EditorGUILayout.BeginHorizontal();
-
-                // Calculate if names differ for use with styles
-                var previewObjectname = namePreviews[i];
-                var objectName = selectedNames[i];
-                bool namesDiffer = previewObjectname != objectName;
-
-                // Display diff
-                var diffStyle = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
-                diffStyle.richText = true;
-                var diffedName = nameDiffs[i];
-                EditorGUILayout.LabelField(diffedName, diffStyle);
-
-                // Display new name
-                var style = namesDiffer ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
-                EditorGUILayout.LabelField(previewObjectname, style);
-
-                EditorGUILayout.EndHorizontal();
+                DrawPreviewRow(GetIconForObject(this.objectsToRename[i]), selectedNames[i], nameDiffs[i], namePreviews[i]);
             }
 
             EditorGUILayout.EndScrollView();
