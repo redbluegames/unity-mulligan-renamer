@@ -36,7 +36,10 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private static string testPackageSuffix = "WithTests";
     private List<RBAsset> redBlueAssets;
 
-    private bool includeTests;
+    private bool includeTestFiles;
+    private bool runUnitTests;
+
+    private TestRunnerCallback unitTestRunnerCallback;
 
     [MenuItem("Assets/RBPackage Exporter")]
     private static void ExportRBScriptsWithTests()
@@ -84,8 +87,11 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
     private void OnEnable()
     {
+        this.unitTestRunnerCallback = null;
         this.redBlueAssets = new List<RBAsset>();
         this.FindAssetsInCompanyFolder();
+
+        this.runUnitTests = true;
     }
 
     private void FindAssetsInCompanyFolder()
@@ -130,12 +136,23 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         }
 
         EditorGUILayout.Separator();
-        this.includeTests = EditorGUILayout.Toggle("Include Tests", this.includeTests);
+        this.includeTestFiles = EditorGUILayout.Toggle("Include Test Files", this.includeTestFiles);
+        this.runUnitTests = EditorGUILayout.Toggle("Run Unit Tests", this.runUnitTests);
 
         EditorGUI.BeginDisabledGroup(!atLeastOnePackageSelected);
         if (GUILayout.Button("Export"))
         {
-            this.ExportAllPackages(this.includeTests);
+            if (this.runUnitTests)
+            {
+                this.unitTestRunnerCallback = new TestRunnerCallback();
+                unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
+                unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
+                UnityEditor.EditorTests.Batch.RunTests(unitTestRunnerCallback);
+            }
+            else
+            {
+                this.HandleTestsSucceeded();
+            }
         }
 
         EditorGUI.EndDisabledGroup();
@@ -146,6 +163,21 @@ public class RBPackageExporter : UnityEditor.EditorWindow
                 "No packages selected to export. Select at least one asset Package.",
                 MessageType.Warning);
         }
+    }
+
+    private void HandleTestsSucceeded()
+    {
+        this.ExportAllPackages(this.includeTestFiles);
+        this.unitTestRunnerCallback = null;
+    }
+
+    private void HandleTestsFailed()
+    {
+        this.unitTestRunnerCallback = null;
+        UnityEditor.EditorUtility.DisplayDialog(
+            "Export Error", "Could not export packages because the Unit tests failed. " +
+            "You must fix the tests before exporting a project.",
+            "OK");
     }
 
     private void ExportAllPackages(bool includeTests)
@@ -214,5 +246,53 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         public string AssetName { get; set; }
 
         public bool IsSelected { get; set; }
+    }
+
+    private class TestRunnerCallback : UnityEditor.EditorTests.ITestRunnerCallback
+    {
+        public UnityEngine.Events.UnityEvent TestsFailed;
+        public UnityEngine.Events.UnityEvent TestsSucceeded;
+
+        public bool IsFailure { get; private set; }
+
+        public TestRunnerCallback()
+        {
+            this.TestsSucceeded = new UnityEngine.Events.UnityEvent();
+            this.TestsFailed = new UnityEngine.Events.UnityEvent();
+        }
+
+        public void TestStarted(string testName)
+        {
+        }
+
+        public void TestFinished(UnityEditor.EditorTests.ITestResult testResult)
+        {
+            if (!testResult.isSuccess)
+            {
+                this.IsFailure = true;
+            }
+        }
+
+        public void RunStarted(string suiteName, int testCount)
+        {
+            this.IsFailure = false;
+        }
+
+        public void RunFinished()
+        {
+            if (!this.IsFailure)
+            {
+                this.TestsSucceeded.Invoke();
+            }
+            else
+            {
+                this.TestsFailed.Invoke();
+            }
+        }
+
+        public void RunFinishedException(System.Exception exception)
+        {
+            
+        }
     }
 }
