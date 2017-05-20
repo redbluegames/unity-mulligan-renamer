@@ -34,14 +34,16 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private static string companyPath = "Assets/RedBlueGames";
     private static string packageExtension = ".unitypackage";
     private static string testPackageSuffix = "WithTests";
+
     private List<RBAsset> redBlueAssets;
+    private List<RBAsset> selectedAssets;
 
     private bool includeTestFiles;
     private bool runUnitTests;
 
     private TestRunnerCallback unitTestRunnerCallback;
 
-    [MenuItem("Assets/RBPackage Exporter")]
+    [MenuItem("Assets/Red Blue/RBPackage Exporter")]
     private static void ExportRBScriptsWithTests()
     {
         EditorWindow.GetWindow<RBPackageExporter>(false, "RBPackage Exporter", true);
@@ -89,6 +91,8 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     {
         this.unitTestRunnerCallback = null;
         this.redBlueAssets = new List<RBAsset>();
+        this.selectedAssets = new List<RBAsset>();
+
         this.FindAssetsInCompanyFolder();
 
         this.runUnitTests = true;
@@ -125,15 +129,16 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         EditorGUILayout.EndVertical();
 
         // Check if any assets are selected.
-        bool atLeastOnePackageSelected = false;
+        this.selectedAssets.Clear();
         foreach (var assetPackage in this.redBlueAssets)
         {
             if (assetPackage.IsSelected)
             {
-                atLeastOnePackageSelected = true;
-                break;
+                this.selectedAssets.Add(assetPackage);
             }
         }
+
+        bool atLeastOnePackageSelected = selectedAssets.Count > 0;
 
         EditorGUILayout.Separator();
         this.includeTestFiles = EditorGUILayout.Toggle("Include Test Files", this.includeTestFiles);
@@ -144,10 +149,7 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         {
             if (this.runUnitTests)
             {
-                this.unitTestRunnerCallback = new TestRunnerCallback();
-                unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
-                unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
-                UnityEditor.EditorTests.Batch.RunTests(unitTestRunnerCallback);
+                this.RunTests();
             }
             else
             {
@@ -165,9 +167,17 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         }
     }
 
+    private void RunTests()
+    {
+        this.unitTestRunnerCallback = new TestRunnerCallback();
+        unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
+        unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
+        UnityEditor.EditorTests.Batch.RunTests(unitTestRunnerCallback);
+    }
+
     private void HandleTestsSucceeded()
     {
-        this.ExportAllPackages(this.includeTestFiles);
+        this.ExportPackages(this.selectedAssets, this.includeTestFiles);
         this.unitTestRunnerCallback = null;
     }
 
@@ -180,18 +190,17 @@ public class RBPackageExporter : UnityEditor.EditorWindow
             "OK");
     }
 
-    private void ExportAllPackages(bool includeTests)
+    private void ExportPackages(List<RBAsset> packages, bool includeTests)
     {
-        foreach (var asset in this.redBlueAssets)
+        // We can only select the exported package (runInterative) if there's one (Unity crashes otherwise).
+        bool runInteractive = packages.Count == 1;
+        foreach (var asset in packages)
         {
-            if (asset.IsSelected)
-            {
-                this.ExportRBScripts(asset, includeTests);
-            }
+            this.ExportRBScripts(asset, includeTests, runInteractive);
         }
     }
 
-    private void ExportRBScripts(RBAsset assetToExport, bool includeTests)
+    private void ExportRBScripts(RBAsset assetToExport, bool includeTests, bool runInteractive)
     {
         var subDirectories = System.IO.Directory.GetDirectories(companyPath, "*", System.IO.SearchOption.AllDirectories);
         var directoriesToExport = new List<string>(subDirectories);
@@ -235,10 +244,17 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         }
 
         string filename = string.Concat(assetToExport.AssetName, includeTests ? testPackageSuffix : string.Empty, packageExtension);
-        AssetDatabase.ExportPackage(
-            allAssetPaths.ToArray(),
-            filename,
-            ExportPackageOptions.IncludeDependencies | ExportPackageOptions.Interactive);
+        ExportPackageOptions exportOptions;
+        if (runInteractive)
+        {
+            exportOptions = ExportPackageOptions.IncludeDependencies | ExportPackageOptions.Interactive;
+        }
+        else
+        {
+            exportOptions = ExportPackageOptions.IncludeDependencies;
+        }
+
+        AssetDatabase.ExportPackage(allAssetPaths.ToArray(), filename, exportOptions);
     }
 
     private class RBAsset
@@ -267,6 +283,11 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
         public void TestFinished(UnityEditor.EditorTests.ITestResult testResult)
         {
+            if (testResult.isIgnored)
+            {
+                return;
+            }
+
             if (!testResult.isSuccess)
             {
                 this.IsFailure = true;
