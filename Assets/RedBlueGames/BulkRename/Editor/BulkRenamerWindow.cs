@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.Tools
+namespace RedBlueGames.BulkRename
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -39,6 +39,11 @@ namespace RedBlueGames.Tools
         private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
         private BulkRenamer bulkRenamer;
+
+        private TrimCharactersOperation trimCharactersOp;
+        private ReplaceStringOperation replacementStringOp;
+        private AddStringOperation addStringOp;
+        private EnumerateOperation enumerateOp;
 
         [MenuItem(AssetsMenuPath, false, 1011)]
         [MenuItem(GameObjectMenuPath, false, 49)]
@@ -145,7 +150,17 @@ namespace RedBlueGames.Tools
         private void OnEnable()
         {
             this.previewPanelScrollPosition = Vector2.zero;
+
+            this.trimCharactersOp = new TrimCharactersOperation();
+            this.replacementStringOp = new ReplaceStringOperation();
+            this.addStringOp = new AddStringOperation();
+            this.enumerateOp = new EnumerateOperation();
             this.bulkRenamer = new BulkRenamer();
+
+            this.bulkRenamer.TrimCharactersOp = this.trimCharactersOp;
+            this.bulkRenamer.ReplaceStringOp = this.replacementStringOp;
+            this.bulkRenamer.AddStringOp = this.addStringOp;
+            this.bulkRenamer.EnumerateOp = this.enumerateOp;
 
             Selection.selectionChanged += this.Repaint;
         }
@@ -159,7 +174,7 @@ namespace RedBlueGames.Tools
         {
             if (this.objectsToRename == null)
             {
-                this.objectsToRename = new List<Object>();
+                this.objectsToRename = new List<UnityEngine.Object>();
             }
 
             this.objectsToRename.Clear();
@@ -191,55 +206,16 @@ namespace RedBlueGames.Tools
 
             EditorGUILayout.Space();
 
-            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
-            this.bulkRenamer.SearchString = EditorGUILayout.TextField(
-                "Search for String",
-                this.bulkRenamer.SearchString);
-            this.bulkRenamer.ReplacementString = EditorGUILayout.TextField(
-                "Replace with",
-                this.bulkRenamer.ReplacementString);
+            this.replacementStringOp = (ReplaceStringOperation)this.replacementStringOp.DrawGUI();
+            this.addStringOp = (AddStringOperation)this.addStringOp.DrawGUI();
+            this.trimCharactersOp = (TrimCharactersOperation)this.trimCharactersOp.DrawGUI();
+            this.enumerateOp = (EnumerateOperation)this.enumerateOp.DrawGUI();
 
-            this.bulkRenamer.SearchIsCaseSensitive = EditorGUILayout.Toggle(
-                "Case Sensitive",
-                this.bulkRenamer.SearchIsCaseSensitive);
-
-            EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
-            this.bulkRenamer.Prefix = EditorGUILayout.TextField("Prefix", this.bulkRenamer.Prefix);
-            this.bulkRenamer.Suffix = EditorGUILayout.TextField("Suffix", this.bulkRenamer.Suffix);
-
-            EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
-            EditorGUILayout.BeginHorizontal();
-            this.bulkRenamer.NumFrontDeleteChars = EditorGUILayout.IntField(
-                "Delete From Front",
-                this.bulkRenamer.NumFrontDeleteChars);
-            this.bulkRenamer.NumFrontDeleteChars = Mathf.Max(0, this.bulkRenamer.NumFrontDeleteChars);
-            this.bulkRenamer.NumBackDeleteChars = EditorGUILayout.IntField(
-                "Delete from Back",
-                this.bulkRenamer.NumBackDeleteChars);
-            this.bulkRenamer.NumBackDeleteChars = Mathf.Max(0, this.bulkRenamer.NumBackDeleteChars);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.LabelField("Enumerating", EditorStyles.boldLabel);
-            this.bulkRenamer.CountFormat = EditorGUILayout.TextField(
-                "Count Format",
-                this.bulkRenamer.CountFormat);
-
-            try
-            {
-                this.bulkRenamer.StartingCount.ToString(this.bulkRenamer.CountFormat);
-            }
-            catch (System.FormatException)
-            {
-                var helpBoxMessage = "Invalid Count Format. Typical formats are D1 for one digit with no " +
-                                     "leading zeros, D2, for two, etc." +
-                                     "\nSee https://msdn.microsoft.com/en-us/library/dwhawy9k(v=vs.110).aspx" +
-                                     " for more formatting options.";
-                EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
-            }
-
-            this.bulkRenamer.StartingCount = EditorGUILayout.IntField(
-                "Count From",
-                this.bulkRenamer.StartingCount);
+            // For now reassign the values for the ops
+            this.bulkRenamer.ReplaceStringOp = this.replacementStringOp;
+            this.bulkRenamer.AddStringOp = this.addStringOp;
+            this.bulkRenamer.TrimCharactersOp = this.trimCharactersOp;
+            this.bulkRenamer.EnumerateOp = this.enumerateOp;
 
             if (GUILayout.Button("Rename"))
             {
