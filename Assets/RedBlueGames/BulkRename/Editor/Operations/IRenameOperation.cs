@@ -1,0 +1,47 @@
+﻿/* MIT License
+
+Copyright (c) 2016 Edward Rowe, RedBlueGames
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+namespace RedBlueGames.BulkRename
+{
+    /// <summary>
+    /// Interface designed for an operation that takes a string and renames it based on a ruleset.
+    /// </summary>
+    public interface IRenameOperation
+    {
+        /// <summary>
+        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// </summary>
+        /// <param name="input">Input String to rename.</param>
+        /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
+        /// <param name="includeDiff">If set to <c>true</c> output the string with diffed text.</param>
+        /// <returns>A new string renamed according to the rename operation's rules.</returns>
+        string Rename(string input, int relativeCount, bool includeDiff);
+
+        /// <summary>
+        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
+        /// Operation with the modified data. This way we mirror how regular GUI calls work.
+        /// </summary>
+        /// <returns>A modified copy of the Operation.</returns>
+        IRenameOperation DrawGUI();
+    }
+}
