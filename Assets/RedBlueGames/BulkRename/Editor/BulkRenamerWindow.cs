@@ -38,12 +38,9 @@ namespace RedBlueGames.BulkRename
 
         private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
-        private BulkRenamer bulkRenamer;
 
-        private TrimCharactersOperation trimCharactersOp;
-        private ReplaceStringOperation replacementStringOp;
-        private AddStringOperation addStringOp;
-        private EnumerateOperation enumerateOp;
+        private BulkRenamer bulkRenamer;
+        private List<IRenameOperation> renameOperations;
 
         [MenuItem(AssetsMenuPath, false, 1011)]
         [MenuItem(GameObjectMenuPath, false, 49)]
@@ -151,16 +148,13 @@ namespace RedBlueGames.BulkRename
         {
             this.previewPanelScrollPosition = Vector2.zero;
 
-            this.trimCharactersOp = new TrimCharactersOperation();
-            this.replacementStringOp = new ReplaceStringOperation();
-            this.addStringOp = new AddStringOperation();
-            this.enumerateOp = new EnumerateOperation();
             this.bulkRenamer = new BulkRenamer();
 
-            this.bulkRenamer.TrimCharactersOp = this.trimCharactersOp;
-            this.bulkRenamer.ReplaceStringOp = this.replacementStringOp;
-            this.bulkRenamer.AddStringOp = this.addStringOp;
-            this.bulkRenamer.EnumerateOp = this.enumerateOp;
+            this.renameOperations = new List<IRenameOperation>();
+            this.renameOperations.Add(new TrimCharactersOperation());
+            this.renameOperations.Add(new ReplaceStringOperation());
+            this.renameOperations.Add(new AddStringOperation());
+            this.renameOperations.Add(new EnumerateOperation());
 
             Selection.selectionChanged += this.Repaint;
         }
@@ -206,16 +200,13 @@ namespace RedBlueGames.BulkRename
 
             EditorGUILayout.Space();
 
-            this.replacementStringOp = (ReplaceStringOperation)this.replacementStringOp.DrawGUI();
-            this.addStringOp = (AddStringOperation)this.addStringOp.DrawGUI();
-            this.trimCharactersOp = (TrimCharactersOperation)this.trimCharactersOp.DrawGUI();
-            this.enumerateOp = (EnumerateOperation)this.enumerateOp.DrawGUI();
+            for (int i = 0; i < this.renameOperations.Count; ++i)
+            {
+                this.renameOperations[i] = this.renameOperations[i].DrawGUI();
+            }
 
-            // For now reassign the values for the ops
-            this.bulkRenamer.ReplaceStringOp = this.replacementStringOp;
-            this.bulkRenamer.AddStringOp = this.addStringOp;
-            this.bulkRenamer.TrimCharactersOp = this.trimCharactersOp;
-            this.bulkRenamer.EnumerateOp = this.enumerateOp;
+            // Reassign the changed values back to the bulk renamer
+            this.bulkRenamer.SetRenameOperations(this.renameOperations);
 
             if (GUILayout.Button("Rename"))
             {

@@ -23,8 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
-    using System.Collections;
-    using System.Text.RegularExpressions;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -32,29 +31,33 @@ namespace RedBlueGames.BulkRename
     /// </summary>
     public class BulkRenamer
     {
-        /// <summary>
-        /// Gets or sets the ReplaceStringOp.
-        /// </summary>
-        /// <value>The replace string op.</value>
-        public ReplaceStringOperation ReplaceStringOp { get; set; }
+        private List<IRenameOperation> renameOperations;
 
-        /// <summary>
-        /// Gets or sets the AddStringOp.
-        /// </summary>
-        /// <value>The add string op.</value>
-        public AddStringOperation AddStringOp { get; set; }
+        private List<IRenameOperation> RenameOperations
+        {
+            get
+            {
+                if (this.renameOperations == null)
+                {
+                    this.renameOperations = new List<IRenameOperation>();
+                }
 
-        /// <summary>
-        /// Gets or sets the TrimCharactersOp.
-        /// </summary>
-        /// <value>The trim characters op.</value>
-        public TrimCharactersOperation TrimCharactersOp { get; set; }
+                return this.renameOperations;
+            }
+        }
 
-        /// <summary>
-        /// Gets or sets the EnumerateOp.
-        /// </summary>
-        /// <value>The enumerate op.</value>
-        public EnumerateOperation EnumerateOp { get; set; }
+        public void SetRenameOperation(IRenameOperation operation)
+        {
+            var operationList = new List<IRenameOperation>();
+            operationList.Add(operation);
+            this.SetRenameOperations(operationList);
+        }
+
+        public void SetRenameOperations(List<IRenameOperation> operations)
+        {
+            this.RenameOperations.Clear();
+            this.RenameOperations.AddRange(operations);
+        }
 
         /// <summary>
         /// Gets the string, renamed according to the BulkRenamer configuration.
@@ -78,25 +81,9 @@ namespace RedBlueGames.BulkRename
         {
             var modifiedName = originalName;
 
-            if (this.TrimCharactersOp != null)
+            foreach (var op in this.RenameOperations)
             {
-                modifiedName = this.TrimCharactersOp.Rename(modifiedName, count, includeDiff);
-            }
-
-            // Replace strings first so we don't replace the prefix.
-            if (this.ReplaceStringOp != null)
-            {
-                modifiedName = this.ReplaceStringOp.Rename(modifiedName, count, includeDiff);
-            }
-
-            if (this.AddStringOp != null)
-            {
-                modifiedName = this.AddStringOp.Rename(modifiedName, count, includeDiff);
-            }
-
-            if (this.EnumerateOp != null)
-            {
-                modifiedName = this.EnumerateOp.Rename(modifiedName, count, includeDiff);
+                modifiedName = op.Rename(modifiedName, count, includeDiff);
             }
 
             return modifiedName;

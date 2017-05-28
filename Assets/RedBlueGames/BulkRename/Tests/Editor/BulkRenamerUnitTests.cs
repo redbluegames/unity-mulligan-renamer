@@ -1,6 +1,7 @@
 ﻿namespace RedBlueGames.BulkRename.Tests
 {
     using System.Collections;
+    using System.Collections.Generic;
     using UnityEngine;
     using NUnit.Framework;
 
@@ -14,7 +15,7 @@
             var bulkRenamer = new BulkRenamer();
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = string.Empty;
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = name;
 
@@ -34,7 +35,7 @@
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "Hero";
             replaceStringOp.ReplacementString = "A";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "CHAR_A_Spawn";
 
@@ -53,7 +54,7 @@
             var bulkRenamer = new BulkRenamer();
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "o";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "StlDdad";
 
@@ -72,7 +73,7 @@
             var bulkRenamer = new BulkRenamer();
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "Heroine";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = name;
 
@@ -92,7 +93,7 @@
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "Hero";
             replaceStringOp.ReplacementString = "Link";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "Char_Link_Spawn";
 
@@ -113,7 +114,7 @@
             replaceStringOp.SearchIsCaseSensitive = false;
             replaceStringOp.SearchString = "ZelDa";
             replaceStringOp.ReplacementString = "blah";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "blahblah";
 
@@ -134,7 +135,7 @@
             replaceStringOp.SearchIsCaseSensitive = true;
             replaceStringOp.SearchString = "zelda";
             replaceStringOp.ReplacementString = "blah";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "ZELDA";
 
@@ -155,7 +156,7 @@
             replaceStringOp.SearchIsCaseSensitive = true;
             replaceStringOp.SearchString = "ZeldA";
             replaceStringOp.ReplacementString = "blah";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
 
             var expected = "blah";
 
@@ -174,7 +175,7 @@
             var bulkRenamer = new BulkRenamer();
             var addStringOp = new AddStringOperation();
             addStringOp.Prefix = string.Empty;
-            bulkRenamer.AddStringOp = addStringOp;
+            bulkRenamer.SetRenameOperation(addStringOp);
 
             var expected = name;
 
@@ -193,7 +194,7 @@
             var bulkRenamer = new BulkRenamer();
             var addStringOp = new AddStringOperation();
             addStringOp.Prefix = "Char_";
-            bulkRenamer.AddStringOp = addStringOp;
+            bulkRenamer.SetRenameOperation(addStringOp);
 
             var expected = "Char_Hero_Spawn";
 
@@ -212,7 +213,7 @@
             var bulkRenamer = new BulkRenamer();
             var addStringOp = new AddStringOperation();
             addStringOp.Suffix = string.Empty;
-            bulkRenamer.AddStringOp = addStringOp;
+            bulkRenamer.SetRenameOperation(addStringOp);
 
             var expected = name;
 
@@ -231,7 +232,7 @@
             var bulkRenamer = new BulkRenamer();
             var addStringOp = new AddStringOperation();
             addStringOp.Suffix = "_Spawn";
-            bulkRenamer.AddStringOp = addStringOp;
+            bulkRenamer.SetRenameOperation(addStringOp);
 
             var expected = "Char_Hero_Spawn";
 
@@ -251,7 +252,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 0;
             trimCharactersOp.NumBackDeleteChars = 0;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = name;
 
@@ -271,7 +272,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 1;
             trimCharactersOp.NumBackDeleteChars = 0;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = "har_Hero";
 
@@ -291,7 +292,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 0;
             trimCharactersOp.NumBackDeleteChars = 1;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = "Char_Her";
 
@@ -311,7 +312,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 1;
             trimCharactersOp.NumBackDeleteChars = 1;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = "har_Her";
 
@@ -331,7 +332,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = name.Length + 2;
             trimCharactersOp.NumBackDeleteChars = 0;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = string.Empty;
 
@@ -351,7 +352,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = name.Length;
             trimCharactersOp.NumBackDeleteChars = name.Length;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = string.Empty;
 
@@ -371,7 +372,7 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = -1;
             trimCharactersOp.NumBackDeleteChars = -10;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
+            bulkRenamer.SetRenameOperation(trimCharactersOp);
 
             var expected = name;
 
@@ -390,7 +391,7 @@
             var bulkRenamer = new BulkRenamer();
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = string.Empty;
-            bulkRenamer.EnumerateOp = enumerateOp;
+            bulkRenamer.SetRenameOperation(enumerateOp);
 
             var expected = name;
 
@@ -410,7 +411,7 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 0;
-            bulkRenamer.EnumerateOp = enumerateOp;
+            bulkRenamer.SetRenameOperation(enumerateOp);
 
             var expected = "Char_Hero0";
 
@@ -437,7 +438,7 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 1;
-            bulkRenamer.EnumerateOp = enumerateOp;
+            bulkRenamer.SetRenameOperation(enumerateOp);
 
             var expectedNames = new string[]
             {
@@ -472,7 +473,7 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = -1;
-            bulkRenamer.EnumerateOp = enumerateOp;
+            bulkRenamer.SetRenameOperation(enumerateOp);
             var expected = "Char_Hero-1";
 
             // Act
@@ -491,7 +492,7 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "s";
             enumerateOp.StartingCount = 100;
-            bulkRenamer.EnumerateOp = enumerateOp;
+            bulkRenamer.SetRenameOperation(enumerateOp);
             var expected = "Char_Hero";
 
             // Act
@@ -511,22 +512,25 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 1;
             trimCharactersOp.NumBackDeleteChars = 5;
-            bulkRenamer.TrimCharactersOp = trimCharactersOp;
 
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "r_H";
             replaceStringOp.ReplacementString = "t_Z";
-            bulkRenamer.ReplaceStringOp = replaceStringOp;
 
             var addStringOp = new AddStringOperation();
             addStringOp.Prefix = "a_";
             addStringOp.Suffix = "AA";
-            bulkRenamer.AddStringOp = addStringOp;
 
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "D4";
             enumerateOp.StartingCount = 100;
-            bulkRenamer.EnumerateOp = enumerateOp;
+
+            var listOfOperations = new List<IRenameOperation>();
+            listOfOperations.Add(trimCharactersOp);
+            listOfOperations.Add(replaceStringOp);
+            listOfOperations.Add(addStringOp);
+            listOfOperations.Add(enumerateOp);
+            bulkRenamer.SetRenameOperations(listOfOperations);
 
             var expected = "a_hat_ZeroAA0100";
 
