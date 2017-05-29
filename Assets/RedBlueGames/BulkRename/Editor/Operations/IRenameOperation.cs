@@ -36,12 +36,5 @@ namespace RedBlueGames.BulkRename
         /// <param name="includeDiff">If set to <c>true</c> output the string with diffed text.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         string Rename(string input, int relativeCount, bool includeDiff);
-
-        /// <summary>
-        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
-        /// Operation with the modified data. This way we mirror how regular GUI calls work.
-        /// </summary>
-        /// <returns>A modified copy of the Operation.</returns>
-        IRenameOperation DrawGUI();
     }
 }

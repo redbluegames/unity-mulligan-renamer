@@ -46,6 +46,10 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        /// <summary>
+        /// Sets the rename operation to use.
+        /// </summary>
+        /// <param name="operation">Operation to assign.</param>
         public void SetRenameOperation(IRenameOperation operation)
         {
             var operationList = new List<IRenameOperation>();
@@ -53,6 +57,10 @@ namespace RedBlueGames.BulkRename
             this.SetRenameOperations(operationList);
         }
 
+        /// <summary>
+        /// Sets the rename operations.
+        /// </summary>
+        /// <param name="operations">Operations to assign.</param>
         public void SetRenameOperations(List<IRenameOperation> operations)
         {
             this.RenameOperations.Clear();
@@ -60,7 +68,7 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Gets the string, renamed according to the BulkRenamer configuration.
+        /// Gets all strings renamed according to the BulkRenamer configuration.
         /// </summary>
         /// <returns>The renamed strings.</returns>
         /// <param name="includeDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
