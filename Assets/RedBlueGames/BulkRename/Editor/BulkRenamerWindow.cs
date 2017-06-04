@@ -228,8 +228,8 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsPanelScrollPosition = 
                 EditorGUILayout.BeginScrollView(
                 this.renameOperationsPanelScrollPosition,
-                GUILayout.MinWidth(300.0f),
-                GUILayout.MaxWidth(500.0f));
+                GUILayout.MinWidth(200.0f),
+                GUILayout.MaxWidth(350.0f));
 
             for (int i = 0; i < this.renameOperationsToApply.Count; ++i)
             {
