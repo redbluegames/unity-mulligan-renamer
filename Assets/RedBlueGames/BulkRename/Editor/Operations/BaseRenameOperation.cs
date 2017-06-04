@@ -40,6 +40,18 @@ namespace RedBlueGames.BulkRename
         private const string EndColorTag = "</color>";
 
         /// <summary>
+        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
+        /// </summary>
+        /// <value>The display path.</value>
+        public abstract string MenuDisplayPath { get; }
+
+        /// <summary>
+        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
+        /// </summary>
+        /// <value>The menu order.</value>
+        public abstract int MenuOrder { get; }
+
+        /// <summary>
         /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
@@ -53,7 +65,13 @@ namespace RedBlueGames.BulkRename
         /// Operation with the modified data. This way we mirror how regular GUI calls work.
         /// </summary>
         /// <returns>A modified copy of the Operation.</returns>
-        public abstract IRenameOperation DrawGUI();
+        public abstract BaseRenameOperation DrawGUI();
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        /// <returns>A clone of this instance</returns>
+        public abstract BaseRenameOperation Clone();
 
         /// <summary>
         /// Colors a string to represent an Added string (for a diff)

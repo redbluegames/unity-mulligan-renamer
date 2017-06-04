@@ -57,6 +57,30 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
+        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
+        /// </summary>
+        /// <value>The display path.</value>
+        public override string MenuDisplayPath
+        {
+            get
+            {
+                return "Replace String";
+            }
+        }
+
+        /// <summary>
+        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
+        /// </summary>
+        /// <value>The menu order.</value>
+        public override int MenuOrder
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the search string, used to determine what text to replace.
         /// </summary>
         /// <value>The search string.</value>
@@ -73,6 +97,16 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         /// <value>The replacement string.</value>
         public string ReplacementString { get; set; }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        /// <returns>A clone of this instance</returns>
+        public override BaseRenameOperation Clone()
+        {
+            var clone = new ReplaceStringOperation(this);
+            return clone;
+        }
 
         /// <summary>
         /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
@@ -118,13 +152,15 @@ namespace RedBlueGames.BulkRename
         /// Operation with the modified data. This way we mirror how regular GUI calls work.
         /// </summary>
         /// <returns>A modified copy of the Operation.</returns>
-        public override IRenameOperation DrawGUI()
+        public override BaseRenameOperation DrawGUI()
         {   
             var clone = new ReplaceStringOperation(this);
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
             clone.SearchString = EditorGUILayout.TextField("Search for String", this.SearchString);
             clone.ReplacementString = EditorGUILayout.TextField("Replace with", this.ReplacementString);
             clone.SearchIsCaseSensitive = EditorGUILayout.Toggle("Case Sensitive", this.SearchIsCaseSensitive);
+            EditorGUI.indentLevel--;
             return clone;
         }
     }

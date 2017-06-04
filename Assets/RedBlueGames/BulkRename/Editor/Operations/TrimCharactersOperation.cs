@@ -55,6 +55,30 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
+        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
+        /// </summary>
+        /// <value>The display path.</value>
+        public override string MenuDisplayPath
+        {
+            get
+            {
+                return "Trim Characters";
+            }
+        }
+
+        /// <summary>
+        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
+        /// </summary>
+        /// <value>The menu order.</value>
+        public override int MenuOrder
+        {
+            get
+            {
+                return 3;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the number of characters to delete from the front.
         /// </summary>
         /// <value>The number front delete chars.</value>
@@ -65,6 +89,16 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         /// <value>The number back delete chars.</value>
         public int NumBackDeleteChars { get; set; }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        /// <returns>A clone of this instance</returns>
+        public override BaseRenameOperation Clone()
+        {
+            var clone = new TrimCharactersOperation(this);
+            return clone;
+        }
 
         /// <summary>
         /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
@@ -120,16 +154,16 @@ namespace RedBlueGames.BulkRename
         /// Operation with the modified data. This way we mirror how regular GUI calls work.
         /// </summary>
         /// <returns>A modified copy of the Operation.</returns>
-        public override IRenameOperation DrawGUI()
+        public override BaseRenameOperation DrawGUI()
         {   
             var clone = new TrimCharactersOperation(this);
             EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
-            EditorGUILayout.BeginHorizontal();
+            EditorGUI.indentLevel++;
             clone.NumFrontDeleteChars = EditorGUILayout.IntField("Delete From Front", this.NumFrontDeleteChars);
             clone.NumFrontDeleteChars = Mathf.Max(0, clone.NumFrontDeleteChars);
             clone.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
             clone.NumBackDeleteChars = Mathf.Max(0, clone.NumBackDeleteChars);
-            EditorGUILayout.EndHorizontal();
+            EditorGUI.indentLevel--;
             return clone;
         }
     }
