@@ -52,6 +52,18 @@ namespace RedBlueGames.BulkRename
         public abstract int MenuOrder { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
+        /// </summary>
+        /// <value><c>true</c> if this instance has errors; otherwise, <c>false</c>.</value>
+        public virtual bool HasErrors
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
         /// </summary>
         /// <param name="input">Input String to rename.</param>

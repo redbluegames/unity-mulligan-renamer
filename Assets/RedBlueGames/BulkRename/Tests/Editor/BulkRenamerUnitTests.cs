@@ -168,6 +168,216 @@
         }
 
         [Test]
+        public void SearchRegex_Empty_DoesNothing()
+        {
+            // Arrange
+            var name = "ThisIsAName";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = string.Empty;
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = name;
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_OneMatch_IsReplaced()
+        {
+            // Arrange
+            var name = "CHAR_Hero_Spawn";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "Hero";
+            replaceStringOp.RegexReplacementString = "A";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "CHAR_A_Spawn";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_MultipleMatches_AllAreReplaced()
+        {
+            // Arrange
+            var name = "StoolDoodad";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "o";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "StlDdad";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_PartialMatches_AreNotReplaced()
+        {
+            // Arrange
+            var name = "Char_Hero_Spawn";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "Heroine";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = name;
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_Replacement_SubstitutesForSearchString()
+        {
+            // Arrange
+            var name = "Char_Hero_Spawn";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "Hero";
+            replaceStringOp.RegexReplacementString = "Link";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "Char_Link_Spawn";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_DoesNotMatchCase_Replaces()
+        {
+            // Arrange
+            var objectName = "ZELDAzelda";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.SearchIsCaseSensitive = false;
+            replaceStringOp.RegexSearchString = "ZelDa";
+            replaceStringOp.RegexReplacementString = "blah";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "blahblah";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegexCaseSensitive_DoesNotMatchCase_DoesNotReplace()
+        {
+            // Arrange
+            var objectName = "ZELDA";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.SearchIsCaseSensitive = true;
+            replaceStringOp.RegexSearchString = "zelda";
+            replaceStringOp.RegexReplacementString = "blah";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "ZELDA";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegexCaseSensitive_MatchesCase_Replaces()
+        {
+            // Arrange
+            var objectName = "ZeldA";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.SearchIsCaseSensitive = true;
+            replaceStringOp.RegexSearchString = "ZeldA";
+            replaceStringOp.RegexReplacementString = "blah";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "blah";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_SpecialCharactersInSearch_Replaces()
+        {
+            // Arrange
+            var objectName = "Char_Hero_Woot";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "[a-zA-Z]*_";
+            replaceStringOp.RegexReplacementString = "Yep";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "YepYepWoot";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void SearchRegex_EscapeCharactersInSearch_Replaces()
+        {
+            // Arrange
+            var objectName = "Char.Hero.Woot";
+            var bulkRenamer = new BulkRenamer();
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.UseRegex = true;
+            replaceStringOp.RegexSearchString = "\\.";
+            replaceStringOp.RegexReplacementString = "_";
+            bulkRenamer.SetRenameOperation(replaceStringOp);
+
+            var expected = "Char_Hero_Woot";
+
+            // Act
+            string result = bulkRenamer.GetRenamedStrings(false, objectName)[0];
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void AddPrefix_Empty_DoesNothing()
         {
             // Arrange
