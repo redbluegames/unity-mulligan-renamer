@@ -237,7 +237,7 @@ namespace RedBlueGames.BulkRename
                 DrawDivider();
             }
 
-            // Can't use these ops in Bulk Rename
+            // BulkRenamer expects the list typed as IRenameOperations
             var renameOpsAsInterfaces = new List<IRenameOperation>();
             foreach (var renameOp in this.renameOperationsToApply)
             {
