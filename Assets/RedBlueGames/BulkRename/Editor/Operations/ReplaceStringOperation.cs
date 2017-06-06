@@ -250,19 +250,35 @@ namespace RedBlueGames.BulkRename
             var clone = new ReplaceStringOperation(this);
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-            clone.UseRegex = EditorGUILayout.Toggle("Use Regex", this.UseRegex);
+
+            var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
+            clone.UseRegex = EditorGUILayout.Toggle(regexToggleContent, this.UseRegex);
+
             if (clone.UseRegex)
             {
-                clone.RegexSearchString = EditorGUILayout.TextField("Match Expression", this.RegexSearchString);
-                clone.RegexReplacementString = EditorGUILayout.TextField("Replacement Expression", this.RegexReplacementString);
+                var regexSearchContent = new GUIContent("Match Expression", "Regular Expression to use to match terms.");
+                clone.RegexSearchString = EditorGUILayout.TextField(regexSearchContent, this.RegexSearchString);
+                var regexReplacmentContent = new GUIContent("Replacement Expression", "Regular Expression to use when replacing matched patterns.");
+                clone.RegexReplacementString = EditorGUILayout.TextField(regexReplacmentContent, this.RegexReplacementString);
             }
             else
             {
-                clone.SearchString = EditorGUILayout.TextField("Search for String", this.SearchString);
-                clone.ReplacementString = EditorGUILayout.TextField("Replace with", this.ReplacementString);
+                var searchStringContent = new GUIContent(
+                                              "Search for String", 
+                                              "Substrings to search for in the filenames. These strings will be replaced by the Replacement String.");
+                clone.SearchString = EditorGUILayout.TextField(searchStringContent, this.SearchString);
+
+                var replacementStringContent = new GUIContent(
+                                                   "Replace with", 
+                                                   "String to replace matching instances of the Search string.");
+                clone.ReplacementString = EditorGUILayout.TextField(replacementStringContent, this.ReplacementString);
             }
 
-            clone.SearchIsCaseSensitive = EditorGUILayout.Toggle("Case Sensitive", this.SearchIsCaseSensitive);
+            var caseSensitiveContent = new GUIContent(
+                                           "Case Sensitive", 
+                                           "Search using case sensitivity. Only strings that match the supplied casing will be replaced.");
+            clone.SearchIsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveContent, this.SearchIsCaseSensitive);
+
             if (this.HasErrors)
             {
                 if (!IsValidRegex(this.ActiveSearchPattern))
