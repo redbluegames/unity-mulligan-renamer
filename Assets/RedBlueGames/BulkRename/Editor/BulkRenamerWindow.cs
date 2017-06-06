@@ -237,7 +237,7 @@ namespace RedBlueGames.BulkRename
                 DrawDivider();
             }
 
-            // Can't use these ops in Bulk Renamer without first converting them to the interface
+            // BulkRenamer expects the list typed as IRenameOperations
             var renameOpsAsInterfaces = new List<IRenameOperation>();
             foreach (var renameOp in this.renameOperationsToApply)
             {
@@ -294,11 +294,15 @@ namespace RedBlueGames.BulkRename
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(30.0f);
+
+            EditorGUI.BeginDisabledGroup(this.RenameOperatationsHaveErrors());
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
                 this.RenameAssets();
                 this.Close();
             }
+
+            EditorGUI.EndDisabledGroup();
 
             GUILayout.Space(30.0f);
             EditorGUILayout.EndHorizontal();
@@ -406,6 +410,19 @@ namespace RedBlueGames.BulkRename
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
             AssetDatabase.RenameAsset(pathToAsset, newName);
+        }
+
+        private bool RenameOperatationsHaveErrors()
+        {
+            foreach (var renameOp in this.renameOperationsToApply)
+            {
+                if (renameOp.HasErrors)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private struct PreviewRowInfo

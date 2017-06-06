@@ -39,6 +39,9 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         public ReplaceStringOperation()
         {
+            this.UseRegex = false;
+            this.RegexSearchString = string.Empty;
+            this.RegexReplacementString = string.Empty;
             this.SearchString = string.Empty;
             this.SearchIsCaseSensitive = false;
             this.ReplacementString = string.Empty;
@@ -51,6 +54,9 @@ namespace RedBlueGames.BulkRename
         /// <param name="operationToCopy">Operation to copy.</param>
         public ReplaceStringOperation(ReplaceStringOperation operationToCopy)
         {
+            this.UseRegex = operationToCopy.UseRegex;
+            this.RegexSearchString = operationToCopy.RegexSearchString;
+            this.RegexReplacementString = operationToCopy.RegexReplacementString;
             this.SearchString = operationToCopy.SearchString;
             this.SearchIsCaseSensitive = operationToCopy.SearchIsCaseSensitive;
             this.ReplacementString = operationToCopy.ReplacementString;
@@ -81,6 +87,25 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/>
+        /// uses a regex expression for input.
+        /// </summary>
+        /// <value><c>true</c> if input is a regular expression; otherwise, <c>false</c>.</value>
+        public bool UseRegex { get; set; }
+
+        /// <summary>
+        /// Gets or sets the regex search string.
+        /// </summary>
+        /// <value>The regex search string.</value>
+        public string RegexSearchString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the regex replacement string.
+        /// </summary>
+        /// <value>The regex replacement string.</value>
+        public string RegexReplacementString { get; set; }
+
+        /// <summary>
         /// Gets or sets the search string, used to determine what text to replace.
         /// </summary>
         /// <value>The search string.</value>
@@ -97,6 +122,65 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         /// <value>The replacement string.</value>
         public string ReplacementString { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
+        /// </summary>
+        /// <value><c>true</c> if this instance has errors; otherwise, <c>false</c>.</value>
+        public override bool HasErrors
+        {
+            get
+            {
+                if (this.UseRegex)
+                {
+                    return !IsValidRegex(this.RegexReplacementString)
+                    || !IsValidRegex(this.RegexSearchString);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        private string ActiveSearchPattern
+        {
+            get
+            {
+                if (this.UseRegex)
+                {
+                    return this.RegexSearchString;
+                }
+                else
+                {
+                    string searchStringRegexPattern = string.Empty;
+
+                    if (!string.IsNullOrEmpty(this.SearchString))
+                    {
+                        // Create capture group regex to extract the matched string
+                        // Escape the non-regex search string to prevent any embedded patterns from being interpretted as regex.
+                        searchStringRegexPattern = string.Concat("(", Regex.Escape(this.SearchString), ")");
+                    }
+
+                    return searchStringRegexPattern;
+                }
+            }
+        }
+
+        private string ActiveReplacementPattern
+        {
+            get
+            {
+                if (this.UseRegex)
+                {
+                    return this.RegexReplacementString;
+                }
+                else
+                {
+                    return this.ReplacementString;
+                }
+            }
+        }
 
         /// <summary>
         /// Clone this instance.
@@ -117,29 +201,38 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount, bool includeDiff)
         {
-            if (!string.IsNullOrEmpty(this.SearchString))
+            if (!string.IsNullOrEmpty(this.ActiveSearchPattern))
             {
-                // Create capture group regex to extract the matched string
-                // Escape the non-regex search string to prevent it from being interpretted as regex.
-                var searchStringRegexPattern = string.Concat("(", Regex.Escape(this.SearchString), ")");
                 var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
 
                 var replacement = string.Empty;
                 if (includeDiff)
                 {
-                    replacement = BaseRenameOperation.ColorStringForDelete("$1");
-                    replacement += BaseRenameOperation.ColorStringForAdd(this.ReplacementString);
+                    replacement = BaseRenameOperation.ColorStringForDelete("$&");
+
+                    // If replacement pattern is empty is screws up the green color tags on the diff.
+                    if (!string.IsNullOrEmpty(this.ActiveReplacementPattern))
+                    {
+                        replacement += BaseRenameOperation.ColorStringForAdd(this.ActiveReplacementPattern);
+                    }
                 }
                 else
                 {
-                    replacement = this.ReplacementString;
+                    replacement = this.ActiveReplacementPattern;
                 }
 
                 // Regex gives us two features - case insensitivity and capture groups. Capture groups
                 // are used so that the diff shows the term that is replaced, not the term that replaces it.
                 // (ex. Char_Herohero searching for hero replacing with 'z' should show "Char_Herozheroz" not 
                 // "Char_herozheroz".
-                return Regex.Replace(input, searchStringRegexPattern, replacement, regexOptions);
+                try
+                {
+                    return Regex.Replace(input, this.ActiveSearchPattern, replacement, regexOptions);
+                }
+                catch (System.ArgumentException)
+                {
+                    return input;
+                }
             }
             else
             {
@@ -157,11 +250,58 @@ namespace RedBlueGames.BulkRename
             var clone = new ReplaceStringOperation(this);
             EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-            clone.SearchString = EditorGUILayout.TextField("Search for String", this.SearchString);
-            clone.ReplacementString = EditorGUILayout.TextField("Replace with", this.ReplacementString);
+            clone.UseRegex = EditorGUILayout.Toggle("Use Regex", this.UseRegex);
+            if (clone.UseRegex)
+            {
+                clone.RegexSearchString = EditorGUILayout.TextField("Match Expression", this.RegexSearchString);
+                clone.RegexReplacementString = EditorGUILayout.TextField("Replacement Expression", this.RegexReplacementString);
+            }
+            else
+            {
+                clone.SearchString = EditorGUILayout.TextField("Search for String", this.SearchString);
+                clone.ReplacementString = EditorGUILayout.TextField("Replace with", this.ReplacementString);
+            }
+
             clone.SearchIsCaseSensitive = EditorGUILayout.Toggle("Case Sensitive", this.SearchIsCaseSensitive);
+            if (this.HasErrors)
+            {
+                if (!IsValidRegex(this.ActiveSearchPattern))
+                {
+                    EditorGUILayout.HelpBox(
+                        "Match Expression is not a valid Regular Expression.",
+                        MessageType.Error);
+                }
+
+                if (!IsValidRegex(this.RegexReplacementString))
+                {
+                    EditorGUILayout.HelpBox(
+                        "Replacement Expression is not a valid Regular Expression.",
+                        MessageType.Error);
+                }
+            }
+
             EditorGUI.indentLevel--;
             return clone;
+        }
+
+        private static bool IsValidRegex(string pattern)
+        {
+            // We consider empty a valid regular expression since Rename handles it gracefully
+            if (string.IsNullOrEmpty(pattern))
+            {
+                return true;
+            }
+
+            try
+            {
+                Regex.Match(string.Empty, pattern);
+            }
+            catch (System.ArgumentException)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
