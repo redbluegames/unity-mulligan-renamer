@@ -91,6 +91,18 @@ namespace RedBlueGames.BulkRename
         public int NumBackDeleteChars { get; set; }
 
         /// <summary>
+        /// Gets the heading label for the Rename Operation.
+        /// </summary>
+        /// <value>The heading label.</value>
+        protected override string HeadingLabel
+        {
+            get
+            {
+                return "Trim Characters";
+            }
+        }
+
+        /// <summary>
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
@@ -150,21 +162,14 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
-        /// Operation with the modified data. This way we mirror how regular GUI calls work.
+        /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        /// <returns>A modified copy of the Operation.</returns>
-        public override BaseRenameOperation DrawGUI()
+        protected override void DrawContents()
         {   
-            var clone = new TrimCharactersOperation(this);
-            EditorGUILayout.LabelField("Trimming", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-            clone.NumFrontDeleteChars = EditorGUILayout.IntField("Delete From Front", this.NumFrontDeleteChars);
-            clone.NumFrontDeleteChars = Mathf.Max(0, clone.NumFrontDeleteChars);
-            clone.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
-            clone.NumBackDeleteChars = Mathf.Max(0, clone.NumBackDeleteChars);
-            EditorGUI.indentLevel--;
-            return clone;
+            this.NumFrontDeleteChars = EditorGUILayout.IntField("Delete From Front", this.NumFrontDeleteChars);
+            this.NumFrontDeleteChars = Mathf.Max(0, this.NumFrontDeleteChars);
+            this.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
+            this.NumBackDeleteChars = Mathf.Max(0, this.NumBackDeleteChars);
         }
     }
 }

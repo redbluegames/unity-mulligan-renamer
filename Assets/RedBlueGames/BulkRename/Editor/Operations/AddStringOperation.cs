@@ -91,6 +91,18 @@ namespace RedBlueGames.BulkRename
         public string Suffix { get; set; }
 
         /// <summary>
+        /// Gets the heading label for the Rename Operation.
+        /// </summary>
+        /// <value>The heading label.</value>
+        protected override string HeadingLabel
+        {
+            get
+            {
+                return "Add String";
+            }
+        }
+
+        /// <summary>
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
@@ -126,19 +138,12 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
-        /// Operation with the modified data. This way we mirror how regular GUI calls work.
+        /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        /// <returns>A modified copy of the Operation.</returns>
-        public override BaseRenameOperation DrawGUI()
+        protected override void DrawContents()
         {   
-            var clone = new AddStringOperation(this);
-            EditorGUILayout.LabelField("Additions", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-            clone.Prefix = EditorGUILayout.TextField("Prefix", this.Prefix);
-            clone.Suffix = EditorGUILayout.TextField("Suffix", this.Suffix);
-            EditorGUI.indentLevel--;
-            return clone;
+            this.Prefix = EditorGUILayout.TextField("Prefix", this.Prefix);
+            this.Suffix = EditorGUILayout.TextField("Suffix", this.Suffix);
         }
     }
 }

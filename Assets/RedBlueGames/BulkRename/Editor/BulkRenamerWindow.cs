@@ -233,7 +233,67 @@ namespace RedBlueGames.BulkRename
 
             for (int i = 0; i < this.renameOperationsToApply.Count; ++i)
             {
-                this.renameOperationsToApply[i] = this.renameOperationsToApply[i].DrawGUI();
+                var currentElement = this.renameOperationsToApply[i];
+                var clickEvent = currentElement.DrawGUI(i == 0, i == this.renameOperationsToApply.Count - 1);
+                switch (clickEvent)
+                {
+                    case BaseRenameOperation.ListButtonEvent.MoveUp:
+                        {
+                            var indexOfAboveElement = Mathf.Max(0, i - 1);
+                            var previousElement = this.renameOperationsToApply[indexOfAboveElement];
+                            this.renameOperationsToApply[indexOfAboveElement] = currentElement;
+                            this.renameOperationsToApply[i] = previousElement;
+
+                            // Workaround: Unfocus any focused control because otherwise it will select a field
+                            // from the element that took this one's place.
+                            GUI.FocusControl(string.Empty);
+
+                            GUIUtility.ExitGUI();
+                            return;
+                        }
+
+                    case BaseRenameOperation.ListButtonEvent.MoveDown:
+                        {
+                            var indexOfBelowElement = Mathf.Min(this.renameOperationsToApply.Count - 1, i + 1);
+                            var nextElement = this.renameOperationsToApply[indexOfBelowElement];
+                            this.renameOperationsToApply[indexOfBelowElement] = currentElement;
+                            this.renameOperationsToApply[i] = nextElement;
+
+                            // Workaround: Unfocus any focused control because otherwise it will select a field
+                            // from the element that took this one's place.
+                            GUI.FocusControl(string.Empty);
+
+                            GUIUtility.ExitGUI();
+                            return;
+                        }
+
+                    case BaseRenameOperation.ListButtonEvent.Delete:
+                        {
+                            this.renameOperationsToApply.RemoveAt(i);
+
+                            // Workaround: Unfocus any focused control because otherwise it will select a field
+                            // from the element that took this one's place.
+                            GUI.FocusControl(string.Empty);
+
+                            GUIUtility.ExitGUI();
+                            return;
+                        }
+
+                    case BaseRenameOperation.ListButtonEvent.None:
+                        {
+                            // Do nothing
+                            break;
+                        }
+
+                    default:
+                        {
+                            Debug.LogError(string.Format(
+                                    "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event.", 
+                                    clickEvent));
+                            return;
+                        }
+                }
+
                 DrawDivider();
             }
 
