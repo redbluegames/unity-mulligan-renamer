@@ -143,6 +143,18 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        /// <summary>
+        /// Gets the heading label for the Rename Operation.
+        /// </summary>
+        /// <value>The heading label.</value>
+        protected override string HeadingLabel
+        {
+            get
+            {
+                return "Replace String";
+            }
+        }
+
         private string ActiveSearchPattern
         {
             get
@@ -241,43 +253,37 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
-        /// Operation with the modified data. This way we mirror how regular GUI calls work.
+        /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        /// <returns>A modified copy of the Operation.</returns>
-        public override BaseRenameOperation DrawGUI()
+        protected override void DrawContents()
         {   
-            var clone = new ReplaceStringOperation(this);
-            EditorGUILayout.LabelField("Text Replacement", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-
             var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
-            clone.UseRegex = EditorGUILayout.Toggle(regexToggleContent, this.UseRegex);
+            this.UseRegex = EditorGUILayout.Toggle(regexToggleContent, this.UseRegex);
 
-            if (clone.UseRegex)
+            if (this.UseRegex)
             {
                 var regexSearchContent = new GUIContent("Match Expression", "Regular Expression to use to match terms.");
-                clone.RegexSearchString = EditorGUILayout.TextField(regexSearchContent, this.RegexSearchString);
+                this.RegexSearchString = EditorGUILayout.TextField(regexSearchContent, this.RegexSearchString);
                 var regexReplacmentContent = new GUIContent("Replacement Expression", "Regular Expression to use when replacing matched patterns.");
-                clone.RegexReplacementString = EditorGUILayout.TextField(regexReplacmentContent, this.RegexReplacementString);
+                this.RegexReplacementString = EditorGUILayout.TextField(regexReplacmentContent, this.RegexReplacementString);
             }
             else
             {
                 var searchStringContent = new GUIContent(
                                               "Search for String", 
                                               "Substrings to search for in the filenames. These strings will be replaced by the Replacement String.");
-                clone.SearchString = EditorGUILayout.TextField(searchStringContent, this.SearchString);
+                this.SearchString = EditorGUILayout.TextField(searchStringContent, this.SearchString);
 
                 var replacementStringContent = new GUIContent(
                                                    "Replace with", 
                                                    "String to replace matching instances of the Search string.");
-                clone.ReplacementString = EditorGUILayout.TextField(replacementStringContent, this.ReplacementString);
+                this.ReplacementString = EditorGUILayout.TextField(replacementStringContent, this.ReplacementString);
             }
 
             var caseSensitiveContent = new GUIContent(
                                            "Case Sensitive", 
                                            "Search using case sensitivity. Only strings that match the supplied casing will be replaced.");
-            clone.SearchIsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveContent, this.SearchIsCaseSensitive);
+            this.SearchIsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveContent, this.SearchIsCaseSensitive);
 
             if (this.HasErrors)
             {
@@ -295,9 +301,6 @@ namespace RedBlueGames.BulkRename
                         MessageType.Error);
                 }
             }
-
-            EditorGUI.indentLevel--;
-            return clone;
         }
 
         private static bool IsValidRegex(string pattern)
