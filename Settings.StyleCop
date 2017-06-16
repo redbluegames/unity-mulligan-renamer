@@ -96,17 +96,11 @@
     <Parser ParserId="StyleCop.CSharp.CsParser">
       <ParserSettings>
         <CollectionProperty Name="GeneratedFileFilters">
-          <Value>[^a-z ]RBPackageExporter.cs</Value>
-          <Value>[^a-z ]IStyleCopIgnoreUtilityView.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtility.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityData.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityDirectoryView.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityFileTreeView.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityFileView.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityPath.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityPrefs.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityWindow.cs</Value>
-          <Value>[^a-z ]StyleCopIgnoreUtilityXMLTool.cs</Value>
+          <Value>[^a-z ]Helpers.cs</Value>
+          <Value>[^a-z ]HtmlEncoder.cs</Value>
+          <Value>[^a-z ]HttpUtility.cs</Value>
+          <Value>[^a-z ]DiffMatchPatch.cs</Value>
+          <Value>[^a-z ]DiffMatchPatchTest.cs</Value>
           <Value>[^a-z ]BulkRenamerUnitTests.cs</Value>
         </CollectionProperty>
       </ParserSettings>
