@@ -18,7 +18,7 @@
             var expected = name;
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -36,7 +36,7 @@
             var expected = "CHAR_A_Spawn";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -53,7 +53,7 @@
             var expected = "StlDdad";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -70,7 +70,7 @@
             var expected = name;
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -88,7 +88,7 @@
             var expected = "Char_Link_Spawn";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -107,7 +107,7 @@
             var expected = "blahblah";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -126,7 +126,7 @@
             var expected = "ZELDA";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -145,7 +145,7 @@
             var expected = "blah";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -163,7 +163,7 @@
             var expected = name;
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -182,7 +182,7 @@
             var expected = "CHAR_A_Spawn";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -200,7 +200,7 @@
             var expected = "StlDdad";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -218,7 +218,7 @@
             var expected = name;
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -237,7 +237,7 @@
             var expected = "Char_Link_Spawn";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -257,7 +257,7 @@
             var expected = "blahblah";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -277,7 +277,7 @@
             var expected = "ZELDA";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -297,7 +297,7 @@
             var expected = "blah";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -316,7 +316,7 @@
             var expected = "YepYepWoot";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -335,7 +335,7 @@
             var expected = "Char_Hero_Woot";
 
             // Act
-            string result = replaceStringOp.Rename(name, 0, false);
+            string result = replaceStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -352,7 +352,7 @@
             var expected = name;
 
             // Act
-            string result = addStringOp.Rename(name, 0, false);
+            string result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -369,7 +369,7 @@
             var expected = "Char_Hero_Spawn";
 
             // Act
-            string result = addStringOp.Rename(name, 0, false);
+            string result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -386,7 +386,7 @@
             var expected = name;
 
             // Act
-            string result = addStringOp.Rename(name, 0, false);
+            string result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -403,7 +403,7 @@
             var expected = "Char_Hero_Spawn";
 
             // Act
-            string result = addStringOp.Rename(name, 0, false);
+            string result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -421,7 +421,7 @@
             var expected = name;
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -439,7 +439,7 @@
             var expected = "har_Hero";
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -457,7 +457,7 @@
             var expected = "Char_Her";
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -475,7 +475,7 @@
             var expected = "har_Her";
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -493,7 +493,7 @@
             var expected = string.Empty;
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -511,7 +511,7 @@
             var expected = string.Empty;
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -529,7 +529,7 @@
             var expected = name;
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0, false);
+            string result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -546,7 +546,7 @@
             var expected = name;
 
             // Act
-            string result = enumerateOp.Rename(name, 0, false);
+            string result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -564,7 +564,7 @@
             var expected = "Char_Hero0";
 
             // Act
-            string result = enumerateOp.Rename(name, 0, false);
+            string result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -599,7 +599,7 @@
             var results = new List<string>(names.Length);
             for (int i = 0; i < names.Length; ++i)
             {
-                results.Add(enumerateOp.Rename(names[i], i, false));
+                results.Add(enumerateOp.Rename(names[i], i));
             }
 
             // Assert
@@ -625,7 +625,7 @@
             var expected = "Char_Hero-1";
 
             // Act
-            string result = enumerateOp.Rename(name, 0, false);
+            string result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -642,7 +642,7 @@
             var expected = "Char_Hero";
 
             // Act
-            string result = enumerateOp.Rename(name, 0, false);
+            string result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -681,7 +681,7 @@
             var expected = "a_hat_ZeroAA0100";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
+            string result = bulkRenamer.GetRenamePreviews(name)[0].NewName;
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -717,8 +717,8 @@
             var expectedReversed = "_Hero_Idle";
 
             // Act
-            string result = bulkRenamer.GetRenamedStrings(false, name)[0];
-            string resultReversed = renamerReversed.GetRenamedStrings(false, name)[0];
+            string result = bulkRenamer.GetRenamePreviews(name)[0].NewName;
+            string resultReversed = renamerReversed.GetRenamePreviews(name)[0].NewName;
 
             // Assert
             Assert.AreEqual(expected, result);

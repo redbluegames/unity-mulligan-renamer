@@ -37,6 +37,9 @@ namespace RedBlueGames.BulkRename
         private const string AssetsMenuPath = "Assets/Red Blue/Rename In Bulk";
         private const string GameObjectMenuPath = "GameObject/Red Blue/Rename In Bulk";
 
+        private const string AddedTextColorTag = "<color=green>";
+        private const string DeletedTextColorTag = "<color=red>";
+
         private Vector2 renameOperationsPanelScrollPosition;
         private Vector2 previewPanelScrollPosition;
         private List<UnityEngine.Object> objectsToRename;
@@ -394,15 +397,15 @@ namespace RedBlueGames.BulkRename
         {
             var previewRowInfos = new PreviewRowInfo[this.objectsToRename.Count];
             var selectedNames = this.GetNamesFromObjectsToRename();
-            var namePreviews = this.bulkRenamer.GetRenamedStrings(false, selectedNames);
-            var nameDiffs = this.bulkRenamer.GetRenamedStrings(true, selectedNames);
+            var namePreviews = this.bulkRenamer.GetRenamePreviews(selectedNames);
 
-            for (int i = 0; i < selectedNames.Length; ++i)
+            for (int i = 0; i < namePreviews.Count; ++i)
             {
                 var info = new PreviewRowInfo();
-                info.OriginalName = selectedNames[i];
-                info.DiffName = nameDiffs[i];
-                info.NewName = namePreviews[i];
+                var namePreview = namePreviews[i];
+                info.OriginalName = namePreview.OriginalName;
+                info.DiffName = namePreview.GetDiffAsFormattedString(AddedTextColorTag, DeletedTextColorTag);
+                info.NewName = namePreview.NewName;
                 info.Icon = GetIconForObject(this.objectsToRename[i]);
 
                 previewRowInfos[i] = info;
@@ -429,21 +432,21 @@ namespace RedBlueGames.BulkRename
             Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
 
             var names = this.GetNamesFromObjectsToRename();
-            var newNames = this.bulkRenamer.GetRenamedStrings(false, names);
+            var newNames = this.bulkRenamer.GetRenamePreviews(names);
 
-            for (int i = 0; i < newNames.Length; ++i)
+            for (int i = 0; i < newNames.Count; ++i)
             {
                 var infoString = string.Format(
                                      "Renaming asset {0} of {1}",
                                      i,
-                                     newNames.Length);
+                                     newNames.Count);
 
                 EditorUtility.DisplayProgressBar(
                     "Renaming Assets...",
                     infoString,
-                    i / (float)newNames.Length);
+                    i / (float)newNames.Count);
 
-                this.RenameObject(this.objectsToRename[i], newNames[i]);
+                this.RenameObject(this.objectsToRename[i], newNames[i].NewName);
             }
 
             EditorUtility.ClearProgressBar();

@@ -113,49 +113,28 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <param name="includeDiff">If set to <c>true</c> include diff.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount, bool includeDiff)
+        public override string Rename(string input, int relativeCount)
         {
             var modifiedName = input;
 
             // Trim Front chars
-            string trimmedFrontChars = string.Empty;
             if (this.NumFrontDeleteChars > 0)
             {
                 var numCharsToDelete = Mathf.Min(this.NumFrontDeleteChars, input.Length);
-                trimmedFrontChars = input.Substring(0, numCharsToDelete);
-
                 modifiedName = modifiedName.Remove(0, numCharsToDelete);
             }
 
             // Trim Back chars
-            string trimmedBackChars = string.Empty;
             if (this.NumBackDeleteChars > 0)
             {
                 var numCharsToDelete = Mathf.Min(this.NumBackDeleteChars, modifiedName.Length);
                 int startIndex = modifiedName.Length - numCharsToDelete;
-                trimmedBackChars = modifiedName.Substring(startIndex, numCharsToDelete);
-
                 modifiedName = modifiedName.Remove(startIndex, numCharsToDelete);
-            }
-
-            // When showing rich text, add back in the trimmed characters
-            if (includeDiff)
-            {
-                if (!string.IsNullOrEmpty(trimmedFrontChars))
-                {
-                    modifiedName = string.Concat(BaseRenameOperation.ColorStringForDelete(trimmedFrontChars), modifiedName);
-                }
-
-                if (!string.IsNullOrEmpty(trimmedBackChars))
-                {
-                    modifiedName = string.Concat(modifiedName, BaseRenameOperation.ColorStringForDelete(trimmedBackChars));
-                }
             }
 
             return modifiedName;

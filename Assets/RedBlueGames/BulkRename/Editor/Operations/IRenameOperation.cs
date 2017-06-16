@@ -29,12 +29,11 @@ namespace RedBlueGames.BulkRename
     public interface IRenameOperation
     {
         /// <summary>
-        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <param name="includeDiff">If set to <c>true</c> output the string with diffed text.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        string Rename(string input, int relativeCount, bool includeDiff);
+        string Rename(string input, int relativeCount);
     }
 }

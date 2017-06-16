@@ -35,10 +35,6 @@ namespace RedBlueGames.BulkRename
     /// </summary>
     public abstract class BaseRenameOperation : IRenameOperation
     {
-        private const string AddedTextColorTag = "<color=green>";
-        private const string DeletedTextColorTag = "<color=red>";
-        private const string EndColorTag = "</color>";
-
         /// <summary>
         /// Events that are returned by the GUI draw call to indicate what input was pressed.
         /// </summary>
@@ -96,13 +92,12 @@ namespace RedBlueGames.BulkRename
         protected abstract string HeadingLabel { get; }
 
         /// <summary>
-        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <param name="includeDiff">If set to <c>true</c> include diff.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public abstract string Rename(string input, int relativeCount, bool includeDiff);
+        public abstract string Rename(string input, int relativeCount);
 
         /// <summary>
         /// Clone this instance.
@@ -128,26 +123,6 @@ namespace RedBlueGames.BulkRename
             EditorGUI.indentLevel--;
 
             return buttonEvent;
-        }
-
-        /// <summary>
-        /// Colors a string to represent an Added string (for a diff)
-        /// </summary>
-        /// <returns>The string colored as if it was added.</returns>
-        /// <param name="stringToColor">String to color.</param>
-        protected static string ColorStringForAdd(string stringToColor)
-        {
-            return string.Concat(AddedTextColorTag, stringToColor, EndColorTag);
-        }
-
-        /// <summary>
-        /// Colors a string to represent a Deleted string (for a diff)
-        /// </summary>
-        /// <returns>The string colored as if it was deleted.</returns>
-        /// <param name="stringToColor">String to color.</param>
-        protected static string ColorStringForDelete(string stringToColor)
-        {
-            return string.Concat(DeletedTextColorTag, stringToColor, EndColorTag);
         }
 
         /// <summary>
