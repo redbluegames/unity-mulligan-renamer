@@ -158,7 +158,7 @@
             var name = "ThisIsAName";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = string.Empty;
+            replaceStringOp.SearchString = string.Empty;
 
             var expected = name;
 
@@ -176,8 +176,8 @@
             var name = "CHAR_Hero_Spawn";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "Hero";
-            replaceStringOp.RegexReplacementString = "A";
+            replaceStringOp.SearchString = "Hero";
+            replaceStringOp.ReplacementString = "A";
 
             var expected = "CHAR_A_Spawn";
 
@@ -195,7 +195,7 @@
             var name = "StoolDoodad";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "o";
+            replaceStringOp.SearchString = "o";
 
             var expected = "StlDdad";
 
@@ -213,7 +213,7 @@
             var name = "Char_Hero_Spawn";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "Heroine";
+            replaceStringOp.SearchString = "Heroine";
 
             var expected = name;
 
@@ -231,8 +231,8 @@
             var name = "Char_Hero_Spawn";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "Hero";
-            replaceStringOp.RegexReplacementString = "Link";
+            replaceStringOp.SearchString = "Hero";
+            replaceStringOp.ReplacementString = "Link";
 
             var expected = "Char_Link_Spawn";
 
@@ -251,8 +251,8 @@
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
             replaceStringOp.SearchIsCaseSensitive = false;
-            replaceStringOp.RegexSearchString = "ZelDa";
-            replaceStringOp.RegexReplacementString = "blah";
+            replaceStringOp.SearchString = "ZelDa";
+            replaceStringOp.ReplacementString = "blah";
 
             var expected = "blahblah";
 
@@ -271,8 +271,8 @@
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
             replaceStringOp.SearchIsCaseSensitive = true;
-            replaceStringOp.RegexSearchString = "zelda";
-            replaceStringOp.RegexReplacementString = "blah";
+            replaceStringOp.SearchString = "zelda";
+            replaceStringOp.ReplacementString = "blah";
 
             var expected = "ZELDA";
 
@@ -291,8 +291,8 @@
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
             replaceStringOp.SearchIsCaseSensitive = true;
-            replaceStringOp.RegexSearchString = "ZeldA";
-            replaceStringOp.RegexReplacementString = "blah";
+            replaceStringOp.SearchString = "ZeldA";
+            replaceStringOp.ReplacementString = "blah";
 
             var expected = "blah";
 
@@ -310,8 +310,8 @@
             var name = "Char_Hero_Woot";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "[a-zA-Z]*_";
-            replaceStringOp.RegexReplacementString = "Yep";
+            replaceStringOp.SearchString = "[a-zA-Z]*_";
+            replaceStringOp.ReplacementString = "Yep";
 
             var expected = "YepYepWoot";
 
@@ -329,8 +329,8 @@
             var name = "Char.Hero.Woot";
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.UseRegex = true;
-            replaceStringOp.RegexSearchString = "\\.";
-            replaceStringOp.RegexReplacementString = "_";
+            replaceStringOp.SearchString = "\\.";
+            replaceStringOp.ReplacementString = "_";
 
             var expected = "Char_Hero_Woot";
 
