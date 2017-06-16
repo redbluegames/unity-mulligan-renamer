@@ -113,13 +113,12 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <param name="includeDiff">If set to <c>true</c> include diff.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount, bool includeDiff)
+        public override string Rename(string input, int relativeCount)
         {
             var modifiedName = input;
             var currentCount = this.StartingCount + relativeCount;
@@ -129,12 +128,6 @@ namespace RedBlueGames.BulkRename
                 try
                 {
                     var currentCountAsString = currentCount.ToString(this.CountFormat);
-
-                    if (includeDiff)
-                    {
-                        currentCountAsString = string.Concat(BaseRenameOperation.ColorStringForAdd(currentCountAsString));
-                    }
-
                     modifiedName = string.Concat(modifiedName, currentCountAsString);
                 }
                 catch (System.FormatException)

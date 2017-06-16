@@ -138,9 +138,10 @@ public class RBPackageExporter : UnityEditor.EditorWindow
             }
         }
 
-        bool atLeastOnePackageSelected = selectedAssets.Count > 0;
+        bool atLeastOnePackageSelected = this.selectedAssets.Count > 0;
 
         EditorGUILayout.Separator();
+        EditorGUILayout.LabelField("Additional Options:", EditorStyles.boldLabel);
         this.includeTestFiles = EditorGUILayout.Toggle("Include Test Files", this.includeTestFiles);
         this.runUnitTests = EditorGUILayout.Toggle("Run Unit Tests", this.runUnitTests);
 
@@ -170,9 +171,9 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private void RunTests()
     {
         this.unitTestRunnerCallback = new TestRunnerCallback();
-        unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
-        unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
-        UnityEditor.EditorTests.Batch.RunTests(unitTestRunnerCallback);
+        this.unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
+        this.unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
+        UnityEditor.EditorTests.Batch.RunTests(this.unitTestRunnerCallback);
     }
 
     private void HandleTestsSucceeded()
@@ -184,10 +185,11 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private void HandleTestsFailed()
     {
         this.unitTestRunnerCallback = null;
-        UnityEditor.EditorUtility.DisplayDialog(
-            "Export Error", "Could not export packages because the Unit tests failed. " +
-            "You must fix the tests before exporting a project.",
-            "OK");
+        string dialogTitle = "Export Error";
+        string exportErrorMsg = "Could not export packages because the Unit tests failed. " +
+            "You must fix the tests before exporting a project.";
+        string confirmButtonText = "OK";
+        UnityEditor.EditorUtility.DisplayDialog(dialogTitle, exportErrorMsg, confirmButtonText);
     }
 
     private void ExportPackages(List<RBAsset> packages, bool includeTests)
@@ -266,15 +268,42 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
     private class TestRunnerCallback : UnityEditor.EditorTests.ITestRunnerCallback
     {
-        public UnityEngine.Events.UnityEvent TestsFailed;
-        public UnityEngine.Events.UnityEvent TestsSucceeded;
-
-        public bool IsFailure { get; private set; }
+        private UnityEngine.Events.UnityEvent testsFailed;
+        private UnityEngine.Events.UnityEvent testsSucceeded;
 
         public TestRunnerCallback()
         {
-            this.TestsSucceeded = new UnityEngine.Events.UnityEvent();
-            this.TestsFailed = new UnityEngine.Events.UnityEvent();
+            this.testsSucceeded = new UnityEngine.Events.UnityEvent();
+            this.testsFailed = new UnityEngine.Events.UnityEvent();
+        }
+
+        public bool IsFailure
+        {
+            get;
+
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the event callback for when Unit Tests fail.
+        /// </summary>
+        public UnityEngine.Events.UnityEvent TestsFailed
+        {
+            get
+            {
+                return this.testsFailed;
+            }
+        }
+
+        /// <summary>
+        /// Gets the event callback for when unity tests succeed.
+        /// </summary>
+        public UnityEngine.Events.UnityEvent TestsSucceeded
+        {
+            get
+            {
+                return this.testsSucceeded;
+            }
         }
 
         public void TestStarted(string testName)
@@ -313,7 +342,6 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
         public void RunFinishedException(System.Exception exception)
         {
-            
         }
     }
 }

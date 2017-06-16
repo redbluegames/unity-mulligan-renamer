@@ -68,30 +68,30 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Gets all strings renamed according to the BulkRenamer configuration.
+        /// Gets previews for the rename operations to be performed on the supplied strings.
         /// </summary>
-        /// <returns>The renamed strings.</returns>
-        /// <param name="includeDiff">If set to <c>true</c> outputs the name including diff with rich text tags.</param>
+        /// <returns>The RenamePreviews.</returns>
         /// <param name="originalNames">Original names to rename.</param>
-        public string[] GetRenamedStrings(bool includeDiff, params string[] originalNames)
+        public List<BulkRenamePreview> GetRenamePreviews(params string[] originalNames)
         {
-            var renamedStrings = new string[originalNames.Length];
+            var previews = new List<BulkRenamePreview>(originalNames.Length);
 
             for (int i = 0; i < originalNames.Length; ++i)
             {
-                renamedStrings[i] = this.GetRenamedString(originalNames[i], i, includeDiff);
+                var renamedString = this.GetRenamedString(originalNames[i], i);
+                previews.Add(new BulkRenamePreview(originalNames[i], renamedString));
             }
 
-            return renamedStrings;
+            return previews;
         }
 
-        private string GetRenamedString(string originalName, int count, bool includeDiff)
+        private string GetRenamedString(string originalName, int count)
         {
             var modifiedName = originalName;
 
             foreach (var op in this.RenameOperations)
             {
-                modifiedName = op.Rename(modifiedName, count, includeDiff);
+                modifiedName = op.Rename(modifiedName, count);
             }
 
             return modifiedName;

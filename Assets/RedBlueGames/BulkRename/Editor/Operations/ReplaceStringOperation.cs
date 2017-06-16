@@ -169,9 +169,8 @@ namespace RedBlueGames.BulkRename
 
                     if (!string.IsNullOrEmpty(this.SearchString))
                     {
-                        // Create capture group regex to extract the matched string
                         // Escape the non-regex search string to prevent any embedded patterns from being interpretted as regex.
-                        searchStringRegexPattern = string.Concat("(", Regex.Escape(this.SearchString), ")");
+                        searchStringRegexPattern = string.Concat(Regex.Escape(this.SearchString));
                     }
 
                     return searchStringRegexPattern;
@@ -205,40 +204,21 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Rename the specified input, using the relativeCount. Optionally output the string as a diff.
+        /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <param name="includeDiff">If set to <c>true</c> include diff.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount, bool includeDiff)
+        public override string Rename(string input, int relativeCount)
         {
             if (!string.IsNullOrEmpty(this.ActiveSearchPattern))
             {
                 var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
+                var replacement = this.ActiveReplacementPattern;
 
-                var replacement = string.Empty;
-                if (includeDiff)
-                {
-                    replacement = BaseRenameOperation.ColorStringForDelete("$&");
-
-                    // If replacement pattern is empty is screws up the green color tags on the diff.
-                    if (!string.IsNullOrEmpty(this.ActiveReplacementPattern))
-                    {
-                        replacement += BaseRenameOperation.ColorStringForAdd(this.ActiveReplacementPattern);
-                    }
-                }
-                else
-                {
-                    replacement = this.ActiveReplacementPattern;
-                }
-
-                // Regex gives us two features - case insensitivity and capture groups. Capture groups
-                // are used so that the diff shows the term that is replaced, not the term that replaces it.
-                // (ex. Char_Herohero searching for hero replacing with 'z' should show "Char_Herozheroz" not 
-                // "Char_herozheroz".
                 try
                 {
+                    // Regex gives us case sensitivity, even when not searching with regex.
                     return Regex.Replace(input, this.ActiveSearchPattern, replacement, regexOptions);
                 }
                 catch (System.ArgumentException)
