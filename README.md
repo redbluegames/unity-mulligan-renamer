@@ -36,3 +36,9 @@ Currently the tool does not allow for undoing Assets, (though Undoing GameObject
 
 ## Contributing
 Contributing to the project is welcome. You can do so by adding GitHub issues, or by submitting code pull requests. If you submit a pull request, please try to adhere to the StyleCop format and reference the GitHub issue in the Pull Requst comments.
+
+
+## Contributors and Credits
+- [lucasrowe](https://github.com/lucasrowe) - Provided general QA.
+- [uvivagabond](https://github.com/uvivagabond) - Improved selected object sorting and helped identify edge cases with objects with empty names and empty Game Object assets. 
+- [kevinrmabie](https://github.com/kevinrmabie) - Rubber duck
