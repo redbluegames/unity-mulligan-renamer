@@ -114,6 +114,10 @@ namespace RedBlueGames.BulkRename
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
         public ListButtonEvent DrawGUI(bool disableUpButton, bool disableDownButton)
         {
+            var operationStyle = new GUIStyle(GUI.skin.FindStyle("ScriptText"));
+            operationStyle.stretchHeight = false;
+            operationStyle.padding = new RectOffset(6, 6, 4, 4);
+            EditorGUILayout.BeginVertical(operationStyle);
             ListButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
                                               this.HeadingLabel,
                                               disableUpButton,
@@ -121,6 +125,7 @@ namespace RedBlueGames.BulkRename
             EditorGUI.indentLevel++;
             this.DrawContents();
             EditorGUI.indentLevel--;
+            EditorGUILayout.EndVertical();
 
             return buttonEvent;
         }

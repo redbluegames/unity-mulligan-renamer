@@ -96,10 +96,16 @@ namespace RedBlueGames.BulkRename
 
         private static void DrawPreviewTitle()
         {
-            EditorGUILayout.BeginHorizontal();
+            var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
+            var margin = new RectOffset();
+            margin = previewHeaderStyle.margin;
+            margin.left = 1;
+            margin.right = 1;
+            previewHeaderStyle.margin = margin;
+            EditorGUILayout.BeginHorizontal(previewHeaderStyle);
             GUILayout.Space(32.0f);
-            EditorGUILayout.LabelField("Diff", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("New Name", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Diff", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.EndHorizontal();
         }
 
@@ -124,11 +130,6 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.LabelField(info.NewName, style);
 
             EditorGUILayout.EndHorizontal();
-        }
-
-        private static void DrawDivider()
-        {
-            GUILayout.Box(string.Empty, GUILayout.ExpandWidth(true), GUILayout.Height(2.0f));
         }
 
         private static Texture GetIconForObject(UnityEngine.Object unityObject)
@@ -212,10 +213,6 @@ namespace RedBlueGames.BulkRename
         {
             this.RefreshObjectsToRename();
 
-            EditorGUILayout.HelpBox(
-                "BulkRename allows renaming mulitple selections at one time via string replacement and other methods.",
-                MessageType.None);
-
             if (this.objectsToRename.Count == 0)
             {
                 EditorGUILayout.HelpBox(
@@ -296,8 +293,6 @@ namespace RedBlueGames.BulkRename
                             return;
                         }
                 }
-
-                DrawDivider();
             }
 
             // BulkRenamer expects the list typed as IRenameOperations
@@ -332,11 +327,10 @@ namespace RedBlueGames.BulkRename
 
             EditorGUILayout.EndScrollView();
 
-            GUILayout.Box(string.Empty, GUILayout.ExpandHeight(true), GUILayout.Width(3.0f));
-
             EditorGUILayout.BeginVertical();
 
-            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition);
+            var previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
+            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, previewScrollStyle);
 
             // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
             // for the scroll to measure horiztonal size correctly.
