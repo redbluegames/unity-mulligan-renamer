@@ -89,7 +89,8 @@ namespace RedBlueGames.BulkRename
         /// <value><c>true</c> if input is a regular expression; otherwise, <c>false</c>.</value>
         public bool UseRegex { get; set; }
 
-        /// Gets or sets the search string, used to determine what text to replace.
+        /// <summary>
+        /// Gets or sets the search string that will be replaced.
         /// </summary>
         /// <value>The search string.</value>
         public string SearchString { get; set; }

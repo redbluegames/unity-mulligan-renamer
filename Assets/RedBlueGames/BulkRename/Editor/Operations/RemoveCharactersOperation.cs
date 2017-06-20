@@ -30,25 +30,27 @@ namespace RedBlueGames.BulkRename
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation that changes the case of the characters in the name.
+    /// RenameOperation that removes specific characters from the names.
     /// </summary>
-    public class ChangeCaseOperation : BaseRenameOperation
+    public class RemoveCharactersOperation : BaseRenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
         /// </summary>
-        public ChangeCaseOperation()
+        public RemoveCharactersOperation()
         {
-            this.ToUpper = false;
+            this.Characters = string.Empty;
+            this.IsCaseSensitive = false;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class by copying another.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
+        public RemoveCharactersOperation(RemoveCharactersOperation operationToCopy)
         {
-            this.ToUpper = operationToCopy.ToUpper;
+            this.Characters = operationToCopy.Characters;
+            this.IsCaseSensitive = operationToCopy.IsCaseSensitive;
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Change Case";
+                return "Remove Characters";
             }
         }
 
@@ -71,15 +73,21 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 4;
+                return 6;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
+        /// Gets or sets the characters to remove.
         /// </summary>
-        /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
-        public bool ToUpper { get; set; }
+        /// <value>The characters.</value>
+        public string Characters { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance searches for the characters using case sensitivity.
+        /// </summary>
+        /// <value><c>true</c> if the search is case sensitive; otherwise, <c>false</c>.</value>
+        public bool IsCaseSensitive { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -89,7 +97,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Change Case";
+                return "Remove Characters";
             }
         }
 
@@ -99,7 +107,7 @@ namespace RedBlueGames.BulkRename
         /// <returns>A clone of this instance</returns>
         public override BaseRenameOperation Clone()
         {
-            var clone = new ChangeCaseOperation(this);
+            var clone = new RemoveCharactersOperation(this);
             return clone;
         }
 
@@ -111,13 +119,25 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            if (this.ToUpper)
+            if (!string.IsNullOrEmpty(this.Characters))
             {
-                return input.ToUpper();
+                var regexOptions = this.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
+                var replacement = string.Empty;
+
+                try
+                {
+                    var regexPattern = Regex.Escape(this.Characters);
+                    var charactersAsRegex = string.Concat("[", regexPattern, "]");
+                    return Regex.Replace(input, charactersAsRegex, replacement, regexOptions);
+                }
+                catch (System.ArgumentException)
+                {
+                    return input;
+                }
             }
             else
             {
-                return input.ToLower();
+                return input;
             }
         }
 
@@ -126,7 +146,11 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            this.ToUpper = EditorGUILayout.Toggle("To Uppercase", this.ToUpper);
+            var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
+            this.Characters = EditorGUILayout.TextField(charactersFieldContent, this.Characters);
+
+            var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
+            this.IsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveToggleContent, this.IsCaseSensitive);
         }
     }
 }

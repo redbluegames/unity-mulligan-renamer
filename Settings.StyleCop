@@ -100,8 +100,24 @@
           <Value>[^a-z ]HtmlEncoder.cs</Value>
           <Value>[^a-z ]HttpUtility.cs</Value>
           <Value>[^a-z ]DiffMatchPatch.cs</Value>
+          <Value>[^a-z ]AddStringOpTests.cs</Value>
+          <Value>[^a-z ]BulkRenamerTests.cs</Value>
+          <Value>[^a-z ]ChangeCaseOpTests.cs</Value>
           <Value>[^a-z ]DiffMatchPatchTest.cs</Value>
-          <Value>[^a-z ]BulkRenamerUnitTests.cs</Value>
+          <Value>[^a-z ]EnumerateOpTests.cs</Value>
+          <Value>[^a-z ]RemoveCharactersOpTests.cs</Value>
+          <Value>[^a-z ]ReplaceStringOpTests.cs</Value>
+          <Value>[^a-z ]TrimOpTests.cs</Value>
+          <Value>[^a-z ]IStyleCopIgnoreUtilityView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtility.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityData.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityDirectoryView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityFileTreeView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityFileView.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityPath.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityPrefs.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityWindow.cs</Value>
+          <Value>[^a-z ]StyleCopIgnoreUtilityXMLTool.cs</Value>
         </CollectionProperty>
       </ParserSettings>
     </Parser>
