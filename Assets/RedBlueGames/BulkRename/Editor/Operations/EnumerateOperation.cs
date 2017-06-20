@@ -144,12 +144,11 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            var clone = new EnumerateOperation(this);
-            clone.CountFormat = EditorGUILayout.TextField("Count Format", this.CountFormat);
+            this.CountFormat = EditorGUILayout.TextField("Count Format", this.CountFormat);
 
             try
             {
-                clone.StartingCount.ToString(clone.CountFormat);
+                this.StartingCount.ToString(this.CountFormat);
             }
             catch (System.FormatException)
             {
@@ -160,7 +159,7 @@ namespace RedBlueGames.BulkRename
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
-            clone.StartingCount = EditorGUILayout.IntField("Count From", this.StartingCount);
+            this.StartingCount = EditorGUILayout.IntField("Count From", this.StartingCount);
         }
     }
 }
