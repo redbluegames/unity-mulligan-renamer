@@ -24,7 +24,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_RemoveSymbols_RemovesOnlySymbols()
+        public void RemoveSymbols_SymbolsAndAlphanumericsInString_RemovesOnlySymbols()
         {
             // Arrange
             var name = "A!@#$%BD*(";
@@ -41,7 +41,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_RemoveSymbols_RemovesAllSymbols()
+        public void RemoveSymbols_OnlySymbolsInString_RemovesAllSymbols()
         {
             // Arrange
             var name = "`~!@#$%^&*()+-=[]{}\\|;:'\",<.>/?";
@@ -58,7 +58,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_RemoveNumbers_RemovesOnlyNumbers()
+        public void RemoveNumbers_LettersAndNumbersInString_RemovesOnlyNumbers()
         {
             // Arrange
             var name = "A251B637k911p";
@@ -75,7 +75,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_RemoveNumbers_RemovesAllNumbers()
+        public void RemoveNumbers_AllNumbersInString_RemovesAllNumbers()
         {
             // Arrange
             var name = "1234567890";
@@ -92,7 +92,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_Custom_RemovesCustomChars()
+        public void RemoveCustomCharacters_ValidString_RemovesCustomChars()
         {
             // Arrange
             var name = "abz35!450k";
@@ -112,7 +112,7 @@
         }
 
         [Test]
-        public void RemoveCharacters_CustomCaseSensitive_RemovesCustomChars()
+        public void RemoveCustomCaseSensitiveCharacters_MixedCasesInString_RemovesCasedCustomChars()
         {
             // Arrange
             var name = "ABCDabcdD";

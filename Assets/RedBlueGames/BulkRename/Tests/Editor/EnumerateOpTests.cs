@@ -8,7 +8,7 @@
     public class EnumerateOpTests
     {
         [Test]
-        public void Enumerating_NoFormat_DoesNothing()
+        public void RenameFormat_NoFormat_DoesNothing()
         {
             // Arrange
             var name = "Char_Hero";
@@ -25,7 +25,7 @@
         }
 
         [Test]
-        public void Enumerating_SingleDigitFormat_AddsCount()
+        public void RenameFormat_SingleDigitFormat_AddsCount()
         {
             // Arrange
             var name = "Char_Hero";
@@ -43,7 +43,7 @@
         }
 
         [Test]
-        public void Enumerating_CountSeveralTimes_CountsUp()
+        public void RenameCount_CountSeveralItems_CountsUp()
         {
             // Arrange
             var names = new string[]
@@ -87,7 +87,7 @@
         }
 
         [Test]
-        public void Enumerating_StartFromNonZero_AddsCorrectCount()
+        public void RenameStartingCount_StartFromNonZero_AddsCorrectCount()
         {
             // Arrange
             var name = "Char_Hero";
@@ -104,7 +104,7 @@
         }
 
         [Test]
-        public void Enumerating_InvalidFormat_IsIgnored()
+        public void RenameStartingCount_InvalidFormat_IsIgnored()
         {
             // Arrange
             var name = "Char_Hero";
