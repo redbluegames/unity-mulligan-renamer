@@ -8,7 +8,7 @@
     public class BulkRenamerTests
     {
         [Test]
-        public void BulkRenamer_AllOperations_RenamesCorrectly()
+        public void GetRenamePreviews_AllOperations_RenamesCorrectly()
         {
             // Arrange
             var bulkRenamer = new BulkRenamer();
@@ -47,7 +47,7 @@
         }
 
         [Test]
-        public void BulkRenamer_OrderSensitiveOps_RespectsOrder()
+        public void GetRenamePreviewsOrder_ValidOperations_AreAppliedInOrder()
         {
             // Arrange
             var name = "Char_Hero_Idle";

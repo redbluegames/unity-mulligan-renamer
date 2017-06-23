@@ -8,7 +8,7 @@
     public class ChangeCaseOpTests
     {
         [Test]
-        public void ChangeCase_EmptyString_DoesNothing()
+        public void Rename_EmptyString_DoesNothing()
         {
             // Arrange
             var name = string.Empty;
@@ -24,7 +24,7 @@
         }
 
         [Test]
-        public void ChangeCase_ValidUpperCharactersLowerered_ToLower()
+        public void RenameToLower_ValidUpperCharacters_AreLowered()
         {
             // Arrange
             var name = "THIS IS ALL UPPER";
@@ -40,7 +40,7 @@
         }
 
         [Test]
-        public void ChangeCase_ValidLowerCharactersUppered_ToUpper()
+        public void RenameToUpper_ValidLowerCharacters_AreUppered()
         {
             // Arrange
             var name = "this is all lower";
@@ -57,7 +57,7 @@
         }
 
         [Test]
-        public void ChangeCase_Symbols_AreUnchanged()
+        public void Rename_Symbols_AreUnchanged()
         {
             // Arrange
             var name = "!@#$%^&*()_-=+[]\\;',.";
