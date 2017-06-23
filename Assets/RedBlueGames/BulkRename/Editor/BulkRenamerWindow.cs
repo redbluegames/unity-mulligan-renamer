@@ -224,7 +224,32 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
+            DrawOperationsPanel();
+            DrawPreviewPanel();
+            EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(30.0f);
+
+            EditorGUI.BeginDisabledGroup(this.RenameOperatationsHaveErrors());
+            if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
+            {
+                this.RenameAssets();
+                this.Close();
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(30.0f);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+        }
+
+        private void DrawOperationsPanel()
+        {
             this.renameOperationsPanelScrollPosition = 
                 EditorGUILayout.BeginScrollView(
                 this.renameOperationsPanelScrollPosition,
@@ -326,45 +351,6 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndScrollView();
-
-            EditorGUILayout.BeginVertical();
-
-            var previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
-            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, previewScrollStyle);
-
-            // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
-            // for the scroll to measure horiztonal size correctly.
-            DrawPreviewTitle();
-
-            var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
-            for (int i = 0; i < previewRowData.Length; ++i)
-            {
-                DrawPreviewRow(previewRowData[i]);
-            }
-
-            EditorGUILayout.EndScrollView();
-
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Space(30.0f);
-
-            EditorGUI.BeginDisabledGroup(this.RenameOperatationsHaveErrors());
-            if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
-            {
-                this.RenameAssets();
-                this.Close();
-            }
-
-            EditorGUI.EndDisabledGroup();
-
-            GUILayout.Space(30.0f);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
         }
 
         private void OnAddRenameOperationConfirmed(object operation)
@@ -385,6 +371,26 @@ namespace RedBlueGames.BulkRename
             // Scroll to the bottom to focus the newly created operation.
             this.renameOperationsPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
             this.Repaint();
+        }
+
+        private void DrawPreviewPanel()
+        {
+            EditorGUILayout.BeginVertical();
+            var previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
+            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, previewScrollStyle);
+
+            // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
+            // for the scroll to measure horiztonal size correctly.
+            DrawPreviewTitle();
+
+            var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
+            for (int i = 0; i < previewRowData.Length; ++i)
+            {
+                DrawPreviewRow(previewRowData[i]);
+            }
+
+            EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
         }
 
         private PreviewRowInfo[] GetPreviewRowDataFromObjectsToRename()
