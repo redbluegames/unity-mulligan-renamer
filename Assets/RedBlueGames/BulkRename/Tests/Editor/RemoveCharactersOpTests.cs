@@ -29,9 +29,101 @@
             // Arrange
             var name = "A!@#$%BD*(";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Characters = "!@#$%^&*()";
+            removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
 
             var expected = "ABD";
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveCharacters_RemoveSymbols_RemovesAllSymbols()
+        {
+            // Arrange
+            var name = "`~!@#$%^&*()+-=[]{}\\|;:'\",<.>/?";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
+
+            var expected = string.Empty;
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveCharacters_RemoveNumbers_RemovesOnlyNumbers()
+        {
+            // Arrange
+            var name = "A251B637k911p";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
+
+            var expected = "ABkp";
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveCharacters_RemoveNumbers_RemovesAllNumbers()
+        {
+            // Arrange
+            var name = "1234567890";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
+
+            var expected = string.Empty;
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveCharacters_Custom_RemovesCustomChars()
+        {
+            // Arrange
+            var name = "abz35!450k";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Options = new RemoveCharactersOperation.RemoveCharactersOperationOptions()
+            {
+                CharactersToRemove = "ak!5"
+            };
+
+            var expected = "bz340";
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveCharacters_CustomCaseSensitive_RemovesCustomChars()
+        {
+            // Arrange
+            var name = "ABCDabcdD";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Options = new RemoveCharactersOperation.RemoveCharactersOperationOptions()
+            {
+                CharactersToRemove = "ABCD",
+                IsCaseSensitive = true
+            };
+
+            var expected = "abcd";
 
             // Act
             string result = removeCharactersOp.Rename(name, 0);

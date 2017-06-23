@@ -30,27 +30,48 @@ namespace RedBlueGames.BulkRename
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation that removes specific characters from the names.
+    /// RenameOperation used to replace substrings from the rename string.
     /// </summary>
     public class RemoveCharactersOperation : BaseRenameOperation
     {
+        public static readonly RemoveCharactersOperationOptions Symbols = new RemoveCharactersOperationOptions()
+        {
+            CharactersToRemove = "\\W",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+        
+        public static readonly RemoveCharactersOperationOptions Numbers = new RemoveCharactersOperationOptions()
+        {
+            CharactersToRemove = "\\d",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+        
+        private RemoveCharactersOperationOptions custom = new RemoveCharactersOperationOptions()
+        {
+            CharactersToRemove = string.Empty,
+            IsCaseSensitive = false,
+            CharactersAreRegex = false
+        };
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
         /// </summary>
         public RemoveCharactersOperation()
         {
-            this.Characters = string.Empty;
-            this.IsCaseSensitive = false;
+            this.Initialize();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
+        /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
         public RemoveCharactersOperation(RemoveCharactersOperation operationToCopy)
         {
-            this.Characters = operationToCopy.Characters;
-            this.IsCaseSensitive = operationToCopy.IsCaseSensitive;
+            this.Initialize();
+            this.Options = operationToCopy.Options;
         }
 
         /// <summary>
@@ -77,19 +98,7 @@ namespace RedBlueGames.BulkRename
             }
         }
 
-        /// <summary>
-        /// Gets or sets the characters to remove.
-        /// </summary>
-        /// <value>The characters.</value>
-        public string Characters { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance searches for the characters using case sensitivity.
-        /// </summary>
-        /// <value><c>true</c> if the search is case sensitive; otherwise, <c>false</c>.</value>
-        public bool IsCaseSensitive { get; set; }
-
-        /// <summary>
+        /// <summary> 
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
@@ -100,6 +109,16 @@ namespace RedBlueGames.BulkRename
                 return "Remove Characters";
             }
         }
+
+        /// <summary>
+        /// Gets or sets the options used to configure the Rename Operation.
+        /// </summary>
+        /// <value>The options.</value>
+        public RemoveCharactersOperationOptions Options { get; set; }
+
+        private List<CharacterPresetGUI> GUIPresets { get; set; }
+
+        private int SelectedPresetIndex { get; set; }
 
         /// <summary>
         /// Clone this instance.
@@ -119,20 +138,30 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            if (!string.IsNullOrEmpty(this.Characters))
+            if (!string.IsNullOrEmpty(this.Options.CharactersToRemove))
             {
-                var regexOptions = this.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
+                var regexOptions = this.Options.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
                 var replacement = string.Empty;
 
                 try
                 {
-                    var regexPattern = Regex.Escape(this.Characters);
+                    var regexPattern = this.Options.CharactersToRemove;
+                    if (!this.Options.CharactersAreRegex)
+                    {
+                        regexPattern = Regex.Escape(regexPattern);
+                    }
+
                     var charactersAsRegex = string.Concat("[", regexPattern, "]");
                     return Regex.Replace(input, charactersAsRegex, replacement, regexOptions);
                 }
-                catch (System.ArgumentException)
+                catch (System.ArgumentException e)
                 {
-                    return input;
+                    throw new System.ArgumentException(
+                        string.Format(
+                            "Trying to Rename a string by RemovingCharacters using an invalid RegEx expression [{0}]." +
+                            " Please supply valid RegEx or unflag the operation as Regex.",
+                            this.Options.CharactersToRemove),
+                        e);
                 }
             }
             else
@@ -145,12 +174,112 @@ namespace RedBlueGames.BulkRename
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
         protected override void DrawContents()
-        {   
-            var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
-            this.Characters = EditorGUILayout.TextField(charactersFieldContent, this.Characters);
+        {
+            var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters with Custom.");
+            var names = new List<GUIContent>(this.GUIPresets.Count);
+            foreach (var preset in this.GUIPresets)
+            {
+                names.Add(new GUIContent(preset.DisplayName));
+            }
 
-            var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
-            this.IsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveToggleContent, this.IsCaseSensitive);
+            this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
+            var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
+
+            var workingOptions = selectedPreset.Options;
+            EditorGUI.BeginDisabledGroup(selectedPreset.IsReadOnly);
+
+            if (selectedPreset.IsReadOnly)
+            {
+                var readonlyLabelContent = new GUIContent(selectedPreset.ReadOnlyLabel);
+                var labelStyle = new GUIStyle(EditorStyles.label);
+                labelStyle.alignment = TextAnchor.MiddleRight;
+                EditorGUILayout.LabelField(readonlyLabelContent, labelStyle);
+            }
+            else
+            {
+                var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
+                workingOptions.CharactersToRemove = EditorGUILayout.TextField(charactersFieldContent, workingOptions.CharactersToRemove);
+
+                var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
+                workingOptions.IsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveToggleContent, workingOptions.IsCaseSensitive);
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            // Structs were copied by value, so reapply the modified structs back to their sources
+            this.Options = workingOptions;
+            selectedPreset.Options = workingOptions;
+        }
+
+        private void Initialize()
+        {
+            var symbolsPreset = new CharacterPresetGUI()
+            {
+                DisplayName = "Symbols",
+                ReadOnlyLabel = "Removes special characters (ie. !@#$%^&*)",
+                Options = Symbols,
+                IsReadOnly = true
+            };
+
+            var numbersPreset = new CharacterPresetGUI()
+            {
+                DisplayName = "Numbers",
+                ReadOnlyLabel = "Removes digits 0-9",
+                Options = Numbers,
+                IsReadOnly = true
+            };
+
+            var customPreset = new CharacterPresetGUI()
+            {
+                DisplayName = "Custom",
+                Options = this.custom
+            };
+
+            this.GUIPresets = new List<CharacterPresetGUI>
+            {
+                symbolsPreset,
+                numbersPreset,
+                customPreset
+            };
+
+            this.SelectedPresetIndex = 0;
+        }
+
+        /// <summary>
+        /// Options used to configure RemoveCharactersOperations.
+        /// </summary>
+        public struct RemoveCharactersOperationOptions
+        {
+            /// <summary>
+            /// Gets or sets the characters to remove.
+            /// </summary>
+            /// <value>The characters to remove.</value>
+            public string CharactersToRemove { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether this
+            /// <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation+RemoveCharactersOperationOptions"/>
+            /// characters are regex symbols.
+            /// </summary>
+            /// <value><c>true</c> if characters are regex; otherwise, <c>false</c>.</value>
+            public bool CharactersAreRegex { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the characters are matched using case sensitivity.
+            /// </summary>
+            /// <value><c>true</c> if search is case sensitive; otherwise, <c>false</c>.</value>
+            public bool IsCaseSensitive { get; set; }
+        }
+
+        private class CharacterPresetGUI
+        {
+            public string DisplayName { get; set; }
+
+            public RemoveCharactersOperationOptions Options { get; set; }
+
+            public string ReadOnlyLabel { get; set; }
+
+            public bool IsReadOnly { get; set; }
         }
     }
 }
