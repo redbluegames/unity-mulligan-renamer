@@ -98,6 +98,12 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        /// <summary>
+        /// Gets or sets the options used to configure the Rename Operation.
+        /// </summary>
+        /// <value>The options.</value>
+        public RemoveCharactersOperationOptions Options { get; set; }
+
         /// <summary> 
         /// Gets the heading label for the Rename Operation.
         /// </summary>
@@ -109,12 +115,6 @@ namespace RedBlueGames.BulkRename
                 return "Remove Characters";
             }
         }
-
-        /// <summary>
-        /// Gets or sets the options used to configure the Rename Operation.
-        /// </summary>
-        /// <value>The options.</value>
-        public RemoveCharactersOperationOptions Options { get; set; }
 
         private List<CharacterPresetGUI> GUIPresets { get; set; }
 
