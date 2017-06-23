@@ -49,32 +49,24 @@ namespace RedBlueGames.BulkRename
         private BulkRenamer bulkRenamer;
         private List<BaseRenameOperation> renameOperationsToApply;
 
+        private List<UnityEngine.Object> ObjectsToRename
+        {
+            get
+            {
+                if (this.objectsToRename == null)
+                {
+                    this.objectsToRename = new List<UnityEngine.Object>();
+                }
+
+                return this.objectsToRename;
+            }
+        }
+
         [MenuItem(AssetsMenuPath, false, 1011)]
         [MenuItem(GameObjectMenuPath, false, 49)]
         private static void ShowRenameSpritesheetWindow()
         {
             EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
-        }
-
-        [MenuItem(AssetsMenuPath, true)]
-        [MenuItem(GameObjectMenuPath, true)]
-        private static bool IsAssetSelectionValid()
-        {
-            if (Selection.activeObject == null)
-            {
-                return false;
-            }
-
-            // Allow a rename if any valid object is selected. The invalid ones won't be renamed.
-            foreach (var selection in Selection.objects)
-            {
-                if (ObjectIsValidForRename(selection))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
@@ -92,21 +84,6 @@ namespace RedBlueGames.BulkRename
             }
 
             return false;
-        }
-
-        private static void DrawPreviewTitle()
-        {
-            var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
-            var margin = new RectOffset();
-            margin = previewHeaderStyle.margin;
-            margin.left = 1;
-            margin.right = 1;
-            previewHeaderStyle.margin = margin;
-            EditorGUILayout.BeginHorizontal(previewHeaderStyle);
-            GUILayout.Space(32.0f);
-            EditorGUILayout.LabelField("Diff", EditorStyles.miniBoldLabel);
-            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
-            EditorGUILayout.EndHorizontal();
         }
 
         private static void DrawPreviewRow(PreviewRowInfo info)
@@ -155,6 +132,20 @@ namespace RedBlueGames.BulkRename
             return icon;
         }
 
+        private List<UnityEngine.Object> GetNewlySelectedObjects()
+        {
+            var newObjects = new List<UnityEngine.Object>();
+            foreach (var selectedObject in Selection.objects)
+            {
+                if (ObjectIsValidForRename(selectedObject) && !this.ObjectsToRename.Contains(selectedObject))
+                {
+                    newObjects.Add(selectedObject);
+                }
+            }
+
+            return newObjects;
+        }
+
         private void OnEnable()
         {
             this.minSize = new Vector2(600.0f, 300.0f);
@@ -183,49 +174,19 @@ namespace RedBlueGames.BulkRename
                     return x.MenuOrder.CompareTo(y.MenuOrder);
                 });
 
+            // When they launch via right click, we immediately load the objects in.
+            this.LoadSelectedObjects();
+
             Selection.selectionChanged += this.Repaint;
-        }
-
-        private void OnDisable()
-        {
-            Selection.selectionChanged -= this.Repaint;
-        }
-
-        private void RefreshObjectsToRename()
-        {
-            if (this.objectsToRename == null)
-            {
-                this.objectsToRename = new List<UnityEngine.Object>();
-            }
-
-            this.objectsToRename.Clear();
-
-            foreach (var selectedObject in RBSelection.SelectedObjectsSortedByTime)
-            {
-                if (ObjectIsValidForRename(selectedObject))
-                {
-                    this.objectsToRename.Add(selectedObject);
-                }
-            }
         }
 
         private void OnGUI()
         {
-            this.RefreshObjectsToRename();
-
-            if (this.objectsToRename.Count == 0)
-            {
-                EditorGUILayout.HelpBox(
-                    "No objects selected. Select some Assets or scene Objects to rename.",
-                    MessageType.Error);
-                return;
-            }
-
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
-            DrawOperationsPanel();
-            DrawPreviewPanel();
+            this.DrawOperationsPanel();
+            this.DrawPreviewPanel();
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
@@ -381,21 +342,91 @@ namespace RedBlueGames.BulkRename
 
             // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
             // for the scroll to measure horiztonal size correctly.
-            DrawPreviewTitle();
+            this.DrawPreviewTitle();
 
-            var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
-            for (int i = 0; i < previewRowData.Length; ++i)
+            bool includeFooter = false;
+            if (this.ObjectsToRename.Count == 0)
             {
-                DrawPreviewRow(previewRowData[i]);
+                GUILayout.FlexibleSpace();
+                var readonlyLabelContent = new GUIContent(
+                                               "No objects specified for rename. To begin,");
+                var labelStyle = new GUIStyle(EditorStyles.label);
+                labelStyle.alignment = TextAnchor.MiddleCenter;
+                EditorGUILayout.LabelField(readonlyLabelContent, labelStyle);
+
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                this.DrawAddObjectsButton();
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+
+                GUILayout.FlexibleSpace();
+            }
+            else
+            {
+                var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
+                for (int i = 0; i < previewRowData.Length; ++i)
+                {
+                    DrawPreviewRow(previewRowData[i]);
+                }
+
+                includeFooter = true;
             }
 
             EditorGUILayout.EndScrollView();
+
+            if (includeFooter)
+            {
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Clear Objects"))
+                {
+                    this.ObjectsToRename.Clear();
+                }
+
+                this.DrawAddObjectsButton();
+
+                EditorGUILayout.EndHorizontal();
+            }
+
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawAddObjectsButton()
+        {
+            var newlySelectedObjects = this.GetNewlySelectedObjects();
+            EditorGUI.BeginDisabledGroup(newlySelectedObjects.Count == 0);
+            if (GUILayout.Button("Add Selected Objects"))
+            {
+                this.LoadSelectedObjects();
+            }
+
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawPreviewTitle()
+        {
+            var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
+            var margin = new RectOffset();
+            margin = previewHeaderStyle.margin;
+            margin.left = 1;
+            margin.right = 1;
+            previewHeaderStyle.margin = margin;
+            EditorGUILayout.BeginHorizontal(previewHeaderStyle);
+            GUILayout.Space(32.0f);
+            EditorGUILayout.LabelField("Diff", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void LoadSelectedObjects()
+        {
+            this.ObjectsToRename.AddRange(this.GetNewlySelectedObjects());
         }
 
         private PreviewRowInfo[] GetPreviewRowDataFromObjectsToRename()
         {
-            var previewRowInfos = new PreviewRowInfo[this.objectsToRename.Count];
+            var previewRowInfos = new PreviewRowInfo[this.ObjectsToRename.Count];
             var selectedNames = this.GetNamesFromObjectsToRename();
             var namePreviews = this.bulkRenamer.GetRenamePreviews(selectedNames);
 
@@ -406,7 +437,7 @@ namespace RedBlueGames.BulkRename
                 info.OriginalName = namePreview.OriginalName;
                 info.DiffName = namePreview.GetDiffAsFormattedString(AddedTextColorTag, DeletedTextColorTag);
                 info.NewName = namePreview.NewName;
-                info.Icon = GetIconForObject(this.objectsToRename[i]);
+                info.Icon = GetIconForObject(this.ObjectsToRename[i]);
 
                 previewRowInfos[i] = info;
             }
@@ -416,11 +447,11 @@ namespace RedBlueGames.BulkRename
 
         private string[] GetNamesFromObjectsToRename()
         {
-            int namesCount = this.objectsToRename.Count;
+            int namesCount = this.ObjectsToRename.Count;
             var names = new string[namesCount];
             for (int i = 0; i < namesCount; ++i)
             {
-                names[i] = this.objectsToRename[i].name;
+                names[i] = this.ObjectsToRename[i].name;
             }
 
             return names;
@@ -429,7 +460,7 @@ namespace RedBlueGames.BulkRename
         private void RenameAssets()
         {
             // Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
-            Undo.RecordObjects(this.objectsToRename.ToArray(), "Bulk Rename");
+            Undo.RecordObjects(this.ObjectsToRename.ToArray(), "Bulk Rename");
 
             var names = this.GetNamesFromObjectsToRename();
             var newNames = this.bulkRenamer.GetRenamePreviews(names);
@@ -446,7 +477,7 @@ namespace RedBlueGames.BulkRename
                     infoString,
                     i / (float)newNames.Count);
 
-                this.RenameObject(this.objectsToRename[i], newNames[i].NewName);
+                this.RenameObject(this.ObjectsToRename[i], newNames[i].NewName);
             }
 
             EditorUtility.ClearProgressBar();
