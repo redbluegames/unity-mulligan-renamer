@@ -62,7 +62,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Enumerate";
+                return "Add/Enumerate";
             }
         }
 

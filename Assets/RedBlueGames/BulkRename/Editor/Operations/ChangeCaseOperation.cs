@@ -59,7 +59,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Change Case";
+                return "Modify/Change Case";
             }
         }
 

@@ -62,7 +62,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Add String";
+                return "Add/Add Prefix or Suffix";
             }
         }
 
@@ -98,7 +98,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Add String";
+                return "Add Prefix or Suffix";
             }
         }
 

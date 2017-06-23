@@ -62,7 +62,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Trim Characters";
+                return "Delete/Trim Characters";
             }
         }
 

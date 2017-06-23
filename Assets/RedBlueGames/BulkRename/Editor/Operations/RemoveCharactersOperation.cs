@@ -82,7 +82,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Remove Characters";
+                return "Delete/Remove Characters";
             }
         }
 
