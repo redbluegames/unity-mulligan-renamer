@@ -317,7 +317,17 @@ namespace RedBlueGames.BulkRename
         private void DrawPreviewPanel()
         {
             EditorGUILayout.BeginVertical();
-            var previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
+
+            GUIStyle previewScrollStyle;
+            if (EditorGUIUtility.isProSkin)
+            {
+                previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
+            }
+            else
+            {
+                previewScrollStyle = new GUIStyle(EditorStyles.textArea);
+            }
+
             this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, previewScrollStyle);
 
             // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
