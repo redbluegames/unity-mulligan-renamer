@@ -132,20 +132,6 @@ namespace RedBlueGames.BulkRename
             return icon;
         }
 
-        private List<UnityEngine.Object> GetNewlySelectedObjects()
-        {
-            var newObjects = new List<UnityEngine.Object>();
-            foreach (var selectedObject in Selection.objects)
-            {
-                if (ObjectIsValidForRename(selectedObject) && !this.ObjectsToRename.Contains(selectedObject))
-                {
-                    newObjects.Add(selectedObject);
-                }
-            }
-
-            return newObjects;
-        }
-
         private void OnEnable()
         {
             this.minSize = new Vector2(600.0f, 300.0f);
@@ -342,15 +328,15 @@ namespace RedBlueGames.BulkRename
             if (this.ObjectsToRename.Count == 0)
             {
                 GUILayout.FlexibleSpace();
-                var readonlyLabelContent = new GUIContent(
-                                               "No objects specified for rename. To begin,");
+                var noItemsPromptContent = new GUIContent(
+                                               "No objects specified for rename. Drag objects here to rename them, or");
                 var labelStyle = new GUIStyle(EditorStyles.label);
                 labelStyle.alignment = TextAnchor.MiddleCenter;
-                EditorGUILayout.LabelField(readonlyLabelContent, labelStyle);
+                EditorGUILayout.LabelField(noItemsPromptContent, labelStyle);
 
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                this.DrawAddObjectsButton();
+                this.DrawAddSelectedObjectsButton();
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.EndHorizontal();
 
@@ -364,21 +350,32 @@ namespace RedBlueGames.BulkRename
                     DrawPreviewRow(previewRowData[i]);
                 }
 
+                GUILayout.FlexibleSpace();
+                var addMoreItemsPromptContent = new GUIContent(
+                                                    "Add more objects by dragging them here");
+                var labelStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
+                labelStyle.alignment = TextAnchor.MiddleCenter;
+                EditorGUILayout.LabelField(addMoreItemsPromptContent, labelStyle);
+
                 includeFooter = true;
             }
 
             EditorGUILayout.EndScrollView();
 
+            var scrollRect = GUILayoutUtility.GetLastRect();
+            var draggedObjects = this.GetDraggedObjectsOverRect(scrollRect);
+            this.ObjectsToRename.AddRange(draggedObjects);
+
             if (includeFooter)
             {
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Clear Objects"))
+                if (GUILayout.Button("Remove All"))
                 {
                     this.ObjectsToRename.Clear();
                 }
 
-                this.DrawAddObjectsButton();
+                this.DrawAddSelectedObjectsButton();
 
                 EditorGUILayout.EndHorizontal();
             }
@@ -386,7 +383,7 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawAddObjectsButton()
+        private void DrawAddSelectedObjectsButton()
         {
             var newlySelectedObjects = this.GetNewlySelectedObjects();
             EditorGUI.BeginDisabledGroup(newlySelectedObjects.Count == 0);
@@ -413,9 +410,60 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndHorizontal();
         }
 
+        private List<UnityEngine.Object> GetDraggedObjectsOverRect(Rect dropArea)
+        {
+            var validDraggedObjects = new List<UnityEngine.Object>();
+            Event currentEvent = Event.current;
+
+            if (currentEvent.type == EventType.DragUpdated || currentEvent.type == EventType.DragPerform)
+            {
+                if (!dropArea.Contains(currentEvent.mousePosition)
+                    || !this.ObjectsContainAValidObjectForRename(DragAndDrop.objectReferences))
+                {
+                    return validDraggedObjects;
+                }
+
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (currentEvent.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+                    validDraggedObjects.AddRange(this.GetValidObjectsForRenameFromGroup(DragAndDrop.objectReferences));
+                }
+
+                currentEvent.Use();
+            }
+
+            return validDraggedObjects;
+        }
+
         private void LoadSelectedObjects()
         {
             this.ObjectsToRename.AddRange(this.GetNewlySelectedObjects());
+        }
+
+        private List<UnityEngine.Object> GetNewlySelectedObjects()
+        {
+            return this.GetValidObjectsForRenameFromGroup(Selection.objects);
+        }
+
+        private List<UnityEngine.Object> GetValidObjectsForRenameFromGroup(ICollection<UnityEngine.Object> objects)
+        {
+            var validObjects = new List<UnityEngine.Object>();
+            foreach (var selectedObject in objects)
+            {
+                if (ObjectIsValidForRename(selectedObject) && !this.ObjectsToRename.Contains(selectedObject))
+                {
+                    validObjects.Add(selectedObject);
+                }
+            }
+
+            return validObjects;
+        }
+
+        private bool ObjectsContainAValidObjectForRename(ICollection<UnityEngine.Object> objects)
+        {
+            return this.GetValidObjectsForRenameFromGroup(objects).Count > 0;
         }
 
         private PreviewRowInfo[] GetPreviewRowDataFromObjectsToRename()
