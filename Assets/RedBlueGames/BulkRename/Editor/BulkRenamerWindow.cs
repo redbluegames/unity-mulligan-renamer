@@ -49,6 +49,9 @@ namespace RedBlueGames.BulkRename
         private BulkRenamer bulkRenamer;
         private List<BaseRenameOperation> renameOperationsToApply;
 
+        private BulkRenameGUIStyles guiStyles;
+        private BulkRenameGUIContents guiContents;
+
         private List<UnityEngine.Object> ObjectsToRename
         {
             get
@@ -84,29 +87,6 @@ namespace RedBlueGames.BulkRename
             }
 
             return false;
-        }
-
-        private static void DrawPreviewRow(PreviewRowInfo info)
-        {
-            // Draw the icon
-            EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
-            GUILayout.Space(8.0f);
-            if (info.Icon != null)
-            {
-                GUIStyle boxStyle = GUIStyle.none;
-                GUILayout.Box(info.Icon, boxStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
-            }
-
-            // Display diff
-            var diffStyle = info.NamesAreDifferent ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
-            diffStyle.richText = true;
-            EditorGUILayout.LabelField(info.DiffName, diffStyle);
-
-            // Display new name
-            var style = info.NamesAreDifferent ? EditorStyles.boldLabel : new GUIStyle(EditorStyles.label);
-            EditorGUILayout.LabelField(info.NewName, style);
-
-            EditorGUILayout.EndHorizontal();
         }
 
         private static Texture GetIconForObject(UnityEngine.Object unityObject)
@@ -168,6 +148,17 @@ namespace RedBlueGames.BulkRename
 
         private void OnGUI()
         {
+            // Initialize GUIContents and GUIStyles in OnGUI since it makes calls that must be done in OnGUI loop.
+            if (this.guiContents == null)
+            {
+                this.InitializeGUIContents();
+            }
+
+            if (this.guiStyles == null)
+            {
+                this.InitializeGUIStyles();
+            }
+
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
@@ -195,6 +186,49 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.Space();
         }
 
+        private void InitializeGUIContents()
+        {
+            this.guiContents = new BulkRenameGUIContents();
+
+            this.guiContents.DropPrompt = new GUIContent(
+                "No objects specified for rename. Drag objects here to rename them, or");
+
+            this.guiContents.DropPromptHint = new GUIContent(
+                "Add more objects by dragging them here");
+        }
+
+        private void InitializeGUIStyles()
+        {
+            this.guiStyles = new BulkRenameGUIStyles();
+
+            this.guiStyles.Icon = GUIStyle.none;
+            this.guiStyles.DiffLabelUnModified = EditorStyles.label;
+            this.guiStyles.DiffLabelWhenModified = EditorStyles.boldLabel;
+            this.guiStyles.NewNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.NewNameLabelModified = EditorStyles.boldLabel;
+
+            this.guiStyles.DropPrompt = new GUIStyle(EditorStyles.label);
+            this.guiStyles.DropPrompt.alignment = TextAnchor.MiddleCenter;
+            this.guiStyles.DropPromptHint = EditorStyles.centeredGreyMiniLabel;
+
+            var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
+            var previewHeaderMargin = new RectOffset();
+            previewHeaderMargin = previewHeaderStyle.margin;
+            previewHeaderMargin.left = 1;
+            previewHeaderMargin.right = 1;
+            previewHeaderStyle.margin = previewHeaderMargin;
+            this.guiStyles.PreviewHeader = previewHeaderStyle;
+
+            if (EditorGUIUtility.isProSkin)
+            {
+                this.guiStyles.PreviewScroll = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
+            }
+            else
+            {
+                this.guiStyles.PreviewScroll = new GUIStyle(EditorStyles.textArea);
+            }
+        }
+
         private void DrawOperationsPanel()
         {
             this.renameOperationsPanelScrollPosition = 
@@ -206,8 +240,8 @@ namespace RedBlueGames.BulkRename
             for (int i = 0; i < this.renameOperationsToApply.Count; ++i)
             {
                 var currentElement = this.renameOperationsToApply[i];
-                var clickEvent = currentElement.DrawGUI(i == 0, i == this.renameOperationsToApply.Count - 1);
-                switch (clickEvent)
+                var buttonClickEvent = currentElement.DrawGUI(i == 0, i == this.renameOperationsToApply.Count - 1);
+                switch (buttonClickEvent)
                 {
                     case BaseRenameOperation.ListButtonEvent.MoveUp:
                         {
@@ -237,12 +271,12 @@ namespace RedBlueGames.BulkRename
                         {
                             Debug.LogError(string.Format(
                                     "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event.", 
-                                    clickEvent));
+                                    buttonClickEvent));
                             return;
                         }
                 }
 
-                if (clickEvent != BaseRenameOperation.ListButtonEvent.None)
+                if (buttonClickEvent != BaseRenameOperation.ListButtonEvent.None)
                 {
                     // Workaround: Unfocus any focused control because otherwise it will select a field
                     // from the element that took this one's place.
@@ -317,57 +351,20 @@ namespace RedBlueGames.BulkRename
         private void DrawPreviewPanel()
         {
             EditorGUILayout.BeginVertical();
-
-            GUIStyle previewScrollStyle;
-            if (EditorGUIUtility.isProSkin)
-            {
-                previewScrollStyle = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
-            }
-            else
-            {
-                previewScrollStyle = new GUIStyle(EditorStyles.textArea);
-            }
-
-            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, previewScrollStyle);
+            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, this.guiStyles.PreviewScroll);
 
             // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
             // for the scroll to measure horiztonal size correctly.
             this.DrawPreviewTitle();
 
-            bool includeFooter = false;
-            if (this.ObjectsToRename.Count == 0)
+            bool panelIsEmpty = this.ObjectsToRename.Count == 0;
+            if (panelIsEmpty)
             {
-                GUILayout.FlexibleSpace();
-                var noItemsPromptContent = new GUIContent(
-                                               "No objects specified for rename. Drag objects here to rename them, or");
-                var labelStyle = new GUIStyle(EditorStyles.label);
-                labelStyle.alignment = TextAnchor.MiddleCenter;
-                EditorGUILayout.LabelField(noItemsPromptContent, labelStyle);
-
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                this.DrawAddSelectedObjectsButton();
-                GUILayout.FlexibleSpace();
-                EditorGUILayout.EndHorizontal();
-
-                GUILayout.FlexibleSpace();
+                this.DrawPreviewPanelContentsEmpty();
             }
             else
             {
-                var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
-                for (int i = 0; i < previewRowData.Length; ++i)
-                {
-                    DrawPreviewRow(previewRowData[i]);
-                }
-
-                GUILayout.FlexibleSpace();
-                var addMoreItemsPromptContent = new GUIContent(
-                                                    "Add more objects by dragging them here");
-                var labelStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
-                labelStyle.alignment = TextAnchor.MiddleCenter;
-                EditorGUILayout.LabelField(addMoreItemsPromptContent, labelStyle);
-
-                includeFooter = true;
+                this.DrawPreviewPanelContentsWithItems();
             }
 
             EditorGUILayout.EndScrollView();
@@ -376,7 +373,7 @@ namespace RedBlueGames.BulkRename
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollRect);
             this.ObjectsToRename.AddRange(draggedObjects);
 
-            if (includeFooter)
+            if (!panelIsEmpty)
             {
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -393,6 +390,32 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndVertical();
         }
 
+        private void DrawPreviewPanelContentsEmpty()
+        {
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(this.guiContents.DropPrompt, this.guiStyles.DropPrompt);
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            this.DrawAddSelectedObjectsButton();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.FlexibleSpace();
+        }
+
+        private void DrawPreviewPanelContentsWithItems()
+        {
+            var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
+            for (int i = 0; i < previewRowData.Length; ++i)
+            {
+                this.DrawPreviewRow(previewRowData[i]);
+            }
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.LabelField(this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+        }
+
         private void DrawAddSelectedObjectsButton()
         {
             var newlySelectedObjects = this.GetNewlySelectedObjects();
@@ -407,16 +430,34 @@ namespace RedBlueGames.BulkRename
 
         private void DrawPreviewTitle()
         {
-            var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
-            var margin = new RectOffset();
-            margin = previewHeaderStyle.margin;
-            margin.left = 1;
-            margin.right = 1;
-            previewHeaderStyle.margin = margin;
-            EditorGUILayout.BeginHorizontal(previewHeaderStyle);
+            EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
             GUILayout.Space(32.0f);
             EditorGUILayout.LabelField("Diff", EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawPreviewRow(PreviewRowInfo info)
+        {
+            // Draw the icon
+            EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
+
+            // Space gives us a bit of padding because the icons kind of spill over by default
+            GUILayout.Space(8.0f);
+            if (info.Icon != null)
+            {
+                GUILayout.Box(info.Icon, this.guiStyles.Icon, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
+            }
+
+            // Display diff
+            var diffStyle = info.NamesAreDifferent ? this.guiStyles.DiffLabelWhenModified : this.guiStyles.DiffLabelUnModified;
+            diffStyle.richText = true;
+            EditorGUILayout.LabelField(info.DiffName, diffStyle);
+
+            // Display new name
+            var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
+            EditorGUILayout.LabelField(info.NewName, style);
+
             EditorGUILayout.EndHorizontal();
         }
 
@@ -588,6 +629,34 @@ namespace RedBlueGames.BulkRename
                     return this.NewName != this.OriginalName;
                 }
             }
+        }
+
+        private class BulkRenameGUIStyles
+        {
+            public GUIStyle PreviewScroll { get; set; }
+
+            public GUIStyle Icon { get; set; }
+
+            public GUIStyle DiffLabelUnModified { get; set; }
+
+            public GUIStyle DiffLabelWhenModified { get; set; }
+
+            public GUIStyle NewNameLabelUnModified { get; set; }
+
+            public GUIStyle NewNameLabelModified { get; set; }
+
+            public GUIStyle DropPrompt { get; set; }
+
+            public GUIStyle DropPromptHint { get; set; }
+
+            public GUIStyle PreviewHeader { get; set; }
+        }
+
+        private class BulkRenameGUIContents
+        {
+            public GUIContent DropPrompt { get; set; }
+
+            public GUIContent DropPromptHint { get; set; }
         }
     }
 }
