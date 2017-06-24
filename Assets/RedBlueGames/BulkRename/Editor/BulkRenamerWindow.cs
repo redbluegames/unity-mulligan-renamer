@@ -225,44 +225,20 @@ namespace RedBlueGames.BulkRename
                 {
                     case BaseRenameOperation.ListButtonEvent.MoveUp:
                         {
-                            var indexOfAboveElement = Mathf.Max(0, i - 1);
-                            var previousElement = this.renameOperationsToApply[indexOfAboveElement];
-                            this.renameOperationsToApply[indexOfAboveElement] = currentElement;
-                            this.renameOperationsToApply[i] = previousElement;
-
-                            // Workaround: Unfocus any focused control because otherwise it will select a field
-                            // from the element that took this one's place.
-                            GUI.FocusControl(string.Empty);
-
-                            GUIUtility.ExitGUI();
-                            return;
+                            this.MoveRenameOpFromIndexToIndex(i, i - 1);
+                            break;
                         }
 
                     case BaseRenameOperation.ListButtonEvent.MoveDown:
                         {
-                            var indexOfBelowElement = Mathf.Min(this.renameOperationsToApply.Count - 1, i + 1);
-                            var nextElement = this.renameOperationsToApply[indexOfBelowElement];
-                            this.renameOperationsToApply[indexOfBelowElement] = currentElement;
-                            this.renameOperationsToApply[i] = nextElement;
-
-                            // Workaround: Unfocus any focused control because otherwise it will select a field
-                            // from the element that took this one's place.
-                            GUI.FocusControl(string.Empty);
-
-                            GUIUtility.ExitGUI();
-                            return;
+                            this.MoveRenameOpFromIndexToIndex(i, i + 1);
+                            break;
                         }
 
                     case BaseRenameOperation.ListButtonEvent.Delete:
                         {
                             this.renameOperationsToApply.RemoveAt(i);
-
-                            // Workaround: Unfocus any focused control because otherwise it will select a field
-                            // from the element that took this one's place.
-                            GUI.FocusControl(string.Empty);
-
-                            GUIUtility.ExitGUI();
-                            return;
+                            break;
                         }
 
                     case BaseRenameOperation.ListButtonEvent.None:
@@ -278,6 +254,16 @@ namespace RedBlueGames.BulkRename
                                     clickEvent));
                             return;
                         }
+                }
+
+                if (clickEvent != BaseRenameOperation.ListButtonEvent.None)
+                {
+                    // Workaround: Unfocus any focused control because otherwise it will select a field
+                    // from the element that took this one's place.
+                    GUI.FocusControl(string.Empty);
+
+                    GUIUtility.ExitGUI();
+                    return;
                 }
             }
 
@@ -312,6 +298,14 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.EndScrollView();
+        }
+
+        private void MoveRenameOpFromIndexToIndex(int fromIndex, int desiredIndex)
+        {
+            desiredIndex = Mathf.Clamp(desiredIndex, 0, this.renameOperationsToApply.Count - 1);
+            var previousElement = this.renameOperationsToApply[desiredIndex];
+            this.renameOperationsToApply[desiredIndex] = this.renameOperationsToApply[fromIndex];
+            this.renameOperationsToApply[fromIndex] = previousElement;
         }
 
         private void OnAddRenameOperationConfirmed(object operation)
