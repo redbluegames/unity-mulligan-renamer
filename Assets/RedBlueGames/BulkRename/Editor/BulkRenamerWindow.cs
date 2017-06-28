@@ -83,7 +83,10 @@ namespace RedBlueGames.BulkRename
         [MenuItem(GameObjectMenuPath, false, 49)]
         private static void ShowRenameSpritesheetWindow()
         {
-            EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
+            var bulkRenamerWindow = EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
+
+            // When they launch via right click, we immediately load the objects in.
+            bulkRenamerWindow.LoadSelectedObjects();
         }
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
@@ -137,9 +140,6 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsToApply.Add(new ReplaceStringOperation());
 
             this.CacheRenameOperationsToClone();
-
-            // When they launch via right click, we immediately load the objects in.
-            this.LoadSelectedObjects();
 
             Selection.selectionChanged += this.Repaint;
         }
