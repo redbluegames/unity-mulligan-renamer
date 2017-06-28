@@ -37,20 +37,21 @@ namespace RedBlueGames.BulkRename
         private const string AssetsMenuPath = "Assets/Red Blue/Rename In Bulk";
         private const string GameObjectMenuPath = "GameObject/Red Blue/Rename In Bulk";
 
+        private const string PrefkeyBase = "RedBlueGames.BulkRenamer";
+        private const string ShowDiffPrefkey = PrefkeyBase + ".ShowDiff";
+
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
 
-        private Vector2 renameOperationsPanelScrollPosition;
-        private Vector2 previewPanelScrollPosition;
-        private List<UnityEngine.Object> objectsToRename;
-
-        private List<BaseRenameOperation> renameOperationsFactory;
-
-        private BulkRenamer bulkRenamer;
-        private List<BaseRenameOperation> renameOperationsToApply;
-
         private BulkRenameGUIStyles guiStyles;
         private BulkRenameGUIContents guiContents;
+        private Vector2 renameOperationsPanelScrollPosition;
+        private Vector2 previewPanelScrollPosition;
+
+        private BulkRenamer bulkRenamer;
+        private List<BaseRenameOperation> renameOperationsToClone;
+        private List<BaseRenameOperation> renameOperationsToApply;
+        private List<UnityEngine.Object> objectsToRename;
 
         private List<UnityEngine.Object> ObjectsToRename
         {
@@ -62,6 +63,19 @@ namespace RedBlueGames.BulkRename
                 }
 
                 return this.objectsToRename;
+            }
+        }
+
+        private bool ShowDiff
+        {
+            get
+            {
+                return EditorPrefs.GetBool(ShowDiffPrefkey, true);
+            }
+
+            set
+            {
+                EditorPrefs.SetBool(ShowDiffPrefkey, value);
             }
         }
 
@@ -122,8 +136,17 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsToApply = new List<BaseRenameOperation>();
             this.renameOperationsToApply.Add(new ReplaceStringOperation());
 
-            // Cache all valid Rename Operations
-            this.renameOperationsFactory = new List<BaseRenameOperation>();
+            this.CacheRenameOperationsToClone();
+
+            // When they launch via right click, we immediately load the objects in.
+            this.LoadSelectedObjects();
+
+            Selection.selectionChanged += this.Repaint;
+        }
+
+        private void CacheRenameOperationsToClone()
+        {
+            this.renameOperationsToClone = new List<BaseRenameOperation>();
             var assembly = Assembly.Load(new AssemblyName("Assembly-CSharp-Editor"));
             var typesInAssembly = assembly.GetTypes();
             foreach (var type in typesInAssembly)
@@ -131,19 +154,14 @@ namespace RedBlueGames.BulkRename
                 if (type.IsSubclassOf(typeof(BaseRenameOperation)))
                 {
                     var renameOp = (BaseRenameOperation)System.Activator.CreateInstance(type);
-                    this.renameOperationsFactory.Add(renameOp);
+                    this.renameOperationsToClone.Add(renameOp);
                 }
             }
 
-            this.renameOperationsFactory.Sort((x, y) =>
+            this.renameOperationsToClone.Sort((x, y) =>
                 {
                     return x.MenuOrder.CompareTo(y.MenuOrder);
                 });
-
-            // When they launch via right click, we immediately load the objects in.
-            this.LoadSelectedObjects();
-
-            Selection.selectionChanged += this.Repaint;
         }
 
         private void OnGUI()
@@ -231,12 +249,54 @@ namespace RedBlueGames.BulkRename
 
         private void DrawOperationsPanel()
         {
+            EditorGUILayout.BeginVertical();
+
+            EditorGUILayout.LabelField("Rename Operations", EditorStyles.boldLabel);
+
             this.renameOperationsPanelScrollPosition = 
                 EditorGUILayout.BeginScrollView(
                 this.renameOperationsPanelScrollPosition,
                 GUILayout.MinWidth(200.0f),
                 GUILayout.MaxWidth(350.0f));
 
+            this.DrawRenameOperations();
+
+            // BulkRenamer expects the list typed as IRenameOperations
+            var renameOpsAsInterfaces = new List<IRenameOperation>();
+            foreach (var renameOp in this.renameOperationsToApply)
+            {
+                renameOpsAsInterfaces.Add((IRenameOperation)renameOp);
+            }
+
+            this.bulkRenamer.SetRenameOperations(renameOpsAsInterfaces);
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Add Operation", GUILayout.Width(150.0f)))
+            {
+                // Add enums to the menu
+                var menu = new GenericMenu();
+                for (int i = 0; i < this.renameOperationsToClone.Count; ++i)
+                {
+                    var renameOp = this.renameOperationsToClone[i];
+                    var content = new GUIContent(renameOp.MenuDisplayPath);
+                    menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
+                }
+
+                menu.ShowAsContext();
+            }
+
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawRenameOperations()
+        {
             for (int i = 0; i < this.renameOperationsToApply.Count; ++i)
             {
                 var currentElement = this.renameOperationsToApply[i];
@@ -286,38 +346,6 @@ namespace RedBlueGames.BulkRename
                     return;
                 }
             }
-
-            // BulkRenamer expects the list typed as IRenameOperations
-            var renameOpsAsInterfaces = new List<IRenameOperation>();
-            foreach (var renameOp in this.renameOperationsToApply)
-            {
-                renameOpsAsInterfaces.Add((IRenameOperation)renameOp);
-            }
-
-            this.bulkRenamer.SetRenameOperations(renameOpsAsInterfaces);
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Add Operation", GUILayout.Width(150.0f)))
-            {
-                // Add enums to the menu
-                var menu = new GenericMenu();
-                for (int i = 0; i < this.renameOperationsFactory.Count; ++i)
-                {
-                    var renameOp = this.renameOperationsFactory[i];
-                    var content = new GUIContent(renameOp.MenuDisplayPath);
-                    menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
-                }
-
-                menu.ShowAsContext();
-            }
-
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.EndScrollView();
         }
 
         private void MoveRenameOpFromIndexToIndex(int fromIndex, int desiredIndex)
@@ -376,6 +404,8 @@ namespace RedBlueGames.BulkRename
             if (!panelIsEmpty)
             {
                 EditorGUILayout.BeginHorizontal();
+                var showDiffContent = new GUIContent("Show Changes", "Show the changes to the original name");
+                this.ShowDiff = EditorGUILayout.Toggle(showDiffContent, this.ShowDiff);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Remove All"))
                 {
@@ -432,7 +462,7 @@ namespace RedBlueGames.BulkRename
         {
             EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
             GUILayout.Space(32.0f);
-            EditorGUILayout.LabelField("Diff", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Original Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.EndHorizontal();
         }
@@ -452,7 +482,8 @@ namespace RedBlueGames.BulkRename
             // Display diff
             var diffStyle = info.NamesAreDifferent ? this.guiStyles.DiffLabelWhenModified : this.guiStyles.DiffLabelUnModified;
             diffStyle.richText = true;
-            EditorGUILayout.LabelField(info.DiffName, diffStyle);
+            var diffName = this.ShowDiff ? info.DiffName : info.OriginalName;
+            EditorGUILayout.LabelField(diffName, diffStyle);
 
             // Display new name
             var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
