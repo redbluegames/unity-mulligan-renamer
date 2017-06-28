@@ -174,7 +174,7 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {
-            var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters with Custom.");
+            var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
             var names = new List<GUIContent>(this.GUIPresets.Count);
             foreach (var preset in this.GUIPresets)
             {

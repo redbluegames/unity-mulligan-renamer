@@ -23,7 +23,9 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
+    using System.Collections.Generic;
     using UnityEditor;
+    using UnityEngine;
 
     /// <summary>
     /// RenameOperation that enumerates characters onto the end of the rename string.
@@ -35,8 +37,7 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         public EnumerateOperation()
         {
-            this.StartingCount = 0;
-            this.CountFormat = string.Empty;
+            this.Initialize();
         }
 
         /// <summary>
@@ -48,6 +49,8 @@ namespace RedBlueGames.BulkRename
         {
             this.StartingCount = operationToCopy.StartingCount;
             this.CountFormat = operationToCopy.CountFormat;
+
+            this.Initialize();
         }
 
         /// <summary>
@@ -98,6 +101,10 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        private List<EnumeratePresetGUI> GUIPresets { get; set; }
+
+        private int SelectedPresetIndex { get; set; }
+
         /// <summary>
         /// Clone this instance.
         /// </summary>
@@ -140,7 +147,20 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            this.CountFormat = EditorGUILayout.TextField("Count Format", this.CountFormat);
+            var presetsContent = new GUIContent("Format", "Select a preset format or specify your own format.");
+            var names = new List<GUIContent>(this.GUIPresets.Count);
+            foreach (var preset in this.GUIPresets)
+            {
+                names.Add(new GUIContent(preset.DisplayName));
+            }
+
+            this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
+            var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
+
+            EditorGUI.BeginDisabledGroup(selectedPreset.ReadOnly);
+            var countFormatContent = new GUIContent("Count Format", "The string format to use when adding the Count to the name.");
+            this.CountFormat = EditorGUILayout.TextField(countFormatContent, selectedPreset.Format);
+            EditorGUI.EndDisabledGroup();
 
             try
             {
@@ -150,12 +170,63 @@ namespace RedBlueGames.BulkRename
             {
                 var helpBoxMessage = "Invalid Count Format. Typical formats are D1 for one digit with no " +
                                      "leading zeros, D2, for two, etc." +
-                                     "\nSee https://msdn.microsoft.com/en-us/library/dwhawy9k(v=vs.110).aspx" +
+                                     "\nLookup String.Format method for more info." +
                                      " for more formatting options.";
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
             this.StartingCount = EditorGUILayout.IntField("Count From", this.StartingCount);
+            selectedPreset.Format = this.CountFormat;
+        }
+
+        private void Initialize()
+        {
+            var singleDigitPreset = new EnumeratePresetGUI()
+            {
+                DisplayName = "0, 1, 2...",
+                Format = "0",
+                ReadOnly = true
+            };
+            
+            var leadingZeroPreset = new EnumeratePresetGUI()
+            {
+                DisplayName = "00, 01, 02...",
+                Format = "00",
+                ReadOnly = true
+            };
+
+            var underscorePreset = new EnumeratePresetGUI()
+            {
+                DisplayName = "_00, _01, _02...",
+                Format = "_00",
+                ReadOnly = true
+            };
+
+            var customPreset = new EnumeratePresetGUI()
+            {
+                DisplayName = "Custom",
+                Format = string.Empty,
+                ReadOnly = false
+            };
+
+            this.GUIPresets = new List<EnumeratePresetGUI>
+            {
+                singleDigitPreset,
+                leadingZeroPreset,
+                underscorePreset,
+                customPreset
+            };
+
+            this.SelectedPresetIndex = 0;
+        }
+
+        private class EnumeratePresetGUI
+        {
+            public string DisplayName { get; set; }
+
+            public string Format { get; set; }
+
+            public bool ReadOnly { get; set; }
         }
     }
 }
