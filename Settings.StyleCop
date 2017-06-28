@@ -103,6 +103,7 @@
           <Value>[^a-z ]AddStringOpTests.cs</Value>
           <Value>[^a-z ]BulkRenamerTests.cs</Value>
           <Value>[^a-z ]ChangeCaseOpTests.cs</Value>
+          <Value>[^a-z ]DeleteNameOpTests.cs</Value>
           <Value>[^a-z ]DiffMatchPatchTest.cs</Value>
           <Value>[^a-z ]EnumerateOpTests.cs</Value>
           <Value>[^a-z ]RemoveCharactersOpTests.cs</Value>
