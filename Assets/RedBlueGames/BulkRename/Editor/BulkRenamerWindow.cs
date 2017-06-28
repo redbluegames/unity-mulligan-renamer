@@ -404,7 +404,7 @@ namespace RedBlueGames.BulkRename
             if (!panelIsEmpty)
             {
                 EditorGUILayout.BeginHorizontal();
-                var showDiffContent = new GUIContent("Show Changes", "Show the changes to the original name");
+                var showDiffContent = new GUIContent("Show Name as Diff", "Show the changes to the original name as a colored diff.");
                 this.ShowDiff = EditorGUILayout.Toggle(showDiffContent, this.ShowDiff);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Remove All"))
