@@ -23,11 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Text.RegularExpressions;
     using UnityEditor;
-    using UnityEngine;
 
     /// <summary>
     /// RenameOperation that changes the case of the characters in the name.

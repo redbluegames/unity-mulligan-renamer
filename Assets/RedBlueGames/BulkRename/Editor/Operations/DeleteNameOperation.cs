@@ -24,30 +24,27 @@ SOFTWARE.
 namespace RedBlueGames.BulkRename
 {
     using UnityEditor;
+    using UnityEngine;
 
     /// <summary>
-    /// RenameOperation that adds a string to the rename string.
+    /// RenameOperation used to delete all characters in a name.
     /// </summary>
-    public class AddStringOperation : BaseRenameOperation
+    public class DeleteNameOperation : BaseRenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.AddStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
         /// </summary>
-        public AddStringOperation()
+        public DeleteNameOperation()
         {
-            this.Prefix = string.Empty;
-            this.Suffix = string.Empty;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.AddStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public AddStringOperation(AddStringOperation operationToCopy)
+        public DeleteNameOperation(DeleteNameOperation operationToCopy)
         {
-            this.Prefix = operationToCopy.Prefix;
-            this.Suffix = operationToCopy.Suffix;
         }
 
         /// <summary>
@@ -58,7 +55,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Add/Add Prefix or Suffix";
+                return "Delete/Delete Name";
             }
         }
 
@@ -70,21 +67,9 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 1;
+                return 6;
             }
         }
-
-        /// <summary>
-        /// Gets or sets the prefix to add.
-        /// </summary>
-        /// <value>The prefix to add..</value>
-        public string Prefix { get; set; }
-
-        /// <summary>
-        /// Gets or sets the suffix to add.
-        /// </summary>
-        /// <value>The suffix to add.</value>
-        public string Suffix { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -94,7 +79,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Add Prefix or Suffix";
+                return "Delete Name";
             }
         }
 
@@ -104,7 +89,7 @@ namespace RedBlueGames.BulkRename
         /// <returns>A clone of this instance</returns>
         public override BaseRenameOperation Clone()
         {
-            var clone = new AddStringOperation(this);
+            var clone = new DeleteNameOperation(this);
             return clone;
         }
 
@@ -116,18 +101,7 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            var modifiedName = input;
-            if (!string.IsNullOrEmpty(this.Prefix))
-            {
-                modifiedName = string.Concat(this.Prefix, modifiedName);
-            }
-
-            if (!string.IsNullOrEmpty(this.Suffix))
-            {
-                modifiedName = string.Concat(modifiedName, this.Suffix);
-            }
-
-            return modifiedName;
+            return string.Empty;
         }
 
         /// <summary>
@@ -135,8 +109,15 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            this.Prefix = EditorGUILayout.TextField("Prefix", this.Prefix);
-            this.Suffix = EditorGUILayout.TextField("Suffix", this.Suffix);
+            var labelContent = new GUIContent("Deletes all characters in the name");
+            var labelStyle = new GUIStyle(EditorStyles.label);
+            labelStyle.alignment = TextAnchor.MiddleRight;
+            labelStyle.wordWrap = true;
+
+            // Label just looks better disabled.
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.LabelField(labelContent, labelStyle);
+            EditorGUI.EndDisabledGroup();
         }
     }
 }

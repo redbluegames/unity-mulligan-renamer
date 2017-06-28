@@ -23,7 +23,6 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
-    using System.Collections;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using UnityEditor;
@@ -94,7 +93,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 6;
+                return 5;
             }
         }
 
@@ -186,14 +185,15 @@ namespace RedBlueGames.BulkRename
             var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
 
             var workingOptions = selectedPreset.Options;
-            EditorGUI.BeginDisabledGroup(selectedPreset.IsReadOnly);
-
             if (selectedPreset.IsReadOnly)
             {
+                // Label just looks better disabled.
+                EditorGUI.BeginDisabledGroup(true);
                 var readonlyLabelContent = new GUIContent(selectedPreset.ReadOnlyLabel);
                 var labelStyle = new GUIStyle(EditorStyles.label);
                 labelStyle.alignment = TextAnchor.MiddleRight;
                 EditorGUILayout.LabelField(readonlyLabelContent, labelStyle);
+                EditorGUI.EndDisabledGroup();
             }
             else
             {
@@ -203,8 +203,6 @@ namespace RedBlueGames.BulkRename
                 var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
                 workingOptions.IsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveToggleContent, workingOptions.IsCaseSensitive);
             }
-
-            EditorGUI.EndDisabledGroup();
 
             // Structs were copied by value, so reapply the modified structs back to their sources
             this.Options = workingOptions;

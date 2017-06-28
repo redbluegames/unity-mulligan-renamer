@@ -21,6 +21,7 @@ MonoBehaviour:
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/AddStringOpTests.cs
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/BulkRenamerTests.cs
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/ChangeCaseOpTests.cs
+  - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/DeleteNameOpTests.cs
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/DiffMatchPatchTest.cs
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/EnumerateOpTests.cs
   - relativePath: /Assets/RedBlueGames/BulkRename/Tests/Editor/RemoveCharactersOpTests.cs
