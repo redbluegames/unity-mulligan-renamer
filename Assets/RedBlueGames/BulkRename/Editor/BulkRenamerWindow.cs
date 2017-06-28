@@ -439,7 +439,12 @@ namespace RedBlueGames.BulkRename
             var previewRowData = this.GetPreviewRowDataFromObjectsToRename();
             for (int i = 0; i < previewRowData.Length; ++i)
             {
-                this.DrawPreviewRow(previewRowData[i]);
+                if (this.DrawPreviewRow(previewRowData[i]))
+                {
+                    this.objectsToRename.Remove(this.ObjectsToRename[i]);
+                    this.Repaint();
+                    break;
+                }
             }
 
             GUILayout.FlexibleSpace();
@@ -467,13 +472,21 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.EndHorizontal();
         }
 
-        private void DrawPreviewRow(PreviewRowInfo info)
+        private bool DrawPreviewRow(PreviewRowInfo info)
         {
+            bool isDeleteClicked = false;
+
             // Draw the icon
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
-            // Space gives us a bit of padding because the icons kind of spill over by default
-            GUILayout.Space(8.0f);
+            // Space gives us a bit of padding or else we're just too bunched up to the side
+            GUILayout.Space(4.0f);
+
+            if (GUILayout.Button("x", EditorStyles.miniButton, GUILayout.Width(16.0f)))
+            {
+                isDeleteClicked = true;
+            }
+
             if (info.Icon != null)
             {
                 GUILayout.Box(info.Icon, this.guiStyles.Icon, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
@@ -490,6 +503,8 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.LabelField(info.NewName, style);
 
             EditorGUILayout.EndHorizontal();
+
+            return isDeleteClicked;
         }
 
         private List<UnityEngine.Object> GetDraggedObjectsOverRect(Rect dropArea)
