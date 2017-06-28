@@ -170,8 +170,7 @@ namespace RedBlueGames.BulkRename
             {
                 var helpBoxMessage = "Invalid Count Format. Typical formats are D1 for one digit with no " +
                                      "leading zeros, D2, for two, etc." +
-                                     "\nLookup String.Format method for more info." +
-                                     " for more formatting options.";
+                                     "\nLookup the String.Format() method for more info on formatting options.";
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
