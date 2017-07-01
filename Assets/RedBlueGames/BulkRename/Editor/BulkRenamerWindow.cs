@@ -372,8 +372,7 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsToApply.Add(renameOp);
 
             // Scroll to the bottom to focus the newly created operation.
-            this.renameOperationsPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
-            this.Repaint();
+            this.ScrollRenameOperationsToBottom();
         }
 
         private void DrawPreviewPanel()
@@ -400,6 +399,7 @@ namespace RedBlueGames.BulkRename
             var scrollRect = GUILayoutUtility.GetLastRect();
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollRect);
             this.ObjectsToRename.AddRange(draggedObjects);
+            this.ScrollPreviewPanelToBottom();
 
             if (!panelIsEmpty)
             {
@@ -442,7 +442,6 @@ namespace RedBlueGames.BulkRename
                 if (this.DrawPreviewRow(previewRowData[i]))
                 {
                     this.objectsToRename.Remove(this.ObjectsToRename[i]);
-                    this.Repaint();
                     break;
                 }
             }
@@ -467,7 +466,8 @@ namespace RedBlueGames.BulkRename
         {
             EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
             GUILayout.Space(32.0f);
-            EditorGUILayout.LabelField("Original Name", EditorStyles.miniBoldLabel);
+            var nameHeader = this.ShowDiff ? "Diffed Name" : "Original Name";
+            EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.EndHorizontal();
         }
@@ -537,6 +537,9 @@ namespace RedBlueGames.BulkRename
         private void LoadSelectedObjects()
         {
             this.ObjectsToRename.AddRange(this.GetNewlySelectedObjects());
+
+            // Scroll to the bottom to focus the newly added objects.
+            this.previewPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
         }
 
         private List<UnityEngine.Object> GetNewlySelectedObjects()
@@ -675,6 +678,16 @@ namespace RedBlueGames.BulkRename
                     return this.NewName != this.OriginalName;
                 }
             }
+        }
+
+        private void ScrollPreviewPanelToBottom()
+        {
+            this.previewPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
+        }
+
+        private void ScrollRenameOperationsToBottom()
+        {
+            this.renameOperationsPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
         }
 
         private class BulkRenameGUIStyles
