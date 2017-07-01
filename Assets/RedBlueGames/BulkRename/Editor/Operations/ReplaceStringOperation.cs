@@ -211,8 +211,8 @@ namespace RedBlueGames.BulkRename
             GUIContent replacementContent;
             if (this.UseRegex)
             {
-                searchContent = new GUIContent("Match Expression", "Regular Expression to use to match terms.");
-                replacementContent = new GUIContent("Replacement Expression", "Regular Expression to use when replacing matched patterns.");
+                searchContent = new GUIContent("Match Regex", "Regular Expression to use to match terms.");
+                replacementContent = new GUIContent("Replacement Regex", "Regular Expression to use when replacing matched patterns.");
             }
             else
             {
