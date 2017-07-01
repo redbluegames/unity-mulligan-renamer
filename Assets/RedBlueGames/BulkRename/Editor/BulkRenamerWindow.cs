@@ -467,7 +467,8 @@ namespace RedBlueGames.BulkRename
         {
             EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
             GUILayout.Space(32.0f);
-            EditorGUILayout.LabelField("Original Name", EditorStyles.miniBoldLabel);
+            var nameHeader = this.ShowDiff ? "Diffed Name" : "Original Name";
+            EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.EndHorizontal();
         }
