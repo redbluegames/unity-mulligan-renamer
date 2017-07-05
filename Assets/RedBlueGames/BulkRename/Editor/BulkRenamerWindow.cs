@@ -644,8 +644,19 @@ namespace RedBlueGames.BulkRename
 
         private void RenameAsset(UnityEngine.Object asset, string newName)
         {
-            var pathToAsset = AssetDatabase.GetAssetPath(asset);
-            AssetDatabase.RenameAsset(pathToAsset, newName);
+            if (asset is Sprite)
+            {
+                string path = AssetDatabase.GetAssetPath(texture2D);
+                TextureImporter parentAsset = TextureImporter.GetAtPath(path);
+                SpriteMetaData[] sliceMetaData = parentAsset.spritesheet;
+            }
+            else
+            {
+                var pathToAsset = AssetDatabase.GetAssetPath(asset);
+                AssetDatabase.RenameAsset(pathToAsset, newName);
+            }
+            //   var pathToAsset = AssetDatabase.GetAssetPath(asset);
+            //  AssetDatabase.RenameAsset(pathToAsset, newName);
         }
 
         private bool RenameOperatationsHaveErrors()
