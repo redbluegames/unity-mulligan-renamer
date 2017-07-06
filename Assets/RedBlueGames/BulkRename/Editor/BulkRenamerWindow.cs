@@ -23,6 +23,11 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
+	using UnityEditor;
+	using UnityEngine;
 
 	/// <summary>
 	/// Tool that tries to allow renaming mulitple selections by parsing similar substrings
@@ -47,7 +52,8 @@ namespace RedBlueGames.BulkRename
 		private List<BaseRenameOperation> renameOperationsToClone;
 		private List<BaseRenameOperation> renameOperationsToApply;
 		private List<UnityEngine.Object> objectsToRename;
-		private	HashSet<string> assetsToReimport = new HashSet<string> ();
+		Dictionary<Object,string> allSpritesWithNewNames = new Dictionary<Object,string> ();
+
 
 		private List<UnityEngine.Object> ObjectsToRename {
 			get {
@@ -114,7 +120,7 @@ namespace RedBlueGames.BulkRename
 			return icon;
 		}
 
-		static Texture GetIconOfSprite (Object unityObject)
+		private	static Texture GetIconOfSprite (Object unityObject)
 		{
 			Sprite sprite = (Sprite)unityObject;
 			string path = AssetDatabase.GetAssetPath (sprite.texture);
@@ -127,7 +133,7 @@ namespace RedBlueGames.BulkRename
 		}
 
 		/// <summary> ///trothmaster:  http://answers.unity3d.com/questions/651984/convert-sprite-image-to-texture.html /// </summary>
-		public static Texture2D TextureFromSprite (Sprite sprite)
+		private static Texture2D TextureFromSprite (Sprite sprite)
 		{
 			if (sprite.rect.width != sprite.texture.width) {
 				Texture2D newText = new Texture2D ((int)sprite.rect.width, (int)sprite.rect.height);
@@ -258,7 +264,7 @@ namespace RedBlueGames.BulkRename
 			EditorGUILayout.LabelField ("Rename Operations", EditorStyles.boldLabel);
 
 			this.renameOperationsPanelScrollPosition = 
-				EditorGUILayout.BeginScrollView (
+                EditorGUILayout.BeginScrollView (
 				this.renameOperationsPanelScrollPosition,
 				GUILayout.MinWidth (200.0f),
 				GUILayout.MaxWidth (350.0f));
@@ -392,8 +398,10 @@ namespace RedBlueGames.BulkRename
 
 			var scrollRect = GUILayoutUtility.GetLastRect ();
 			var draggedObjects = this.GetDraggedObjectsOverRect (scrollRect);
-			this.ObjectsToRename.AddRange (draggedObjects);
-			this.ScrollPreviewPanelToBottom ();
+			if (draggedObjects.Count > 0) {
+				this.AddObjectsToRename (draggedObjects);
+				this.ScrollPreviewPanelToBottom ();
+			}
 
 			if (!panelIsEmpty) {
 				EditorGUILayout.BeginHorizontal ();
@@ -520,10 +528,19 @@ namespace RedBlueGames.BulkRename
 
 		private void LoadSelectedObjects ()
 		{
-			this.ObjectsToRename.AddRange (this.GetNewlySelectedObjects ());
+			this.AddObjectsToRename (this.GetNewlySelectedObjects ());
 
 			// Scroll to the bottom to focus the newly added objects.
 			this.previewPanelScrollPosition = new Vector2 (0.0f, 10000000.0f);
+		}
+
+		private void AddObjectsToRename (List<UnityEngine.Object> objects)
+		{
+			objects.Sort (delegate(UnityEngine.Object x, UnityEngine.Object y) {
+				return EditorUtility.NaturalCompare (x.name, y.name);
+			});
+
+			this.ObjectsToRename.AddRange (objects);
 		}
 
 		private List<UnityEngine.Object> GetNewlySelectedObjects ()
@@ -583,6 +600,7 @@ namespace RedBlueGames.BulkRename
 		{
 			// Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
 			Undo.RecordObjects (this.ObjectsToRename.ToArray (), "Bulk Rename");
+
 			var names = this.GetNamesFromObjectsToRename ();
 			var newNames = this.bulkRenamer.GetRenamePreviews (names);
 
@@ -599,12 +617,11 @@ namespace RedBlueGames.BulkRename
 
 				this.RenameObject (this.ObjectsToRename [i], newNames [i].NewName);
 			}
-			foreach (var item in assetsToReimport) {
-				AssetDatabase.ImportAsset (item, ImportAssetOptions.Default);
-			}
-			assetsToReimport.Clear ();
+			RenameSprites (allSpritesWithNewNames);
 
 			EditorUtility.ClearProgressBar ();
+			allSpritesWithNewNames.Clear ();
+
 		}
 
 		private void RenameObject (UnityEngine.Object obj, string newName)
@@ -621,24 +638,74 @@ namespace RedBlueGames.BulkRename
 			gameObject.name = newName;
 		}
 
+		public 	static string ReplaceSpritePrefixInMetafile (string metafileText, string prefixToReplace, string newPrefix)
+		{			
+			string fileIDPattern = prefixToReplace;
+			var fileIDRegex = new System.Text.RegularExpressions.Regex (fileIDPattern);
+			string replacementText = newPrefix;
+			return fileIDRegex.Replace (metafileText, replacementText);
+		}
+
+		void RenameSprites (Dictionary<Object,string> allSpritesWithNewNames)
+		{
+			string actualAssetName;
+			string newAssetName;
+			string path;
+			HashSet<string> assetsToReimport = new HashSet<string> ();
+
+			foreach (var asset in allSpritesWithNewNames) {
+				actualAssetName = asset.Key.name;
+				newAssetName = asset.Value;
+				path = AssetDatabase.GetAssetPath (asset.Key);
+				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
+				#region Changing name in metafiles
+				PropertyInfo cachedInspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+				SerializedObject so = new UnityEditor.SerializedObject (asset.Key);
+				cachedInspectorModeInfo.SetValue (so, InspectorMode.Debug, null);
+				PropertyInfo inspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+				SerializedProperty sp = so.FindProperty ("m_LocalIdentfierInFile");
+				string oldNameMeta = sp.intValue + ": " + actualAssetName;
+				string newNameMeta = sp.intValue + ": " + asset.Value;
+				string metaFile = System.IO.File.ReadAllText (path + ".meta");
+				string ammendedMetaFile = ReplaceSpritePrefixInMetafile (metaFile, actualAssetName, newAssetName);
+				System.IO.File.WriteAllText (path + ".meta", ammendedMetaFile);
+				#endregion
+			}
+			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
+
+
+			#region Changing names in Project Window
+			foreach (var asset in allSpritesWithNewNames) {
+				actualAssetName = asset.Key.name;
+				newAssetName = asset.Value;
+				path = AssetDatabase.GetAssetPath (asset.Key);
+				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
+				SpriteMetaData[] spriteMetaData = parentAsset.spritesheet;
+
+				for (int i = 0; i < spriteMetaData.Length; i++) {
+					if (spriteMetaData [i].name.Equals (actualAssetName)) {
+						spriteMetaData [i].name = newAssetName;
+						break;                   
+					}	
+				}
+				EditorUtility.SetDirty (parentAsset);                            
+				parentAsset.spritesheet = spriteMetaData;
+				assetsToReimport.Add (path);
+			}
+			foreach (var item in assetsToReimport) { 
+				AssetDatabase.ImportAsset (item, ImportAssetOptions.ForceUpdate);
+			}
+			#endregion
+		}
+
 		private void RenameAsset (UnityEngine.Object asset, string newName)
 		{
 			if (asset is Sprite) {
-				string path = AssetDatabase.GetAssetPath (asset);
-				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
-				SpriteMetaData[] spriteMetaData = parentAsset.spritesheet;
-				for (int i = 0; i < spriteMetaData.Length; i++) {
-					if (spriteMetaData [i].name.Equals (asset.name)) {
-						spriteMetaData [i].name = newName;
-					}	
-				}
-				parentAsset.spritesheet = spriteMetaData;
-				EditorUtility.SetDirty (parentAsset);
-				assetsToReimport.Add (path);
+				allSpritesWithNewNames.Add (asset, newName);
 			} else {
 				var pathToAsset = AssetDatabase.GetAssetPath (asset);
 				AssetDatabase.RenameAsset (pathToAsset, newName);
-			}		
+			}	
 		}
 
 		private bool RenameOperatationsHaveErrors ()
