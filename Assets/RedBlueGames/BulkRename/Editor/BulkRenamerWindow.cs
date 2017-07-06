@@ -398,8 +398,11 @@ namespace RedBlueGames.BulkRename
 
             var scrollRect = GUILayoutUtility.GetLastRect();
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollRect);
-            this.ObjectsToRename.AddRange(draggedObjects);
-            this.ScrollPreviewPanelToBottom();
+            if (draggedObjects.Count > 0)
+            {
+                this.ObjectsToRename.AddRange(draggedObjects);
+                this.ScrollPreviewPanelToBottom();
+            }
 
             if (!panelIsEmpty)
             {
