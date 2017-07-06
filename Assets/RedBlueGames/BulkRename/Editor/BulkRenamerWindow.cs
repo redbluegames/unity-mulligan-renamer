@@ -23,11 +23,6 @@ SOFTWARE.
 
 namespace RedBlueGames.BulkRename
 {
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Reflection;
-	using UnityEditor;
-	using UnityEngine;
 
 	/// <summary>
 	/// Tool that tries to allow renaming mulitple selections by parsing similar substrings
