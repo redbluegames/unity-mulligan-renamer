@@ -400,7 +400,7 @@ namespace RedBlueGames.BulkRename
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollRect);
             if (draggedObjects.Count > 0)
             {
-                this.ObjectsToRename.AddRange(draggedObjects);
+                this.AddObjectsToRename(draggedObjects);
                 this.ScrollPreviewPanelToBottom();
             }
 
@@ -539,10 +539,20 @@ namespace RedBlueGames.BulkRename
 
         private void LoadSelectedObjects()
         {
-            this.ObjectsToRename.AddRange(this.GetNewlySelectedObjects());
+            this.AddObjectsToRename(this.GetNewlySelectedObjects());
 
             // Scroll to the bottom to focus the newly added objects.
             this.previewPanelScrollPosition = new Vector2(0.0f, 10000000.0f);
+        }
+
+        private void AddObjectsToRename(List<UnityEngine.Object> objects)
+        {
+            objects.Sort(delegate(UnityEngine.Object x, UnityEngine.Object y)
+                {
+                    return EditorUtility.NaturalCompare(x.name, y.name);
+                });
+
+            this.ObjectsToRename.AddRange(objects);
         }
 
         private List<UnityEngine.Object> GetNewlySelectedObjects()
