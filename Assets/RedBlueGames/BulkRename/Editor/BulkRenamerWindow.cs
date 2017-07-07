@@ -52,8 +52,6 @@ namespace RedBlueGames.BulkRename
 		private List<BaseRenameOperation> renameOperationsToClone;
 		private List<BaseRenameOperation> renameOperationsToApply;
 		private List<UnityEngine.Object> objectsToRename;
-		Dictionary<Object,string> allSpritesWithNewNames = new Dictionary<Object,string> ();
-
 
 		private List<UnityEngine.Object> ObjectsToRename {
 			get {
@@ -64,6 +62,8 @@ namespace RedBlueGames.BulkRename
 				return this.objectsToRename;
 			}
 		}
+
+
 
 		private bool ShowDiff {
 			get {
@@ -264,7 +264,7 @@ namespace RedBlueGames.BulkRename
 			EditorGUILayout.LabelField ("Rename Operations", EditorStyles.boldLabel);
 
 			this.renameOperationsPanelScrollPosition = 
-                EditorGUILayout.BeginScrollView (
+				EditorGUILayout.BeginScrollView (
 				this.renameOperationsPanelScrollPosition,
 				GUILayout.MinWidth (200.0f),
 				GUILayout.MaxWidth (350.0f));
@@ -596,8 +596,12 @@ namespace RedBlueGames.BulkRename
 			return names;
 		}
 
+
 		private void RenameAssets ()
 		{
+			Dictionary<Object,string> allSpritesWithNewNames = new Dictionary<Object,string> ();
+			Dictionary<Object,string> allAssetsWithNewNames = new Dictionary<Object,string> ();
+			Dictionary<Object,string> allGameObjectssWithNewNames = new Dictionary<Object,string> ();
 			// Record all the objects to undo stack, though this unfortunately doesn't capture Asset renames
 			Undo.RecordObjects (this.ObjectsToRename.ToArray (), "Bulk Rename");
 
@@ -605,37 +609,41 @@ namespace RedBlueGames.BulkRename
 			var newNames = this.bulkRenamer.GetRenamePreviews (names);
 
 			for (int i = 0; i < newNames.Count; ++i) {
-				var infoString = string.Format (
-					                 "Renaming asset {0} of {1}",
-					                 i,
-					                 newNames.Count);
-
-				EditorUtility.DisplayProgressBar (
-					"Renaming Assets...",
-					infoString,
-					i / (float)newNames.Count);
-
-				this.RenameObject (this.ObjectsToRename [i], newNames [i].NewName);
+				var infoString = string.Format ("Renaming asset {0} of {1}", i, newNames.Count);
+				EditorUtility.DisplayProgressBar ("Renaming Assets...", infoString, i / (float)newNames.Count);
+				this.RenameObject (this.ObjectsToRename [i], newNames [i].NewName, ref allSpritesWithNewNames, ref allAssetsWithNewNames, ref allGameObjectssWithNewNames);
 			}
+
+			RenameAsset (allAssetsWithNewNames);
+			RenameGameObject (allGameObjectssWithNewNames);
 			RenameSprites (allSpritesWithNewNames);
-
 			EditorUtility.ClearProgressBar ();
-			allSpritesWithNewNames.Clear ();
-
 		}
 
-		private void RenameObject (UnityEngine.Object obj, string newName)
+
+
+		private void RenameObject (UnityEngine.Object obj, string newName,
+		                           ref  Dictionary<Object,string> allSpritesWithNewNames,
+		                           ref Dictionary<Object,string> allAssetsWithNewNames,
+		                           ref  Dictionary<Object,string> allGameObjectssWithNewNames)
 		{
+
 			if (AssetDatabase.Contains (obj)) {
-				this.RenameAsset (obj, newName);
+				if (obj is Sprite) {
+					allSpritesWithNewNames.Add (obj, newName);
+				} else {
+					allAssetsWithNewNames.Add (obj, newName);
+				}	
 			} else {
-				this.RenameGameObject (obj, newName);
+				allGameObjectssWithNewNames.Add (obj, newName);
 			}
 		}
 
-		private void RenameGameObject (UnityEngine.Object gameObject, string newName)
+		private void RenameGameObject (Dictionary<Object,string> allGameObjectssWithNewNames)
 		{
-			gameObject.name = newName;
+			foreach (var item in allGameObjectssWithNewNames) {
+				item.Key.name = item.Value;
+			}
 		}
 
 		public 	static string ReplaceSpritePrefixInMetafile (string metafileText, string prefixToReplace, string newPrefix)
@@ -658,7 +666,7 @@ namespace RedBlueGames.BulkRename
 				newAssetName = asset.Value;
 				path = AssetDatabase.GetAssetPath (asset.Key);
 				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
-				#region Changing name in metafiles
+				//Changing name in metafiles
 				PropertyInfo cachedInspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
 				SerializedObject so = new UnityEditor.SerializedObject (asset.Key);
 				cachedInspectorModeInfo.SetValue (so, InspectorMode.Debug, null);
@@ -669,12 +677,11 @@ namespace RedBlueGames.BulkRename
 				string metaFile = System.IO.File.ReadAllText (path + ".meta");
 				string ammendedMetaFile = ReplaceSpritePrefixInMetafile (metaFile, actualAssetName, newAssetName);
 				System.IO.File.WriteAllText (path + ".meta", ammendedMetaFile);
-				#endregion
 			}
 			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
 
 
-			#region Changing names in Project Window
+			//Changing names in Project Window
 			foreach (var asset in allSpritesWithNewNames) {
 				actualAssetName = asset.Key.name;
 				newAssetName = asset.Value;
@@ -695,17 +702,15 @@ namespace RedBlueGames.BulkRename
 			foreach (var item in assetsToReimport) { 
 				AssetDatabase.ImportAsset (item, ImportAssetOptions.ForceUpdate);
 			}
-			#endregion
+
 		}
 
-		private void RenameAsset (UnityEngine.Object asset, string newName)
+		private void RenameAsset (Dictionary<Object,string> allAssetsWithNewNames)
 		{
-			if (asset is Sprite) {
-				allSpritesWithNewNames.Add (asset, newName);
-			} else {
-				var pathToAsset = AssetDatabase.GetAssetPath (asset);
-				AssetDatabase.RenameAsset (pathToAsset, newName);
-			}	
+			foreach (var item in allAssetsWithNewNames) {				
+				var pathToAsset = AssetDatabase.GetAssetPath (item.Key);
+				AssetDatabase.RenameAsset (pathToAsset, item.Value);
+			}
 		}
 
 		private bool RenameOperatationsHaveErrors ()
@@ -715,7 +720,6 @@ namespace RedBlueGames.BulkRename
 					return true;
 				}
 			}
-
 			return false;
 		}
 
