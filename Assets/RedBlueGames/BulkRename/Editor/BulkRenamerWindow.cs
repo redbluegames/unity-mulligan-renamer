@@ -52,6 +52,7 @@ namespace RedBlueGames.BulkRename
 		private List<BaseRenameOperation> renameOperationsToClone;
 		private List<BaseRenameOperation> renameOperationsToApply;
 		private List<UnityEngine.Object> objectsToRename;
+		private Dictionary<UnityEngine.Object, Texture> iconsForPreview = new Dictionary<Object, Texture> ();
 
 		private List<UnityEngine.Object> ObjectsToRename {
 			get {
@@ -100,7 +101,12 @@ namespace RedBlueGames.BulkRename
 			return false;
 		}
 
-		private static Texture GetIconForObject (UnityEngine.Object unityObject)
+		void OnDisable ()
+		{
+			iconsForPreview.Clear ();
+		}
+
+		private  Texture GetIconForObject (UnityEngine.Object unityObject)
 		{
 			var pathToObject = AssetDatabase.GetAssetPath (unityObject);
 			Texture icon = null;
@@ -120,20 +126,26 @@ namespace RedBlueGames.BulkRename
 			return icon;
 		}
 
-		private	static Texture GetIconOfSprite (Object unityObject)
+		private	 Texture GetIconOfSprite (Object unityObject)
 		{
 			Sprite sprite = (Sprite)unityObject;
 			string path = AssetDatabase.GetAssetPath (sprite.texture);
 			TextureImporter ti = AssetImporter.GetAtPath (path) as TextureImporter;
-			bool isReadable = ti.isReadable;
-			ti.isReadable = true;
-			Texture texture = TextureFromSprite (sprite);
-			ti.isReadable = isReadable;
-			return texture;
+			if (!ti.isReadable) {
+				ti.isReadable = true;
+				ti.SaveAndReimport ();
+			}
+			if (iconsForPreview.ContainsKey (unityObject)) {
+				return iconsForPreview [unityObject];
+			} else {
+				iconsForPreview.Add (unityObject, CreateTextureFromSprite (sprite));
+			}
+			return iconsForPreview [unityObject];
+
 		}
 
 		/// <summary> ///trothmaster:  http://answers.unity3d.com/questions/651984/convert-sprite-image-to-texture.html /// </summary>
-		private static Texture2D TextureFromSprite (Sprite sprite)
+		private static Texture2D CreateTextureFromSprite (Sprite sprite)
 		{
 			if (sprite.rect.width != sprite.texture.width) {
 				Texture2D newText = new Texture2D ((int)sprite.rect.width, (int)sprite.rect.height);
@@ -654,54 +666,118 @@ namespace RedBlueGames.BulkRename
 			return fileIDRegex.Replace (metafileText, replacementText);
 		}
 
+		public 	static string ReplaceSpritePrefixesInMetafile (string metafileText, string[]prefixToReplace, string[]newPrefix)
+		{		
+			string tempText = metafileText;	
+			for (int i = 0; i < prefixToReplace.Length; i++) {
+				string fileIDPattern = prefixToReplace [i];
+				var fileIDRegex = new System.Text.RegularExpressions.Regex (fileIDPattern);
+				string replacementText = newPrefix [i];
+				tempText = fileIDRegex.Replace (tempText, replacementText);	
+			}
+			return tempText;
+
+		}
+
 		void RenameSprites (Dictionary<Object,string> allSpritesWithNewNames)
 		{
+			PropertyInfo cachedInspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
 			string actualAssetName;
 			string newAssetName;
 			string path;
+
 			HashSet<string> assetsToReimport = new HashSet<string> ();
+			HashSet<string> pathsWithSameMeta = new HashSet<string> ();
+			string[] prefixesToReplace = new string[allSpritesWithNewNames.Count];
+			string[] newPrefixes = new string[allSpritesWithNewNames.Count];
 
+			TextureImporter parentAsset;
+			SerializedObject so;
+			SerializedProperty sp;
+
+			#region New faster but more complicated
+			int k = 0;
 			foreach (var asset in allSpritesWithNewNames) {
-				actualAssetName = asset.Key.name;
-				newAssetName = asset.Value;
-				path = AssetDatabase.GetAssetPath (asset.Key);
-				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
-				//Changing name in metafiles
-				PropertyInfo cachedInspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
-				SerializedObject so = new UnityEditor.SerializedObject (asset.Key);
-				cachedInspectorModeInfo.SetValue (so, InspectorMode.Debug, null);
-				PropertyInfo inspectorModeInfo = typeof(SerializedObject).GetProperty ("inspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
-				SerializedProperty sp = so.FindProperty ("m_LocalIdentfierInFile");
-				string oldNameMeta = sp.intValue + ": " + actualAssetName;
-				string newNameMeta = sp.intValue + ": " + asset.Value;
-				string metaFile = System.IO.File.ReadAllText (path + ".meta");
-				string ammendedMetaFile = ReplaceSpritePrefixInMetafile (metaFile, actualAssetName, newAssetName);
-				System.IO.File.WriteAllText (path + ".meta", ammendedMetaFile);
+				pathsWithSameMeta.Add (AssetDatabase.GetAssetPath (asset.Key));
+				prefixesToReplace [k] = asset.Key.name;
+				newPrefixes [k] = asset.Value;
+				k++;
 			}
-			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
+			k = 0;
+			string ammendedMetaFile = "";
+			foreach (var item in pathsWithSameMeta) {
+				string metaFile = System.IO.File.ReadAllText (item + ".meta");
+				ammendedMetaFile = ReplaceSpritePrefixesInMetafile (metaFile, prefixesToReplace, newPrefixes);
+				System.IO.File.WriteAllText (item + ".meta", ammendedMetaFile);
+				AssetDatabase.Refresh ();
 
+			}
+			//			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
 
-			//Changing names in Project Window
-			foreach (var asset in allSpritesWithNewNames) {
-				actualAssetName = asset.Key.name;
-				newAssetName = asset.Value;
-				path = AssetDatabase.GetAssetPath (asset.Key);
-				TextureImporter parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
-				SpriteMetaData[] spriteMetaData = parentAsset.spritesheet;
+			foreach (var item in pathsWithSameMeta) {
+				parentAsset = TextureImporter.GetAtPath (item)as TextureImporter;
 
-				for (int i = 0; i < spriteMetaData.Length; i++) {
-					if (spriteMetaData [i].name.Equals (actualAssetName)) {
-						spriteMetaData [i].name = newAssetName;
-						break;                   
-					}	
+				foreach (var asset in allSpritesWithNewNames) {
+					if (AssetDatabase.GetAssetPath (asset.Key) == item) {
+						SpriteMetaData[] spriteMetaData = null;
+						spriteMetaData = parentAsset.spritesheet;
+						for (int i = 0; i < spriteMetaData.Length; i++) {
+							if (spriteMetaData [i].name.Equals (asset.Key.name)) {
+								spriteMetaData [i].name = asset.Value;
+								break;                   
+							}	
+						}
+						parentAsset.spritesheet = spriteMetaData;
+					}
 				}
-				EditorUtility.SetDirty (parentAsset);                            
-				parentAsset.spritesheet = spriteMetaData;
-				assetsToReimport.Add (path);
+				EditorUtility.SetDirty (parentAsset); 
+				assetsToReimport.Add (item);
 			}
-			foreach (var item in assetsToReimport) { 
-				AssetDatabase.ImportAsset (item, ImportAssetOptions.ForceUpdate);
-			}
+			AssetDatabase.Refresh ();
+			#endregion
+
+
+			#region Old Good But Slower
+			//
+			//			foreach (var asset in allSpritesWithNewNames) {
+			//				actualAssetName = asset.Key.name;
+			//				newAssetName = asset.Value;
+			//				path = AssetDatabase.GetAssetPath (asset.Key) + ".meta";
+			//
+			//
+			//				so = new UnityEditor.SerializedObject (asset.Key);
+			//				cachedInspectorModeInfo.SetValue (so, InspectorMode.Debug, null);
+			//				sp = so.FindProperty ("m_LocalIdentfierInFile");
+			//				string oldNameMeta = sp.intValue + ": " + actualAssetName;
+			//				string newNameMeta = sp.intValue + ": " + asset.Value;
+			//
+			//				string metaFile = System.IO.File.ReadAllText (path);
+			//				string ammendedMetaFile = ReplaceSpritePrefixInMetafile (metaFile, actualAssetName, newAssetName);
+			//				System.IO.File.WriteAllText (path, ammendedMetaFile);
+			//			}
+			//			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
+			//
+			//			foreach (var asset in allSpritesWithNewNames) {
+			//				actualAssetName = asset.Key.name;
+			//				newAssetName = asset.Value;
+			//				path = AssetDatabase.GetAssetPath (asset.Key);
+			//				parentAsset = TextureImporter.GetAtPath (path)as TextureImporter;
+			//				SpriteMetaData[] spriteMetaData = parentAsset.spritesheet;
+			//
+			//				for (int i = 0; i < spriteMetaData.Length; i++) {
+			//					if (spriteMetaData [i].name.Equals (actualAssetName)) {
+			//						spriteMetaData [i].name = newAssetName;
+			//						break;                   
+			//					}	
+			//				}
+			//				EditorUtility.SetDirty (parentAsset);                            
+			//				parentAsset.spritesheet = spriteMetaData;
+			//				assetsToReimport.Add (path);
+			//			}
+			//			AssetDatabase.Refresh ();// it has local range - only refresh assets in body of this method!
+			//
+
+			#endregion
 
 		}
 
