@@ -50,7 +50,7 @@ namespace RedBlueGames.BulkRename
         private Rect scrollViewClippingRect;
 
         private BulkRenamer bulkRenamer;
-        private List<BaseRenameOperation> renameOperationsToClone;
+        private List<BaseRenameOperation> renameOperationPrototypes;
         private List<BaseRenameOperation> renameOperationsToApply;
         private List<UnityEngine.Object> objectsToRename;
 
@@ -148,7 +148,7 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsToApply = new List<BaseRenameOperation>();
             this.renameOperationsToApply.Add(new ReplaceStringOperation());
 
-            this.CacheRenameOperationsToClone();
+            this.CacheRenameOperationPrototypes();
 
             Selection.selectionChanged += this.Repaint;
         }
@@ -158,9 +158,9 @@ namespace RedBlueGames.BulkRename
             Selection.selectionChanged -= this.Repaint;
         }
 
-        private void CacheRenameOperationsToClone()
+        private void CacheRenameOperationPrototypes()
         {
-            this.renameOperationsToClone = new List<BaseRenameOperation>();
+            this.renameOperationPrototypes = new List<BaseRenameOperation>();
             var assembly = Assembly.Load(new AssemblyName("Assembly-CSharp-Editor"));
             var typesInAssembly = assembly.GetTypes();
             foreach (var type in typesInAssembly)
@@ -168,11 +168,11 @@ namespace RedBlueGames.BulkRename
                 if (type.IsSubclassOf(typeof(BaseRenameOperation)))
                 {
                     var renameOp = (BaseRenameOperation)System.Activator.CreateInstance(type);
-                    this.renameOperationsToClone.Add(renameOp);
+                    this.renameOperationPrototypes.Add(renameOp);
                 }
             }
 
-            this.renameOperationsToClone.Sort((x, y) =>
+            this.renameOperationPrototypes.Sort((x, y) =>
                 {
                     return x.MenuOrder.CompareTo(y.MenuOrder);
                 });
@@ -296,9 +296,9 @@ namespace RedBlueGames.BulkRename
             {
                 // Add enums to the menu
                 var menu = new GenericMenu();
-                for (int i = 0; i < this.renameOperationsToClone.Count; ++i)
+                for (int i = 0; i < this.renameOperationPrototypes.Count; ++i)
                 {
-                    var renameOp = this.renameOperationsToClone[i];
+                    var renameOp = this.renameOperationPrototypes[i];
                     var content = new GUIContent(renameOp.MenuDisplayPath);
                     menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
                 }
