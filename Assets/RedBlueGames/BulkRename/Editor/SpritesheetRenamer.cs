@@ -64,31 +64,37 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
-        /// Sets the path to the texture that's associated with the spritesheet.
-        /// </summary>
-        /// <param name="path">Path to the texture.</param>
-        public void SetPathToTexture(string path)
-        {
-            var pathToMeta = path + ".meta";
-            if (!System.IO.File.Exists(pathToMeta))
-            {
-                string exception = string.Format(
-                                       "Error trying to SetPathToTexture in SpritesheetRenamer. " +
-                                       "No meta file exists at the specified path: {0}",
-                                       pathToMeta);
-                throw new System.ArgumentException(exception);
-            }
-
-            this.PathToTexture = path;
-        }
-
-        /// <summary>
         /// Adds a sprite for rename.
         /// </summary>
         /// <param name="sprite">Sprite to rename.</param>
         /// <param name="newName">New name for the sprite.</param>
         public void AddSpriteForRename(Sprite sprite, string newName)
         {
+            var pathToSprite = AssetDatabase.GetAssetPath(sprite);
+            if (!string.IsNullOrEmpty(this.PathToTexture) && pathToSprite != this.PathToTexture)
+            {
+                var exception = string.Format(
+                                    "Trying to add Sprite {0} to SpriteRenamer that has a different path to texture " +
+                                    "than the other sprites. Received path {1}, expected {2}",
+                                    sprite.name,
+                                    pathToSprite,
+                                    this.PathToTexture);
+                throw new System.ArgumentException(exception);
+            }
+
+            var pathToMeta = pathToSprite + ".meta";
+            if (!System.IO.File.Exists(pathToMeta))
+            {
+                var exception = string.Format(
+                                    "Trying to add Sprite {0} to SpriteRenamer at path {1}, but " +
+                                    "no meta file exists at the specified path.",
+                                    sprite.name,
+                                    pathToMeta);
+                throw new System.ArgumentException(exception);
+            }
+
+            this.PathToTexture = pathToSprite;
+
             // Unity doesn't let you name two sprites with the same name, so we shouldn't either.
             var uniqueName = this.CreateSpritesheetUniqueName(newName);
 

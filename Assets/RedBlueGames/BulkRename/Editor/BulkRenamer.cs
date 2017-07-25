@@ -205,7 +205,6 @@ namespace RedBlueGames.BulkRename
             else
             {
                 var spritesheetRenamer = new SpritesheetRenamer();
-                spritesheetRenamer.SetPathToTexture(path);
                 spritesheetRenamer.AddSpriteForRename(sprite, newName);
 
                 spritesheetRenamers.Add(spritesheetRenamer);
