@@ -39,6 +39,6 @@ Contributing to the project is welcome. You can do so by adding GitHub issues, o
 
 
 ## Contributors and Credits
-- [lucasrowe](https://github.com/lucasrowe) - Provided general QA.
-- [uvivagabond](https://github.com/uvivagabond) - Improved selected object sorting and helped identify edge cases with objects with empty names and empty Game Object assets. 
-- [kevinrmabie](https://github.com/kevinrmabie) - Rubber duck
+- [uvivagabond](https://github.com/uvivagabond)
+- [lucasrowe](https://github.com/lucasrowe)
+- [kevinrmabie](https://github.com/kevinrmabie)
