@@ -43,6 +43,8 @@ namespace RedBlueGames.BulkRename
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
 
+        private const string RenameOpsEditorPrefsKey = "RedBlueGames.BulkRenamer.RenameOperationsToApply";
+
         private BulkRenameGUIStyles guiStyles;
         private BulkRenameGUIContents guiContents;
         private Vector2 renameOperationsPanelScrollPosition;
@@ -146,9 +148,10 @@ namespace RedBlueGames.BulkRename
 
             this.bulkRenamer = new BulkRenamer();
             this.renameOperationsToApply = new List<BaseRenameOperation>();
-            this.renameOperationsToApply.Add(new ReplaceStringOperation());
 
             this.CacheRenameOperationPrototypes();
+
+            this.LoadSavedRenameOperations();
 
             Selection.selectionChanged += this.Repaint;
         }
@@ -327,18 +330,21 @@ namespace RedBlueGames.BulkRename
                     case BaseRenameOperation.ListButtonEvent.MoveUp:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i - 1);
+                            this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
                     case BaseRenameOperation.ListButtonEvent.MoveDown:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i + 1);
+                            this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
                     case BaseRenameOperation.ListButtonEvent.Delete:
                         {
                             this.renameOperationsToApply.RemoveAt(i);
+                            this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
@@ -392,8 +398,49 @@ namespace RedBlueGames.BulkRename
             var renameOp = operationAsRenameOp.Clone();
             this.renameOperationsToApply.Add(renameOp);
 
+            this.SaveRenameOperationsToPreferences();
+
             // Scroll to the bottom to focus the newly created operation.
             this.ScrollRenameOperationsToBottom();
+        }
+
+        private void SaveRenameOperationsToPreferences()
+        {
+            var allOpPathsCommaSeparated = string.Empty;
+            foreach (var op in this.renameOperationsToApply)
+            {
+                allOpPathsCommaSeparated += op.MenuDisplayPath;
+                if (op != this.renameOperationsToApply.Last())
+                {
+                    allOpPathsCommaSeparated += ",";
+                }
+            }
+
+            EditorPrefs.SetString(RenameOpsEditorPrefsKey, allOpPathsCommaSeparated);
+        }
+
+        private void LoadSavedRenameOperations()
+        {
+            var serializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
+            if (string.IsNullOrEmpty(serializedOps))
+            {
+                this.renameOperationsToApply.Add(new ReplaceStringOperation());
+            }
+            else
+            {
+                var ops = serializedOps.Split(',');
+                foreach (var op in ops)
+                {
+                    foreach (var prototypeOp in this.renameOperationPrototypes)
+                    {
+                        if (prototypeOp.MenuDisplayPath == op)
+                        {
+                            this.OnAddRenameOperationConfirmed(prototypeOp);
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void DrawPreviewPanel()
