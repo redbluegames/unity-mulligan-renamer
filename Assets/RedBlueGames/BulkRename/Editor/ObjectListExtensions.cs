@@ -47,5 +47,14 @@ namespace RedBlueGames.BulkRename
 
             return names;
         }
+
+        /// <summary>
+        /// Removes all null entries in the list.
+        /// </summary>
+        /// <param name="list">List to modify.</param>
+        public static void RemoveNullObjects(this List<UnityEngine.Object> list)
+        {
+            list.RemoveAll(item => item == null || item.Equals(null));
+        }
     }
 }

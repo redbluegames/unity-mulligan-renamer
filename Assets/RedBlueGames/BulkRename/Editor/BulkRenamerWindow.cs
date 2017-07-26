@@ -191,6 +191,9 @@ namespace RedBlueGames.BulkRename
                 this.InitializeGUIStyles();
             }
 
+            // Remove any objects that got deleted while working
+            this.ObjectsToRename.RemoveNullObjects();
+
             this.ObjectsToRename.Sort(delegate(UnityEngine.Object x, UnityEngine.Object y)
                 {
                     return EditorUtility.NaturalCompare(x.name, y.name);
