@@ -137,6 +137,18 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected override Color32 HighlightColor
+        {
+            get
+            {
+                return this.ReplaceColor;
+            }
+        }
+
         private string SearchRegexPattern
         {
             get

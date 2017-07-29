@@ -35,6 +35,13 @@ namespace RedBlueGames.BulkRename
     /// </summary>
     public abstract class BaseRenameOperation : IRenameOperation
     {
+        protected readonly Color32 ReplaceColor = new Color32(30, 139, 176, 255);
+        protected readonly Color32 AddColor = new Color32(36, 213, 161, 255);
+        protected readonly Color32 DeleteColor = new Color32(237, 74, 113, 255);
+        protected readonly Color32 ModifyColor = new Color32(254, 208, 110, 255);
+
+        private Texture2D highlightTexture;
+
         /// <summary>
         /// Events that are returned by the GUI draw call to indicate what input was pressed.
         /// </summary>
@@ -92,6 +99,12 @@ namespace RedBlueGames.BulkRename
         protected abstract string HeadingLabel { get; }
 
         /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected abstract Color32 HighlightColor { get; }
+
+        /// <summary>
         /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
@@ -117,7 +130,7 @@ namespace RedBlueGames.BulkRename
             var operationStyle = new GUIStyle(GUI.skin.FindStyle("ScriptText"));
             operationStyle.stretchHeight = false;
             operationStyle.padding = new RectOffset(6, 6, 4, 4);
-            EditorGUILayout.BeginVertical(operationStyle);
+            Rect operationRect = EditorGUILayout.BeginVertical(operationStyle);
             ListButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
                                               this.HeadingLabel,
                                               disableUpButton,
@@ -126,6 +139,15 @@ namespace RedBlueGames.BulkRename
             this.DrawContents();
             EditorGUI.indentLevel--;
             EditorGUILayout.EndVertical();
+
+            var coloredHighlightRect = new Rect(operationRect);
+            coloredHighlightRect.yMin += 1.0f;
+            coloredHighlightRect.xMin += 1.0f;
+            coloredHighlightRect.width = 4.0f;
+            var oldColor = GUI.color;
+            GUI.color = this.HighlightColor;
+            GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
+            GUI.color = oldColor;
 
             return buttonEvent;
         }

@@ -115,6 +115,18 @@ namespace RedBlueGames.BulkRename
             }
         }
 
+        /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected override Color32 HighlightColor
+        {
+            get
+            {
+                return this.DeleteColor;
+            }
+        }
+
         private List<CharacterPresetGUI> GUIPresets { get; set; }
 
         private int SelectedPresetIndex { get; set; }

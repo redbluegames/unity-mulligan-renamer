@@ -550,7 +550,7 @@ namespace RedBlueGames.BulkRename
 
             var nameHeader = this.ShowDiff ? "Diffed Name" : "Original Name";
             EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
-            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
             EditorGUILayout.EndHorizontal();
         }
 
@@ -578,7 +578,7 @@ namespace RedBlueGames.BulkRename
 
             // Display new name
             var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
-            EditorGUILayout.LabelField(info.NewName, style);
+            EditorGUILayout.LabelField(info.NewName, style, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
 
             EditorGUILayout.EndHorizontal();
 

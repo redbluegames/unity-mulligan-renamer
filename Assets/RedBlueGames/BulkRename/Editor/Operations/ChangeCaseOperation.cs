@@ -24,6 +24,7 @@ SOFTWARE.
 namespace RedBlueGames.BulkRename
 {
     using UnityEditor;
+    using UnityEngine;
 
     /// <summary>
     /// RenameOperation that changes the case of the characters in the name.
@@ -86,6 +87,18 @@ namespace RedBlueGames.BulkRename
             get
             {
                 return "Change Case";
+            }
+        }
+
+        /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected override Color32 HighlightColor
+        {
+            get
+            {
+                return this.ModifyColor;
             }
         }
 

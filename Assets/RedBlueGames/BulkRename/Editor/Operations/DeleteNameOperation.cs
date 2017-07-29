@@ -84,6 +84,18 @@ namespace RedBlueGames.BulkRename
         }
 
         /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected override Color32 HighlightColor
+        {
+            get
+            {
+                return this.DeleteColor;
+            }
+        }
+
+        /// <summary>
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>

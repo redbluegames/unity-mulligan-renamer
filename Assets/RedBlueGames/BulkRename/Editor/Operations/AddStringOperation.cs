@@ -24,6 +24,7 @@ SOFTWARE.
 namespace RedBlueGames.BulkRename
 {
     using UnityEditor;
+    using UnityEngine;
 
     /// <summary>
     /// RenameOperation that adds a string to the rename string.
@@ -95,6 +96,18 @@ namespace RedBlueGames.BulkRename
             get
             {
                 return "Add Prefix or Suffix";
+            }
+        }
+
+        /// <summary>
+        /// Gets the color to use for highlighting the operation.
+        /// </summary>
+        /// <value>The color of the highlight.</value>
+        protected override Color32 HighlightColor
+        {
+            get
+            {
+                return this.AddColor;
             }
         }
 
