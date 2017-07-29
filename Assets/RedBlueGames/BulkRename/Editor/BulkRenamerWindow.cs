@@ -45,6 +45,8 @@ namespace RedBlueGames.BulkRename
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.BulkRenamer.RenameOperationsToApply";
 
+        private const float PreviewPanelFirstColumnMinSize = 50.0f;
+
         private BulkRenameGUIStyles guiStyles;
         private BulkRenameGUIContents guiContents;
         private Vector2 renameOperationsPanelScrollPosition;
@@ -446,11 +448,12 @@ namespace RedBlueGames.BulkRename
         private void DrawPreviewPanel()
         {
             EditorGUILayout.BeginVertical();
-            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, this.guiStyles.PreviewScroll);
 
             // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
             // for the scroll to measure horiztonal size correctly.
             this.DrawPreviewTitle();
+
+            this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, this.guiStyles.PreviewScroll);
 
             bool panelIsEmpty = this.ObjectsToRename.Count == 0;
             if (panelIsEmpty)
@@ -541,9 +544,12 @@ namespace RedBlueGames.BulkRename
         private void DrawPreviewTitle()
         {
             EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
-            GUILayout.Space(32.0f);
+
+            // Add space for the icons and remove buttons
+            GUILayout.Space(36.0f); 
+
             var nameHeader = this.ShowDiff ? "Diffed Name" : "Original Name";
-            EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
             EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel);
             EditorGUILayout.EndHorizontal();
         }
@@ -568,7 +574,7 @@ namespace RedBlueGames.BulkRename
             var diffStyle = info.NamesAreDifferent ? this.guiStyles.DiffLabelWhenModified : this.guiStyles.DiffLabelUnModified;
             diffStyle.richText = true;
             var diffName = this.ShowDiff ? info.DiffName : info.OriginalName;
-            EditorGUILayout.LabelField(diffName, diffStyle);
+            EditorGUILayout.LabelField(diffName, diffStyle, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
 
             // Display new name
             var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
