@@ -631,6 +631,8 @@ namespace RedBlueGames.BulkRename
 
         private class PreviewPanelContents
         {
+            private const float MinWidth = 200.0f;
+
             public float LongestOriginalNameWidth { get; private set; }
 
             public float LongestNewNameWidth { get; private set; }
@@ -697,6 +699,9 @@ namespace RedBlueGames.BulkRename
                         preview.LongestNewNameWidth = newNameWidth;
                     }
                 }
+
+                preview.LongestOriginalNameWidth = Mathf.Max(MinWidth, preview.LongestOriginalNameWidth);
+                preview.LongestNewNameWidth = Mathf.Max(MinWidth, preview.LongestNewNameWidth);
 
                 return preview;
             }
