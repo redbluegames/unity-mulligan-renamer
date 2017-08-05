@@ -38,7 +38,6 @@ namespace RedBlueGames.BulkRename
         private const string GameObjectMenuPath = "GameObject/Red Blue/Rename In Bulk";
 
         private const string PrefkeyBase = "RedBlueGames.BulkRenamer";
-        private const string ShowDiffPrefkey = PrefkeyBase + ".ShowDiff";
 
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
@@ -68,19 +67,6 @@ namespace RedBlueGames.BulkRename
                 }
 
                 return this.objectsToRename;
-            }
-        }
-
-        private bool ShowDiff
-        {
-            get
-            {
-                return EditorPrefs.GetBool(ShowDiffPrefkey, true);
-            }
-
-            set
-            {
-                EditorPrefs.SetBool(ShowDiffPrefkey, value);
             }
         }
 
@@ -217,8 +203,8 @@ namespace RedBlueGames.BulkRename
             this.guiStyles = new BulkRenameGUIStyles();
 
             this.guiStyles.Icon = GUIStyle.none;
-            this.guiStyles.DiffLabelUnModified = EditorStyles.label;
-            this.guiStyles.DiffLabelWhenModified = EditorStyles.boldLabel;
+            this.guiStyles.OriginalNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.OriginalNameLabelWhenModified = EditorStyles.boldLabel;
             this.guiStyles.NewNameLabelUnModified = EditorStyles.label;
             this.guiStyles.NewNameLabelModified = EditorStyles.boldLabel;
 
@@ -450,8 +436,6 @@ namespace RedBlueGames.BulkRename
             if (!panelIsEmpty)
             {
                 EditorGUILayout.BeginHorizontal();
-                var showDiffContent = new GUIContent("Show Name as Diff", "Show the changes to the original name as a colored diff.");
-                this.ShowDiff = EditorGUILayout.Toggle(showDiffContent, this.ShowDiff);
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Remove All"))
                 {
@@ -540,15 +524,12 @@ namespace RedBlueGames.BulkRename
 
             GUILayout.Box(info.Icon, this.guiStyles.Icon, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
 
-            // Display diff
-            var diffStyle = info.NamesAreDifferent ? this.guiStyles.DiffLabelWhenModified : this.guiStyles.DiffLabelUnModified;
-            diffStyle.richText = true;
-            var diffName = this.ShowDiff ? info.DiffName : info.OriginalName;
-            EditorGUILayout.LabelField(diffName, diffStyle, GUILayout.Width(firstColumnWidth));
+            var originalNameStyle = info.NamesAreDifferent ? this.guiStyles.OriginalNameLabelWhenModified : this.guiStyles.OriginalNameLabelUnModified;
+            EditorGUILayout.LabelField(info.OriginalName, originalNameStyle, GUILayout.Width(firstColumnWidth));
 
             // Display new name
-            var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
-            EditorGUILayout.LabelField(info.NewName, style, GUILayout.Width(secondColumnWidth));
+            var newNameStyle = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
+            EditorGUILayout.LabelField(info.NewName, newNameStyle, GUILayout.Width(secondColumnWidth));
             GUILayout.FlexibleSpace();
 
             EditorGUILayout.EndHorizontal();
@@ -641,8 +622,6 @@ namespace RedBlueGames.BulkRename
 
             public string OriginalName { get; set; }
 
-            public string DiffName { get; set; }
-
             public string NewName { get; set; }
 
             public bool NamesAreDifferent
@@ -699,7 +678,6 @@ namespace RedBlueGames.BulkRename
                     var info = new PreviewRowModel();
                     var namePreview = namePreviews[i];
                     info.OriginalName = namePreview.OriginalName;
-                    info.DiffName = namePreview.GetDiffAsFormattedString(AddedTextColorTag, DeletedTextColorTag);
                     info.NewName = namePreview.NewName;
                     info.Icon = GetIconForObject(objects[i]);
 
@@ -761,9 +739,9 @@ namespace RedBlueGames.BulkRename
 
             public GUIStyle Icon { get; set; }
 
-            public GUIStyle DiffLabelUnModified { get; set; }
+            public GUIStyle OriginalNameLabelUnModified { get; set; }
 
-            public GUIStyle DiffLabelWhenModified { get; set; }
+            public GUIStyle OriginalNameLabelWhenModified { get; set; }
 
             public GUIStyle NewNameLabelUnModified { get; set; }
 
