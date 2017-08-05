@@ -111,36 +111,6 @@ namespace RedBlueGames.BulkRename
             return false;
         }
 
-        private Texture GetIconForObject(UnityEngine.Object unityObject)
-        {
-            var pathToObject = AssetDatabase.GetAssetPath(unityObject);
-            Texture icon = null;
-            if (string.IsNullOrEmpty(pathToObject))
-            {
-                if (unityObject.GetType() == typeof(GameObject))
-                {
-                    icon = EditorGUIUtility.FindTexture("GameObject Icon");
-                }
-                else
-                {
-                    icon = EditorGUIUtility.FindTexture("DefaultAsset Icon");
-                }
-            }
-            else
-            {
-                if (unityObject is Sprite)
-                {
-                    icon = AssetPreview.GetAssetPreview(unityObject);
-                }
-                else
-                {
-                    icon = AssetDatabase.GetCachedIcon(pathToObject);
-                }
-            }
-
-            return icon;
-        }
-
         private void OnEnable()
         {
             AssetPreview.SetPreviewTextureCacheSize(100);
@@ -448,9 +418,6 @@ namespace RedBlueGames.BulkRename
         private void DrawPreviewPanel()
         {
             EditorGUILayout.BeginVertical();
-
-            // Note that something about the way we draw the preview title, requires it to be included in the scroll view in order
-            // for the scroll to measure horiztonal size correctly.
             this.DrawPreviewTitle();
 
             this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, this.guiStyles.PreviewScroll);
@@ -515,10 +482,14 @@ namespace RedBlueGames.BulkRename
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            var previewRowData = this.GetPreviewRowDataFromObjects(this.ObjectsToRename);
-            for (int i = 0; i < previewRowData.Length; ++i)
+            float paddingForBold = 1.11f;
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename);
+            float firstColumnWidth = GUI.skin.label.CalcSize(new GUIContent(previewContents.LongestOriginalName)).x * paddingForBold;
+            float secondColumnWidth = GUI.skin.label.CalcSize(new GUIContent(previewContents.LongestNewName)).x * paddingForBold;
+
+            for (int i = 0; i < previewContents.NumRows; ++i)
             {
-                if (this.DrawPreviewRow(previewRowData[i]))
+                if (this.DrawPreviewRow(previewContents[i], firstColumnWidth, secondColumnWidth))
                 {
                     this.ObjectsToRename.Remove(this.ObjectsToRename[i]);
                     break;
@@ -546,15 +517,14 @@ namespace RedBlueGames.BulkRename
             EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
 
             // Add space for the icons and remove buttons
-            GUILayout.Space(36.0f); 
+            EditorGUILayout.LabelField("Rename Previews (Before / After)", EditorStyles.miniBoldLabel);
 
-            var nameHeader = this.ShowDiff ? "Diffed Name" : "Original Name";
-            EditorGUILayout.LabelField(nameHeader, EditorStyles.miniBoldLabel, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
-            EditorGUILayout.LabelField("New Name", EditorStyles.miniBoldLabel, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
+            GUILayout.FlexibleSpace();
+
             EditorGUILayout.EndHorizontal();
         }
 
-        private bool DrawPreviewRow(PreviewRowInfo info)
+        private bool DrawPreviewRow(PreviewRowModel info, float firstColumnWidth, float secondColumnWidth)
         {
             bool isDeleteClicked = false;
 
@@ -574,11 +544,12 @@ namespace RedBlueGames.BulkRename
             var diffStyle = info.NamesAreDifferent ? this.guiStyles.DiffLabelWhenModified : this.guiStyles.DiffLabelUnModified;
             diffStyle.richText = true;
             var diffName = this.ShowDiff ? info.DiffName : info.OriginalName;
-            EditorGUILayout.LabelField(diffName, diffStyle, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
+            EditorGUILayout.LabelField(diffName, diffStyle, GUILayout.Width(firstColumnWidth));
 
             // Display new name
             var style = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
-            EditorGUILayout.LabelField(info.NewName, style, GUILayout.MinWidth(PreviewPanelFirstColumnMinSize));
+            EditorGUILayout.LabelField(info.NewName, style, GUILayout.Width(secondColumnWidth));
+            GUILayout.FlexibleSpace();
 
             EditorGUILayout.EndHorizontal();
 
@@ -641,27 +612,6 @@ namespace RedBlueGames.BulkRename
             return validObjects;
         }
 
-        private PreviewRowInfo[] GetPreviewRowDataFromObjects(List<UnityEngine.Object> objects)
-        {
-            var previewRowInfos = new PreviewRowInfo[objects.Count];
-            var objectNames = objects.GetNames();
-            var namePreviews = this.bulkRenamer.GetRenamePreviews(objectNames);
-
-            for (int i = 0; i < namePreviews.Count; ++i)
-            {
-                var info = new PreviewRowInfo();
-                var namePreview = namePreviews[i];
-                info.OriginalName = namePreview.OriginalName;
-                info.DiffName = namePreview.GetDiffAsFormattedString(AddedTextColorTag, DeletedTextColorTag);
-                info.NewName = namePreview.NewName;
-                info.Icon = this.GetIconForObject(objects[i]);
-
-                previewRowInfos[i] = info;
-            }
-
-            return previewRowInfos;
-        }
-
         private bool RenameOperatationsHaveErrors()
         {
             foreach (var renameOp in this.renameOperationsToApply)
@@ -685,7 +635,7 @@ namespace RedBlueGames.BulkRename
             this.renameOperationsPanelScrollPosition = new Vector2(0.0f, 100000);
         }
 
-        private struct PreviewRowInfo
+        private struct PreviewRowModel
         {
             public Texture Icon { get; set; }
 
@@ -701,6 +651,107 @@ namespace RedBlueGames.BulkRename
                 {
                     return this.NewName != this.OriginalName;
                 }
+            }
+        }
+
+        private class PreviewPanelContents
+        {
+            public string LongestOriginalName { get; private set; }
+
+            public string LongestNewName { get; private set; }
+
+            public int NumRows
+            {
+                get
+                {
+                    return this.PreviewRowInfos.Length;
+                }
+            }
+
+            private PreviewRowModel[] PreviewRowInfos { get; set; }
+
+            public PreviewRowModel this [int index]
+            {
+                get
+                {
+                    if (index >= 0 && index < this.PreviewRowInfos.Length)
+                    {
+                        return this.PreviewRowInfos[index];
+                    }
+                    else
+                    {
+                        throw new System.IndexOutOfRangeException(
+                            "Trying to access PreviewRowModel at index that is out of bounds. Index: " + index);
+                    }
+                }
+            }
+
+            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects)
+            {
+                var preview = new PreviewPanelContents();
+
+                preview.PreviewRowInfos = new PreviewRowModel[objects.Count];
+                var objectNames = objects.GetNames();
+                var namePreviews = renamer.GetRenamePreviews(objectNames);
+
+                for (int i = 0; i < namePreviews.Count; ++i)
+                {
+                    var info = new PreviewRowModel();
+                    var namePreview = namePreviews[i];
+                    info.OriginalName = namePreview.OriginalName;
+                    info.DiffName = namePreview.GetDiffAsFormattedString(AddedTextColorTag, DeletedTextColorTag);
+                    info.NewName = namePreview.NewName;
+                    info.Icon = GetIconForObject(objects[i]);
+
+                    preview.PreviewRowInfos[i] = info;
+                }
+
+                preview.LongestOriginalName = string.Empty;
+                preview.LongestNewName = string.Empty;
+                foreach (var previewRowInfo in preview.PreviewRowInfos)
+                {
+                    if (previewRowInfo.OriginalName.Length > preview.LongestOriginalName.Length)
+                    {
+                        preview.LongestOriginalName = previewRowInfo.OriginalName;
+                    }
+
+                    if (previewRowInfo.NewName.Length > preview.LongestNewName.Length)
+                    {
+                        preview.LongestNewName = previewRowInfo.NewName;
+                    }
+                }
+
+                return preview;
+            }
+
+            private static Texture GetIconForObject(UnityEngine.Object unityObject)
+            {
+                var pathToObject = AssetDatabase.GetAssetPath(unityObject);
+                Texture icon = null;
+                if (string.IsNullOrEmpty(pathToObject))
+                {
+                    if (unityObject.GetType() == typeof(GameObject))
+                    {
+                        icon = EditorGUIUtility.FindTexture("GameObject Icon");
+                    }
+                    else
+                    {
+                        icon = EditorGUIUtility.FindTexture("DefaultAsset Icon");
+                    }
+                }
+                else
+                {
+                    if (unityObject is Sprite)
+                    {
+                        icon = AssetPreview.GetAssetPreview(unityObject);
+                    }
+                    else
+                    {
+                        icon = AssetDatabase.GetCachedIcon(pathToObject);
+                    }
+                }
+
+                return icon;
             }
         }
 
