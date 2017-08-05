@@ -466,14 +466,10 @@ namespace RedBlueGames.BulkRename
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            float paddingForBold = 1.11f;
             var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename);
-            float firstColumnWidth = GUI.skin.label.CalcSize(new GUIContent(previewContents.LongestOriginalName)).x * paddingForBold;
-            float secondColumnWidth = GUI.skin.label.CalcSize(new GUIContent(previewContents.LongestNewName)).x * paddingForBold;
-
             for (int i = 0; i < previewContents.NumRows; ++i)
             {
-                if (this.DrawPreviewRow(previewContents[i], firstColumnWidth, secondColumnWidth))
+                if (this.DrawPreviewRow(previewContents[i], previewContents.LongestOriginalNameWidth, previewContents.LongestNewNameWidth))
                 {
                     this.ObjectsToRename.Remove(this.ObjectsToRename[i]);
                     break;
@@ -635,9 +631,9 @@ namespace RedBlueGames.BulkRename
 
         private class PreviewPanelContents
         {
-            public string LongestOriginalName { get; private set; }
+            public float LongestOriginalNameWidth { get; private set; }
 
-            public string LongestNewName { get; private set; }
+            public float LongestNewNameWidth { get; private set; }
 
             public int NumRows
             {
@@ -684,18 +680,21 @@ namespace RedBlueGames.BulkRename
                     preview.PreviewRowInfos[i] = info;
                 }
 
-                preview.LongestOriginalName = string.Empty;
-                preview.LongestNewName = string.Empty;
+                float paddingForBold = 1.11f;
+                preview.LongestOriginalNameWidth = 0.0f;
+                preview.LongestNewNameWidth = 0.0f;
                 foreach (var previewRowInfo in preview.PreviewRowInfos)
                 {
-                    if (previewRowInfo.OriginalName.Length > preview.LongestOriginalName.Length)
+                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.OriginalName)).x * paddingForBold;
+                    if (originalNameWidth > preview.LongestOriginalNameWidth)
                     {
-                        preview.LongestOriginalName = previewRowInfo.OriginalName;
+                        preview.LongestOriginalNameWidth = originalNameWidth;
                     }
 
-                    if (previewRowInfo.NewName.Length > preview.LongestNewName.Length)
+                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.NewName)).x * paddingForBold;
+                    if (newNameWidth > preview.LongestNewNameWidth)
                     {
-                        preview.LongestNewName = previewRowInfo.NewName;
+                        preview.LongestNewNameWidth = newNameWidth;
                     }
                 }
 
