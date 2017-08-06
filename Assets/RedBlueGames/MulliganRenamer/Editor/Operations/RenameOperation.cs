@@ -168,6 +168,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             EditorGUILayout.BeginHorizontal();
 
+            // Leave some space for the colored highlight
+            GUILayout.Space(4.0f);
             EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
             ListButtonEvent buttonEvent = ListButtonEvent.None;
             buttonEvent = this.DrawReorderingButtons(disableUpButton, disableDownButton);
