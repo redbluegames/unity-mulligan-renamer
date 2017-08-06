@@ -168,11 +168,12 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(30.0f);
 
-            EditorGUI.BeginDisabledGroup(this.RenameOperatationsHaveErrors());
+            var disableRenameButton = this.RenameOperatationsHaveErrors() || this.ObjectsToRename.Count == 0;
+            EditorGUI.BeginDisabledGroup(disableRenameButton);
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
                 this.bulkRenamer.RenameObjects(this.ObjectsToRename);
-                this.Close();
+                this.ObjectsToRename.Clear();
             }
 
             EditorGUI.EndDisabledGroup();
