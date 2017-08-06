@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using UnityEngine;

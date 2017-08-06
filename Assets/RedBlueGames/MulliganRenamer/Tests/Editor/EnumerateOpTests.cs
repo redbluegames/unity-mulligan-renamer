@@ -1,4 +1,4 @@
-﻿namespace RedBlueGames.BulkRename.Tests
+﻿namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;

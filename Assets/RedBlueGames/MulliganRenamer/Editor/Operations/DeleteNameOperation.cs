@@ -21,34 +21,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation used to trim characters from the front or back of the rename string.
+    /// RenameOperation used to delete all characters in a name.
     /// </summary>
-    public class TrimCharactersOperation : BaseRenameOperation
+    public class DeleteNameOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.TrimCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
         /// </summary>
-        public TrimCharactersOperation()
+        public DeleteNameOperation()
         {
-            this.NumFrontDeleteChars = 0;
-            this.NumBackDeleteChars = 0;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.TrimCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public TrimCharactersOperation(TrimCharactersOperation operationToCopy)
+        public DeleteNameOperation(DeleteNameOperation operationToCopy)
         {
-            this.NumFrontDeleteChars = operationToCopy.NumFrontDeleteChars;
-            this.NumBackDeleteChars = operationToCopy.NumBackDeleteChars;
         }
 
         /// <summary>
@@ -59,7 +55,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Delete/Trim Characters";
+                return "Delete/Delete Name";
             }
         }
 
@@ -71,21 +67,9 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 3;
+                return 6;
             }
         }
-
-        /// <summary>
-        /// Gets or sets the number of characters to delete from the front.
-        /// </summary>
-        /// <value>The number front delete chars.</value>
-        public int NumFrontDeleteChars { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of characters to delete from the back.
-        /// </summary>
-        /// <value>The number back delete chars.</value>
-        public int NumBackDeleteChars { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -95,7 +79,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Trim Characters";
+                return "Delete Name";
             }
         }
 
@@ -115,9 +99,9 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override BaseRenameOperation Clone()
+        public override RenameOperation Clone()
         {
-            var clone = new TrimCharactersOperation(this);
+            var clone = new DeleteNameOperation(this);
             return clone;
         }
 
@@ -129,24 +113,7 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            var modifiedName = input;
-
-            // Trim Front chars
-            if (this.NumFrontDeleteChars > 0)
-            {
-                var numCharsToDelete = Mathf.Min(this.NumFrontDeleteChars, input.Length);
-                modifiedName = modifiedName.Remove(0, numCharsToDelete);
-            }
-
-            // Trim Back chars
-            if (this.NumBackDeleteChars > 0)
-            {
-                var numCharsToDelete = Mathf.Min(this.NumBackDeleteChars, modifiedName.Length);
-                int startIndex = modifiedName.Length - numCharsToDelete;
-                modifiedName = modifiedName.Remove(startIndex, numCharsToDelete);
-            }
-
-            return modifiedName;
+            return string.Empty;
         }
 
         /// <summary>
@@ -154,10 +121,15 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            this.NumFrontDeleteChars = EditorGUILayout.IntField("Delete from Front", this.NumFrontDeleteChars);
-            this.NumFrontDeleteChars = Mathf.Max(0, this.NumFrontDeleteChars);
-            this.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
-            this.NumBackDeleteChars = Mathf.Max(0, this.NumBackDeleteChars);
+            var labelContent = new GUIContent("Deletes all characters in the name");
+            var labelStyle = new GUIStyle(EditorStyles.label);
+            labelStyle.alignment = TextAnchor.MiddleRight;
+            labelStyle.wordWrap = true;
+
+            // Label just looks better disabled.
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.LabelField(labelContent, labelStyle);
+            EditorGUI.EndDisabledGroup();
         }
     }
 }

@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -32,26 +32,26 @@ namespace RedBlueGames.BulkRename
     /// <summary>
     /// Tool that tries to allow renaming mulitple selections by parsing similar substrings
     /// </summary>
-    public class BulkRenamerWindow : EditorWindow
+    public class MulliganRenamerWindow : EditorWindow
     {
-        private const string WindowMenuPath = "Window/Red Blue/Bulk Renamer";
+        private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
 
-        private const string RenameOpsEditorPrefsKey = "RedBlueGames.BulkRenamer.RenameOperationsToApply";
+        private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
 
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
 
-        private BulkRenameGUIStyles guiStyles;
-        private BulkRenameGUIContents guiContents;
+        private GUIStyles guiStyles;
+        private GUIContents guiContents;
         private Vector2 renameOperationsPanelScrollPosition;
         private Vector2 previewPanelScrollPosition;
         private Rect scrollViewClippingRect;
 
         private BulkRenamer bulkRenamer;
-        private List<BaseRenameOperation> renameOperationPrototypes;
-        private List<BaseRenameOperation> renameOperationsToApply;
+        private List<RenameOperation> renameOperationPrototypes;
+        private List<RenameOperation> renameOperationsToApply;
         private List<UnityEngine.Object> objectsToRename;
 
         private List<UnityEngine.Object> ObjectsToRename
@@ -70,7 +70,7 @@ namespace RedBlueGames.BulkRename
         [MenuItem(WindowMenuPath, false)]
         private static void ShowRenameSpritesheetWindow()
         {
-            var bulkRenamerWindow = EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
+            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(true, "Bulk Rename", true);
 
             // When they launch via right click, we immediately load the objects in.
             bulkRenamerWindow.LoadSelectedObjects();
@@ -101,7 +101,7 @@ namespace RedBlueGames.BulkRename
             this.previewPanelScrollPosition = Vector2.zero;
 
             this.bulkRenamer = new BulkRenamer();
-            this.renameOperationsToApply = new List<BaseRenameOperation>();
+            this.renameOperationsToApply = new List<RenameOperation>();
 
             this.CacheRenameOperationPrototypes();
 
@@ -117,14 +117,14 @@ namespace RedBlueGames.BulkRename
 
         private void CacheRenameOperationPrototypes()
         {
-            this.renameOperationPrototypes = new List<BaseRenameOperation>();
+            this.renameOperationPrototypes = new List<RenameOperation>();
             var assembly = Assembly.Load(new AssemblyName("Assembly-CSharp-Editor"));
             var typesInAssembly = assembly.GetTypes();
             foreach (var type in typesInAssembly)
             {
-                if (type.IsSubclassOf(typeof(BaseRenameOperation)))
+                if (type.IsSubclassOf(typeof(RenameOperation)))
                 {
-                    var renameOp = (BaseRenameOperation)System.Activator.CreateInstance(type);
+                    var renameOp = (RenameOperation)System.Activator.CreateInstance(type);
                     this.renameOperationPrototypes.Add(renameOp);
                 }
             }
@@ -185,7 +185,7 @@ namespace RedBlueGames.BulkRename
 
         private void InitializeGUIContents()
         {
-            this.guiContents = new BulkRenameGUIContents();
+            this.guiContents = new GUIContents();
 
             this.guiContents.DropPrompt = new GUIContent(
                 "No objects specified for rename. Drag objects here to rename them, or");
@@ -196,7 +196,7 @@ namespace RedBlueGames.BulkRename
 
         private void InitializeGUIStyles()
         {
-            this.guiStyles = new BulkRenameGUIStyles();
+            this.guiStyles = new GUIStyles();
 
             this.guiStyles.Icon = GUIStyle.none;
             this.guiStyles.OriginalNameLabelUnModified = EditorStyles.label;
@@ -281,28 +281,28 @@ namespace RedBlueGames.BulkRename
                 var buttonClickEvent = currentElement.DrawGUI(i == 0, i == this.renameOperationsToApply.Count - 1);
                 switch (buttonClickEvent)
                 {
-                    case BaseRenameOperation.ListButtonEvent.MoveUp:
+                    case RenameOperation.ListButtonEvent.MoveUp:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i - 1);
                             this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
-                    case BaseRenameOperation.ListButtonEvent.MoveDown:
+                    case RenameOperation.ListButtonEvent.MoveDown:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i + 1);
                             this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
-                    case BaseRenameOperation.ListButtonEvent.Delete:
+                    case RenameOperation.ListButtonEvent.Delete:
                         {
                             this.renameOperationsToApply.RemoveAt(i);
                             this.SaveRenameOperationsToPreferences();
                             break;
                         }
 
-                    case BaseRenameOperation.ListButtonEvent.None:
+                    case RenameOperation.ListButtonEvent.None:
                         {
                             // Do nothing
                             break;
@@ -317,7 +317,7 @@ namespace RedBlueGames.BulkRename
                         }
                 }
 
-                if (buttonClickEvent != BaseRenameOperation.ListButtonEvent.None)
+                if (buttonClickEvent != RenameOperation.ListButtonEvent.None)
                 {
                     // Workaround: Unfocus any focused control because otherwise it will select a field
                     // from the element that took this one's place.
@@ -339,11 +339,11 @@ namespace RedBlueGames.BulkRename
 
         private void OnAddRenameOperationConfirmed(object operation)
         {
-            var operationAsRenameOp = operation as BaseRenameOperation;
+            var operationAsRenameOp = operation as RenameOperation;
             if (operationAsRenameOp == null)
             {
                 throw new System.ArgumentException(
-                    "BulkRenamerWindow tried to add a new RenameOperation using a type that is not a subclass of BaseRenameOperation." +
+                    "MulliganRenamerWindow tried to add a new RenameOperation using a type that is not a subclass of BaseRenameOperation." +
                     " Operation type: " +
                     operation.GetType().ToString());
             }
@@ -733,7 +733,7 @@ namespace RedBlueGames.BulkRename
             }
         }
 
-        private class BulkRenameGUIStyles
+        private class GUIStyles
         {
             public GUIStyle PreviewScroll { get; set; }
 
@@ -754,7 +754,7 @@ namespace RedBlueGames.BulkRename
             public GUIStyle PreviewHeader { get; set; }
         }
 
-        private class BulkRenameGUIContents
+        private class GUIContents
         {
             public GUIContent DropPrompt { get; set; }
 

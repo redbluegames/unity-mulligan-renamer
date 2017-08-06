@@ -1,4 +1,4 @@
-﻿namespace RedBlueGames.BulkRename
+﻿namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
 

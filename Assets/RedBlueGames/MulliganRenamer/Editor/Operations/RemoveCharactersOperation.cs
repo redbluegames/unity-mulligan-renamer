@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
@@ -31,7 +31,7 @@ namespace RedBlueGames.BulkRename
     /// <summary>
     /// RenameOperation used to replace substrings from the rename string.
     /// </summary>
-    public class RemoveCharactersOperation : BaseRenameOperation
+    public class RemoveCharactersOperation : RenameOperation
     {
         public static readonly RemoveCharactersOperationOptions Symbols = new RemoveCharactersOperationOptions()
         {
@@ -135,7 +135,7 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override BaseRenameOperation Clone()
+        public override RenameOperation Clone()
         {
             var clone = new RemoveCharactersOperation(this);
             return clone;

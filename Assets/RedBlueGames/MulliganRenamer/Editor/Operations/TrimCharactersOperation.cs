@@ -21,31 +21,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation that changes the case of the characters in the name.
+    /// RenameOperation used to trim characters from the front or back of the rename string.
     /// </summary>
-    public class ChangeCaseOperation : BaseRenameOperation
+    public class TrimCharactersOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.TrimCharactersOperation"/> class.
         /// </summary>
-        public ChangeCaseOperation()
+        public TrimCharactersOperation()
         {
-            this.ToUpper = false;
+            this.NumFrontDeleteChars = 0;
+            this.NumBackDeleteChars = 0;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class by copying another.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.TrimCharactersOperation"/> class.
+        /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
+        public TrimCharactersOperation(TrimCharactersOperation operationToCopy)
         {
-            this.ToUpper = operationToCopy.ToUpper;
+            this.NumFrontDeleteChars = operationToCopy.NumFrontDeleteChars;
+            this.NumBackDeleteChars = operationToCopy.NumBackDeleteChars;
         }
 
         /// <summary>
@@ -56,7 +59,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Modify/Change Case";
+                return "Delete/Trim Characters";
             }
         }
 
@@ -68,15 +71,21 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 4;
+                return 3;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
+        /// Gets or sets the number of characters to delete from the front.
         /// </summary>
-        /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
-        public bool ToUpper { get; set; }
+        /// <value>The number front delete chars.</value>
+        public int NumFrontDeleteChars { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of characters to delete from the back.
+        /// </summary>
+        /// <value>The number back delete chars.</value>
+        public int NumBackDeleteChars { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -86,7 +95,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Change Case";
+                return "Trim Characters";
             }
         }
 
@@ -98,7 +107,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return this.ModifyColor;
+                return this.DeleteColor;
             }
         }
 
@@ -106,9 +115,9 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override BaseRenameOperation Clone()
+        public override RenameOperation Clone()
         {
-            var clone = new ChangeCaseOperation(this);
+            var clone = new TrimCharactersOperation(this);
             return clone;
         }
 
@@ -120,14 +129,24 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            if (this.ToUpper)
+            var modifiedName = input;
+
+            // Trim Front chars
+            if (this.NumFrontDeleteChars > 0)
             {
-                return input.ToUpper();
+                var numCharsToDelete = Mathf.Min(this.NumFrontDeleteChars, input.Length);
+                modifiedName = modifiedName.Remove(0, numCharsToDelete);
             }
-            else
+
+            // Trim Back chars
+            if (this.NumBackDeleteChars > 0)
             {
-                return input.ToLower();
+                var numCharsToDelete = Mathf.Min(this.NumBackDeleteChars, modifiedName.Length);
+                int startIndex = modifiedName.Length - numCharsToDelete;
+                modifiedName = modifiedName.Remove(startIndex, numCharsToDelete);
             }
+
+            return modifiedName;
         }
 
         /// <summary>
@@ -135,7 +154,10 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            this.ToUpper = EditorGUILayout.Toggle("To Uppercase", this.ToUpper);
+            this.NumFrontDeleteChars = EditorGUILayout.IntField("Delete from Front", this.NumFrontDeleteChars);
+            this.NumFrontDeleteChars = Mathf.Max(0, this.NumFrontDeleteChars);
+            this.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
+            this.NumBackDeleteChars = Mathf.Max(0, this.NumBackDeleteChars);
         }
     }
 }

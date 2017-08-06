@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
@@ -29,7 +29,7 @@ namespace RedBlueGames.BulkRename
     /// <summary>
     /// RenameOperation that adds a string to the rename string.
     /// </summary>
-    public class AddStringOperation : BaseRenameOperation
+    public class AddStringOperation : RenameOperation
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.AddStringOperation"/> class.
@@ -115,7 +115,7 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override BaseRenameOperation Clone()
+        public override RenameOperation Clone()
         {
             var clone = new AddStringOperation(this);
             return clone;

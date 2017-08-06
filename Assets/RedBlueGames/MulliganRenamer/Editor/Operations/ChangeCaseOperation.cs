@@ -21,30 +21,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation used to delete all characters in a name.
+    /// RenameOperation that changes the case of the characters in the name.
     /// </summary>
-    public class DeleteNameOperation : BaseRenameOperation
+    public class ChangeCaseOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class.
         /// </summary>
-        public DeleteNameOperation()
+        public ChangeCaseOperation()
         {
+            this.ToUpper = false;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
-        /// This is a clone constructor, copying the values from one to another.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class by copying another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public DeleteNameOperation(DeleteNameOperation operationToCopy)
+        public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
         {
+            this.ToUpper = operationToCopy.ToUpper;
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Delete/Delete Name";
+                return "Modify/Change Case";
             }
         }
 
@@ -67,9 +68,15 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return 6;
+                return 4;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
+        /// </summary>
+        /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
+        public bool ToUpper { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -79,7 +86,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return "Delete Name";
+                return "Change Case";
             }
         }
 
@@ -91,7 +98,7 @@ namespace RedBlueGames.BulkRename
         {
             get
             {
-                return this.DeleteColor;
+                return this.ModifyColor;
             }
         }
 
@@ -99,9 +106,9 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override BaseRenameOperation Clone()
+        public override RenameOperation Clone()
         {
-            var clone = new DeleteNameOperation(this);
+            var clone = new ChangeCaseOperation(this);
             return clone;
         }
 
@@ -113,7 +120,14 @@ namespace RedBlueGames.BulkRename
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            return string.Empty;
+            if (this.ToUpper)
+            {
+                return input.ToUpper();
+            }
+            else
+            {
+                return input.ToLower();
+            }
         }
 
         /// <summary>
@@ -121,15 +135,7 @@ namespace RedBlueGames.BulkRename
         /// </summary>
         protected override void DrawContents()
         {   
-            var labelContent = new GUIContent("Deletes all characters in the name");
-            var labelStyle = new GUIStyle(EditorStyles.label);
-            labelStyle.alignment = TextAnchor.MiddleRight;
-            labelStyle.wordWrap = true;
-
-            // Label just looks better disabled.
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.LabelField(labelContent, labelStyle);
-            EditorGUI.EndDisabledGroup();
+            this.ToUpper = EditorGUILayout.Toggle("To Uppercase", this.ToUpper);
         }
     }
 }

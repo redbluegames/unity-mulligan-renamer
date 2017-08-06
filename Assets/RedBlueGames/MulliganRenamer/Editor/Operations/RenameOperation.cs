@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace RedBlueGames.BulkRename
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace RedBlueGames.BulkRename
     /// The base RenameOperation used by BulkRenamer. All Operations derive from this,
     /// allowing for shared code.
     /// </summary>
-    public abstract class BaseRenameOperation : IRenameOperation
+    public abstract class RenameOperation : IRenameOperation
     {
         protected readonly Color32 ReplaceColor = new Color32(30, 139, 176, 255);
         protected readonly Color32 AddColor = new Color32(36, 213, 161, 255);
@@ -116,7 +116,7 @@ namespace RedBlueGames.BulkRename
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public abstract BaseRenameOperation Clone();
+        public abstract RenameOperation Clone();
 
         /// <summary>
         /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
