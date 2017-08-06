@@ -70,7 +70,7 @@ namespace RedBlueGames.MulliganRenamer
         [MenuItem(WindowMenuPath, false)]
         private static void ShowRenameSpritesheetWindow()
         {
-            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(true, "Bulk Rename", true);
+            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(true, "Mulligan Renamer", true);
 
             // When they launch via right click, we immediately load the objects in.
             bulkRenamerWindow.LoadSelectedObjects();
