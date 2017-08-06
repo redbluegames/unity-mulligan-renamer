@@ -34,10 +34,7 @@ namespace RedBlueGames.BulkRename
     /// </summary>
     public class BulkRenamerWindow : EditorWindow
     {
-        private const string AssetsMenuPath = "Assets/Red Blue/Rename In Bulk";
-        private const string GameObjectMenuPath = "GameObject/Red Blue/Rename In Bulk";
-
-        private const string PrefkeyBase = "RedBlueGames.BulkRenamer";
+        private const string WindowMenuPath = "Window/Red Blue/Bulk Renamer";
 
         private const string AddedTextColorTag = "<color=green>";
         private const string DeletedTextColorTag = "<color=red>";
@@ -70,8 +67,7 @@ namespace RedBlueGames.BulkRename
             }
         }
 
-        [MenuItem(AssetsMenuPath, false, 1011)]
-        [MenuItem(GameObjectMenuPath, false, 49)]
+        [MenuItem(WindowMenuPath, false)]
         private static void ShowRenameSpritesheetWindow()
         {
             var bulkRenamerWindow = EditorWindow.GetWindow<BulkRenamerWindow>(true, "Bulk Rename", true);
