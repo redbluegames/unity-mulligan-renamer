@@ -8,6 +8,23 @@
     public class TrimOpTests
     {
         [Test]
+        public void Trimming_TargetIsNull_IsEmpty()
+        {
+            // Arrange
+            string name = null;
+            var trimCharactersOp = new TrimCharactersOperation();
+            trimCharactersOp.NumFrontDeleteChars = 1;
+
+            var expected = string.Empty;
+
+            // Act
+            string result = trimCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void Trimming_DeleteNone_IsUnchanged()
         {
             // Arrange

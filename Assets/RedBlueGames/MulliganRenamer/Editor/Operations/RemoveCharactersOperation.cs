@@ -86,18 +86,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 5;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the options used to configure the Rename Operation.
         /// </summary>
         /// <value>The options.</value>
@@ -149,6 +137,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
             if (!string.IsNullOrEmpty(this.Options.CharactersToRemove))
             {
                 var regexOptions = this.Options.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;

@@ -8,6 +8,23 @@
     public class AddStringOpTests
     {
         [Test]
+        public void AddPrefix_NullTarget_Adds()
+        {
+            // Arrange
+            string name = null;
+            var addStringOp = new AddStringOperation();
+            addStringOp.Prefix = string.Empty;
+
+            var expected = name;
+
+            // Act
+            string result = addStringOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void AddPrefix_Empty_DoesNothing()
         {
             // Arrange

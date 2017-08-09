@@ -61,18 +61,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 4;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
         /// </summary>
         /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
@@ -120,6 +108,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
             if (this.ToUpper)
             {
                 return input.ToUpper();

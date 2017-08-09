@@ -8,6 +8,22 @@
     public class ChangeCaseOpTests
     {
         [Test]
+        public void Rename_NullTarget_DoesNothing()
+        {
+            // Arrange
+            string name = null;
+            var changeCaseOp = new ChangeCaseOperation();
+
+            var expected = string.Empty;
+
+            // Act
+            string result = changeCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void Rename_EmptyString_DoesNothing()
         {
             // Arrange

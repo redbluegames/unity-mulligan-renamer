@@ -8,6 +8,22 @@
     public class RemoveCharactersOpTests
     {
         [Test]
+        public void RemoveCharacters_NullTarget_IsUnchanged()
+        {
+            // Arrange
+            string name = null;
+            var removeCharactersOp = new RemoveCharactersOperation();
+
+            var expected = string.Empty;
+
+            // Act
+            string result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void RemoveCharacters_EmptyTarget_IsUnchanged()
         {
             // Arrange

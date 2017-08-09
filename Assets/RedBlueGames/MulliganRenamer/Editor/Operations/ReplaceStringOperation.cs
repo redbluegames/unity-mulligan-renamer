@@ -64,19 +64,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Replace String";
-            }
-        }
-
-        /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 0;
+                return "Replace/Replace String";
             }
         }
 

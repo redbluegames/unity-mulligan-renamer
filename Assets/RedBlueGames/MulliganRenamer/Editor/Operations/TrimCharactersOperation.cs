@@ -64,18 +64,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 3;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the number of characters to delete from the front.
         /// </summary>
         /// <value>The number front delete chars.</value>
@@ -129,6 +117,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
             var modifiedName = input;
 
             // Trim Front chars
