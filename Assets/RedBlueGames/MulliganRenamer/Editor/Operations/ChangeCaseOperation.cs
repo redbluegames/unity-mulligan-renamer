@@ -61,18 +61,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 4;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
         /// </summary>
         /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>

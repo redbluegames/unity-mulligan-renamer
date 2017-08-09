@@ -69,18 +69,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/>
         /// uses a regex expression for input.
         /// </summary>

@@ -118,21 +118,14 @@ namespace RedBlueGames.MulliganRenamer
         private void CacheRenameOperationPrototypes()
         {
             this.renameOperationPrototypes = new List<RenameOperation>();
-            var assembly = Assembly.Load(new AssemblyName("Assembly-CSharp-Editor"));
-            var typesInAssembly = assembly.GetTypes();
-            foreach (var type in typesInAssembly)
-            {
-                if (type.IsSubclassOf(typeof(RenameOperation)))
-                {
-                    var renameOp = (RenameOperation)System.Activator.CreateInstance(type);
-                    this.renameOperationPrototypes.Add(renameOp);
-                }
-            }
 
-            this.renameOperationPrototypes.Sort((x, y) =>
-                {
-                    return x.MenuOrder.CompareTo(y.MenuOrder);
-                });
+            this.renameOperationPrototypes.Add(new ReplaceStringOperation());
+            this.renameOperationPrototypes.Add(new ReplaceNameOperation());
+            this.renameOperationPrototypes.Add(new AddStringOperation());
+            this.renameOperationPrototypes.Add(new EnumerateOperation());
+            this.renameOperationPrototypes.Add(new TrimCharactersOperation());
+            this.renameOperationPrototypes.Add(new RemoveCharactersOperation());
+            this.renameOperationPrototypes.Add(new ChangeCaseOperation());
         }
 
         private void OnGUI()

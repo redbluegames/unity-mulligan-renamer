@@ -66,18 +66,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public override int MenuOrder
-        {
-            get
-            {
-                return 4;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the starting count.
         /// </summary>
         /// <value>The starting count.</value>

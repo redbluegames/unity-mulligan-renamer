@@ -75,12 +75,6 @@ namespace RedBlueGames.MulliganRenamer
         public abstract string MenuDisplayPath { get; }
 
         /// <summary>
-        /// Gets the order in which this rename op is displayed in the Add Op menu (lower is higher in the list.)
-        /// </summary>
-        /// <value>The menu order.</value>
-        public abstract int MenuOrder { get; }
-
-        /// <summary>
         /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
         /// </summary>
         /// <value><c>true</c> if this instance has errors; otherwise, <c>false</c>.</value>
