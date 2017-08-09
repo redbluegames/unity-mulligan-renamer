@@ -8,6 +8,24 @@
     public class EnumerateOpTests
     {
         [Test]
+        public void Rename_NullTarget_AddsCount()
+        {
+            // Arrange
+            string name = null;
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.CountFormat = "0";
+            enumerateOp.StartingCount = 0;
+
+            var expected = "0";
+
+            // Act
+            string result = enumerateOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void RenameFormat_NoFormat_DoesNothing()
         {
             // Arrange

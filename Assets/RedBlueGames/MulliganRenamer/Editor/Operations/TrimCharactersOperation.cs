@@ -117,6 +117,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
             var modifiedName = input;
 
             // Trim Front chars

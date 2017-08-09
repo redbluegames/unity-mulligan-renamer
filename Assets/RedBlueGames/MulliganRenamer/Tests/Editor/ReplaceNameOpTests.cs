@@ -8,7 +8,7 @@
     public class ReplaceNameOpTests
     {
         [Test]
-        public void Rename_NameIsNull_Renames()
+        public void Rename_DeleteTargetNameIsNull_Renames()
         {
             // Arrange
             string name = null;
@@ -24,7 +24,7 @@
         }
 
         [Test]
-        public void Rename_NameIsEmpty_IsUnchanged()
+        public void Rename_DeleteTargetNameIsEmpty_IsUnchanged()
         {
             // Arrange
             var name = string.Empty;
@@ -40,13 +40,30 @@
         }
 
         [Test]
-        public void Rename_NameIsNotEmpty_IsDeleted()
+        public void Rename_DeleteTargetNameIsNotEmpty_IsDeleted()
         {
             // Arrange
             var name = "Char_Hero";
             var replaceNameOp = new ReplaceNameOperation();
 
             var expected = string.Empty;
+
+            // Act
+            string result = replaceNameOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void Rename_ReplaceName_IsReplaced()
+        {
+            // Arrange
+            var name = "Char_Hero";
+            var replaceNameOp = new ReplaceNameOperation();
+            replaceNameOp.NewName = "Blah";
+
+            var expected = "Blah";
 
             // Act
             string result = replaceNameOp.Rename(name, 0);
