@@ -149,6 +149,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
             if (!string.IsNullOrEmpty(this.Options.CharactersToRemove))
             {
                 var regexOptions = this.Options.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;

@@ -27,24 +27,26 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation used to delete all characters in a name.
+    /// RenameOperation used to delete all characters in a name and replace it with an entirely new one.
     /// </summary>
-    public class DeleteNameOperation : RenameOperation
+    public class ReplaceNameOperation : RenameOperation
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
         /// </summary>
-        public DeleteNameOperation()
+        public ReplaceNameOperation()
         {
+            this.NewName = string.Empty;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceNameOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public DeleteNameOperation(DeleteNameOperation operationToCopy)
+        public ReplaceNameOperation(ReplaceNameOperation operationToCopy)
         {
+            this.NewName = operationToCopy.NewName;
         }
 
         /// <summary>
@@ -55,7 +57,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Delete/Delete Name";
+                return "Replace/Rename";
             }
         }
 
@@ -71,6 +73,8 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public string NewName { get; set; }
+
         /// <summary>
         /// Gets the heading label for the Rename Operation.
         /// </summary>
@@ -79,7 +83,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Delete Name";
+                return "Rename";
             }
         }
 
@@ -91,7 +95,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return this.DeleteColor;
+                return this.ReplaceColor;
             }
         }
 
@@ -101,7 +105,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A clone of this instance</returns>
         public override RenameOperation Clone()
         {
-            var clone = new DeleteNameOperation(this);
+            var clone = new ReplaceNameOperation(this);
             return clone;
         }
 
@@ -113,7 +117,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         public override string Rename(string input, int relativeCount)
         {
-            return string.Empty;
+            return this.NewName;
         }
 
         /// <summary>
@@ -121,15 +125,9 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         protected override void DrawContents()
         {   
-            var labelContent = new GUIContent("Deletes all characters in the name");
-            var labelStyle = new GUIStyle(EditorStyles.label);
-            labelStyle.alignment = TextAnchor.MiddleRight;
-            labelStyle.wordWrap = true;
+            GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
 
-            // Label just looks better disabled.
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.LabelField(labelContent, labelStyle);
-            EditorGUI.EndDisabledGroup();
+            this.NewName = EditorGUILayout.TextField(newNameContent, this.NewName);
         }
     }
 }

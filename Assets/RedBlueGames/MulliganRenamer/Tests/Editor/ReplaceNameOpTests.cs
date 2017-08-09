@@ -5,19 +5,35 @@
     using UnityEngine;
     using NUnit.Framework;
 
-    public class DeleteNameOpTests
+    public class ReplaceNameOpTests
     {
+        [Test]
+        public void Rename_NameIsNull_Renames()
+        {
+            // Arrange
+            string name = null;
+            var replaceNameOp = new ReplaceNameOperation();
+
+            var expected = string.Empty;
+
+            // Act
+            string result = replaceNameOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
         [Test]
         public void Rename_NameIsEmpty_IsUnchanged()
         {
             // Arrange
             var name = string.Empty;
-            var deleteCharactersOp = new DeleteNameOperation();
+            var replaceNameOp = new ReplaceNameOperation();
 
             var expected = string.Empty;
 
             // Act
-            string result = deleteCharactersOp.Rename(name, 0);
+            string result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -28,12 +44,12 @@
         {
             // Arrange
             var name = "Char_Hero";
-            var deleteCharactersOp = new DeleteNameOperation();
+            var replaceNameOp = new ReplaceNameOperation();
 
             var expected = string.Empty;
 
             // Act
-            string result = deleteCharactersOp.Rename(name, 0);
+            string result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

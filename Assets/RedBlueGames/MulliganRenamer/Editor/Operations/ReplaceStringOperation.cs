@@ -64,7 +64,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Replace String";
+                return "Replace/Replace String";
             }
         }
 
