@@ -1,6 +1,12 @@
 # How to Contribute #
 
-Thanks for your interest in contributing to the project! To contribute, please follow these steps.
+Thanks for your interest in contributing to the project!
+
+## Submitting an Issue ##
+Before submitting an issue, give a quick search to see if the issue is already logged. For new issues, feel free to format the Issue however you like. We will add any necessary labels, or reformat it if it will help with organization. If you are submitting a feature request, a mockup would be incredibly helpful to quickly understand the request.
+
+## Submitting Code Changes ##
+To contribute code, please follow these guidelines:
 
 1. It is very helpful to first submit an issue for whatever you'd like to see added to the base repository. 
 This way you can reference the issue in your commits.
