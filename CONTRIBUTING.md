@@ -1,6 +1,6 @@
 # How to Contribute #
 
-Thanks for your interest in contributing to the project!
+Thanks for your interest in contributing to the project! Please follow these suggestions to make sure we all work efficiently together.
 
 ## Submitting an Issue ##
 Before submitting an issue, give a quick search to see if the issue is already logged. For new issues, feel free to format the Issue however you like. We will add any necessary labels, or reformat it if it will help with organization. If you are submitting a feature request, a mockup would be incredibly helpful to quickly understand the request.
