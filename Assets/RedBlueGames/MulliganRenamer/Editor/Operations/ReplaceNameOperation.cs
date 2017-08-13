@@ -23,6 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
 
@@ -67,7 +68,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -79,11 +80,19 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.ReplaceColor;
+            }
+        }
+
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "New Name";
             }
         }
 
@@ -103,18 +112,30 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
-            return this.NewName;
+            var renameResult = new RenameResult();
+
+            if (!string.IsNullOrEmpty(input))
+            {
+                renameResult.Add(new Diff(input, DiffOperation.Deletion));
+            }
+
+            if (!string.IsNullOrEmpty(this.NewName))
+            {
+                renameResult.Add(new Diff(this.NewName, DiffOperation.Insertion));
+            }
+
+            return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        protected override void DrawContents(int controlPrefix)
         {   
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
-
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
             this.NewName = EditorGUILayout.TextField(newNameContent, this.NewName);
         }
     }

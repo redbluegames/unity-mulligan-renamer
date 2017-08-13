@@ -16,10 +16,10 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 0;
 
-            var expected = "0";
+            var expected = new RenameResult() { new Diff("0", DiffOperation.Insertion) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -33,10 +33,10 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = string.Empty;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -51,10 +51,14 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 0;
 
-            var expected = "Char_Hero0";
+            var expected = new RenameResult()
+            {
+                new Diff(name, DiffOperation.Equal),
+                new Diff("0", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -76,17 +80,17 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 1;
 
-            var expectedNames = new string[]
+            var expectedRenameResults = new RenameResult[]
             {
-                "BlockA1",
-                "BlockB2",
-                "BlockC3",
-                "BlockD4",
-                "BlockE5",
+                new RenameResult() { new Diff("BlockA", DiffOperation.Equal), new Diff("1", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockB", DiffOperation.Equal), new Diff("2", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockC", DiffOperation.Equal), new Diff("3", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockD", DiffOperation.Equal), new Diff("4", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockE", DiffOperation.Equal), new Diff("5", DiffOperation.Insertion) },
             };
 
             // Act
-            var results = new List<string>(names.Length);
+            var results = new List<RenameResult>(names.Length);
             for (int i = 0; i < names.Length; ++i)
             {
                 results.Add(enumerateOp.Rename(names[i], i));
@@ -94,12 +98,12 @@
 
             // Assert
             Assert.AreEqual(
-                expectedNames.Length,
+                expectedRenameResults.Length,
                 results.Count,
                 "Expected Results and results should have the same number of entries but didn't.");
             for (int i = 0; i < results.Count; ++i)
             {
-                var expected = expectedNames[i];
+                var expected = expectedRenameResults[i];
                 Assert.AreEqual(expected, results[i]);
             }
         }
@@ -112,10 +116,16 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = -1;
-            var expected = "Char_Hero-1";
+
+
+            var expected = new RenameResult()
+            {
+                new Diff("Char_Hero", DiffOperation.Equal),
+                new Diff("-1", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -129,10 +139,11 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "s";
             enumerateOp.StartingCount = 100;
-            var expected = "Char_Hero";
+
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

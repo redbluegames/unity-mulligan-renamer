@@ -14,10 +14,10 @@
             string name = null;
             var replaceNameOp = new ReplaceNameOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = replaceNameOp.Rename(name, 0);
+            var result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -30,10 +30,10 @@
             var name = string.Empty;
             var replaceNameOp = new ReplaceNameOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = replaceNameOp.Rename(name, 0);
+            var result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -46,10 +46,10 @@
             var name = "Char_Hero";
             var replaceNameOp = new ReplaceNameOperation();
 
-            var expected = string.Empty;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Deletion) };
 
             // Act
-            string result = replaceNameOp.Rename(name, 0);
+            var result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -63,10 +63,14 @@
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "Blah";
 
-            var expected = "Blah";
+            var expected = new RenameResult()
+            {
+                new Diff(name, DiffOperation.Deletion),
+                new Diff("Blah", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = replaceNameOp.Rename(name, 0);
+            var result = replaceNameOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

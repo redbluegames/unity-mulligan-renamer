@@ -40,7 +40,7 @@ namespace RedBlueGames.MulliganRenamer
         protected readonly Color32 DeleteColor = new Color32(237, 74, 113, 255);
         protected readonly Color32 ModifyColor = new Color32(254, 208, 110, 255);
 
-        private Texture2D highlightTexture;
+        private string queuedControlToFocus;
 
         /// <summary>
         /// Events that are returned by the GUI draw call to indicate what input was pressed.
@@ -75,6 +75,12 @@ namespace RedBlueGames.MulliganRenamer
         public abstract string MenuDisplayPath { get; }
 
         /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public abstract string ControlToFocus { get; }
+
+        /// <summary>
         /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
         /// </summary>
         /// <value><c>true</c> if this instance has errors; otherwise, <c>false</c>.</value>
@@ -90,21 +96,21 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected abstract string HeadingLabel { get; }
+        public abstract string HeadingLabel { get; }
 
         /// <summary>
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected abstract Color32 HighlightColor { get; }
+        public abstract Color32 HighlightColor { get; }
 
         /// <summary>
         /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public abstract string Rename(string input, int relativeCount);
+        /// <returns>A diff of the original name, renamed according to the rename operation's rules.</returns>
+        public abstract RenameResult Rename(string input, int relativeCount);
 
         /// <summary>
         /// Clone this instance.
@@ -119,7 +125,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name = "disableUpButton">Draw the GUI with a disabled MoveUp button.</param>
         /// <param name = "disableDownButton">Draw the GUI with a disabled MoveDown button.</param>
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
-        public ListButtonEvent DrawGUI(bool disableUpButton, bool disableDownButton)
+        public ListButtonEvent DrawGUI(GUIOptions guiOptions)
         {
             var operationStyle = new GUIStyle(GUI.skin.FindStyle("ScriptText"));
             operationStyle.stretchHeight = false;
@@ -127,17 +133,18 @@ namespace RedBlueGames.MulliganRenamer
             Rect operationRect = EditorGUILayout.BeginVertical(operationStyle);
             ListButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
                                               this.HeadingLabel,
-                                              disableUpButton,
-                                              disableDownButton);
+                                              guiOptions.DisableUpButton,
+                                              guiOptions.DisableDownButton);
             EditorGUI.indentLevel++;
-            this.DrawContents();
+            this.DrawContents(guiOptions.ControlPrefix);
             EditorGUI.indentLevel--;
             EditorGUILayout.EndVertical();
 
             var coloredHighlightRect = new Rect(operationRect);
-            coloredHighlightRect.yMin += 1.0f;
-            coloredHighlightRect.xMin += 1.0f;
-            coloredHighlightRect.width = 4.0f;
+            coloredHighlightRect.yMin += 2.0f;
+            coloredHighlightRect.yMax -= 1.0f;
+            coloredHighlightRect.xMin += 2.0f;
+            coloredHighlightRect.width = 3.0f;
             var oldColor = GUI.color;
             GUI.color = this.HighlightColor;
             GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
@@ -146,10 +153,7 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
-        /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
-        /// </summary>
-        protected abstract void DrawContents();
+        protected abstract void DrawContents(int controlPrefix);
 
         /// <summary>
         /// Draws the header and reorder buttons.
@@ -218,6 +222,15 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return buttonEvent;
+        }
+
+        public class GUIOptions
+        {
+            public bool DisableUpButton { get; set; }
+
+            public bool DisableDownButton { get; set; }
+
+            public int ControlPrefix { get; set; }
         }
     }
 }

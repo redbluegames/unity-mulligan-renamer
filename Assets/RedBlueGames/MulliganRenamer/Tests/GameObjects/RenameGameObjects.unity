@@ -640,7 +640,7 @@ GameObject:
   m_Component:
   - component: {fileID: 928132342}
   m_Layer: 0
-  m_Name: RockerA
+  m_Name: Blocker_A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -669,7 +669,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1077417810}
   m_Layer: 0
-  m_Name: RockerB
+  m_Name: Blocker_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -726,7 +726,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1472819140}
   m_Layer: 0
-  m_Name: RockerC
+  m_Name: Blocker_C
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

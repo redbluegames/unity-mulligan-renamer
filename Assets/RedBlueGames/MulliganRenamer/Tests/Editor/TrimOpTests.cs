@@ -15,10 +15,10 @@
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 1;
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -33,10 +33,10 @@
             trimCharactersOp.NumFrontDeleteChars = 0;
             trimCharactersOp.NumBackDeleteChars = 0;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -51,10 +51,14 @@
             trimCharactersOp.NumFrontDeleteChars = 1;
             trimCharactersOp.NumBackDeleteChars = 0;
 
-            var expected = "har_Hero";
+            var expected = new RenameResult()
+            {
+                new Diff("C", DiffOperation.Deletion),
+                new Diff("har_Hero", DiffOperation.Equal),
+            };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -69,10 +73,14 @@
             trimCharactersOp.NumFrontDeleteChars = 0;
             trimCharactersOp.NumBackDeleteChars = 1;
 
-            var expected = "Char_Her";
+            var expected = new RenameResult()
+            {
+                new Diff("Char_Her", DiffOperation.Equal),
+                new Diff("o", DiffOperation.Deletion),
+            };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -87,10 +95,15 @@
             trimCharactersOp.NumFrontDeleteChars = 1;
             trimCharactersOp.NumBackDeleteChars = 1;
 
-            var expected = "har_Her";
+            var expected = new RenameResult()
+            {
+                new Diff("C", DiffOperation.Deletion),
+                new Diff("har_Her", DiffOperation.Equal),
+                new Diff("o", DiffOperation.Deletion),
+            };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -105,10 +118,10 @@
             trimCharactersOp.NumFrontDeleteChars = name.Length + 2;
             trimCharactersOp.NumBackDeleteChars = 0;
 
-            var expected = string.Empty;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Deletion) };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -123,10 +136,10 @@
             trimCharactersOp.NumFrontDeleteChars = name.Length;
             trimCharactersOp.NumBackDeleteChars = name.Length;
 
-            var expected = string.Empty;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Deletion) };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -141,10 +154,10 @@
             trimCharactersOp.NumFrontDeleteChars = -1;
             trimCharactersOp.NumBackDeleteChars = -10;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = trimCharactersOp.Rename(name, 0);
+            var result = trimCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

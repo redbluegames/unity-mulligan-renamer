@@ -14,10 +14,10 @@
             string name = null;
             var removeCharactersOp = new RemoveCharactersOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -30,10 +30,10 @@
             var name = string.Empty;
             var removeCharactersOp = new RemoveCharactersOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -47,10 +47,21 @@
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
 
-            var expected = "ABD";
+            var expected = new RenameResult()
+            {
+                new Diff("A", DiffOperation.Equal),
+                new Diff("!", DiffOperation.Deletion),
+                new Diff("@", DiffOperation.Deletion),
+                new Diff("#", DiffOperation.Deletion),
+                new Diff("$", DiffOperation.Deletion),
+                new Diff("%", DiffOperation.Deletion),
+                new Diff("BD", DiffOperation.Equal),
+                new Diff("*", DiffOperation.Deletion),
+                new Diff("(", DiffOperation.Deletion),
+            };
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -64,10 +75,15 @@
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
 
-            var expected = string.Empty;
+            var expected = new RenameResult();
+            for (int i = 0; i < name.Length; ++i)
+            {
+                var substring = name.Substring(i, 1);
+                expected.Add(new Diff(substring, DiffOperation.Deletion));
+            }
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -81,10 +97,25 @@
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
 
-            var expected = "ABkp";
+            var expected = new RenameResult()
+            {
+                new Diff("A", DiffOperation.Equal),
+                new Diff("2", DiffOperation.Deletion),
+                new Diff("5", DiffOperation.Deletion),
+                new Diff("1", DiffOperation.Deletion),
+                new Diff("B", DiffOperation.Equal),
+                new Diff("6", DiffOperation.Deletion),
+                new Diff("3", DiffOperation.Deletion),
+                new Diff("7", DiffOperation.Deletion),
+                new Diff("k", DiffOperation.Equal),
+                new Diff("9", DiffOperation.Deletion),
+                new Diff("1", DiffOperation.Deletion),
+                new Diff("1", DiffOperation.Deletion),
+                new Diff("p", DiffOperation.Equal),
+            };
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -98,10 +129,15 @@
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
 
-            var expected = string.Empty;
+            var expected = new RenameResult();
+            for (int i = 0; i < name.Length; ++i)
+            {
+                var substring = name.Substring(i, 1);
+                expected.Add(new Diff(substring, DiffOperation.Deletion));
+            }
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -117,11 +153,21 @@
             {
                 CharactersToRemove = "ak!5"
             };
-
-            var expected = "bz340";
+            
+            var expected = new RenameResult()
+            {
+                new Diff("a", DiffOperation.Deletion),
+                new Diff("bz3", DiffOperation.Equal),
+                new Diff("5", DiffOperation.Deletion),
+                new Diff("!", DiffOperation.Deletion),
+                new Diff("4", DiffOperation.Equal),
+                new Diff("5", DiffOperation.Deletion),
+                new Diff("0", DiffOperation.Equal),
+                new Diff("k", DiffOperation.Deletion),
+            };
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -139,10 +185,18 @@
                 IsCaseSensitive = true
             };
 
-            var expected = "abcd";
+            var expected = new RenameResult()
+            {
+                new Diff("A", DiffOperation.Deletion),
+                new Diff("B", DiffOperation.Deletion),
+                new Diff("C", DiffOperation.Deletion),
+                new Diff("D", DiffOperation.Deletion),
+                new Diff("abcd", DiffOperation.Equal),
+                new Diff("D", DiffOperation.Deletion),
+            };
 
             // Act
-            string result = removeCharactersOp.Rename(name, 0);
+            var result = removeCharactersOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

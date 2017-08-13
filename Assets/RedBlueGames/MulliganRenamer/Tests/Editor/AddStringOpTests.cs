@@ -13,12 +13,12 @@
             // Arrange
             string name = null;
             var addStringOp = new AddStringOperation();
-            addStringOp.Prefix = string.Empty;
+            addStringOp.Prefix = "Pre";
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff("Pre", DiffOperation.Insertion) };
 
             // Act
-            string result = addStringOp.Rename(name, 0);
+            var result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -32,10 +32,10 @@
             var addStringOp = new AddStringOperation();
             addStringOp.Prefix = string.Empty;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = addStringOp.Rename(name, 0);
+            var result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -49,10 +49,14 @@
             var addStringOp = new AddStringOperation();
             addStringOp.Prefix = "Char_";
 
-            var expected = "Char_Hero_Spawn";
+            var expected = new RenameResult()
+            {
+                new Diff("Char_", DiffOperation.Insertion),
+                new Diff("Hero_Spawn", DiffOperation.Equal)
+            };
 
             // Act
-            string result = addStringOp.Rename(name, 0);
+            var result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -66,27 +70,31 @@
             var addStringOp = new AddStringOperation();
             addStringOp.Suffix = string.Empty;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff("Char_Hero_Spawn", DiffOperation.Equal) };
 
             // Act
-            string result = addStringOp.Rename(name, 0);
+            var result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
         }
 
         [Test]
-        public void AddSuffix_ValidPrefix_IsAdded()
+        public void AddSuffix_ValidSuffix_IsAdded()
         {
             // Arrange
             var name = "Char_Hero";
             var addStringOp = new AddStringOperation();
             addStringOp.Suffix = "_Spawn";
 
-            var expected = "Char_Hero_Spawn";
+            var expected = new RenameResult()
+            {
+                new Diff("Char_Hero", DiffOperation.Equal),
+                new Diff("_Spawn", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = addStringOp.Rename(name, 0);
+            var result = addStringOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
