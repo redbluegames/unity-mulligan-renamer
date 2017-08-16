@@ -6,7 +6,7 @@ Bulk Rename tool for Unity allows for quick and safe renaming of many assets or 
 ## Installation
 To install this package follow these steps:
 
-1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases). (Or click [here](https://github.com/redbluegames/unity-bulk-rename/releases/download/1.2.0/BulkRename.unitypackage))
+1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases). (Or click [here](https://github.com/redbluegames/unity-bulk-rename/releases/tag/v2.1.0))
 
 2. Open the Unity project you want to import the Bulk Rename tool into.
 
