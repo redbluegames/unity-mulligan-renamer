@@ -1,4 +1,27 @@
-﻿namespace RedBlueGames.MulliganRenamer
+﻿/* MIT License
+
+Copyright (c) 2016 Edward Rowe, RedBlueGames
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -14,10 +37,10 @@
             string name = null;
             var changeCaseOp = new ChangeCaseOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = changeCaseOp.Rename(name, 0);
+            var result = changeCaseOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -30,10 +53,10 @@
             var name = string.Empty;
             var changeCaseOp = new ChangeCaseOperation();
 
-            var expected = string.Empty;
+            var expected = RenameResult.Empty;
 
             // Act
-            string result = changeCaseOp.Rename(name, 0);
+            var result = changeCaseOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -43,13 +66,27 @@
         public void RenameToLower_ValidUpperCharacters_AreLowered()
         {
             // Arrange
-            var name = "THIS IS ALL UPPER";
+            var name = "SOME UPPER";
             var changeCaseOp = new ChangeCaseOperation();
 
-            var expected = "this is all upper";
+            var expectedName = "some upper";
+            var expected = new RenameResult();
+            for (int i = 0; i < name.Length; ++i)
+            {
+                var expectedNameChar = expectedName.Substring(i, 1);
+                var nameChar = name.Substring(i, 1);
+                if (nameChar == expectedNameChar)
+                {
+                    expected.Add(new Diff(nameChar, DiffOperation.Equal));
+                    continue;
+                }
+
+                expected.Add(new Diff(nameChar, DiffOperation.Deletion));
+                expected.Add(new Diff(expectedNameChar, DiffOperation.Insertion));
+            }
 
             // Act
-            string result = changeCaseOp.Rename(name, 0);
+            var result = changeCaseOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -63,10 +100,24 @@
             var changeCaseOp = new ChangeCaseOperation();
             changeCaseOp.ToUpper = true;
 
-            var expected = "THIS IS ALL LOWER";
+            var expectedName = "THIS IS ALL LOWER";
+            var expected = new RenameResult();
+            for (int i = 0; i < name.Length; ++i)
+            {
+                var expectedNameChar = expectedName.Substring(i, 1);
+                var nameChar = name.Substring(i, 1);
+                if (nameChar == expectedNameChar)
+                {
+                    expected.Add(new Diff(nameChar, DiffOperation.Equal));
+                    continue;
+                }
+
+                expected.Add(new Diff(nameChar, DiffOperation.Deletion));
+                expected.Add(new Diff(expectedNameChar, DiffOperation.Insertion));
+            }
 
             // Act
-            string result = changeCaseOp.Rename(name, 0);
+            var result = changeCaseOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -79,10 +130,10 @@
             var name = "!@#$%^&*()_-=+[]\\;',.";
             var changeCaseOp = new ChangeCaseOperation();
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = changeCaseOp.Rename(name, 0);
+            var result = changeCaseOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

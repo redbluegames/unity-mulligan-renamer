@@ -74,14 +74,15 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <returns>The RenamePreviews.</returns>
         /// <param name="originalNames">Original names to rename.</param>
-        public List<BulkRenamePreview> GetRenamePreviews(params string[] originalNames)
+        public List<RenameResultSequence> GetRenamePreviews(params string[] originalNames)
         {
-            var previews = new List<BulkRenamePreview>(originalNames.Length);
+            var previews = new List<RenameResultSequence>(originalNames.Length);
 
             for (int i = 0; i < originalNames.Length; ++i)
             {
-                var renamedString = this.GetRenamedString(originalNames[i], i);
-                previews.Add(new BulkRenamePreview(originalNames[i], renamedString));
+                var originalName = originalNames[i];
+                var renameResults = this.GetRenameSequenceForName(originalName, i);
+                previews.Add(new RenameResultSequence(renameResults));
             }
 
             return previews;
@@ -173,16 +174,29 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private string GetRenamedString(string originalName, int count)
+        private List<RenameResult> GetRenameSequenceForName(string originalName, int count)
         {
-            var modifiedName = originalName;
+            var renameResults = new List<RenameResult>();
+            string modifiedName = originalName;
+            RenameResult result;
 
-            foreach (var op in this.RenameOperations)
+            if (this.RenameOperations.Count == 0)
             {
-                modifiedName = op.Rename(modifiedName, count);
+                result = new RenameResult();
+                result.Add(new Diff(originalName, DiffOperation.Equal));
+                renameResults.Add(result);
+            }
+            else
+            {
+                foreach (var op in this.RenameOperations)
+                {
+                    result = op.Rename(modifiedName, count);
+                    renameResults.Add(result);
+                    modifiedName = result.Result;
+                }
             }
 
-            return modifiedName;
+            return renameResults;
         }
 
         private void MarkSpriteForRename(Sprite sprite, string newName, ref List<SpritesheetRenamer> spritesheetRenamers)

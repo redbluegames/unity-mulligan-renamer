@@ -1,4 +1,27 @@
-﻿namespace RedBlueGames.MulliganRenamer
+﻿/* MIT License
+
+Copyright (c) 2016 Edward Rowe, RedBlueGames
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;
@@ -16,10 +39,10 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 0;
 
-            var expected = "0";
+            var expected = new RenameResult() { new Diff("0", DiffOperation.Insertion) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -33,10 +56,10 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = string.Empty;
 
-            var expected = name;
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -51,10 +74,14 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 0;
 
-            var expected = "Char_Hero0";
+            var expected = new RenameResult()
+            {
+                new Diff(name, DiffOperation.Equal),
+                new Diff("0", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -76,17 +103,17 @@
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = 1;
 
-            var expectedNames = new string[]
+            var expectedRenameResults = new RenameResult[]
             {
-                "BlockA1",
-                "BlockB2",
-                "BlockC3",
-                "BlockD4",
-                "BlockE5",
+                new RenameResult() { new Diff("BlockA", DiffOperation.Equal), new Diff("1", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockB", DiffOperation.Equal), new Diff("2", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockC", DiffOperation.Equal), new Diff("3", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockD", DiffOperation.Equal), new Diff("4", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockE", DiffOperation.Equal), new Diff("5", DiffOperation.Insertion) },
             };
 
             // Act
-            var results = new List<string>(names.Length);
+            var results = new List<RenameResult>(names.Length);
             for (int i = 0; i < names.Length; ++i)
             {
                 results.Add(enumerateOp.Rename(names[i], i));
@@ -94,12 +121,12 @@
 
             // Assert
             Assert.AreEqual(
-                expectedNames.Length,
+                expectedRenameResults.Length,
                 results.Count,
                 "Expected Results and results should have the same number of entries but didn't.");
             for (int i = 0; i < results.Count; ++i)
             {
-                var expected = expectedNames[i];
+                var expected = expectedRenameResults[i];
                 Assert.AreEqual(expected, results[i]);
             }
         }
@@ -112,10 +139,16 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "0";
             enumerateOp.StartingCount = -1;
-            var expected = "Char_Hero-1";
+
+
+            var expected = new RenameResult()
+            {
+                new Diff("Char_Hero", DiffOperation.Equal),
+                new Diff("-1", DiffOperation.Insertion)
+            };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
@@ -129,10 +162,11 @@
             var enumerateOp = new EnumerateOperation();
             enumerateOp.CountFormat = "s";
             enumerateOp.StartingCount = 100;
-            var expected = "Char_Hero";
+
+            var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
             // Act
-            string result = enumerateOp.Rename(name, 0);
+            var result = enumerateOp.Rename(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);

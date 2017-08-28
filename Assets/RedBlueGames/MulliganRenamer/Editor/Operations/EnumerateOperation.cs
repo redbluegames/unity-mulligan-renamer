@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class EnumerateOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
         /// </summary>
         public EnumerateOperation()
         {
@@ -41,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -81,7 +81,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -93,11 +93,23 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.AddColor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "Format";
             }
         }
 
@@ -121,17 +133,21 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
-            var modifiedName = input;
-            var currentCount = this.StartingCount + relativeCount;
+            var renameResult = new RenameResult();
+            if (!string.IsNullOrEmpty(input))
+            {
+                renameResult.Add(new Diff(input, DiffOperation.Equal));
+            }
 
             if (!string.IsNullOrEmpty(this.CountFormat))
             {
+                var currentCount = this.StartingCount + relativeCount;
                 try
                 {
                     var currentCountAsString = currentCount.ToString(this.CountFormat);
-                    modifiedName = string.Concat(modifiedName, currentCountAsString);
+                    renameResult.Add(new Diff(currentCountAsString, DiffOperation.Insertion));
                 }
                 catch (System.FormatException)
                 {
@@ -139,13 +155,14 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            return modifiedName;
+            return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
+        protected override void DrawContents(int controlPrefix)
         {   
             var presetsContent = new GUIContent("Format", "Select a preset format or specify your own format.");
             var names = new List<GUIContent>(this.GUIPresets.Count);
@@ -154,11 +171,13 @@ namespace RedBlueGames.MulliganRenamer
                 names.Add(new GUIContent(preset.DisplayName));
             }
 
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
             this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
             var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
 
             EditorGUI.BeginDisabledGroup(selectedPreset.ReadOnly);
             var countFormatContent = new GUIContent("Count Format", "The string format to use when adding the Count to the name.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFormatContent.text));
             this.CountFormat = EditorGUILayout.TextField(countFormatContent, selectedPreset.Format);
             EditorGUI.EndDisabledGroup();
 
@@ -174,6 +193,7 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Count From"));
             this.StartingCount = EditorGUILayout.IntField("Count From", this.StartingCount);
             selectedPreset.Format = this.CountFormat;
         }

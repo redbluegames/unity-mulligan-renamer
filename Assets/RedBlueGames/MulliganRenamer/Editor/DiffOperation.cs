@@ -23,19 +23,24 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections.Generic;
-
     /// <summary>
-    /// Interface designed for an operation that takes a string and renames it based on a ruleset.
+    /// Operations stored by Diffs
     /// </summary>
-    public interface IRenameOperation
+    public enum DiffOperation
     {
         /// <summary>
-        /// Rename the specified input, using the relativeCount.
+        /// The string is equal to the previous value.
         /// </summary>
-        /// <param name="input">Input String to rename.</param>
-        /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        RenameResult Rename(string input, int relativeCount);
+        Equal,
+
+        /// <summary>
+        /// The string represents a deletion to the original string.
+        /// </summary>
+        Deletion,
+
+        /// <summary>
+        /// The string represents an insertion to the original string.
+        /// </summary>
+        Insertion
     }
 }

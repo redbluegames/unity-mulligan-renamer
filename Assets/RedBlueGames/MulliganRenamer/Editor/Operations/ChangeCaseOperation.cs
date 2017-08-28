@@ -23,6 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ChangeCaseOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class.
+        /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class.
         /// </summary>
         public ChangeCaseOperation()
         {
@@ -40,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class by copying another.
+        /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class by copying another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
         public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
@@ -61,7 +62,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
+        /// Gets or sets a value indicating whether this <see cref="ChangeCaseOperation"/> changes the case to uppercase.
         /// </summary>
         /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
         public bool ToUpper { get; set; }
@@ -70,7 +71,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -82,11 +83,23 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.ModifyColor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "To Uppercase";
             }
         }
 
@@ -106,28 +119,61 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
             if (string.IsNullOrEmpty(input))
             {
-                return string.Empty;
+                return RenameResult.Empty;
             }
 
+            var inputCaseChanged = input;
             if (this.ToUpper)
             {
-                return input.ToUpper();
+                inputCaseChanged = input.ToUpper();
             }
             else
             {
-                return input.ToLower();
+                inputCaseChanged = input.ToLower();
             }
+
+            var renameResult = new RenameResult();
+            var consecutiveEqualChars = string.Empty;
+            for (int i = 0; i < input.Length; ++i)
+            {
+                string oldLetter = input.Substring(i, 1);
+                string newLetter = inputCaseChanged.Substring(i, 1);
+                if (oldLetter.Equals(newLetter))
+                {
+                    consecutiveEqualChars = string.Concat(consecutiveEqualChars, oldLetter);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(consecutiveEqualChars))
+                    {
+                        renameResult.Add(new Diff(consecutiveEqualChars, DiffOperation.Equal));
+                        consecutiveEqualChars = string.Empty;
+                    }
+
+                    renameResult.Add(new Diff(oldLetter, DiffOperation.Deletion));
+                    renameResult.Add(new Diff(newLetter, DiffOperation.Insertion));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(consecutiveEqualChars))
+            {
+                renameResult.Add(new Diff(consecutiveEqualChars, DiffOperation.Equal));
+            }
+
+            return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
+        protected override void DrawContents(int controlPrefix)
         {   
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
             this.ToUpper = EditorGUILayout.Toggle("To Uppercase", this.ToUpper);
         }
     }

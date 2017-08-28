@@ -23,6 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ReplaceNameOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceNameOperation"/> class.
         /// </summary>
         public ReplaceNameOperation()
         {
@@ -40,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceNameOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -61,13 +62,17 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets or sets the new name.
+        /// </summary>
+        /// <value>The new name.</value>
         public string NewName { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -79,11 +84,23 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.ReplaceColor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "New Name";
             }
         }
 
@@ -103,18 +120,31 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
-            return this.NewName;
+            var renameResult = new RenameResult();
+
+            if (!string.IsNullOrEmpty(input))
+            {
+                renameResult.Add(new Diff(input, DiffOperation.Deletion));
+            }
+
+            if (!string.IsNullOrEmpty(this.NewName))
+            {
+                renameResult.Add(new Diff(this.NewName, DiffOperation.Insertion));
+            }
+
+            return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
+        protected override void DrawContents(int controlPrefix)
         {   
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
-
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
             this.NewName = EditorGUILayout.TextField(newNameContent, this.NewName);
         }
     }

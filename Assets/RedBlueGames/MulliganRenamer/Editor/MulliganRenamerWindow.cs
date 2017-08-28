@@ -40,6 +40,7 @@ namespace RedBlueGames.MulliganRenamer
         private const string DeletedTextColorTag = "<color=red>";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
+        private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
 
@@ -51,19 +52,57 @@ namespace RedBlueGames.MulliganRenamer
 
         private BulkRenamer bulkRenamer;
         private List<RenameOperation> renameOperationPrototypes;
-        private List<RenameOperation> renameOperationsToApply;
-        private List<UnityEngine.Object> objectsToRename;
 
-        private List<UnityEngine.Object> ObjectsToRename
+        private List<UnityEngine.Object> ObjectsToRename { get; set; }
+
+        private List<RenameOperation> RenameOperationsToApply { get; set; }
+
+        private RenameOperation OperationToForceFocus { get; set; }
+
+        private int FocusedRenameOpIndex
         {
             get
             {
-                if (this.objectsToRename == null)
+                var focusedControl = GUI.GetNameOfFocusedControl();
+                if (string.IsNullOrEmpty(focusedControl))
                 {
-                    this.objectsToRename = new List<UnityEngine.Object>();
+                    return -1;
                 }
 
-                return this.objectsToRename;
+                return GUIControlNameUtility.GetPrefixFromName(focusedControl);
+            }
+        }
+
+        private RenameOperation FocusedRenameOp
+        {
+            get
+            {
+                var focusedOpIndex = this.FocusedRenameOpIndex;
+                if (focusedOpIndex >= 0 && focusedOpIndex < this.RenameOperationsToApply.Count)
+                {
+                    return this.RenameOperationsToApply[this.FocusedRenameOpIndex];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        private bool IsShowingPreviewSteps { get; set; }
+
+        private string LastFocusedControlName { get; set; }
+
+        private bool IsPreviewStepModePreference
+        {
+            get
+            {
+                return EditorPrefs.GetBool(PreviewModePrefixKey, true);
+            }
+
+            set
+            {
+                EditorPrefs.SetBool(PreviewModePrefixKey, value);
             }
         }
 
@@ -93,6 +132,31 @@ namespace RedBlueGames.MulliganRenamer
             return false;
         }
 
+        private static int DrawPreviewBreadcrumbs(int selectedIndex, params PreviewBreadcrumbOptions[] breacrumbConfigs)
+        {
+            var lastSelectedIndex = selectedIndex;
+            for (int i = 0; i < breacrumbConfigs.Length; ++i)
+            {
+                var styleName = i == 0 ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
+                var enabled = i == lastSelectedIndex;
+                bool selected = GUILayout.Toggle(enabled, breacrumbConfigs[i].Heading, styleName);
+                if (selected)
+                {
+                    lastSelectedIndex = i;
+
+                    var coloredHighlightRect = GUILayoutUtility.GetLastRect();
+                    coloredHighlightRect.height = 2;
+                    coloredHighlightRect.x += -5.0f;
+                    var oldColor = GUI.color;
+                    GUI.color = breacrumbConfigs[i].HighlightColor;
+                    GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
+                    GUI.color = oldColor;
+                }
+            }
+
+            return lastSelectedIndex;
+        }
+
         private void OnEnable()
         {
             AssetPreview.SetPreviewTextureCacheSize(100);
@@ -101,10 +165,10 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanelScrollPosition = Vector2.zero;
 
             this.bulkRenamer = new BulkRenamer();
-            this.renameOperationsToApply = new List<RenameOperation>();
+            this.RenameOperationsToApply = new List<RenameOperation>();
+            this.ObjectsToRename = new List<UnityEngine.Object>();
 
             this.CacheRenameOperationPrototypes();
-
             this.LoadSavedRenameOperations();
 
             Selection.selectionChanged += this.Repaint;
@@ -128,55 +192,6 @@ namespace RedBlueGames.MulliganRenamer
             this.renameOperationPrototypes.Add(new ChangeCaseOperation());
         }
 
-        private void OnGUI()
-        {
-            // Initialize GUIContents and GUIStyles in OnGUI since it makes calls that must be done in OnGUI loop.
-            if (this.guiContents == null)
-            {
-                this.InitializeGUIContents();
-            }
-
-            if (this.guiStyles == null)
-            {
-                this.InitializeGUIStyles();
-            }
-
-            // Remove any objects that got deleted while working
-            this.ObjectsToRename.RemoveNullObjects();
-
-            this.ObjectsToRename.Sort(delegate(UnityEngine.Object x, UnityEngine.Object y)
-                {
-                    return EditorUtility.NaturalCompare(x.name, y.name);
-                });
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-            this.DrawOperationsPanel();
-            this.DrawPreviewPanel();
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Space(30.0f);
-
-            var disableRenameButton = this.RenameOperatationsHaveErrors() || this.ObjectsToRename.Count == 0;
-            EditorGUI.BeginDisabledGroup(disableRenameButton);
-            if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
-            {
-                this.bulkRenamer.RenameObjects(this.ObjectsToRename);
-                this.ObjectsToRename.Clear();
-            }
-
-            EditorGUI.EndDisabledGroup();
-
-            GUILayout.Space(30.0f);
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.Space();
-        }
-
         private void InitializeGUIContents()
         {
             this.guiContents = new GUIContents();
@@ -197,6 +212,8 @@ namespace RedBlueGames.MulliganRenamer
             this.guiStyles.OriginalNameLabelWhenModified = EditorStyles.boldLabel;
             this.guiStyles.NewNameLabelUnModified = EditorStyles.label;
             this.guiStyles.NewNameLabelModified = EditorStyles.boldLabel;
+            this.guiStyles.FinalNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.FinalNameLabelWhenModified = EditorStyles.boldLabel;
 
             this.guiStyles.DropPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPrompt.alignment = TextAnchor.MiddleCenter;
@@ -220,22 +237,129 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        private void OnGUI()
+        {
+            // Initialize GUIContents and GUIStyles in OnGUI since it makes calls that must be done in OnGUI loop.
+            if (this.guiContents == null)
+            {
+                this.InitializeGUIContents();
+            }
+
+            if (this.guiStyles == null)
+            {
+                this.InitializeGUIStyles();
+            }
+
+            // Remove any objects that got deleted while working
+            this.ObjectsToRename.RemoveNullObjects();
+
+            this.ObjectsToRename.Sort(delegate(UnityEngine.Object x, UnityEngine.Object y)
+                {
+                    return EditorUtility.NaturalCompare(x.name, y.name);
+                });
+            
+            this.DrawToolbar();
+
+            EditorGUILayout.BeginHorizontal();
+            this.DrawOperationsPanel();
+
+            this.FocusForcedFocusControl();
+
+            this.DrawPreviewPanel();
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Space(30.0f);
+
+            var disableRenameButton = this.RenameOperatationsHaveErrors() || this.ObjectsToRename.Count == 0;
+            EditorGUI.BeginDisabledGroup(disableRenameButton);
+            if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
+            {
+                this.bulkRenamer.RenameObjects(this.ObjectsToRename);
+                this.ObjectsToRename.Clear();
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            GUILayout.Space(30.0f);
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space();
+
+            // Issue #XXX - Workaround to force focus to stay with whatever widget it was on...
+            var focusedControl = GUI.GetNameOfFocusedControl();
+            if (string.IsNullOrEmpty(focusedControl))
+            {
+                GUI.FocusControl(this.LastFocusedControlName);
+            }
+            else
+            {
+                this.LastFocusedControlName = GUI.GetNameOfFocusedControl();
+            }
+        }
+
+        private void FocusRenameOperationDeferred(RenameOperation renameOperation)
+        {
+            this.OperationToForceFocus = renameOperation;
+        }
+
+        private void FocusForcedFocusControl()
+        {
+            if (this.OperationToForceFocus == null)
+            {
+                return;
+            }
+
+            var controlNameToForceFocus = string.Empty; 
+            for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
+            {
+                if (this.RenameOperationsToApply[i] == this.OperationToForceFocus)
+                {
+                    controlNameToForceFocus = GUIControlNameUtility.CreatePrefixedName(
+                        i, 
+                        this.RenameOperationsToApply[i].ControlToFocus);
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(controlNameToForceFocus))
+            {
+                var previouslyFocusedControl = GUI.GetNameOfFocusedControl();
+
+                // Try to focus the desired control
+                GUI.FocusControl(controlNameToForceFocus);
+                EditorGUI.FocusTextInControl(controlNameToForceFocus);
+
+                // Stop focusing the desired control only once it's been focused.
+                // (Workaround because for some reason this fails to focus a control when users click between breadcrumbs)
+                var focusedControl = GUI.GetNameOfFocusedControl();
+                if (controlNameToForceFocus.Equals(focusedControl))
+                {
+                    this.FocusRenameOperationDeferred(null);
+                }
+                else
+                {
+                    // If we weren't able to focus the new control, go back to whatever was focused before.
+                    GUI.FocusControl(previouslyFocusedControl);
+                }
+            }
+        }
+
         private void DrawOperationsPanel()
         {
             EditorGUILayout.BeginVertical();
 
-            EditorGUILayout.LabelField("Rename Operations", EditorStyles.boldLabel);
-
             this.renameOperationsPanelScrollPosition = EditorGUILayout.BeginScrollView(
                 this.renameOperationsPanelScrollPosition,
-                GUILayout.MinWidth(200.0f),
-                GUILayout.MaxWidth(350.0f));
+                GUILayout.Width(350.0f));
 
             this.DrawRenameOperations();
 
             // BulkRenamer expects the list typed as IRenameOperations
             var renameOpsAsInterfaces = new List<IRenameOperation>();
-            foreach (var renameOp in this.renameOperationsToApply)
+            foreach (var renameOp in this.RenameOperationsToApply)
             {
                 renameOpsAsInterfaces.Add((IRenameOperation)renameOp);
             }
@@ -269,30 +393,53 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawRenameOperations()
         {
-            for (int i = 0; i < this.renameOperationsToApply.Count; ++i)
+            // Store the op before buttons are pressed because buttons change focus
+            var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
+
+            for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
-                var currentElement = this.renameOperationsToApply[i];
-                var buttonClickEvent = currentElement.DrawGUI(i == 0, i == this.renameOperationsToApply.Count - 1);
+                var currentElement = this.RenameOperationsToApply[i];
+                var guiOptions = new RenameOperation.GUIOptions();
+                guiOptions.ControlPrefix = i;
+                guiOptions.DisableUpButton = i == 0;
+                guiOptions.DisableDownButton = i == this.RenameOperationsToApply.Count - 1;
+                var buttonClickEvent = currentElement.DrawGUI(guiOptions);
                 switch (buttonClickEvent)
                 {
                     case RenameOperation.ListButtonEvent.MoveUp:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i - 1);
-                            this.SaveRenameOperationsToPreferences();
+
+                            // Move focus with the RenameOp. This techincally changes their focus within the 
+                            // rename op, but it's better than focus getting swapped to whatever op replaces this one.
+                            this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
                             break;
                         }
 
                     case RenameOperation.ListButtonEvent.MoveDown:
                         {
                             this.MoveRenameOpFromIndexToIndex(i, i + 1);
-                            this.SaveRenameOperationsToPreferences();
+                            this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
                             break;
                         }
 
                     case RenameOperation.ListButtonEvent.Delete:
                         {
-                            this.renameOperationsToApply.RemoveAt(i);
-                            this.SaveRenameOperationsToPreferences();
+                            var removingFocusedOperation = focusedOpBeforeButtonPresses == currentElement;
+
+                            this.RemoveRenameOperationAt(i);
+
+                            if (removingFocusedOperation && this.RenameOperationsToApply.Count > 0)
+                            {
+                                // Focus the RenameOp that took this one's place, if there is one. 
+                                var indexToFocus = Mathf.Min(this.RenameOperationsToApply.Count - 1, i);
+                                this.FocusRenameOperationDeferred(this.RenameOperationsToApply[indexToFocus]);
+                            }
+                            else
+                            {
+                                this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
+                            }
+
                             break;
                         }
 
@@ -310,25 +457,18 @@ namespace RedBlueGames.MulliganRenamer
                             return;
                         }
                 }
-
-                if (buttonClickEvent != RenameOperation.ListButtonEvent.None)
-                {
-                    // Workaround: Unfocus any focused control because otherwise it will select a field
-                    // from the element that took this one's place.
-                    GUI.FocusControl(string.Empty);
-
-                    GUIUtility.ExitGUI();
-                    return;
-                }
             }
         }
 
         private void MoveRenameOpFromIndexToIndex(int fromIndex, int desiredIndex)
         {
-            desiredIndex = Mathf.Clamp(desiredIndex, 0, this.renameOperationsToApply.Count - 1);
-            var previousElement = this.renameOperationsToApply[desiredIndex];
-            this.renameOperationsToApply[desiredIndex] = this.renameOperationsToApply[fromIndex];
-            this.renameOperationsToApply[fromIndex] = previousElement;
+            var oldFocusedOp = this.FocusedRenameOp;
+            desiredIndex = Mathf.Clamp(desiredIndex, 0, this.RenameOperationsToApply.Count - 1);
+            var destinationElementCopy = this.RenameOperationsToApply[desiredIndex];
+            this.RenameOperationsToApply[desiredIndex] = this.RenameOperationsToApply[fromIndex];
+            this.RenameOperationsToApply[fromIndex] = destinationElementCopy;
+
+            this.SaveRenameOperationsToPreferences();
         }
 
         private void OnAddRenameOperationConfirmed(object operation)
@@ -342,23 +482,36 @@ namespace RedBlueGames.MulliganRenamer
                     operation.GetType().ToString());
             }
 
+            this.AddRenameOperation(operationAsRenameOp);
+        }
+
+        private void AddRenameOperation(RenameOperation operation)
+        {
             // Construct the Rename op
-            var renameOp = operationAsRenameOp.Clone();
-            this.renameOperationsToApply.Add(renameOp);
+            var renameOp = operation.Clone();
+            this.RenameOperationsToApply.Add(renameOp);
 
             this.SaveRenameOperationsToPreferences();
 
             // Scroll to the bottom to focus the newly created operation.
             this.ScrollRenameOperationsToBottom();
+
+            this.FocusRenameOperationDeferred(renameOp);
+        }
+
+        private void RemoveRenameOperationAt(int indexToRemove)
+        {
+            this.RenameOperationsToApply.RemoveAt(indexToRemove);
+            this.SaveRenameOperationsToPreferences();
         }
 
         private void SaveRenameOperationsToPreferences()
         {
             var allOpPathsCommaSeparated = string.Empty;
-            foreach (var op in this.renameOperationsToApply)
+            foreach (var op in this.RenameOperationsToApply)
             {
                 allOpPathsCommaSeparated += op.MenuDisplayPath;
-                if (op != this.renameOperationsToApply.Last())
+                if (op != this.RenameOperationsToApply.Last())
                 {
                     allOpPathsCommaSeparated += ",";
                 }
@@ -372,7 +525,7 @@ namespace RedBlueGames.MulliganRenamer
             var serializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
             if (string.IsNullOrEmpty(serializedOps))
             {
-                this.renameOperationsToApply.Add(new ReplaceStringOperation());
+                this.RenameOperationsToApply.Add(new ReplaceStringOperation());
             }
             else
             {
@@ -383,18 +536,22 @@ namespace RedBlueGames.MulliganRenamer
                     {
                         if (prototypeOp.MenuDisplayPath == op)
                         {
-                            this.OnAddRenameOperationConfirmed(prototypeOp);
+                            this.AddRenameOperation(prototypeOp);
                             break;
                         }
                     }
                 }
+            }
+
+            if (this.RenameOperationsToApply.Count > 0)
+            {
+                this.FocusRenameOperationDeferred(this.RenameOperationsToApply.First());
             }
         }
 
         private void DrawPreviewPanel()
         {
             EditorGUILayout.BeginVertical();
-            this.DrawPreviewTitle();
 
             this.previewPanelScrollPosition = EditorGUILayout.BeginScrollView(this.previewPanelScrollPosition, this.guiStyles.PreviewScroll);
 
@@ -456,10 +613,36 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename);
+            int renameStep = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename, renameStep);
+
+            EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
+
+            // Space gives us a bit of padding or else we're just too bunched up to the side
+            GUILayout.Space(42.0f);
+
+            string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
+            string newNameColumnHeader = "After";
+
+            EditorGUILayout.LabelField(originalNameColumnHeader, this.guiStyles.NewNameLabelModified, GUILayout.Width(previewContents.LongestOriginalNameWidth));
+            if (this.IsShowingPreviewSteps && this.RenameOperationsToApply.Count > 1)
+            {
+                EditorGUILayout.LabelField(newNameColumnHeader, this.guiStyles.NewNameLabelModified, GUILayout.Width(previewContents.LongestNewNameWidth));
+            }
+
+            EditorGUILayout.LabelField("Final Name", this.guiStyles.NewNameLabelModified, GUILayout.Width(previewContents.LongestNewNameWidth));
+
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.EndHorizontal();
+
             for (int i = 0; i < previewContents.NumRows; ++i)
             {
-                if (this.DrawPreviewRow(previewContents[i], previewContents.LongestOriginalNameWidth, previewContents.LongestNewNameWidth))
+                if (this.DrawPreviewRow(
+                        previewContents[i],
+                        previewContents.LongestOriginalNameWidth,
+                        previewContents.LongestNewNameWidth,
+                        previewContents.LongestNewNameWidth))
                 {
                     this.ObjectsToRename.Remove(this.ObjectsToRename[i]);
                     break;
@@ -482,19 +665,55 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.EndDisabledGroup();
         }
 
-        private void DrawPreviewTitle()
+        private void DrawToolbar()
         {
-            EditorGUILayout.BeginHorizontal(this.guiStyles.PreviewHeader);
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-            // Add space for the icons and remove buttons
-            EditorGUILayout.LabelField("Rename Previews (Before / After)", EditorStyles.miniBoldLabel);
+            GUILayout.Label("Rename Operations", GUILayout.Width(340.0f));
+
+            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
+            var buttonText = this.IsShowingPreviewSteps ? "Hide Steps" : "Show Steps";
+            var toggleStepPreview = GUILayout.Button(buttonText, "toolbarbutton");
+            EditorGUI.EndDisabledGroup();
+
+            // The breadcrumb style spills to the left some so we need to leave extra space for it
+            const float BreadcrumbLeftOffset = 5.0f;
+            GUILayout.Space(BreadcrumbLeftOffset + 1.0f);
+
+            if (toggleStepPreview)
+            {
+                this.IsPreviewStepModePreference = !this.IsPreviewStepModePreference;
+            }
+
+            // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
+            // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
+            this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count <= 1;
+            if (this.IsShowingPreviewSteps)
+            {
+                var breadcrumbOptions = new PreviewBreadcrumbOptions[this.RenameOperationsToApply.Count];
+                for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
+                {
+                    breadcrumbOptions[i].Heading = this.RenameOperationsToApply[i].HeadingLabel;
+                    breadcrumbOptions[i].HighlightColor = this.RenameOperationsToApply[i].HighlightColor;
+                }
+
+                var selectedBreadcrumbIndex = DrawPreviewBreadcrumbs(this.FocusedRenameOpIndex, breadcrumbOptions);
+                if (selectedBreadcrumbIndex != this.FocusedRenameOpIndex)
+                {
+                    var renameOp = this.RenameOperationsToApply[selectedBreadcrumbIndex];
+                    this.FocusRenameOperationDeferred(renameOp);
+                }
+            }
+            else
+            {
+                DrawPreviewBreadcrumbs(0, new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear });
+            }
 
             GUILayout.FlexibleSpace();
-
             EditorGUILayout.EndHorizontal();
         }
 
-        private bool DrawPreviewRow(PreviewRowModel info, float firstColumnWidth, float secondColumnWidth)
+        private bool DrawPreviewRow(PreviewRowModel info, float firstColumnWidth, float secondColumnWidth, float thirdColumnWidth)
         {
             bool isDeleteClicked = false;
 
@@ -511,11 +730,23 @@ namespace RedBlueGames.MulliganRenamer
             GUILayout.Box(info.Icon, this.guiStyles.Icon, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
 
             var originalNameStyle = info.NamesAreDifferent ? this.guiStyles.OriginalNameLabelWhenModified : this.guiStyles.OriginalNameLabelUnModified;
+            originalNameStyle.richText = true;
             EditorGUILayout.LabelField(info.OriginalName, originalNameStyle, GUILayout.Width(firstColumnWidth));
 
-            // Display new name
-            var newNameStyle = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
-            EditorGUILayout.LabelField(info.NewName, newNameStyle, GUILayout.Width(secondColumnWidth));
+            if (this.IsPreviewStepModePreference)
+            {
+                // Display new name
+                var newNameStyle = info.NamesAreDifferent ? this.guiStyles.NewNameLabelModified : this.guiStyles.NewNameLabelUnModified;
+                newNameStyle.richText = true;
+                EditorGUILayout.LabelField(info.NewName, newNameStyle, GUILayout.Width(secondColumnWidth));
+            }
+
+            if (!this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count > 1)
+            {
+                var finalNameStyle = info.NamesAreDifferent ? this.guiStyles.FinalNameLabelWhenModified : this.guiStyles.FinalNameLabelUnModified;
+                EditorGUILayout.LabelField(info.FinalName, finalNameStyle, GUILayout.Width(thirdColumnWidth));
+            }
+
             GUILayout.FlexibleSpace();
 
             EditorGUILayout.EndHorizontal();
@@ -581,7 +812,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private bool RenameOperatationsHaveErrors()
         {
-            foreach (var renameOp in this.renameOperationsToApply)
+            foreach (var renameOp in this.RenameOperationsToApply)
             {
                 if (renameOp.HasErrors)
                 {
@@ -602,6 +833,13 @@ namespace RedBlueGames.MulliganRenamer
             this.renameOperationsPanelScrollPosition = new Vector2(0.0f, 100000);
         }
 
+        private struct PreviewBreadcrumbOptions
+        {
+            public string Heading { get; set; }
+
+            public Color32 HighlightColor { get; set; }
+        }
+
         private struct PreviewRowModel
         {
             public Texture Icon { get; set; }
@@ -609,6 +847,8 @@ namespace RedBlueGames.MulliganRenamer
             public string OriginalName { get; set; }
 
             public string NewName { get; set; }
+
+            public string FinalName { get; set; }
 
             public bool NamesAreDifferent
             {
@@ -653,7 +893,7 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects, int renameStep)
             {
                 var preview = new PreviewPanelContents();
 
@@ -665,25 +905,38 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var info = new PreviewRowModel();
                     var namePreview = namePreviews[i];
-                    info.OriginalName = namePreview.OriginalName;
-                    info.NewName = namePreview.NewName;
+                    if (renameStep >= 0 && renameStep < namePreview.NumSteps)
+                    {
+                        info.OriginalName = namePreview.GetOriginalNameAtStep(renameStep);
+                        info.NewName = namePreview.GetNewNameAtStep(renameStep);
+                        info.FinalName = namePreview.NewName;
+                    }
+                    else
+                    {
+                        info.OriginalName = namePreview.OriginalName;
+                        info.NewName = namePreview.NewName;
+                        info.FinalName = namePreview.NewName;
+                    }
+
                     info.Icon = GetIconForObject(objects[i]);
 
                     preview.PreviewRowInfos[i] = info;
                 }
 
-                float paddingForBold = 1.11f;
+                float paddingScaleForBold = 1.11f;
                 preview.LongestOriginalNameWidth = 0.0f;
                 preview.LongestNewNameWidth = 0.0f;
                 foreach (var previewRowInfo in preview.PreviewRowInfos)
                 {
-                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.OriginalName)).x * paddingForBold;
+                    var originalNameNoTags = System.Text.RegularExpressions.Regex.Replace(previewRowInfo.OriginalName, @"<[^>]*>", string.Empty);
+                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(originalNameNoTags)).x * paddingScaleForBold;
                     if (originalNameWidth > preview.LongestOriginalNameWidth)
                     {
                         preview.LongestOriginalNameWidth = originalNameWidth;
                     }
 
-                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.NewName)).x * paddingForBold;
+                    var newNameNoTags = System.Text.RegularExpressions.Regex.Replace(previewRowInfo.NewName, @"<[^>]*>", string.Empty);
+                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(newNameNoTags)).x * paddingScaleForBold;
                     if (newNameWidth > preview.LongestNewNameWidth)
                     {
                         preview.LongestNewNameWidth = newNameWidth;
@@ -740,6 +993,10 @@ namespace RedBlueGames.MulliganRenamer
             public GUIStyle NewNameLabelUnModified { get; set; }
 
             public GUIStyle NewNameLabelModified { get; set; }
+
+            public GUIStyle FinalNameLabelUnModified { get; set; }
+
+            public GUIStyle FinalNameLabelWhenModified { get; set; }
 
             public GUIStyle DropPrompt { get; set; }
 

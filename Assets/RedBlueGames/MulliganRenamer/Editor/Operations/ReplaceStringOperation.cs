@@ -23,6 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEngine;
@@ -33,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ReplaceStringOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceStringOperation"/> class.
         /// </summary>
         public ReplaceStringOperation()
         {
@@ -44,7 +45,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceStringOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -69,7 +70,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/>
+        /// Gets or sets a value indicating whether this <see cref="ReplaceStringOperation"/>
         /// uses a regex expression for input.
         /// </summary>
         /// <value><c>true</c> if input is a regular expression; otherwise, <c>false</c>.</value>
@@ -117,7 +118,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -129,11 +130,23 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.ReplaceColor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "Search String";
             }
         }
 
@@ -176,35 +189,47 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
-            if (!string.IsNullOrEmpty(this.SearchRegexPattern))
+            if (string.IsNullOrEmpty(input))
             {
-                var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
-                var replacement = this.ReplacementString;
+                return new RenameResult();
+            }
 
-                try
-                {
-                    // Regex gives us case sensitivity, even when not searching with regex.
-                    return Regex.Replace(input, this.SearchRegexPattern, replacement, regexOptions);
-                }
-                catch (System.ArgumentException)
-                {
-                    return input;
-                }
-            }
-            else
+            RenameResult renameResult;
+            if (string.IsNullOrEmpty(this.SearchString))
             {
-                return input;
+                renameResult = new RenameResult();
+                renameResult.Add(new Diff(input, DiffOperation.Equal));
+                return renameResult;
             }
+
+            MatchCollection matches;
+            try
+            {
+                // Regex gives us case sensitivity, even when not searching with regex.
+                var regexOptions = this.SearchIsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
+                matches = Regex.Matches(input, this.SearchRegexPattern, regexOptions);
+            }
+            catch (System.ArgumentException)
+            {
+                renameResult = new RenameResult();
+                renameResult.Add(new Diff(input, DiffOperation.Equal));
+                return renameResult;
+            }
+
+            renameResult = this.CreateDiffFromMatches(input, this.ReplacementString, matches);
+            return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
+        protected override void DrawContents(int controlPrefix)
         {   
             var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, regexToggleContent.text));
             this.UseRegex = EditorGUILayout.Toggle(regexToggleContent, this.UseRegex);
 
             GUIContent searchContent;
@@ -224,12 +249,16 @@ namespace RedBlueGames.MulliganRenamer
                     "String to replace matching instances of the Search string.");
             }
 
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Search String"));
             this.SearchString = EditorGUILayout.TextField(searchContent, this.SearchString);
+
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Replacement String"));
             this.ReplacementString = EditorGUILayout.TextField(replacementContent, this.ReplacementString);
 
             var caseSensitiveContent = new GUIContent(
                                            "Case Sensitive", 
                                            "Search using case sensitivity. Only strings that match the supplied casing will be replaced.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, caseSensitiveContent.text));
             this.SearchIsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveContent, this.SearchIsCaseSensitive);
 
             if (this.HasErrors)
@@ -268,6 +297,41 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return true;
+        }
+
+        private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
+        {
+            var renameResult = new RenameResult();
+            var nextMatchStartingIndex = 0;
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                // Grab the substring before the match
+                if (nextMatchStartingIndex < match.Index)
+                {
+                    string before = originalName.Substring(nextMatchStartingIndex, match.Index - nextMatchStartingIndex);
+                    renameResult.Add(new Diff(before, DiffOperation.Equal));
+                }
+
+                // Add the match as a deletion
+                renameResult.Add(new Diff(match.Value, DiffOperation.Deletion));
+
+                // Add the result as an insertion
+                var result = match.Result(replacementRegex);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    renameResult.Add(new Diff(result, DiffOperation.Insertion));
+                }
+
+                nextMatchStartingIndex = match.Index + match.Length;
+            }
+
+            if (nextMatchStartingIndex < originalName.Length)
+            {
+                var lastSubstring = originalName.Substring(nextMatchStartingIndex, originalName.Length - nextMatchStartingIndex);
+                renameResult.Add(new Diff(lastSubstring, DiffOperation.Equal));
+            }
+
+            return renameResult;
         }
     }
 }

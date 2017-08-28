@@ -54,8 +54,10 @@ namespace RedBlueGames.MulliganRenamer
             CharactersAreRegex = false
         };
 
+        private ReplaceStringOperation internalReplaceStringOperation;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RemoveCharactersOperation"/> class.
         /// </summary>
         public RemoveCharactersOperation()
         {
@@ -63,7 +65,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RemoveCharactersOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -95,7 +97,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the heading label for the Rename Operation.
         /// </summary>
         /// <value>The heading label.</value>
-        protected override string HeadingLabel
+        public override string HeadingLabel
         {
             get
             {
@@ -107,11 +109,60 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the color to use for highlighting the operation.
         /// </summary>
         /// <value>The color of the highlight.</value>
-        protected override Color32 HighlightColor
+        public override Color32 HighlightColor
         {
             get
             {
                 return this.DeleteColor;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
+        /// </summary>
+        public override bool HasErrors
+        {
+            get
+            {
+                return this.InternalReplaceStringOperation.HasErrors;
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "Preset";
+            }
+        }
+
+        private ReplaceStringOperation InternalReplaceStringOperation
+        {
+            get
+            {
+                if (this.internalReplaceStringOperation == null)
+                {
+                    this.internalReplaceStringOperation = new ReplaceStringOperation();
+                }
+
+                this.internalReplaceStringOperation.SearchIsCaseSensitive = this.Options.IsCaseSensitive;
+                this.internalReplaceStringOperation.UseRegex = true;
+
+                var regexPattern = this.Options.CharactersToRemove;
+                if (!this.Options.CharactersAreRegex)
+                {
+                    regexPattern = Regex.Escape(regexPattern);
+                }
+
+                var charactersAsRegex = string.Concat("[", regexPattern, "]");
+                this.internalReplaceStringOperation.SearchString = charactersAsRegex;
+                this.internalReplaceStringOperation.ReplacementString = string.Empty;
+
+                return this.internalReplaceStringOperation;
             }
         }
 
@@ -135,49 +186,21 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override string Rename(string input, int relativeCount)
+        public override RenameResult Rename(string input, int relativeCount)
         {
             if (string.IsNullOrEmpty(input))
             {
-                return string.Empty;
+                return RenameResult.Empty;
             }
 
-            if (!string.IsNullOrEmpty(this.Options.CharactersToRemove))
-            {
-                var regexOptions = this.Options.IsCaseSensitive ? default(RegexOptions) : RegexOptions.IgnoreCase;
-                var replacement = string.Empty;
-
-                try
-                {
-                    var regexPattern = this.Options.CharactersToRemove;
-                    if (!this.Options.CharactersAreRegex)
-                    {
-                        regexPattern = Regex.Escape(regexPattern);
-                    }
-
-                    var charactersAsRegex = string.Concat("[", regexPattern, "]");
-                    return Regex.Replace(input, charactersAsRegex, replacement, regexOptions);
-                }
-                catch (System.ArgumentException e)
-                {
-                    throw new System.ArgumentException(
-                        string.Format(
-                            "Trying to Rename a string by RemovingCharacters using an invalid RegEx expression [{0}]." +
-                            " Please supply valid RegEx or unflag the operation as Regex.",
-                            this.Options.CharactersToRemove),
-                        e);
-                }
-            }
-            else
-            {
-                return input;
-            }
+            return this.InternalReplaceStringOperation.Rename(input, relativeCount);
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
-        protected override void DrawContents()
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
+        protected override void DrawContents(int controlPrefix)
         {
             var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
             var names = new List<GUIContent>(this.GUIPresets.Count);
@@ -186,6 +209,7 @@ namespace RedBlueGames.MulliganRenamer
                 names.Add(new GUIContent(preset.DisplayName));
             }
 
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
             this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
             var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
 
@@ -203,6 +227,7 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
+                GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, charactersFieldContent.text));
                 workingOptions.CharactersToRemove = EditorGUILayout.TextField(charactersFieldContent, workingOptions.CharactersToRemove);
 
                 var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
@@ -261,7 +286,7 @@ namespace RedBlueGames.MulliganRenamer
 
             /// <summary>
             /// Gets or sets a value indicating whether this
-            /// <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation+RemoveCharactersOperationOptions"/>
+            /// <see cref="RemoveCharactersOperation+RemoveCharactersOperationOptions"/>
             /// characters are regex symbols.
             /// </summary>
             /// <value><c>true</c> if characters are regex; otherwise, <c>false</c>.</value>
