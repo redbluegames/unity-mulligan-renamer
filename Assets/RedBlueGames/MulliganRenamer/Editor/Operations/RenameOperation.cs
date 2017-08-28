@@ -122,8 +122,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
         /// Operation with the modified data. This way we mirror how regular GUI calls work.
         /// </summary>
-        /// <param name = "disableUpButton">Draw the GUI with a disabled MoveUp button.</param>
-        /// <param name = "disableDownButton">Draw the GUI with a disabled MoveDown button.</param>
+        /// <param name = "guiOptions">Options to use when drawing the operation GUI.</param>
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
         public ListButtonEvent DrawGUI(GUIOptions guiOptions)
         {
@@ -153,6 +152,10 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
+        /// <summary>
+        /// Draws the contents of the Rename Op using EditorGUILayout.
+        /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected abstract void DrawContents(int controlPrefix);
 
         /// <summary>
@@ -224,12 +227,29 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
+        /// <summary>
+        /// GUI options to apply when drawing a RenameOperation
+        /// </summary>
         public class GUIOptions
         {
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="RenameOperation"/>
+            /// should be drawn with the Up Button disabled.
+            /// </summary>
+            /// <value><c>true</c> if the up button should be disabled; otherwise, <c>false</c>.</value>
             public bool DisableUpButton { get; set; }
 
+            /// <summary>
+            /// Gets or sets a value indicating whether this <see cref="RenameOperation"/>
+            /// should be drawn with the Down Button disabled.
+            /// </summary>
+            /// <value><c>true</c> if the down button should be disabled; otherwise, <c>false</c>.</value>
             public bool DisableDownButton { get; set; }
 
+            /// <summary>
+            /// Gets or sets the prefix to use when setting control names for this <see cref="RenameOperation"/>
+            /// </summary>
+            /// <value>The control prefix.</value>
             public int ControlPrefix { get; set; }
         }
     }

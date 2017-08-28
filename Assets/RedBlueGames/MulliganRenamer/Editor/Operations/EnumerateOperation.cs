@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class EnumerateOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
         /// </summary>
         public EnumerateOperation()
         {
@@ -41,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -101,6 +101,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
         public override string ControlToFocus
         {
             get
@@ -157,6 +161,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {   
             var presetsContent = new GUIContent("Format", "Select a preset format or specify your own format.");

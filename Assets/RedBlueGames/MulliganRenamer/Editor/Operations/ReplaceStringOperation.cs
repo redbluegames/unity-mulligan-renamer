@@ -34,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ReplaceStringOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceStringOperation"/> class.
         /// </summary>
         public ReplaceStringOperation()
         {
@@ -45,7 +45,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceStringOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -70,7 +70,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ReplaceStringOperation"/>
+        /// Gets or sets a value indicating whether this <see cref="ReplaceStringOperation"/>
         /// uses a regex expression for input.
         /// </summary>
         /// <value><c>true</c> if input is a regular expression; otherwise, <c>false</c>.</value>
@@ -138,6 +138,18 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
+        public override string ControlToFocus
+        {
+            get
+            {
+                return "Search String";
+            }
+        }
+
         private string SearchRegexPattern
         {
             get
@@ -158,14 +170,6 @@ namespace RedBlueGames.MulliganRenamer
 
                     return searchStringRegexPattern;
                 }
-            }
-        }
-
-        public override string ControlToFocus
-        {
-            get
-            {
-                return "Search String";
             }
         }
 
@@ -214,48 +218,14 @@ namespace RedBlueGames.MulliganRenamer
                 return renameResult;
             }
 
-            renameResult = CreateDiffFromMatches(input, this.ReplacementString, matches);
-            return renameResult;
-        }
-
-        private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
-        {
-            var renameResult = new RenameResult();
-            var nextMatchStartingIndex = 0;
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                // Grab the substring before the match
-                if (nextMatchStartingIndex < match.Index)
-                {
-                    string before = originalName.Substring(nextMatchStartingIndex, match.Index - nextMatchStartingIndex);
-                    renameResult.Add(new Diff(before, DiffOperation.Equal));
-                }
-
-                // Add the match as a deletion
-                renameResult.Add(new Diff(match.Value, DiffOperation.Deletion));
-
-                // Add the result as an insertion
-                var result = match.Result(replacementRegex);
-                if (!string.IsNullOrEmpty(result))
-                {
-                    renameResult.Add(new Diff(result, DiffOperation.Insertion));
-                }
-
-                nextMatchStartingIndex = match.Index + match.Length;
-            }
-
-            if (nextMatchStartingIndex < originalName.Length)
-            {
-                var lastSubstring = originalName.Substring(nextMatchStartingIndex, originalName.Length - nextMatchStartingIndex);
-                renameResult.Add(new Diff(lastSubstring, DiffOperation.Equal));
-            }
-
+            renameResult = this.CreateDiffFromMatches(input, this.ReplacementString, matches);
             return renameResult;
         }
 
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {   
             var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
@@ -327,6 +297,41 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return true;
+        }
+
+        private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
+        {
+            var renameResult = new RenameResult();
+            var nextMatchStartingIndex = 0;
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                // Grab the substring before the match
+                if (nextMatchStartingIndex < match.Index)
+                {
+                    string before = originalName.Substring(nextMatchStartingIndex, match.Index - nextMatchStartingIndex);
+                    renameResult.Add(new Diff(before, DiffOperation.Equal));
+                }
+
+                // Add the match as a deletion
+                renameResult.Add(new Diff(match.Value, DiffOperation.Deletion));
+
+                // Add the result as an insertion
+                var result = match.Result(replacementRegex);
+                if (!string.IsNullOrEmpty(result))
+                {
+                    renameResult.Add(new Diff(result, DiffOperation.Insertion));
+                }
+
+                nextMatchStartingIndex = match.Index + match.Length;
+            }
+
+            if (nextMatchStartingIndex < originalName.Length)
+            {
+                var lastSubstring = originalName.Substring(nextMatchStartingIndex, originalName.Length - nextMatchStartingIndex);
+                renameResult.Add(new Diff(lastSubstring, DiffOperation.Equal));
+            }
+
+            return renameResult;
         }
     }
 }

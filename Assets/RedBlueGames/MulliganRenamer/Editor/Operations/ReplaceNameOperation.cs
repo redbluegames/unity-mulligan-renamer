@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ReplaceNameOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.DeleteNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceNameOperation"/> class.
         /// </summary>
         public ReplaceNameOperation()
         {
@@ -41,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ReplaceNameOperation"/> class.
+        /// Initializes a new instance of the <see cref="ReplaceNameOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -62,6 +62,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets or sets the new name.
+        /// </summary>
+        /// <value>The new name.</value>
         public string NewName { get; set; }
 
         /// <summary>
@@ -88,6 +92,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
         public override string ControlToFocus
         {
             get
@@ -132,6 +140,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {   
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");

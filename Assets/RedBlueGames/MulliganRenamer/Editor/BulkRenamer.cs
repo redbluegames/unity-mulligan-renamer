@@ -192,7 +192,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     result = op.Rename(modifiedName, count);
                     renameResults.Add(result);
-                    modifiedName = result.NewName;
+                    modifiedName = result.Result;
                 }
             }
 

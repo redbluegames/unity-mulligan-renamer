@@ -57,7 +57,7 @@ namespace RedBlueGames.MulliganRenamer
         private ReplaceStringOperation internalReplaceStringOperation;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RemoveCharactersOperation"/> class.
         /// </summary>
         public RemoveCharactersOperation()
         {
@@ -65,7 +65,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation"/> class.
+        /// Initializes a new instance of the <see cref="RemoveCharactersOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
@@ -120,8 +120,6 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
         /// </summary>
-        /// <value>true</value>
-        /// <c>false</c>
         public override bool HasErrors
         {
             get
@@ -130,6 +128,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
         public override string ControlToFocus
         {
             get
@@ -197,6 +199,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {
             var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
@@ -283,7 +286,7 @@ namespace RedBlueGames.MulliganRenamer
 
             /// <summary>
             /// Gets or sets a value indicating whether this
-            /// <see cref="RedBlueGames.BulkRename.RemoveCharactersOperation+RemoveCharactersOperationOptions"/>
+            /// <see cref="RemoveCharactersOperation+RemoveCharactersOperationOptions"/>
             /// characters are regex symbols.
             /// </summary>
             /// <value><c>true</c> if characters are regex; otherwise, <c>false</c>.</value>

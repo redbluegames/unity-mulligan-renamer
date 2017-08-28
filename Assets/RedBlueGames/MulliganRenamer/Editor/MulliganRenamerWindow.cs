@@ -44,9 +44,6 @@ namespace RedBlueGames.MulliganRenamer
 
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
 
-        // The breadcrumb style spills to the left some so we need to leave extra space for it
-        private const float BreadcrumbLeftOffset = 5.0f;
-
         private GUIStyles guiStyles;
         private GUIContents guiContents;
         private Vector2 renameOperationsPanelScrollPosition;
@@ -133,6 +130,31 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return false;
+        }
+
+        private static int DrawPreviewBreadcrumbs(int selectedIndex, params PreviewBreadcrumbOptions[] breacrumbConfigs)
+        {
+            var lastSelectedIndex = selectedIndex;
+            for (int i = 0; i < breacrumbConfigs.Length; ++i)
+            {
+                var styleName = i == 0 ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
+                var enabled = i == lastSelectedIndex;
+                bool selected = GUILayout.Toggle(enabled, breacrumbConfigs[i].Heading, styleName);
+                if (selected)
+                {
+                    lastSelectedIndex = i;
+
+                    var coloredHighlightRect = GUILayoutUtility.GetLastRect();
+                    coloredHighlightRect.height = 2;
+                    coloredHighlightRect.x += -5.0f;
+                    var oldColor = GUI.color;
+                    GUI.color = breacrumbConfigs[i].HighlightColor;
+                    GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
+                    GUI.color = oldColor;
+                }
+            }
+
+            return lastSelectedIndex;
         }
 
         private void OnEnable()
@@ -417,6 +439,7 @@ namespace RedBlueGames.MulliganRenamer
                             {
                                 this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
                             }
+
                             break;
                         }
 
@@ -653,8 +676,9 @@ namespace RedBlueGames.MulliganRenamer
             var toggleStepPreview = GUILayout.Button(buttonText, "toolbarbutton");
             EditorGUI.EndDisabledGroup();
 
-            const float breadcrumbLeftOffset = 5.0f;
-            GUILayout.Space(breadcrumbLeftOffset + 1.0f);
+            // The breadcrumb style spills to the left some so we need to leave extra space for it
+            const float BreadcrumbLeftOffset = 5.0f;
+            GUILayout.Space(BreadcrumbLeftOffset + 1.0f);
 
             if (toggleStepPreview)
             {
@@ -687,31 +711,6 @@ namespace RedBlueGames.MulliganRenamer
 
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-        }
-
-        private static int DrawPreviewBreadcrumbs(int selectedIndex, params PreviewBreadcrumbOptions[] breacrumbConfigs)
-        {
-            var lastSelectedIndex = selectedIndex;
-            for (int i = 0; i < breacrumbConfigs.Length; ++i)
-            {
-                var styleName = i == 0 ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
-                var enabled = i == lastSelectedIndex;
-                bool selected = GUILayout.Toggle(enabled, breacrumbConfigs[i].Heading, styleName);
-                if (selected)
-                {
-                    lastSelectedIndex = i;
-
-                    var coloredHighlightRect = GUILayoutUtility.GetLastRect();
-                    coloredHighlightRect.height = 2;
-                    coloredHighlightRect.x += -5.0f;
-                    var oldColor = GUI.color;
-                    GUI.color = breacrumbConfigs[i].HighlightColor;
-                    GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
-                    GUI.color = oldColor;
-                }
-            }
-
-            return lastSelectedIndex;
         }
 
         private bool DrawPreviewRow(PreviewRowModel info, float firstColumnWidth, float secondColumnWidth, float thirdColumnWidth)

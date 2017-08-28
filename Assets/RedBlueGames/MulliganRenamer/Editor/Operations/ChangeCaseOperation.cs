@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     public class ChangeCaseOperation : RenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class.
+        /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class.
         /// </summary>
         public ChangeCaseOperation()
         {
@@ -41,7 +41,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> class by copying another.
+        /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class by copying another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
         public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
@@ -62,7 +62,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="RedBlueGames.BulkRename.ChangeCaseOperation"/> changes the case to uppercase.
+        /// Gets or sets a value indicating whether this <see cref="ChangeCaseOperation"/> changes the case to uppercase.
         /// </summary>
         /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
         public bool ToUpper { get; set; }
@@ -91,6 +91,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the name of the control to focus when this operation is focused
+        /// </summary>
+        /// <value>The name of the control to focus.</value>
         public override string ControlToFocus
         {
             get
@@ -166,6 +170,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {   
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
