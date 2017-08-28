@@ -288,7 +288,7 @@ namespace RedBlueGames.MulliganRenamer
 
             EditorGUILayout.Space();
 
-            // Issue #XXX - Workaround to force focus to stay with whatever widget it was on...
+            // Issue #115 - Workaround to force focus to stay with whatever widget it was previously on...
             var focusedControl = GUI.GetNameOfFocusedControl();
             if (string.IsNullOrEmpty(focusedControl))
             {
