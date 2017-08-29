@@ -372,19 +372,9 @@ namespace RedBlueGames.MulliganRenamer
 
             GUILayout.Label("Rename Operations", GUILayout.Width(340.0f));
 
-            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
-            var buttonText = this.IsShowingPreviewSteps ? "Hide Steps" : "Show Steps";
-            var toggleStepPreview = GUILayout.Button(buttonText, "toolbarbutton");
-            EditorGUI.EndDisabledGroup();
-
             // The breadcrumb style spills to the left some so we need to leave extra space for it
             const float BreadcrumbLeftOffset = 5.0f;
             GUILayout.Space(BreadcrumbLeftOffset + 1.0f);
-
-            if (toggleStepPreview)
-            {
-                this.IsPreviewStepModePreference = !this.IsPreviewStepModePreference;
-            }
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
@@ -411,6 +401,12 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             GUILayout.FlexibleSpace();
+
+            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
+            var buttonText = "Preview Steps";
+            this.IsPreviewStepModePreference = GUILayout.Toggle(this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
+            EditorGUI.EndDisabledGroup();
+
             EditorGUILayout.EndHorizontal();
         }
 
