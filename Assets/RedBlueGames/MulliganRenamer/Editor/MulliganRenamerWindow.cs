@@ -355,14 +355,18 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.Space();
 
             // Issue #115 - Workaround to force focus to stay with whatever widget it was previously on...
-            var focusedControl = GUI.GetNameOfFocusedControl();
-            if (string.IsNullOrEmpty(focusedControl))
+            if (EditorWindow.focusedWindow == this)
             {
-                GUI.FocusControl(this.LastFocusedControlName);
-            }
-            else
-            {
-                this.LastFocusedControlName = GUI.GetNameOfFocusedControl();
+                var focusedControl = GUI.GetNameOfFocusedControl();
+                if (string.IsNullOrEmpty(focusedControl))
+                {
+                    GUI.FocusControl(this.LastFocusedControlName);
+                    EditorGUI.FocusTextInControl(this.LastFocusedControlName);
+                }
+                else
+                {
+                    this.LastFocusedControlName = GUI.GetNameOfFocusedControl();
+                }
             }
         }
 
@@ -765,6 +769,11 @@ namespace RedBlueGames.MulliganRenamer
 
         private void FocusForcedFocusControl()
         {
+            if (EditorWindow.focusedWindow != this)
+            {
+                return;
+            }
+
             if (this.OperationToForceFocus == null)
             {
                 return;
@@ -801,6 +810,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     // If we weren't able to focus the new control, go back to whatever was focused before.
                     GUI.FocusControl(previouslyFocusedControl);
+                    EditorGUI.FocusTextInControl(previouslyFocusedControl);
                 }
             }
         }
