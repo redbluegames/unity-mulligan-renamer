@@ -161,7 +161,12 @@ namespace RedBlueGames.MulliganRenamer
         {
             bool isDeleteClicked = false;
 
-            EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
+            var horizontalRect = EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
+
+            var oldColor = GUI.color;
+            GUI.color = style.BackgroundColor;
+            GUI.DrawTexture(horizontalRect, Texture2D.whiteTexture);
+            GUI.color = oldColor;
 
             // Space gives us a bit of padding or else we're just too bunched up to the side
             GUILayout.Space(4.0f);
@@ -285,6 +290,17 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.guiStyles.PreviewScroll = new GUIStyle(EditorStyles.textArea);
             }
+
+            if (EditorGUIUtility.isProSkin)
+            {
+                this.guiStyles.PreviewRowBackgroundEven = new Color(0.3f, 0.3f, 0.3f, 0.2f);
+            }
+            else
+            {
+                this.guiStyles.PreviewRowBackgroundEven = new Color(0.6f, 0.6f, 0.6f, 0.2f);
+            }
+
+            this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
         }
 
         private void OnGUI()
@@ -635,6 +651,8 @@ namespace RedBlueGames.MulliganRenamer
 
                 previewRowStyle.ThirdColumnWidth = showThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
 
+                previewRowStyle.BackgroundColor = i % 2 == 0 ? this.guiStyles.PreviewRowBackgroundEven : this.guiStyles.PreviewRowBackgroundOdd;
+
                 if (DrawPreviewRow(content, previewRowStyle))
                 {
                     this.ObjectsToRename.Remove(this.ObjectsToRename[i]);
@@ -911,11 +929,13 @@ namespace RedBlueGames.MulliganRenamer
             public GUIStyle ThirdColumnStyle { get; set; }
 
             public float ThirdColumnWidth { get; set; }
+
+            public Color BackgroundColor { get; set; }
         }
 
         private class PreviewPanelContents
         {
-            private const float MinColumnWidth = 200.0f;
+            private const float MinColumnWidth = 150.0f;
 
             public float LongestOriginalNameWidth { get; private set; }
 
@@ -1060,6 +1080,10 @@ namespace RedBlueGames.MulliganRenamer
             public GUIStyle DropPromptHint { get; set; }
 
             public GUIStyle PreviewHeader { get; set; }
+
+            public Color PreviewRowBackgroundOdd { get; set; }
+
+            public Color PreviewRowBackgroundEven { get; set; }
         }
 
         private class GUIContents
