@@ -35,10 +35,10 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public abstract class RenameOperation : IRenameOperation
     {
-        protected readonly Color32 ReplaceColor = new Color32(30, 139, 176, 255);
-        protected readonly Color32 AddColor = new Color32(36, 213, 161, 255);
-        protected readonly Color32 DeleteColor = new Color32(237, 74, 113, 255);
-        protected readonly Color32 ModifyColor = new Color32(254, 208, 110, 255);
+        protected readonly Color32 ReplaceColor = new Color32(17, 138, 178, 255);
+        protected readonly Color32 AddColor = new Color32(6, 214, 160, 255);
+        protected readonly Color32 DeleteColor = new Color32(239, 71, 111, 255);
+        protected readonly Color32 ModifyColor = new Color32(255, 209, 102, 255);
 
         private string queuedControlToFocus;
 
@@ -126,7 +126,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
         public ListButtonEvent DrawGUI(GUIOptions guiOptions)
         {
-            var operationStyle = new GUIStyle(GUI.skin.FindStyle("ScriptText"));
+            var operationStyle = new GUIStyle("ScriptText");
             operationStyle.stretchHeight = false;
             operationStyle.padding = new RectOffset(6, 6, 4, 4);
             Rect operationRect = EditorGUILayout.BeginVertical(operationStyle);

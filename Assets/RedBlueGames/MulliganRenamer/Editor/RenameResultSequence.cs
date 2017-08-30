@@ -84,9 +84,18 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <returns>The original name at the rename step.</returns>
         /// <param name="stepIndex">Rename step index.</param>
-        public string GetOriginalNameAtStep(int stepIndex)
+        /// <param name="deletionTagColor">Color for deletions</param>
+        public string GetOriginalNameAtStep(int stepIndex, Color deletionTagColor)
         {
-            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetOriginalColored(Color.red);
+            if (stepIndex < 0 || stepIndex >= this.NumSteps)
+            {
+                var exception = string.Format(
+                                    "Trying to get original name for RenameResultSequence at index that's out of bounds. Index: {0}",
+                                    stepIndex);
+                throw new System.ArgumentException(exception, "stepIndex");
+            }
+
+            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetOriginalColored(deletionTagColor);
         }
 
         /// <summary>
@@ -94,9 +103,18 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <returns>The new name at step.</returns>
         /// <param name="stepIndex">Rename step index.</param>
-        public string GetNewNameAtStep(int stepIndex)
+        /// <param name="insertionTagColor">Color for insertions</param>
+        public string GetNewNameAtStep(int stepIndex, Color insertionTagColor)
         {
-            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetResultColored(Color.green);
+            if (stepIndex < 0 || stepIndex >= this.NumSteps)
+            {
+                var exception = string.Format(
+                    "Trying to get original name for RenameResultSequence at index that's out of bounds. Index: {0}",
+                    stepIndex);
+                throw new System.ArgumentException(exception, "stepIndex");
+            }
+
+            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetResultColored(insertionTagColor);
         }
     }
 }

@@ -157,7 +157,7 @@ namespace RedBlueGames.MulliganRenamer
             return lastSelectedIndex;
         }
 
-        private static bool DrawPreviewRow(PreviewRowModel info, PreviewRowStyle style)
+        private static bool DrawPreviewRow(int previewStepIndex, PreviewRowModel info, PreviewRowStyle style)
         {
             bool isDeleteClicked = false;
 
@@ -180,18 +180,23 @@ namespace RedBlueGames.MulliganRenamer
 
             if (style.FirstColumnWidth > 0)
             {
-                EditorGUILayout.LabelField(info.OriginalName, style.FirstColumnStyle, GUILayout.Width(style.FirstColumnWidth));
+                var originalName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ? 
+                    info.RenameResultSequence.GetOriginalNameAtStep(previewStepIndex, style.DeletionColor) : 
+                    info.RenameResultSequence.OriginalName;
+                EditorGUILayout.LabelField(originalName, style.FirstColumnStyle, GUILayout.Width(style.FirstColumnWidth));
             }
 
             if (style.SecondColumnWidth > 0)
             {
-                // Display new name
-                EditorGUILayout.LabelField(info.NewName, style.SecondColumnStyle, GUILayout.Width(style.SecondColumnWidth));
+                var newName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ? 
+                    info.RenameResultSequence.GetNewNameAtStep(previewStepIndex, style.InsertionColor) : 
+                    info.RenameResultSequence.NewName;
+                EditorGUILayout.LabelField(newName, style.SecondColumnStyle, GUILayout.Width(style.SecondColumnWidth));
             }
 
             if (style.ThirdColumnWidth > 0)
             {
-                EditorGUILayout.LabelField(info.FinalName, style.ThirdColumnStyle, GUILayout.Width(style.ThirdColumnWidth));
+                EditorGUILayout.LabelField(info.RenameResultSequence.NewName, style.ThirdColumnStyle, GUILayout.Width(style.ThirdColumnWidth));
             }
 
             GUILayout.FlexibleSpace();
@@ -284,20 +289,21 @@ namespace RedBlueGames.MulliganRenamer
 
             if (EditorGUIUtility.isProSkin)
             {
-                this.guiStyles.PreviewScroll = new GUIStyle(GUI.skin.FindStyle("CurveEditorBackground"));
-            }
-            else
-            {
-                this.guiStyles.PreviewScroll = new GUIStyle(EditorStyles.textArea);
-            }
+                this.guiStyles.PreviewScroll = new GUIStyle("CurveEditorBackground");
 
-            if (EditorGUIUtility.isProSkin)
-            {
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.3f, 0.3f, 0.3f, 0.2f);
+
+                this.guiStyles.InsertionTextColor = new Color32(6, 214, 160, 255);
+                this.guiStyles.DeletionTextColor = new Color32(239, 71, 111, 255);
             }
             else
             {
+                this.guiStyles.PreviewScroll = EditorStyles.textArea;
+
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.6f, 0.6f, 0.6f, 0.2f);
+
+                this.guiStyles.InsertionTextColor = new Color32(0, 140, 104, 255);
+                this.guiStyles.DeletionTextColor = new Color32(189, 47, 79, 255);
             }
 
             this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
@@ -591,14 +597,14 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            int renameStep = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename, renameStep);
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename);
 
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
             // Space gives us a bit of padding or else we're just too bunched up to the side
             GUILayout.Space(42.0f);
 
+            int renameStep = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
             string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
             string newNameColumnHeader = "After";
 
@@ -620,13 +626,13 @@ namespace RedBlueGames.MulliganRenamer
 
             EditorGUILayout.EndHorizontal();
 
-            this.DrawPreviewRows(previewContents, shouldShowSecondColumn, shouldShowThirdColumn);
+            this.DrawPreviewRows(renameStep, previewContents, shouldShowSecondColumn, shouldShowThirdColumn);
 
             GUILayout.FlexibleSpace();
             EditorGUILayout.LabelField(this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
         }
 
-        private void DrawPreviewRows(PreviewPanelContents previewContents, bool showSecondColumn, bool showThirdColumn)
+        private void DrawPreviewRows(int stepIndex, PreviewPanelContents previewContents, bool showSecondColumn, bool showThirdColumn)
         {
             for (int i = 0; i < previewContents.NumRows; ++i)
             {
@@ -653,7 +659,10 @@ namespace RedBlueGames.MulliganRenamer
 
                 previewRowStyle.BackgroundColor = i % 2 == 0 ? this.guiStyles.PreviewRowBackgroundEven : this.guiStyles.PreviewRowBackgroundOdd;
 
-                if (DrawPreviewRow(content, previewRowStyle))
+                previewRowStyle.InsertionColor = this.guiStyles.InsertionTextColor;
+                previewRowStyle.DeletionColor = this.guiStyles.DeletionTextColor;
+
+                if (DrawPreviewRow(stepIndex, content, previewRowStyle))
                 {
                     this.ObjectsToRename.Remove(this.ObjectsToRename[i]);
                     break;
@@ -905,17 +914,13 @@ namespace RedBlueGames.MulliganRenamer
         {
             public Texture Icon { get; set; }
 
-            public string OriginalName { get; set; }
-
-            public string NewName { get; set; }
-
-            public string FinalName { get; set; }
+            public RenameResultSequence RenameResultSequence { get; set; }
 
             public bool NamesAreDifferent
             {
                 get
                 {
-                    return this.NewName != this.OriginalName;
+                    return this.RenameResultSequence.OriginalName != this.RenameResultSequence.NewName;
                 }
             }
         }
@@ -923,6 +928,10 @@ namespace RedBlueGames.MulliganRenamer
         private struct PreviewRowStyle
         {
             public GUIStyle IconStyle { get; set; }
+
+            public Color DeletionColor { get; set; }
+
+            public Color InsertionColor { get; set; }
 
             public GUIStyle FirstColumnStyle { get; set; }
 
@@ -975,7 +984,7 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects, int renameStep)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects)
             {
                 var preview = new PreviewPanelContents();
 
@@ -987,18 +996,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var info = new PreviewRowModel();
                     var namePreview = namePreviews[i];
-                    if (renameStep >= 0 && renameStep < namePreview.NumSteps)
-                    {
-                        info.OriginalName = namePreview.GetOriginalNameAtStep(renameStep);
-                        info.NewName = namePreview.GetNewNameAtStep(renameStep);
-                        info.FinalName = namePreview.NewName;
-                    }
-                    else
-                    {
-                        info.OriginalName = namePreview.OriginalName;
-                        info.NewName = namePreview.NewName;
-                        info.FinalName = namePreview.NewName;
-                    }
+                    info.RenameResultSequence = namePreview;
 
                     info.Icon = GetIconForObject(objects[i]);
 
@@ -1010,15 +1008,13 @@ namespace RedBlueGames.MulliganRenamer
                 preview.LongestNewNameWidth = 0.0f;
                 foreach (var previewRowInfo in preview.PreviewRowInfos)
                 {
-                    var originalNameNoTags = System.Text.RegularExpressions.Regex.Replace(previewRowInfo.OriginalName, @"<[^>]*>", string.Empty);
-                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(originalNameNoTags)).x * paddingScaleForBold;
+                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.RenameResultSequence.OriginalName)).x * paddingScaleForBold;
                     if (originalNameWidth > preview.LongestOriginalNameWidth)
                     {
                         preview.LongestOriginalNameWidth = originalNameWidth;
                     }
 
-                    var newNameNoTags = System.Text.RegularExpressions.Regex.Replace(previewRowInfo.NewName, @"<[^>]*>", string.Empty);
-                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(newNameNoTags)).x * paddingScaleForBold;
+                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.RenameResultSequence.NewName)).x * paddingScaleForBold;
                     if (newNameWidth > preview.LongestNewNameWidth)
                     {
                         preview.LongestNewNameWidth = newNameWidth;
@@ -1090,6 +1086,10 @@ namespace RedBlueGames.MulliganRenamer
             public Color PreviewRowBackgroundOdd { get; set; }
 
             public Color PreviewRowBackgroundEven { get; set; }
+
+            public Color InsertionTextColor { get; set; }
+
+            public Color DeletionTextColor { get; set; }
         }
 
         private class GUIContents
