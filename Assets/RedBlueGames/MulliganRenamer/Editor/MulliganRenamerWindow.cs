@@ -50,8 +50,9 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 previewPanelScrollPosition;
         private Rect scrollViewClippingRect;
 
-        private BulkRenamer bulkRenamer;
-        private List<RenameOperation> renameOperationPrototypes;
+        private BulkRenamer BulkRenamer { get; set; }
+
+        private List<RenameOperation> RenameOperationPrototypes { get; set; }
 
         private List<UnityEngine.Object> ObjectsToRename { get; set; }
 
@@ -213,7 +214,7 @@ namespace RedBlueGames.MulliganRenamer
 
             this.previewPanelScrollPosition = Vector2.zero;
 
-            this.bulkRenamer = new BulkRenamer();
+            this.BulkRenamer = new BulkRenamer();
             this.RenameOperationsToApply = new List<RenameOperation>();
             this.ObjectsToRename = new List<UnityEngine.Object>();
 
@@ -230,15 +231,15 @@ namespace RedBlueGames.MulliganRenamer
 
         private void CacheRenameOperationPrototypes()
         {
-            this.renameOperationPrototypes = new List<RenameOperation>();
+            this.RenameOperationPrototypes = new List<RenameOperation>();
 
-            this.renameOperationPrototypes.Add(new ReplaceStringOperation());
-            this.renameOperationPrototypes.Add(new ReplaceNameOperation());
-            this.renameOperationPrototypes.Add(new AddStringOperation());
-            this.renameOperationPrototypes.Add(new EnumerateOperation());
-            this.renameOperationPrototypes.Add(new TrimCharactersOperation());
-            this.renameOperationPrototypes.Add(new RemoveCharactersOperation());
-            this.renameOperationPrototypes.Add(new ChangeCaseOperation());
+            this.RenameOperationPrototypes.Add(new ReplaceStringOperation());
+            this.RenameOperationPrototypes.Add(new ReplaceNameOperation());
+            this.RenameOperationPrototypes.Add(new AddStringOperation());
+            this.RenameOperationPrototypes.Add(new EnumerateOperation());
+            this.RenameOperationPrototypes.Add(new TrimCharactersOperation());
+            this.RenameOperationPrototypes.Add(new RemoveCharactersOperation());
+            this.RenameOperationPrototypes.Add(new ChangeCaseOperation());
         }
 
         private void InitializeGUIContents()
@@ -324,11 +325,6 @@ namespace RedBlueGames.MulliganRenamer
 
             // Remove any objects that got deleted while working
             this.ObjectsToRename.RemoveNullObjects();
-
-            this.ObjectsToRename.Sort(delegate(UnityEngine.Object x, UnityEngine.Object y)
-                {
-                    return EditorUtility.NaturalCompare(x.name, y.name);
-                });
             
             this.DrawToolbar();
 
@@ -349,7 +345,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(disableRenameButton);
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
-                this.bulkRenamer.RenameObjects(this.ObjectsToRename);
+                this.BulkRenamer.RenameObjects(this.ObjectsToRename);
                 this.ObjectsToRename.Clear();
             }
 
@@ -434,7 +430,7 @@ namespace RedBlueGames.MulliganRenamer
                 renameOpsAsInterfaces.Add((IRenameOperation)renameOp);
             }
 
-            this.bulkRenamer.SetRenameOperations(renameOpsAsInterfaces);
+            this.BulkRenamer.SetRenameOperations(renameOpsAsInterfaces);
 
             EditorGUILayout.Space();
 
@@ -444,9 +440,9 @@ namespace RedBlueGames.MulliganRenamer
             {
                 // Add enums to the menu
                 var menu = new GenericMenu();
-                for (int i = 0; i < this.renameOperationPrototypes.Count; ++i)
+                for (int i = 0; i < this.RenameOperationPrototypes.Count; ++i)
                 {
-                    var renameOp = this.renameOperationPrototypes[i];
+                    var renameOp = this.RenameOperationPrototypes[i];
                     var content = new GUIContent(renameOp.MenuDisplayPath);
                     menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
                 }
@@ -557,7 +553,7 @@ namespace RedBlueGames.MulliganRenamer
             var draggedObjects = this.GetDraggedObjectsOverRect(this.scrollViewClippingRect);
             if (draggedObjects.Count > 0)
             {
-                this.ObjectsToRename.AddRange(draggedObjects);
+                this.AddObjectsToRename(draggedObjects);
                 this.ScrollPreviewPanelToBottom();
             }
 
@@ -594,7 +590,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.bulkRenamer, this.ObjectsToRename);
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.BulkRenamer, this.ObjectsToRename);
 
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
@@ -751,7 +747,7 @@ namespace RedBlueGames.MulliganRenamer
                 var ops = serializedOps.Split(',');
                 foreach (var op in ops)
                 {
-                    foreach (var prototypeOp in this.renameOperationPrototypes)
+                    foreach (var prototypeOp in this.RenameOperationPrototypes)
                     {
                         if (prototypeOp.MenuDisplayPath == op)
                         {
@@ -847,10 +843,40 @@ namespace RedBlueGames.MulliganRenamer
 
         private void LoadSelectedObjects()
         {
-            this.ObjectsToRename.AddRange(this.GetValidSelectedObjects());
+            this.AddObjectsToRename(this.GetValidSelectedObjects());
 
             // Scroll to the bottom to focus the newly added objects.
             this.ScrollPreviewPanelToBottom();
+        }
+
+        private void AddObjectsToRename(List<UnityEngine.Object> objectsToAdd)
+        {
+            // Sort the objects before adding them
+            var assets = new List<UnityEngine.Object>();
+            var gameObjects = new List<UnityEngine.Object>();
+            foreach (var obj in objectsToAdd)
+            {
+                if (obj.IsAsset())
+                {
+                    assets.Add(obj);
+                }
+                else
+                {
+                    gameObjects.Add((GameObject)obj);
+                }
+            }
+
+            // When clicking and dragging from the scene, GameObjects are properly sorted according to the hierarchy.
+            // But when selected and adding them, they are not. So we need to resort them here.
+            gameObjects.Sort((x, y) => ((GameObject)x).GetHierarchySorting().CompareTo(((GameObject)y).GetHierarchySorting()));
+
+            assets.Sort((x, y) =>
+                {
+                    return EditorUtility.NaturalCompare(x.name, y.name);
+                });
+
+            this.ObjectsToRename.AddRange(assets);
+            this.ObjectsToRename.AddRange(gameObjects);
         }
 
         private List<UnityEngine.Object> GetValidSelectedObjects()

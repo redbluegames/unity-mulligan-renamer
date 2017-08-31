@@ -156,7 +156,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var objectToRename = objects[i];
                 var newName = newNames[i].NewName;
-                if (AssetDatabase.Contains(objectToRename))
+                if (objectToRename.IsAsset())
                 {
                     if (objectToRename is Sprite)
                     {
