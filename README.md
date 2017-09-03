@@ -8,7 +8,7 @@ This ReadMe provides a quick overview of the tool. For more detailed documentati
 ## Installation
 To install this package follow these steps:
 
-1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases).
+1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases) or click [here](https://github.com/redbluegames/unity-bulk-rename/releases/latest).
 
 2. Open the Unity project you want to import the Mulligan Renamer tool into.
 
