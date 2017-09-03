@@ -3,21 +3,21 @@ Mulligan Rename tool for Unity allows for quick and safe renaming of many assets
 
 This ReadMe provides a quick overview of the tool. For more detailed documentation, check out the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki).
 
-![BulkRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/bulk_rename_gameobjects.gif)
+![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/bulk_rename_gameobjects.gif)
 
 ## Installation
 To install this package follow these steps:
 
 1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases).
 
-2. Open the Unity project you want to import the Bulk Rename tool into.
+2. Open the Unity project you want to import the Mulligan Renamer tool into.
 
 3. Install the custom package through Unity's Asset menu.
   - In _Unity Editor_ go to **Assets** -> **Import Package** -> **Custom Package...**
   - Select the .unitypackage file you just downloaded. We recommend storing the files at the default location (Assets/RedBlueGames), but it should work anywhere.
 
 ## Using the Tool
-To use the Bulk Rename tool, open it from the `Window/Red Blue` menu. If you have Objects selected,
+To use the Mulligan Renamer tool, open it from the `Window/Red Blue` menu. If you have Objects selected,
 they will automatically be entered for rename. Otherwise, drag and drop the Assets or GameObjects you want to
 rename into the Mulligan Renamer window.
 
