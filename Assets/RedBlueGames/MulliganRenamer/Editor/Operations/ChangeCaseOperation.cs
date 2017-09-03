@@ -37,7 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public ChangeCaseOperation()
         {
-            this.ToUpper = false;
+            this.Casing = CasingChange.Lowercase;
         }
 
         /// <summary>
@@ -46,8 +46,30 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="operationToCopy">Operation to copy.</param>
         public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
         {
-            this.ToUpper = operationToCopy.ToUpper;
+            this.Casing = operationToCopy.Casing;
         }
+
+        /// <summary>
+        /// Casing change describes all possible new casings.
+        /// </summary>
+        public enum CasingChange
+        {
+            /// <summary>
+            /// Change all characters to lowercase
+            /// </summary>
+            Lowercase,
+
+            /// <summary>
+            /// Change all character to uppercase
+            /// </summary>
+            Uppercase
+        }
+
+        /// <summary>
+        /// Gets or sets the desired casing.
+        /// </summary>
+        /// <value>The desired casing.</value>
+        public CasingChange Casing { get; set; }
 
         /// <summary>
         /// Gets the path that's displayed when this rename op is used in the Add Op menu.
@@ -60,12 +82,6 @@ namespace RedBlueGames.MulliganRenamer
                 return "Modify/Change Case";
             }
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="ChangeCaseOperation"/> changes the case to uppercase.
-        /// </summary>
-        /// <value><c>true</c> if to upper; otherwise, <c>false</c>.</value>
-        public bool ToUpper { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -127,13 +143,19 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var inputCaseChanged = input;
-            if (this.ToUpper)
+            switch (this.Casing)
             {
-                inputCaseChanged = input.ToUpper();
-            }
-            else
-            {
-                inputCaseChanged = input.ToLower();
+                case CasingChange.Lowercase:
+                    inputCaseChanged = input.ToLower();
+                    break;
+                case CasingChange.Uppercase:
+                    inputCaseChanged = input.ToUpper();
+                    break;
+                default:
+                    var message = string.Format(
+                                      "CaseOperation received unknown CasingOption {0}",
+                                      this.Casing);
+                    throw new System.ArgumentOutOfRangeException(message);
             }
 
             var renameResult = new RenameResult();
@@ -173,8 +195,9 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(int controlPrefix)
         {   
+            var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
-            this.ToUpper = EditorGUILayout.Toggle("To Uppercase", this.ToUpper);
+            this.Casing = (CasingChange)EditorGUILayout.EnumPopup(casingLabel, this.Casing);
         }
     }
 }

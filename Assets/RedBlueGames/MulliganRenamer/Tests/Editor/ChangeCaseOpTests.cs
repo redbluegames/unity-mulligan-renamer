@@ -98,7 +98,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "this is all lower";
             var changeCaseOp = new ChangeCaseOperation();
-            changeCaseOp.ToUpper = true;
+            changeCaseOp.Casing = ChangeCaseOperation.CasingChange.Uppercase;
 
             var expectedName = "THIS IS ALL LOWER";
             var expected = new RenameResult();
