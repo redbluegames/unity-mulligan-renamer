@@ -96,6 +96,7 @@
     <Parser ParserId="StyleCop.CSharp.CsParser">
       <ParserSettings>
         <CollectionProperty Name="GeneratedFileFilters">
+          <Value>[^a-z ]Script.cs</Value>
           <Value>[^a-z ]AddStringOpTests.cs</Value>
           <Value>[^a-z ]BulkRenamerTests.cs</Value>
           <Value>[^a-z ]ChangeCaseOpTests.cs</Value>
