@@ -1,21 +1,23 @@
-# Unity - Bulk Rename Tool
-Bulk Rename tool for Unity allows for quick and safe renaming of many assets or GameObjects. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
+# Unity - Mulligan Rename Tool
+Mulligan Rename tool for Unity allows for quick and safe renaming of many assets or GameObjects all at once. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
 
 ![BulkRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/bulk_rename_gameobjects.gif)
 
 ## Installation
 To install this package follow these steps:
 
-1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases). (Or click [here](https://github.com/redbluegames/unity-bulk-rename/releases/tag/v2.1.0))
+1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases).
 
 2. Open the Unity project you want to import the Bulk Rename tool into.
 
-3. Install the custom package through Unity's Asset menu. 
+3. Install the custom package through Unity's Asset menu.
   - In _Unity Editor_ go to **Assets** -> **Import Package** -> **Custom Package...**
   - Select the .unitypackage file you just downloaded. We recommend storing the files at the default location (Assets/RedBlueGames), but it should work anywhere.
-  
+
 ## Using the Tool
-To use the Bulk Rename tool you must first select the assets or GameObjects in a scene you want to rename. Right click, and select "Rename in Bulk". This will open up the rename utility. You can continue to select or deselect Objects while the tool is open.
+To use the Bulk Rename tool, open it from the Window/RedBlueGames menu. If you have Objects selected,
+they will automatically be entered for rename. Otherwise, drag and drop the Assets or GameObjects you want to
+rename into the Mulligan Renamer window.
 
 The tool allows for the following options:
 * **Search String and Replacement String** allow for replacement of substrings from the selected objects.
