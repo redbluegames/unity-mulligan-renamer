@@ -999,12 +999,12 @@ namespace RedBlueGames.MulliganRenamer
                 var preview = new PreviewPanelContents();
 
                 preview.PreviewRowInfos = new PreviewRowModel[objects.Count];
-                var objectNames = objects.GetNames();
 
-                for (int i = 0; i < objectNames.Length; ++i)
+                for (int i = 0; i < preview.PreviewRowInfos.Length; ++i)
                 {
                     var info = new PreviewRowModel();
-                    var namePreview = info.RenameResultSequence = renameSequence.GetRenamePreview(objectNames[i], i);
+                    var originalName = objects[i].name;
+                    var namePreview = info.RenameResultSequence = renameSequence.GetRenamePreview(originalName, i);
 
                     info.Icon = GetIconForObject(objects[i]);
 
