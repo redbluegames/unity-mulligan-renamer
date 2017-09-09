@@ -56,7 +56,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<UnityEngine.Object> ObjectsToRename { get; set; }
 
-        private List<RenameOperation> RenameOperationsToApply { get; set; }
+        private RenameOperationSequence<RenameOperation> RenameOperationsToApply { get; set; }
 
         private RenameOperation OperationToForceFocus { get; set; }
 
@@ -215,7 +215,7 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanelScrollPosition = Vector2.zero;
 
             this.BulkRenamer = new BulkRenamer();
-            this.RenameOperationsToApply = new List<RenameOperation>();
+            this.RenameOperationsToApply = new RenameOperationSequence<RenameOperation>();
             this.ObjectsToRename = new List<UnityEngine.Object>();
 
             this.CacheRenameOperationPrototypes();
@@ -387,8 +387,9 @@ namespace RedBlueGames.MulliganRenamer
                 var breadcrumbOptions = new PreviewBreadcrumbOptions[this.RenameOperationsToApply.Count];
                 for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
                 {
-                    breadcrumbOptions[i].Heading = this.RenameOperationsToApply[i].HeadingLabel;
-                    breadcrumbOptions[i].HighlightColor = this.RenameOperationsToApply[i].HighlightColor;
+                    var operationAtBreadcrumb = this.RenameOperationsToApply[i];
+                    breadcrumbOptions[i].Heading = operationAtBreadcrumb.HeadingLabel;
+                    breadcrumbOptions[i].HighlightColor = operationAtBreadcrumb.HighlightColor;
                 }
 
                 var selectedBreadcrumbIndex = DrawPreviewBreadcrumbs(this.FocusedRenameOpIndex, breadcrumbOptions);
@@ -423,14 +424,7 @@ namespace RedBlueGames.MulliganRenamer
 
             this.DrawRenameOperations();
 
-            // BulkRenamer expects the list typed as IRenameOperations
-            var renameOpsAsInterfaces = new List<IRenameOperation>();
-            foreach (var renameOp in this.RenameOperationsToApply)
-            {
-                renameOpsAsInterfaces.Add((IRenameOperation)renameOp);
-            }
-
-            this.BulkRenamer.SetRenameOperations(renameOpsAsInterfaces);
+            this.BulkRenamer.SetOperationSequence(this.RenameOperationsToApply);
 
             EditorGUILayout.Space();
 
@@ -461,6 +455,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             // Store the op before buttons are pressed because buttons change focus
             var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
+            bool saveOpsToPreferences = false;
+            RenameOperation operationToFocus = null;
 
             for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
@@ -474,18 +470,20 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     case RenameOperation.ListButtonEvent.MoveUp:
                         {
-                            this.MoveRenameOpFromIndexToIndex(i, i - 1);
+                            this.RenameOperationsToApply.MoveRenameOpFromIndexToIndex(i, i - 1);
+                            saveOpsToPreferences = true;
 
                             // Move focus with the RenameOp. This techincally changes their focus within the 
                             // rename op, but it's better than focus getting swapped to whatever op replaces this one.
-                            this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
+                            operationToFocus = focusedOpBeforeButtonPresses;
                             break;
                         }
 
                     case RenameOperation.ListButtonEvent.MoveDown:
                         {
-                            this.MoveRenameOpFromIndexToIndex(i, i + 1);
-                            this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
+                            this.RenameOperationsToApply.MoveRenameOpFromIndexToIndex(i, i + 1);
+                            saveOpsToPreferences = true;
+                            operationToFocus = focusedOpBeforeButtonPresses;
                             break;
                         }
 
@@ -493,17 +491,18 @@ namespace RedBlueGames.MulliganRenamer
                         {
                             var removingFocusedOperation = focusedOpBeforeButtonPresses == currentElement;
 
-                            this.RemoveRenameOperationAt(i);
+                            this.RenameOperationsToApply.RemoveAt(i);
+                            saveOpsToPreferences = true;
 
                             if (removingFocusedOperation && this.RenameOperationsToApply.Count > 0)
                             {
                                 // Focus the RenameOp that took this one's place, if there is one. 
                                 var indexToFocus = Mathf.Min(this.RenameOperationsToApply.Count - 1, i);
-                                this.FocusRenameOperationDeferred(this.RenameOperationsToApply[indexToFocus]);
+                                operationToFocus = this.RenameOperationsToApply[indexToFocus];
                             }
                             else
                             {
-                                this.FocusRenameOperationDeferred(focusedOpBeforeButtonPresses);
+                                operationToFocus = focusedOpBeforeButtonPresses;
                             }
 
                             break;
@@ -522,6 +521,16 @@ namespace RedBlueGames.MulliganRenamer
                                     buttonClickEvent));
                             return;
                         }
+                }
+
+                if (operationToFocus != null)
+                {
+                    this.FocusRenameOperationDeferred(operationToFocus);
+                }
+
+                if (saveOpsToPreferences)
+                {
+                    SaveRenameOperationsToPreferences();
                 }
             }
         }
@@ -590,7 +599,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.BulkRenamer, this.ObjectsToRename);
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.RenameOperationsToApply, this.ObjectsToRename);
 
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
@@ -675,17 +684,6 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.EndDisabledGroup();
         }
 
-        private void MoveRenameOpFromIndexToIndex(int fromIndex, int desiredIndex)
-        {
-            var oldFocusedOp = this.FocusedRenameOp;
-            desiredIndex = Mathf.Clamp(desiredIndex, 0, this.RenameOperationsToApply.Count - 1);
-            var destinationElementCopy = this.RenameOperationsToApply[desiredIndex];
-            this.RenameOperationsToApply[desiredIndex] = this.RenameOperationsToApply[fromIndex];
-            this.RenameOperationsToApply[fromIndex] = destinationElementCopy;
-
-            this.SaveRenameOperationsToPreferences();
-        }
-
         private void OnAddRenameOperationConfirmed(object operation)
         {
             var operationAsRenameOp = operation as RenameOperation;
@@ -714,19 +712,13 @@ namespace RedBlueGames.MulliganRenamer
             this.FocusRenameOperationDeferred(renameOp);
         }
 
-        private void RemoveRenameOperationAt(int indexToRemove)
-        {
-            this.RenameOperationsToApply.RemoveAt(indexToRemove);
-            this.SaveRenameOperationsToPreferences();
-        }
-
         private void SaveRenameOperationsToPreferences()
         {
             var allOpPathsCommaSeparated = string.Empty;
-            foreach (var op in this.RenameOperationsToApply)
+            for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
-                allOpPathsCommaSeparated += op.MenuDisplayPath;
-                if (op != this.RenameOperationsToApply.Last())
+                allOpPathsCommaSeparated += this.RenameOperationsToApply[i].MenuDisplayPath;
+                if (i != this.RenameOperationsToApply.Count - 1)
                 {
                     allOpPathsCommaSeparated += ",";
                 }
@@ -900,8 +892,9 @@ namespace RedBlueGames.MulliganRenamer
 
         private bool RenameOperatationsHaveErrors()
         {
-            foreach (var renameOp in this.RenameOperationsToApply)
+            for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
+                var renameOp = this.RenameOperationsToApply[i];
                 if (renameOp.HasErrors)
                 {
                     return true;
@@ -1002,19 +995,20 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamer renamer, List<UnityEngine.Object> objects)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(
+                RenameOperationSequence<RenameOperation> renameSequence,
+                List<UnityEngine.Object> objects)
             {
                 var preview = new PreviewPanelContents();
 
                 preview.PreviewRowInfos = new PreviewRowModel[objects.Count];
                 var objectNames = objects.GetNames();
-                var namePreviews = renamer.GetRenamePreviews(objectNames);
 
-                for (int i = 0; i < namePreviews.Count; ++i)
+                for (int i = 0; i < objectNames.Length; ++i)
                 {
                     var info = new PreviewRowModel();
-                    var namePreview = namePreviews[i];
-                    info.RenameResultSequence = namePreview;
+                    var namePreview = 
+                        info.RenameResultSequence = renameSequence.GetRenamePreview(objectNames[i], i);
 
                     info.Icon = GetIconForObject(objects[i]);
 

@@ -28,13 +28,12 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using NUnit.Framework;
 
-    public class BulkRenamerTests
+    public class RenameOperationSequenceTests
     {
         [Test]
-        public void GetRenamePreviews_AllOperations_RenamesCorrectly()
+        public void GetNewName_AllOperations_RenamesCorrectly()
         {
             // Arrange
-            var bulkRenamer = new BulkRenamer();
             var name = "Char_Hero_Idle";
 
             var trimCharactersOp = new TrimCharactersOperation();
@@ -53,24 +52,23 @@ namespace RedBlueGames.MulliganRenamer
             enumerateOp.CountFormat = "D4";
             enumerateOp.StartingCount = 100;
 
-            var listOfOperations = new List<IRenameOperation>();
-            listOfOperations.Add(trimCharactersOp);
-            listOfOperations.Add(replaceStringOp);
-            listOfOperations.Add(addStringOp);
-            listOfOperations.Add(enumerateOp);
-            bulkRenamer.SetRenameOperations(listOfOperations);
+            var operationSequence = new RenameOperationSequence<RenameOperation>();
+            operationSequence.Add(trimCharactersOp);
+            operationSequence.Add(replaceStringOp);
+            operationSequence.Add(addStringOp);
+            operationSequence.Add(enumerateOp);
 
             var expected = "a_hat_ZeroAA0100";
 
             // Act
-            string result = bulkRenamer.GetRenamePreviews(name)[0].NewName;
+            string result = operationSequence.GetResultingName(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
         }
 
         [Test]
-        public void GetRenamePreviewsOrder_ValidOperations_AreAppliedInOrder()
+        public void GetNewName_ValidOperations_AreAppliedInOrder()
         {
             // Arrange
             var name = "Char_Hero_Idle";
@@ -82,25 +80,25 @@ namespace RedBlueGames.MulliganRenamer
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 4;
 
-            var listOfOperations = new List<IRenameOperation>();
-            listOfOperations.Add(replaceStringOp);
-            listOfOperations.Add(trimCharactersOp);
+            var operationSequence = new RenameOperationSequence<RenameOperation>();
+            operationSequence.Add(replaceStringOp);
+            operationSequence.Add(trimCharactersOp);
 
             var bulkRenamer = new BulkRenamer();
-            bulkRenamer.SetRenameOperations(listOfOperations);
+            bulkRenamer.SetOperationSequence(operationSequence);
 
             var renamerReversed = new BulkRenamer();
-            var operationsReversed = new List<IRenameOperation>();
-            operationsReversed.Add(trimCharactersOp);
-            operationsReversed.Add(replaceStringOp);
-            renamerReversed.SetRenameOperations(operationsReversed);
+            var operationSequenceReversed = new RenameOperationSequence<RenameOperation>();
+            operationSequenceReversed.Add(trimCharactersOp);
+            operationSequenceReversed.Add(replaceStringOp);
+            renamerReversed.SetOperationSequence(operationSequenceReversed);
 
             var expected = "boonro_Idle";
             var expectedReversed = "_Hero_Idle";
 
             // Act
-            string result = bulkRenamer.GetRenamePreviews(name)[0].NewName;
-            string resultReversed = renamerReversed.GetRenamePreviews(name)[0].NewName;
+            string result = operationSequence.GetResultingName(name, 0);
+            string resultReversed = operationSequenceReversed.GetResultingName(name, 0);
 
             // Assert
             Assert.AreEqual(expected, result);
