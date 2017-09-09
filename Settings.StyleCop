@@ -97,10 +97,10 @@
       <ParserSettings>
         <CollectionProperty Name="GeneratedFileFilters">
           <Value>[^a-z ]AddStringOpTests.cs</Value>
-          <Value>[^a-z ]BulkRenamerTests.cs</Value>
           <Value>[^a-z ]ChangeCaseOpTests.cs</Value>
           <Value>[^a-z ]EnumerateOpTests.cs</Value>
           <Value>[^a-z ]RemoveCharactersOpTests.cs</Value>
+          <Value>[^a-z ]RenameOperationSequenceTests.cs</Value>
           <Value>[^a-z ]ReplaceNameOpTests.cs</Value>
           <Value>[^a-z ]ReplaceStringOpTests.cs</Value>
           <Value>[^a-z ]TrimOpTests.cs</Value>

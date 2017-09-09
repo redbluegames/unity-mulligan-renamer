@@ -15,14 +15,14 @@ MonoBehaviour:
     relativePath: /Settings.StyleCop
   ignoredFilePaths:
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/AddStringOpTests.cs
-  - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/BulkRenamerTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/ChangeCaseOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/EnumerateOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/RemoveCharactersOpTests.cs
+  - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/RenameOperationSequenceTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/ReplaceNameOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/ReplaceStringOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/TrimOpTests.cs
-  - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/TargetAssets/AllAssetTypes/Script.cs
+  - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/TargetAssets/AllAssets/Script.cs
   - relativePath: /Assets/RedBlueGames/StyleCopIgnoreUtility/Editor/IStyleCopIgnoreUtilityView.cs
   - relativePath: /Assets/RedBlueGames/StyleCopIgnoreUtility/Editor/StyleCopIgnoreUtility.cs
   - relativePath: /Assets/RedBlueGames/StyleCopIgnoreUtility/Editor/StyleCopIgnoreUtilityData.cs

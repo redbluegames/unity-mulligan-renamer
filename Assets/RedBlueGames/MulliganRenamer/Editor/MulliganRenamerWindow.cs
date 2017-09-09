@@ -434,9 +434,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 // Add enums to the menu
                 var menu = new GenericMenu();
-                for (int i = 0; i < this.RenameOperationPrototypes.Count; ++i)
+                foreach (var renameOp in this.RenameOperationsToApply)
                 {
-                    var renameOp = this.RenameOperationPrototypes[i];
                     var content = new GUIContent(renameOp.MenuDisplayPath);
                     menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
                 }
@@ -470,7 +469,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     case RenameOperation.ListButtonEvent.MoveUp:
                         {
-                            this.RenameOperationsToApply.MoveRenameOpFromIndexToIndex(i, i - 1);
+                            this.RenameOperationsToApply.MoveOperationFromIndexToIndex(i, i - 1);
                             saveOpsToPreferences = true;
 
                             // Move focus with the RenameOp. This techincally changes their focus within the 
@@ -481,7 +480,7 @@ namespace RedBlueGames.MulliganRenamer
 
                     case RenameOperation.ListButtonEvent.MoveDown:
                         {
-                            this.RenameOperationsToApply.MoveRenameOpFromIndexToIndex(i, i + 1);
+                            this.RenameOperationsToApply.MoveOperationFromIndexToIndex(i, i + 1);
                             saveOpsToPreferences = true;
                             operationToFocus = focusedOpBeforeButtonPresses;
                             break;
@@ -530,7 +529,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (saveOpsToPreferences)
                 {
-                    SaveRenameOperationsToPreferences();
+                    this.SaveRenameOperationsToPreferences();
                 }
             }
         }
@@ -771,11 +770,10 @@ namespace RedBlueGames.MulliganRenamer
             var controlNameToForceFocus = string.Empty; 
             for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
-                if (this.RenameOperationsToApply[i] == this.OperationToForceFocus)
+                var renameOp = this.RenameOperationsToApply[i];
+                if (renameOp == this.OperationToForceFocus)
                 {
-                    controlNameToForceFocus = GUIControlNameUtility.CreatePrefixedName(
-                        i, 
-                        this.RenameOperationsToApply[i].ControlToFocus);
+                    controlNameToForceFocus = GUIControlNameUtility.CreatePrefixedName(i, renameOp.ControlToFocus);
                     break;
                 }
             }
@@ -892,10 +890,9 @@ namespace RedBlueGames.MulliganRenamer
 
         private bool RenameOperatationsHaveErrors()
         {
-            for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
+            foreach (var renameOperation in this.RenameOperationsToApply)
             {
-                var renameOp = this.RenameOperationsToApply[i];
-                if (renameOp.HasErrors)
+                if (renameOperation.HasErrors)
                 {
                     return true;
                 }
@@ -1007,8 +1004,7 @@ namespace RedBlueGames.MulliganRenamer
                 for (int i = 0; i < objectNames.Length; ++i)
                 {
                     var info = new PreviewRowModel();
-                    var namePreview = 
-                        info.RenameResultSequence = renameSequence.GetRenamePreview(objectNames[i], i);
+                    var namePreview = info.RenameResultSequence = renameSequence.GetRenamePreview(objectNames[i], i);
 
                     info.Icon = GetIconForObject(objects[i]);
 
