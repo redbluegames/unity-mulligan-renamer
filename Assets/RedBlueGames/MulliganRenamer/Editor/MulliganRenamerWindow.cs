@@ -345,7 +345,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(disableRenameButton);
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
-                this.BulkRenamer.RenameObjects(this.ObjectsToRename);
+                this.BulkRenamer.RenameObjects(this.ObjectsToRename, this.RenameOperationsToApply);
                 this.ObjectsToRename.Clear();
             }
 
@@ -424,8 +424,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.DrawRenameOperations();
 
-            this.BulkRenamer.SetOperationSequence(this.RenameOperationsToApply);
-
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
@@ -434,7 +432,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 // Add enums to the menu
                 var menu = new GenericMenu();
-                foreach (var renameOp in this.RenameOperationsToApply)
+                foreach (var renameOp in this.RenameOperationPrototypes)
                 {
                     var content = new GUIContent(renameOp.MenuDisplayPath);
                     menu.AddItem(content, false, this.OnAddRenameOperationConfirmed, renameOp);
@@ -1004,7 +1002,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var info = new PreviewRowModel();
                     var originalName = objects[i].name;
-                    var namePreview = info.RenameResultSequence = renameSequence.GetRenamePreview(originalName, i);
+                    info.RenameResultSequence = renameSequence.GetRenamePreview(originalName, i);
 
                     info.Icon = GetIconForObject(objects[i]);
 

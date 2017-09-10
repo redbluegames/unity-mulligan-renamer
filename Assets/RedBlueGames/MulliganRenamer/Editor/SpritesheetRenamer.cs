@@ -86,9 +86,8 @@ namespace RedBlueGames.MulliganRenamer
             if (!System.IO.File.Exists(pathToMeta))
             {
                 var exception = string.Format(
-                                    "Trying to add Sprite {0} to SpriteRenamer at path {1}, but " +
+                                    "Trying to add Sprite to SpriteRenamer at path {0}, but " +
                                     "no meta file exists at the specified path.",
-                                    sprite.name,
                                     pathToMeta);
                 throw new System.ArgumentException(exception);
             }
@@ -111,9 +110,11 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var sprite = spriteNamePair.Key;
                 metaFileWithRenames = ReplaceSpriteInMetaFile(metaFileWithRenames, sprite, spriteNamePair.Value);
+                sprite.name = spriteNamePair.Value;
             }
 
             System.IO.File.WriteAllText(this.PathToTextureMetaFile, metaFileWithRenames);
+
             AssetDatabase.ImportAsset(this.PathToTexture);
         }
 
@@ -151,18 +152,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return uniqueName;
-        }
-
-        private string GetNewNameForSprite(Sprite sprite)
-        {
-            if (this.SpritesAndNewNames.ContainsKey(sprite))
-            {
-                return this.SpritesAndNewNames[sprite];
-            }
-            else
-            {
-                return string.Empty;
-            }
         }
     }
 }

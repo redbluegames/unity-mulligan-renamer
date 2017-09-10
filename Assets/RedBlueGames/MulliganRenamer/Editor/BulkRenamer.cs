@@ -33,104 +33,93 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class BulkRenamer
     {
-        private RenameOperationSequence<RenameOperation> RenameOperationSequence { get; set; }
-
         /// <summary>
-        /// Sets the operation sequence to use when renaming objects.
-        /// </summary>
-        /// <param name="sequence">RenameSequence to pass object names through.</param>
-        public void SetOperationSequence(RenameOperationSequence<RenameOperation> sequence)
-        {
-            this.RenameOperationSequence = sequence;
-        }
-
-        /// <summary>
-        /// Renames the specified objects according to the rules of the BulkRenamer.
+        /// Renames the specified Objects according to a supplied RenameOperationSequence.
         /// </summary>
         /// <param name="objectsToRename">Objects to rename.</param>
-        public void RenameObjects(List<UnityEngine.Object> objectsToRename)
+        /// <param name="sequence">Sequence to use to generate new names.</param>
+        /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
+        public void RenameObjects(List<UnityEngine.Object> objectsToRename, RenameOperationSequence<RenameOperation> sequence, bool ignoreUndo = false)
         {
-            // Record all the objects to undo stack, note as of Unity 5.5.2 this does not record asset names
-            Undo.RecordObjects(objectsToRename.ToArray(), "Bulk Rename");
-
-            var spritesAndCounts = new List<ObjectCountPair<Sprite>>();
-            var nonSpriteAssetsAndCounts = new List<ObjectCountPair<UnityEngine.Object>>();
-            var gameObjectsAndCounts = new List<ObjectCountPair<GameObject>>();
-            this.SeparateObjectsByRenameType(objectsToRename, ref spritesAndCounts, ref nonSpriteAssetsAndCounts, ref gameObjectsAndCounts);
-
-            EditorUtility.DisplayProgressBar("Renaming Assets...", "Collecting Sprites for Rename", 0.0f);
-            var spritesheetRenamers = new List<SpritesheetRenamer>();
-            foreach (var spriteCountPair in spritesAndCounts)
+            var objs = new List<ObjectNameDelta>();
+            for (int i = 0; i < objectsToRename.Count; ++i)
             {
-                var newName = this.RenameOperationSequence.GetResultingName(spriteCountPair.UnityObject.name, spriteCountPair.Count);
-                this.MarkSpriteForRename((Sprite)spriteCountPair.UnityObject, newName, ref spritesheetRenamers);
+                var newName = sequence.GetResultingName(objectsToRename[i].name, i);
+                var originalName = objectsToRename[i].name;
+
+                // Don't request a rename if the name isn't going to change.
+                if (originalName.Equals(newName))
+                {
+                    continue;
+                }
+
+                objs.Add(new ObjectNameDelta(objectsToRename[i], newName));
             }
 
-            int totalProgressSteps = spritesheetRenamers.Count + nonSpriteAssetsAndCounts.Count + gameObjectsAndCounts.Count;
-            int currentProgressStep = 0;
-            for (int i = 0; i < spritesheetRenamers.Count; ++i)
-            {
-                var infoString = string.Format("Renaming Spritesheet {0} of {1}", i, spritesheetRenamers.Count);
-                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, currentProgressStep / (float)totalProgressSteps);
-
-                spritesheetRenamers[i].RenameSprites();
-                currentProgressStep++;
-            }
-
-            int assetCount = 0;
-            foreach (var assetCountPair in nonSpriteAssetsAndCounts)
-            {
-                var infoString = string.Format("Renaming Asset {0} of {1}", assetCount, nonSpriteAssetsAndCounts.Count);
-                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, currentProgressStep / (float)totalProgressSteps);
-
-                var newName = this.RenameOperationSequence.GetResultingName(assetCountPair.UnityObject.name, assetCountPair.Count);
-                this.RenameAsset(assetCountPair.UnityObject, newName);
-
-                currentProgressStep++;
-                assetCount++;
-            }
-
-            int gameObjectCount = 0;
-            foreach (var gameObjectCountPair in gameObjectsAndCounts)
-            {
-                var infoString = string.Format("Renaming GameObjects {0} of {1}", gameObjectCount, gameObjectsAndCounts.Count);
-                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, currentProgressStep / (float)totalProgressSteps);
-
-                var newName = this.RenameOperationSequence.GetResultingName(gameObjectCountPair.UnityObject.name, gameObjectCountPair.Count);
-                this.RenameGameObject(gameObjectCountPair.UnityObject, newName);
-
-                currentProgressStep++;
-                gameObjectCount++;
-            }
-
-            EditorUtility.ClearProgressBar();
+            this.RenameObjects(objs, ignoreUndo);
         }
 
-        private void SeparateObjectsByRenameType(
-            List<UnityEngine.Object> objects,
-            ref List<ObjectCountPair<Sprite>> sprites,
-            ref List<ObjectCountPair<UnityEngine.Object>> nonSpriteAssets,
-            ref List<ObjectCountPair<GameObject>> gameObjects)
+        /// <summary>
+        /// Renames the objects supplied as a list of object and new name pairings.
+        /// </summary>
+        /// <param name="objectsAndNewNames">Objects with their new names.</param>
+        /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
+        public void RenameObjects(List<ObjectNameDelta> objectsAndNewNames, bool ignoreUndo = false)
         {
-            for (int i = 0; i < objects.Count; ++i)
+            // Record all the objects to undo stack, note as of Unity 5.5.2 this does not record asset names,
+            // so we have our own Undoer to handle assets.
+            // Furthermore, our Spritesheet renaming isn't captured by the undo system so it must be manually undone.
+            if (!ignoreUndo)
             {
-                var objectToRename = objects[i];
+                var gameObjectsToRename = new List<GameObject>();
+                foreach (var objectAndName in objectsAndNewNames)
+                {
+                    if (!objectAndName.NamedObject.IsAsset())
+                    {
+                        gameObjectsToRename.Add((GameObject)objectAndName.NamedObject);
+                    }
+                }
+
+                Undo.RecordObjects(gameObjectsToRename.ToArray(), "Bulk Rename");
+
+                AssetRenameUndoer.RecordAssetRenames("Bulk Rename", objectsAndNewNames);
+            }
+
+            EditorUtility.DisplayProgressBar("Renaming Assets...", "Renaming Assets...", 0.0f);
+            var spritesheetRenamers = new List<SpritesheetRenamer>();
+            for (int i = 0; i < objectsAndNewNames.Count; ++i)
+            {
+                var infoString = string.Format("Renaming Asset {0} of {1}", i, objectsAndNewNames.Count);
+                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, i / (float)objectsAndNewNames.Count);
+
+                var objectToRename = objectsAndNewNames[i].NamedObject;
+                var newName = objectsAndNewNames[i].NewName;
                 if (objectToRename.IsAsset())
                 {
                     if (objectToRename is Sprite)
                     {
-                        sprites.Add(new ObjectCountPair<Sprite>((Sprite)objectToRename, i));
+                        this.MarkSpriteForRename((Sprite)objectToRename, newName, ref spritesheetRenamers);
                     }
                     else
                     {
-                        nonSpriteAssets.Add(new ObjectCountPair<UnityEngine.Object>(objectToRename, i));
+                        this.RenameAsset(objectToRename, newName);
                     }
                 }
                 else
                 {
-                    gameObjects.Add(new ObjectCountPair<GameObject>((GameObject)objectToRename, i));
+                    this.RenameGameObject((GameObject)objectToRename, newName);
                 }
             }
+
+            for (int i = 0; i < spritesheetRenamers.Count; ++i)
+            {
+                var infoString = string.Format("Renaming Spritesheet {0} of {1}", i, spritesheetRenamers.Count);
+                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, i / (float)spritesheetRenamers.Count);
+                
+                spritesheetRenamers[i].RenameSprites();
+            }
+
+            EditorUtility.ClearProgressBar();
         }
 
         private void MarkSpriteForRename(Sprite sprite, string newName, ref List<SpritesheetRenamer> spritesheetRenamers)
@@ -168,19 +157,6 @@ namespace RedBlueGames.MulliganRenamer
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
             AssetDatabase.RenameAsset(pathToAsset, newName);
-        }
-
-        private class ObjectCountPair<T> where T : UnityEngine.Object
-        {
-            public ObjectCountPair(T obj, int count)
-            {
-                this.UnityObject = obj;
-                this.Count = count;
-            }
-
-            public T UnityObject { get; }
-
-            public int Count { get; }
         }
     }
 }
