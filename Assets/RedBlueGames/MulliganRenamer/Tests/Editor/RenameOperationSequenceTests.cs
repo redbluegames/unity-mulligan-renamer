@@ -84,14 +84,9 @@ namespace RedBlueGames.MulliganRenamer
             operationSequence.Add(replaceStringOp);
             operationSequence.Add(trimCharactersOp);
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.SetOperationSequence(operationSequence);
-
-            var renamerReversed = new BulkRenamer();
             var operationSequenceReversed = new RenameOperationSequence<RenameOperation>();
             operationSequenceReversed.Add(trimCharactersOp);
             operationSequenceReversed.Add(replaceStringOp);
-            renamerReversed.SetOperationSequence(operationSequenceReversed);
 
             var expected = "boonro_Idle";
             var expectedReversed = "_Hero_Idle";

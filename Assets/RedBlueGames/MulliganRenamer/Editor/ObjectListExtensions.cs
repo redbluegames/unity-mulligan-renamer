@@ -32,23 +32,6 @@ namespace RedBlueGames.MulliganRenamer
     public static class ObjectListExtensions
     {
         /// <summary>
-        /// Gets the names for the associated Unity Objects
-        /// </summary>
-        /// <returns>The names.</returns>
-        /// <param name="objects">Objects to get the names of.</param>
-        public static string[] GetNames(this List<UnityEngine.Object> objects)
-        {
-            int namesCount = objects.Count;
-            var names = new string[namesCount];
-            for (int i = 0; i < namesCount; ++i)
-            {
-                names[i] = objects[i].name;
-            }
-
-            return names;
-        }
-
-        /// <summary>
         /// Removes all null entries in the list.
         /// </summary>
         /// <param name="list">List to modify.</param>
