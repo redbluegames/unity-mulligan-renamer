@@ -290,7 +290,14 @@ namespace RedBlueGames.MulliganRenamer
 
             if (EditorGUIUtility.isProSkin)
             {
-                this.guiStyles.PreviewScroll = new GUIStyle("CurveEditorBackground");
+                string styleName = string.Empty;
+                #if UNITY_5
+                styleName = "AnimationCurveEditorBackground";
+                #else
+                styleName = "CurveEditorBackground";
+                #endif
+
+                this.guiStyles.PreviewScroll = new GUIStyle(styleName);
 
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.3f, 0.3f, 0.3f, 0.2f);
 
