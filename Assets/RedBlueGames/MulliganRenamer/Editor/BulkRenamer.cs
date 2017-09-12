@@ -85,12 +85,13 @@ namespace RedBlueGames.MulliganRenamer
                 AssetRenameUndoer.RecordAssetRenames("Bulk Rename", objectsAndNewNames);
             }
 
-            EditorUtility.DisplayProgressBar("Renaming Assets...", "Renaming Assets...", 0.0f);
+            int totalNumSteps = objectsAndNewNames.Count; 
+            int currentStep = 0;
             var spritesheetRenamers = new List<SpritesheetRenamer>();
-            for (int i = 0; i < objectsAndNewNames.Count; ++i)
+            for (int i = 0; i < objectsAndNewNames.Count; ++i, ++currentStep)
             {
-                var infoString = string.Format("Renaming Asset {0} of {1}", i, objectsAndNewNames.Count);
-                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, i / (float)objectsAndNewNames.Count);
+                var infoString = string.Format("Renaming Object {0} of {1}", i, objectsAndNewNames.Count);
+                EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)objectsAndNewNames.Count);
 
                 var objectToRename = objectsAndNewNames[i].NamedObject;
                 var newName = objectsAndNewNames[i].NewName;
@@ -111,10 +112,10 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            for (int i = 0; i < spritesheetRenamers.Count; ++i)
+            for (int i = 0; i < spritesheetRenamers.Count; ++i, ++currentStep)
             {
                 var infoString = string.Format("Renaming Spritesheet {0} of {1}", i, spritesheetRenamers.Count);
-                EditorUtility.DisplayProgressBar("Renaming Assets...", infoString, i / (float)spritesheetRenamers.Count);
+                EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)totalNumSteps);
                 
                 spritesheetRenamers[i].RenameSprites();
             }
