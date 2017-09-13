@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 /// <summary>
 /// Tool that helps us export RedBlueTools for use in other projects, as well as for the public
@@ -39,9 +40,6 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private List<RBAsset> selectedAssets;
 
     private bool includeTestFiles;
-    private bool runUnitTests;
-
-    private TestRunnerCallback unitTestRunnerCallback;
 
     [MenuItem("Assets/Red Blue/RBPackage Exporter")]
     private static void ExportRBScriptsWithTests()
@@ -89,13 +87,10 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
     private void OnEnable()
     {
-        this.unitTestRunnerCallback = null;
         this.redBlueAssets = new List<RBAsset>();
         this.selectedAssets = new List<RBAsset>();
 
         this.FindAssetsInCompanyFolder();
-
-        this.runUnitTests = true;
     }
 
     private void FindAssetsInCompanyFolder()
@@ -143,19 +138,11 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         EditorGUILayout.Separator();
         EditorGUILayout.LabelField("Additional Options:", EditorStyles.boldLabel);
         this.includeTestFiles = EditorGUILayout.Toggle("Include Test Files", this.includeTestFiles);
-        this.runUnitTests = EditorGUILayout.Toggle("Run Unit Tests", this.runUnitTests);
 
         EditorGUI.BeginDisabledGroup(!atLeastOnePackageSelected);
         if (GUILayout.Button("Export"))
         {
-            if (this.runUnitTests)
-            {
-                this.RunTests();
-            }
-            else
-            {
-                this.HandleTestsSucceeded();
-            }
+            this.ExportPackages(this.selectedAssets, this.includeTestFiles);
         }
 
         EditorGUI.EndDisabledGroup();
@@ -168,23 +155,8 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         }
     }
 
-    private void RunTests()
-    {
-        this.unitTestRunnerCallback = new TestRunnerCallback();
-        this.unitTestRunnerCallback.TestsSucceeded.AddListener(this.HandleTestsSucceeded);
-        this.unitTestRunnerCallback.TestsFailed.AddListener(this.HandleTestsFailed);
-        UnityEditor.EditorTests.Batch.RunTests(this.unitTestRunnerCallback);
-    }
-
-    private void HandleTestsSucceeded()
-    {
-        this.ExportPackages(this.selectedAssets, this.includeTestFiles);
-        this.unitTestRunnerCallback = null;
-    }
-
     private void HandleTestsFailed()
     {
-        this.unitTestRunnerCallback = null;
         string dialogTitle = "Export Error";
         string exportErrorMsg = "Could not export packages because the Unit tests failed. " +
             "You must fix the tests before exporting a project.";
@@ -264,84 +236,5 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         public string AssetName { get; set; }
 
         public bool IsSelected { get; set; }
-    }
-
-    private class TestRunnerCallback : UnityEditor.EditorTests.ITestRunnerCallback
-    {
-        private UnityEngine.Events.UnityEvent testsFailed;
-        private UnityEngine.Events.UnityEvent testsSucceeded;
-
-        public TestRunnerCallback()
-        {
-            this.testsSucceeded = new UnityEngine.Events.UnityEvent();
-            this.testsFailed = new UnityEngine.Events.UnityEvent();
-        }
-
-        public bool IsFailure
-        {
-            get;
-
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the event callback for when Unit Tests fail.
-        /// </summary>
-        public UnityEngine.Events.UnityEvent TestsFailed
-        {
-            get
-            {
-                return this.testsFailed;
-            }
-        }
-
-        /// <summary>
-        /// Gets the event callback for when unity tests succeed.
-        /// </summary>
-        public UnityEngine.Events.UnityEvent TestsSucceeded
-        {
-            get
-            {
-                return this.testsSucceeded;
-            }
-        }
-
-        public void TestStarted(string testName)
-        {
-        }
-
-        public void TestFinished(UnityEditor.EditorTests.ITestResult testResult)
-        {
-            if (testResult.isIgnored)
-            {
-                return;
-            }
-
-            if (!testResult.isSuccess)
-            {
-                this.IsFailure = true;
-            }
-        }
-
-        public void RunStarted(string suiteName, int testCount)
-        {
-            this.IsFailure = false;
-        }
-
-        public void RunFinished()
-        {
-            if (!this.IsFailure)
-            {
-                this.TestsSucceeded.Invoke();
-            }
-            else
-            {
-                this.TestsFailed.Invoke();
-            }
-        }
-
-        public void RunFinishedException(System.Exception exception)
-        {
-        }
     }
 }
