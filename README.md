@@ -1,5 +1,5 @@
-# Unity - Mulligan Rename Tool
-Mulligan Rename tool for Unity allows for quick and safe renaming of many assets or GameObjects all at once. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
+# Unity - Mulligan Renamer
+The Mulligan Renamer tool for Unity allows for quick and safe renaming of many assets or GameObjects all at once. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
 
 This ReadMe provides a quick overview of the tool. For more detailed documentation, check out the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki).
 
