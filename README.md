@@ -3,7 +3,7 @@ The Mulligan Renamer tool for Unity allows for quick and safe renaming of many a
 
 This ReadMe provides a quick overview of the tool. For more detailed documentation, check out the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki).
 
-![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/bulk_rename_gameobjects.gif)
+![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/mulligan-renamer-overview.gif)
 
 ## Installation
 To install this package follow these steps:
