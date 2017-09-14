@@ -25,7 +25,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 /// <summary>
 /// Tool that helps us export RedBlueTools for use in other projects, as well as for the public
