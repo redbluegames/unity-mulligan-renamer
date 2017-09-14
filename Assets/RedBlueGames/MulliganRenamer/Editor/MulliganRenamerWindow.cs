@@ -34,6 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerWindow : EditorWindow
     {
+        private const string VersionString = "1.0.0";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string AddedTextColorTag = "<color=green>";
@@ -251,6 +252,9 @@ namespace RedBlueGames.MulliganRenamer
 
             this.guiContents.DropPromptHint = new GUIContent(
                 "Add more objects by dragging them here");
+
+            var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2017 RedBlueGames");
+            this.guiContents.CopyrightLabel = new GUIContent(copyrightLabel);
         }
 
         private void InitializeGUIStyles()
@@ -315,6 +319,10 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
+
+            var copyrightStyle = new GUIStyle(EditorStyles.miniLabel);
+            copyrightStyle.alignment = TextAnchor.MiddleRight;
+            this.guiStyles.CopyrightLabel = copyrightStyle;
         }
 
         private void OnGUI()
@@ -362,6 +370,8 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField(this.guiContents.CopyrightLabel, this.guiStyles.CopyrightLabel);
 
             // Issue #115 - Workaround to force focus to stay with whatever widget it was previously on...
             var focusedControl = GUI.GetNameOfFocusedControl();
@@ -1103,6 +1113,8 @@ namespace RedBlueGames.MulliganRenamer
             public Color InsertionTextColor { get; set; }
 
             public Color DeletionTextColor { get; set; }
+
+            public GUIStyle CopyrightLabel { get; set; }
         }
 
         private class GUIContents
@@ -1110,6 +1122,8 @@ namespace RedBlueGames.MulliganRenamer
             public GUIContent DropPrompt { get; set; }
 
             public GUIContent DropPromptHint { get; set; }
+
+            public GUIContent CopyrightLabel { get; set; }
         }
     }
 }
