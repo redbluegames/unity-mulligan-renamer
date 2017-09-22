@@ -34,11 +34,8 @@ The tool allows for many rename operations. Here are a few:
 
 You can combine any number of the rename operations in any order to achieve the rename results you want. Read more about the operations in the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki) [here](https://github.com/redbluegames/unity-bulk-rename/wiki/Rename-Operations). 
 
-## Notes and Considerations
-Currently the tool does not allow for undoing Assets, (though Undoing GameObjects in the scene is possible). This seems to be a limitation of Unity's undo system.
-
 ## Contributing
-Contributing to the project is welcome. You can do so by adding GitHub issues, or by submitting code pull requests. If you submit a pull request, please try to adhere to the StyleCop format and reference the GitHub issue in the Pull Requst comments.
+Contributing to the project is welcome. You can do so by adding GitHub issues, or by submitting code pull requests. Please read the [Contributing Guidelines](https://github.com/redbluegames/unity-mulligan-renamer/blob/master/CONTRIBUTING.md) before contributing.
 
 
 ## Contributors and Credits
