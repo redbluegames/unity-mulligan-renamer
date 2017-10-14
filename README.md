@@ -6,6 +6,17 @@ This ReadMe provides a quick overview of the tool. For more detailed documentati
 ![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/mulligan-renamer-overview.gif)
 
 ## Installation
+
+### Through Unity Asset Store
+
+<p align="center">
+  <a href="https://www.assetstore.unity3d.com/en/#!/content/99843"><img src="https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/readme-asset-store.png" alt="Unity Asset Store"/></a>
+</p>
+
+Development on Mulligan Renamer is supported through purchases on the Asset Store, as well as through volunteer time of contributors. Please consider supporting further development by purchasing it through the [Unity Asset Store](https://www.assetstore.unity3d.com/en/#!/content/99843).
+
+### Through Github
+
 To install this package follow these steps:
 
 1. Download the latest package (.unitypackage file) from the [Releases page](https://github.com/redbluegames/unity-bulk-rename/releases) or click [here](https://github.com/redbluegames/unity-bulk-rename/releases/latest).
