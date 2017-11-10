@@ -39,9 +39,12 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="objectsToRename">Objects to rename.</param>
         /// <param name="sequence">Sequence to use to generate new names.</param>
         /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
-        public void RenameObjects(List<UnityEngine.Object> objectsToRename, RenameOperationSequence<RenameOperation> sequence, bool ignoreUndo = false)
+        public void RenameObjects(
+            List<UnityEngine.Object> objectsToRename,
+            RenameOperationSequence<RenameOperation> sequence,
+            bool ignoreUndo = false)
         {
-            var objs = new List<ObjectNameDelta>();
+            var nameChanges = new List<ObjectNameDelta>();
             for (int i = 0; i < objectsToRename.Count; ++i)
             {
                 var newName = sequence.GetResultingName(objectsToRename[i].name, i);
@@ -53,10 +56,10 @@ namespace RedBlueGames.MulliganRenamer
                     continue;
                 }
 
-                objs.Add(new ObjectNameDelta(objectsToRename[i], newName));
+                nameChanges.Add(new ObjectNameDelta(objectsToRename[i], newName));
             }
 
-            this.RenameObjects(objs, ignoreUndo);
+            this.RenameObjects(nameChanges, ignoreUndo);
         }
 
         /// <summary>
