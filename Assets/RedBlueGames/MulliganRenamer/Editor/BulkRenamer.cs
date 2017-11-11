@@ -69,79 +69,111 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
         public void RenameObjects(List<ObjectNameDelta> objectsAndNewNames, bool ignoreUndo = false)
         {
+            List<ObjectNameDelta> assetsToRename;
+            List<ObjectNameDelta> spritesToRename;
+            List<ObjectNameDelta> gameObjectsToRename;
+            this.SplitObjectsIntoCategories(objectsAndNewNames, out gameObjectsToRename, out assetsToRename, out spritesToRename);
+
             // Record all the objects to undo stack, note as of Unity 5.5.2 this does not record asset names,
             // so we have our own Undoer to handle assets.
             // Furthermore, our Spritesheet renaming isn't captured by the undo system so it must be manually undone.
             if (!ignoreUndo)
             {
-                var gameObjectsToRename = new List<GameObject>();
-                foreach (var objectAndName in objectsAndNewNames)
+                var gameObjectsToRenameAsGameObjects = new List<GameObject>();
+                foreach (var gameObjectToRename in gameObjectsToRename)
                 {
-                    if (!objectAndName.NamedObject.IsAsset())
-                    {
-                        gameObjectsToRename.Add((GameObject)objectAndName.NamedObject);
-                    }
+                    gameObjectsToRenameAsGameObjects.Add((GameObject)gameObjectToRename.NamedObject);
                 }
 
-                Undo.RecordObjects(gameObjectsToRename.ToArray(), "Bulk Rename");
+                Undo.RecordObjects(gameObjectsToRenameAsGameObjects.ToArray(), "Bulk Rename");
 
                 AssetRenameUndoer.RecordAssetRenames("Bulk Rename", objectsAndNewNames);
             }
 
             // Rename the objects and show a progress bar
-            int totalNumSteps = objectsAndNewNames.Count; 
-            int currentStep = 0;
+            int totalNumSteps = spritesToRename.Count + assetsToRename.Count + gameObjectsToRename.Count; 
+            int progressBarStep = 0;
             var spritesheetRenamers = new List<SpritesheetRenamer>();
             var deferredRenames = new List<ObjectNameDelta>();
-            for (int i = 0; i < objectsAndNewNames.Count; ++i, ++currentStep)
+            foreach (var spriteToRename in spritesToRename)
             {
-                var infoString = string.Format("Renaming Object {0} of {1}", i, objectsAndNewNames.Count);
-                EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)objectsAndNewNames.Count);
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
+                this.MarkSpriteForRename((Sprite)spriteToRename.NamedObject, spriteToRename.NewName, ref spritesheetRenamers);
+            }
 
-                var currentRename = objectsAndNewNames[i];
-                var objectToRename = currentRename.NamedObject;
-                var newName = currentRename.NewName;
-                if (objectToRename.IsAsset())
+            foreach (var assetToRename in assetsToRename)
+            {
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
+                if (RenamedAssetWillCollideWithAnotherAsset(assetToRename, objectsAndNewNames))
                 {
-                    if (objectToRename is Sprite)
-                    {
-                        this.MarkSpriteForRename((Sprite)objectToRename, newName, ref spritesheetRenamers);
-                    }
-                    else
-                    {
-                        if (RenamedAssetWillCollideWithAnotherAsset(currentRename, objectsAndNewNames))
-                        {
-                            deferredRenames.Add(currentRename);
-                            var tempname = currentRename.NamedObject.GetInstanceID().ToString();
-                            this.RenameAsset(currentRename.NamedObject, tempname);
-                        }
-                        else
-                        {
-                            this.RenameAsset(objectToRename, newName);
-                        }
-                    }
+                    // Decrement progress bar count because we'll increment it later when we do the deferred objects.
+                    --progressBarStep;
+                    deferredRenames.Add(assetToRename);
+                    var tempname = assetToRename.NamedObject.GetInstanceID().ToString();
+                    this.RenameAsset(assetToRename.NamedObject, tempname);
                 }
                 else
                 {
-                    this.RenameGameObject((GameObject)objectToRename, newName);
+                    this.RenameAsset(assetToRename.NamedObject, assetToRename.NewName);
                 }
+            }
+
+            foreach (var gameObjectToRename in gameObjectsToRename)
+            {
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
+                this.RenameGameObject((GameObject)gameObjectToRename.NamedObject, gameObjectToRename.NewName);
             }
 
             foreach (var deferredRename in deferredRenames)
             {
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
                 this.RenameAsset(deferredRename.NamedObject, deferredRename.NewName);
             }
 
             // Rename the sprites in the spritesheets
-            for (int i = 0; i < spritesheetRenamers.Count; ++i, ++currentStep)
+            for (int i = 0; i < spritesheetRenamers.Count; ++i, ++progressBarStep)
             {
-                var infoString = string.Format("Renaming Spritesheet {0} of {1}", i, spritesheetRenamers.Count);
-                EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)totalNumSteps);
-                
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
                 spritesheetRenamers[i].RenameSprites();
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        private void UpdateProgressBar(int currentStep, int totalNumSteps)
+        {
+            var infoString = string.Format("Renaming Object {0} of {1}", currentStep++, totalNumSteps);
+            EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)totalNumSteps);
+        }
+
+        private void SplitObjectsIntoCategories(
+            List<ObjectNameDelta> objectRenames,
+            out List<ObjectNameDelta> gameObjects,
+            out List<ObjectNameDelta> assets,
+            out List<ObjectNameDelta> sprites)
+        {
+            gameObjects = new List<ObjectNameDelta>();
+            assets = new List<ObjectNameDelta>();
+            sprites = new List<ObjectNameDelta>();
+            foreach (var objectRename in objectRenames)
+            {
+                var obj = objectRename.NamedObject;
+                if (obj.IsAsset())
+                {
+                    if (obj is Sprite)
+                    {
+                        sprites.Add(objectRename);
+                    }
+                    else
+                    {
+                        assets.Add(objectRename);
+                    }
+                }
+                else
+                {
+                    gameObjects.Add(objectRename);
+                }
+            }
         }
 
         private static bool RenamedAssetWillCollideWithAnotherAsset(
@@ -150,10 +182,10 @@ namespace RedBlueGames.MulliganRenamer
         {
             var originalAssetPath = AssetDatabase.GetAssetPath(assetToRename.NamedObject);
             var futurePathToAsset = string.Concat(
-                System.IO.Path.GetDirectoryName(originalAssetPath),
-                System.IO.Path.DirectorySeparatorChar,
-                assetToRename.NewName,
-                System.IO.Path.GetExtension(originalAssetPath));
+                                        System.IO.Path.GetDirectoryName(originalAssetPath),
+                                        System.IO.Path.DirectorySeparatorChar,
+                                        assetToRename.NewName,
+                                        System.IO.Path.GetExtension(originalAssetPath));
 
             foreach (var otherRename in otherRenames)
             {
