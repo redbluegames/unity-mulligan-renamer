@@ -140,7 +140,37 @@ namespace RedBlueGames.MulliganRenamer
             EditorUtility.ClearProgressBar();
         }
 
-        private void UpdateProgressBar(int currentStep, int totalNumSteps)
+        private static bool RenamedAssetWillCollideWithAnotherAsset(
+            ObjectNameDelta assetToRename,
+            List<ObjectNameDelta> otherRenames)
+        {
+            var originalAssetPath = AssetDatabase.GetAssetPath(assetToRename.NamedObject);
+            var futurePathToAsset = string.Concat(
+                System.IO.Path.GetDirectoryName(originalAssetPath),
+                System.IO.Path.DirectorySeparatorChar,
+                assetToRename.NewName,
+                System.IO.Path.GetExtension(originalAssetPath));
+
+            foreach (var otherRename in otherRenames)
+            {
+                // Make sure to skip itself if it happens to be in the list
+                var otherAsset = otherRename.NamedObject;
+                if (otherAsset == assetToRename.NamedObject)
+                {
+                    continue;
+                }
+
+                var pathToOtherAsset = AssetDatabase.GetAssetPath(otherAsset);
+                if (pathToOtherAsset == futurePathToAsset)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void UpdateProgressBar(int currentStep, int totalNumSteps)
         {
             var infoString = string.Format("Renaming Object {0} of {1}", currentStep++, totalNumSteps);
             EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)totalNumSteps);
@@ -174,36 +204,6 @@ namespace RedBlueGames.MulliganRenamer
                     gameObjects.Add(objectRename);
                 }
             }
-        }
-
-        private static bool RenamedAssetWillCollideWithAnotherAsset(
-            ObjectNameDelta assetToRename,
-            List<ObjectNameDelta> otherRenames)
-        {
-            var originalAssetPath = AssetDatabase.GetAssetPath(assetToRename.NamedObject);
-            var futurePathToAsset = string.Concat(
-                                        System.IO.Path.GetDirectoryName(originalAssetPath),
-                                        System.IO.Path.DirectorySeparatorChar,
-                                        assetToRename.NewName,
-                                        System.IO.Path.GetExtension(originalAssetPath));
-
-            foreach (var otherRename in otherRenames)
-            {
-                // Make sure to skip itself if it happens to be in the list
-                var otherAsset = otherRename.NamedObject;
-                if (otherAsset == assetToRename.NamedObject)
-                {
-                    continue;
-                }
-
-                var pathToOtherAsset = AssetDatabase.GetAssetPath(otherAsset);
-                if (pathToOtherAsset == futurePathToAsset)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private void MarkSpriteForRename(Sprite sprite, string newName, ref List<SpritesheetRenamer> spritesheetRenamers)

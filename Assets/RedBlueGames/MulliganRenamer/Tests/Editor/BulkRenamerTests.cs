@@ -30,6 +30,8 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine.TestTools;
     using NUnit.Framework;
 
+    using Object = UnityEngine.Object;
+
     public class BulkRenamerTests
     {
         private static readonly string TestFixturesFolderName = "TestFixtures";
@@ -38,41 +40,46 @@ namespace RedBlueGames.MulliganRenamer
         private static readonly string TestFixturesDirectory =
             string.Concat(TestFixturesPath, "/");
 
-        private List<UnityEngine.Object> singleObject;
-        private List<UnityEngine.Object> multipleObjects;
-        private List<UnityEngine.Object> enumeratedObjects;
+        private List<Object> singleAsset;
+        private List<Object> multipleAssets;
+        private List<Object> enumeratedObjects;
+
+        private List<Object> gameObjects;
+        private Texture2D textureWithSprites;
 
         [OneTimeSetUp]
         public void Setup()
         {
             AssetDatabase.CreateFolder("Assets", TestFixturesFolderName);
 
-            this.SetupSingleObjectTest();
-            this.SetupMultipleObjectTest();
+            this.SetupSingleAssetTest();
+            this.SetupMultipleAssetsTest();
+            this.SetupGameObjects();
             this.SetupEnumeratedObject();
+            this.SetupSpriteSheet();
         }
 
-        private void SetupSingleObjectTest()
+        private void SetupSingleAssetTest()
         {
             var gameObjectAsset = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "Original.prefab"),
                                       new GameObject("Original"));
-            this.singleObject = new List<UnityEngine.Object>();
-            this.singleObject.Add(gameObjectAsset);
+            this.singleAsset = new List<Object>();
+            this.singleAsset.Add(gameObjectAsset);
         }
 
-        private void SetupMultipleObjectTest()
+        private void SetupMultipleAssetsTest()
         {
             var multipleObject0 = PrefabUtility.CreatePrefab(
-                                      string.Concat(TestFixturesDirectory, "GameObject0.prefab"),
-                                      new GameObject("GameObject0"));
+                                      string.Concat(TestFixturesDirectory, "Asset0.prefab"),
+                                      new GameObject("Asset0"));
             var multipleObject1 = PrefabUtility.CreatePrefab(
-                                      string.Concat(TestFixturesDirectory, "GameObject1.prefab"),
-                                      new GameObject("GameObject1"));
+                                      string.Concat(TestFixturesDirectory, "Asset1.prefab"),
+                                      new GameObject("Asset1"));
 
-            this.multipleObjects = new List<UnityEngine.Object>();
-            this.multipleObjects.Add(multipleObject0);
-            this.multipleObjects.Add(multipleObject1);
+            this.multipleAssets = new List<Object>();
+            this.multipleAssets.Add(multipleObject0);
+            this.multipleAssets.Add(multipleObject1);
         }
 
         private void SetupEnumeratedObject()
@@ -87,10 +94,57 @@ namespace RedBlueGames.MulliganRenamer
                                         string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"),
                                         new GameObject("EnumeratedObject2"));
 
-            this.enumeratedObjects = new List<UnityEngine.Object>();
+            this.enumeratedObjects = new List<Object>();
             this.enumeratedObjects.Add(enumeratedObject0);
             this.enumeratedObjects.Add(enumeratedObject1);
             this.enumeratedObjects.Add(enumeratedObject2);
+        }
+
+        private void SetupGameObjects()
+        {
+            var gameObject0 = new GameObject("GameObject0");
+            var gameObject1 = new GameObject("GameObject1");
+
+            this.gameObjects = new List<Object>();
+            this.gameObjects.Add(gameObject0);
+            this.gameObjects.Add(gameObject1);
+        }
+
+        private void SetupSpriteSheet()
+        {
+            var texture = new Texture2D(64, 64, TextureFormat.ARGB32, false, true);
+            for (int x = 0; x < 64; ++x)
+            {
+                for (int y = 0; y < 64; ++y)
+                {
+                    texture.SetPixel(x, y, Color.cyan);
+                }
+            }
+
+            texture.Apply();
+
+            // Need to save the texture as an Asset and store a reference to the Asset
+            var path = string.Concat(TestFixturesDirectory, "Texture.png");
+            byte[] bytes = texture.EncodeToPNG();
+            System.IO.File.WriteAllBytes(path, bytes);
+            AssetDatabase.ImportAsset(path);
+            this.textureWithSprites = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            
+            var importer = (TextureImporter)TextureImporter.GetAtPath(path);
+            importer.isReadable = true;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            var spriteMetaData = new SpriteMetaData[4];
+            spriteMetaData[0].rect = new Rect(0, 0, 32, 32);
+            spriteMetaData[0].name = "Texture_Sprite0";
+            spriteMetaData[1].rect = new Rect(32, 0, 32, 32);
+            spriteMetaData[1].name = "Texture_Sprite1";
+            spriteMetaData[2].rect = new Rect(0, 32, 32, 32);
+            spriteMetaData[2].name = "Texture_Sprite2";
+            spriteMetaData[3].rect = new Rect(32, 32, 32, 32);
+            spriteMetaData[3].name = "Texture_Sprite3";
+            importer.spritesheet = spriteMetaData;
+            importer.SaveAndReimport();
         }
 
         [OneTimeTearDown]
@@ -100,7 +154,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void RenameObjects_SingleObject_Renames()
+        public void RenameObjects_SingleAsset_Renames()
         {
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "NewName";
@@ -109,13 +163,41 @@ namespace RedBlueGames.MulliganRenamer
             renameSequence.Add(replaceNameOp);
 
             var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.singleObject, renameSequence, true);
+            bulkRenamer.RenameObjects(this.singleAsset, renameSequence, true);
 
-            Assert.AreEqual("NewName", this.singleObject[0].name);
+            Assert.AreEqual("NewName", this.singleAsset[0].name);
         }
 
         [Test]
-        public void RenameObjects_MultipleObjects_Renames()
+        public void RenameObjects_MultipleAssets_Renames()
+        {
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.SearchString = "Asset";
+            replaceStringOp.ReplacementString = "Thingy";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceStringOp);
+
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.RenameObjects(this.multipleAssets, renameSequence, true);
+
+            var expectedNames = new List<string>
+            {
+                "Thingy0",
+                "Thingy1"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var obj in this.multipleAssets)
+            {
+                resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        [Test]
+        public void RenameObjects_MultipleGameObjects_Renames()
         {
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "Object";
@@ -125,7 +207,7 @@ namespace RedBlueGames.MulliganRenamer
             renameSequence.Add(replaceStringOp);
 
             var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.multipleObjects, renameSequence, true);
+            bulkRenamer.RenameObjects(this.gameObjects, renameSequence, true);
 
             var expectedNames = new List<string>
             {
@@ -134,7 +216,7 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var resultingNames = new List<string>();
-            foreach (var obj in this.multipleObjects)
+            foreach (var obj in this.gameObjects)
             {
                 resultingNames.Add(obj.name);
             }
@@ -174,6 +256,50 @@ namespace RedBlueGames.MulliganRenamer
             foreach (var obj in this.enumeratedObjects)
             {
                 resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        [Test]
+        public void RenameObjects_Spritesheet_Renames()
+        {
+            var replaceNameOp = new ReplaceNameOperation();
+            replaceNameOp.NewName = "NewSprite";
+
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.StartingCount = 1;
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceNameOp);
+            renameSequence.Add(enumerateOp);
+
+            var path = AssetDatabase.GetAssetPath(this.textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+            var allSprites = new List<Object>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                if (asset is Sprite)
+                {
+                    allSprites.Add(asset);
+                }
+            }
+
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.RenameObjects(allSprites, renameSequence, true);
+
+            var expectedNames = new List<string>
+            {
+                "NewSprite1",
+                "NewSprite2",
+                "NewSprite3",
+                "NewSprite4"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var sprite in allSprites)
+            {
+                resultingNames.Add(sprite.name);
             }
 
             Assert.AreEqual(expectedNames, resultingNames);
