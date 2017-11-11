@@ -48,18 +48,18 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets the named object.
         /// </summary>
         /// <value>The named object.</value>
-        public UnityEngine.Object NamedObject { get; private set;}
+        public UnityEngine.Object NamedObject { get; private set; }
 
         /// <summary>
         /// Gets the old name of the object.
         /// </summary>
         /// <value>The old name.</value>
-        public string OldName { get; private set;}
+        public string OldName { get; private set; }
 
         /// <summary>
         /// Gets the new name of the object.
         /// </summary>
         /// <value>The new name.</value>
-        public string NewName { get; private set;}
+        public string NewName { get; private set; }
     }
 }

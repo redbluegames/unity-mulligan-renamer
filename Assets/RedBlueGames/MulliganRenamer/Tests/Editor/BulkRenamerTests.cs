@@ -40,18 +40,29 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<UnityEngine.Object> singleObject;
         private List<UnityEngine.Object> multipleObjects;
+        private List<UnityEngine.Object> enumeratedObjects;
 
         [OneTimeSetUp]
         public void Setup()
         {
             AssetDatabase.CreateFolder("Assets", TestFixturesFolderName);
 
+            this.SetupSingleObjectTest();
+            this.SetupMultipleObjectTest();
+            this.SetupEnumeratedObject();
+        }
+
+        private void SetupSingleObjectTest()
+        {
             var gameObjectAsset = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "Original.prefab"),
                                       new GameObject("Original"));
             this.singleObject = new List<UnityEngine.Object>();
             this.singleObject.Add(gameObjectAsset);
+        }
 
+        private void SetupMultipleObjectTest()
+        {
             var multipleObject0 = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "GameObject0.prefab"),
                                       new GameObject("GameObject0"));
@@ -62,6 +73,24 @@ namespace RedBlueGames.MulliganRenamer
             this.multipleObjects = new List<UnityEngine.Object>();
             this.multipleObjects.Add(multipleObject0);
             this.multipleObjects.Add(multipleObject1);
+        }
+
+        private void SetupEnumeratedObject()
+        {
+            var enumeratedObject0 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject0.prefab"),
+                                        new GameObject("EnumeratedObject0"));
+            var enumeratedObject1 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject1.prefab"),
+                                        new GameObject("EnumeratedObject1"));
+            var enumeratedObject2 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"),
+                                        new GameObject("EnumeratedObject2"));
+
+            this.enumeratedObjects = new List<UnityEngine.Object>();
+            this.enumeratedObjects.Add(enumeratedObject0);
+            this.enumeratedObjects.Add(enumeratedObject1);
+            this.enumeratedObjects.Add(enumeratedObject2);
         }
 
         [OneTimeTearDown]
@@ -88,7 +117,6 @@ namespace RedBlueGames.MulliganRenamer
         [Test]
         public void RenameObjects_MultipleObjects_Renames()
         {
-            Debug.Log("Work it");
             var replaceStringOp = new ReplaceStringOperation();
             replaceStringOp.SearchString = "Object";
             replaceStringOp.ReplacementString = "Thingy";
@@ -107,6 +135,43 @@ namespace RedBlueGames.MulliganRenamer
 
             var resultingNames = new List<string>();
             foreach (var obj in this.multipleObjects)
+            {
+                resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        [Test]
+        public void RenameObjects_EnumeratedObjectsWithDependentChanges_Renames()
+        {
+            // Arrange
+            var removeCharactersOp = new RemoveCharactersOperation();
+            var removeCharacterOptions = RemoveCharactersOperation.Numbers;
+            removeCharactersOp.Options = removeCharacterOptions;
+
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.StartingCount = 1;
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(removeCharactersOp);
+            renameSequence.Add(enumerateOp);
+
+            // Act
+            var bulkRenamer = new BulkRenamer();
+            bulkRenamer.RenameObjects(this.enumeratedObjects, renameSequence, true);
+
+            // Assert
+            // Build two lists to compare against because Assert displays their differences nicely in its output.
+            var expectedNames = new List<string>
+            {
+                "EnumeratedObject1",
+                "EnumeratedObject2",
+                "EnumeratedObject3"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var obj in this.enumeratedObjects)
             {
                 resultingNames.Add(obj.name);
             }

@@ -15,6 +15,7 @@ MonoBehaviour:
     relativePath: /Settings.StyleCop
   ignoredFilePaths:
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/AddStringOpTests.cs
+  - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/BulkRenamerTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/ChangeCaseOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/EnumerateOpTests.cs
   - relativePath: /Assets/RedBlueGames/MulliganRenamer/Tests/Editor/RemoveCharactersOpTests.cs

@@ -88,16 +88,19 @@ namespace RedBlueGames.MulliganRenamer
                 AssetRenameUndoer.RecordAssetRenames("Bulk Rename", objectsAndNewNames);
             }
 
+            // Rename the objects and show a progress bar
             int totalNumSteps = objectsAndNewNames.Count; 
             int currentStep = 0;
             var spritesheetRenamers = new List<SpritesheetRenamer>();
+            var deferredRenames = new List<ObjectNameDelta>();
             for (int i = 0; i < objectsAndNewNames.Count; ++i, ++currentStep)
             {
                 var infoString = string.Format("Renaming Object {0} of {1}", i, objectsAndNewNames.Count);
                 EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)objectsAndNewNames.Count);
 
-                var objectToRename = objectsAndNewNames[i].NamedObject;
-                var newName = objectsAndNewNames[i].NewName;
+                var currentRename = objectsAndNewNames[i];
+                var objectToRename = currentRename.NamedObject;
+                var newName = currentRename.NewName;
                 if (objectToRename.IsAsset())
                 {
                     if (objectToRename is Sprite)
@@ -106,7 +109,16 @@ namespace RedBlueGames.MulliganRenamer
                     }
                     else
                     {
-                        this.RenameAsset(objectToRename, newName);
+                        if (RenamedAssetWillCollideWithAnotherAsset(currentRename, objectsAndNewNames))
+                        {
+                            deferredRenames.Add(currentRename);
+                            var tempname = currentRename.NamedObject.GetInstanceID().ToString();
+                            this.RenameAsset(currentRename.NamedObject, tempname);
+                        }
+                        else
+                        {
+                            this.RenameAsset(objectToRename, newName);
+                        }
                     }
                 }
                 else
@@ -115,6 +127,12 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
+            foreach (var deferredRename in deferredRenames)
+            {
+                this.RenameAsset(deferredRename.NamedObject, deferredRename.NewName);
+            }
+
+            // Rename the sprites in the spritesheets
             for (int i = 0; i < spritesheetRenamers.Count; ++i, ++currentStep)
             {
                 var infoString = string.Format("Renaming Spritesheet {0} of {1}", i, spritesheetRenamers.Count);
@@ -124,6 +142,36 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        private static bool RenamedAssetWillCollideWithAnotherAsset(
+            ObjectNameDelta assetToRename,
+            List<ObjectNameDelta> otherRenames)
+        {
+            var originalAssetPath = AssetDatabase.GetAssetPath(assetToRename.NamedObject);
+            var futurePathToAsset = string.Concat(
+                System.IO.Path.GetDirectoryName(originalAssetPath),
+                System.IO.Path.DirectorySeparatorChar,
+                assetToRename.NewName,
+                System.IO.Path.GetExtension(originalAssetPath));
+
+            foreach (var otherRename in otherRenames)
+            {
+                // Make sure to skip itself if it happens to be in the list
+                var otherAsset = otherRename.NamedObject;
+                if (otherAsset == assetToRename.NamedObject)
+                {
+                    continue;
+                }
+
+                var pathToOtherAsset = AssetDatabase.GetAssetPath(otherAsset);
+                if (pathToOtherAsset == futurePathToAsset)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void MarkSpriteForRename(Sprite sprite, string newName, ref List<SpritesheetRenamer> spritesheetRenamers)

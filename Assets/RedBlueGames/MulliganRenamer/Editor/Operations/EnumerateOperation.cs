@@ -200,6 +200,9 @@ namespace RedBlueGames.MulliganRenamer
 
         private void Initialize()
         {
+            // Give it an initially valid count format
+            this.CountFormat = "0";
+                
             var singleDigitPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "0, 1, 2...",
