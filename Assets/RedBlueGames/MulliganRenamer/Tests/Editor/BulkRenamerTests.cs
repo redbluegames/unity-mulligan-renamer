@@ -162,8 +162,8 @@ namespace RedBlueGames.MulliganRenamer
             var renameSequence = new RenameOperationSequence<RenameOperation>();
             renameSequence.Add(replaceNameOp);
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.singleAsset, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(this.singleAsset, true);
 
             Assert.AreEqual("NewName", this.singleAsset[0].name);
         }
@@ -178,8 +178,8 @@ namespace RedBlueGames.MulliganRenamer
             var renameSequence = new RenameOperationSequence<RenameOperation>();
             renameSequence.Add(replaceStringOp);
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.multipleAssets, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(this.multipleAssets, true);
 
             var expectedNames = new List<string>
             {
@@ -206,8 +206,8 @@ namespace RedBlueGames.MulliganRenamer
             var renameSequence = new RenameOperationSequence<RenameOperation>();
             renameSequence.Add(replaceStringOp);
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.gameObjects, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(this.gameObjects, true);
 
             var expectedNames = new List<string>
             {
@@ -240,8 +240,8 @@ namespace RedBlueGames.MulliganRenamer
             renameSequence.Add(enumerateOp);
 
             // Act
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.enumeratedObjects, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(this.enumeratedObjects, true);
 
             // Assert
             // Build two lists to compare against because Assert displays their differences nicely in its output.
@@ -285,8 +285,8 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(allSprites, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(allSprites, true);
 
             var expectedNames = new List<string>
             {

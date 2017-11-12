@@ -178,6 +178,11 @@ namespace RedBlueGames.MulliganRenamer
                 isDeleteClicked = true;
             }
 
+            if (info.WarningIcon != null)
+            {
+                GUILayout.Box(info.WarningIcon, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
+            }
+
             GUILayout.Box(info.Icon, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
 
             if (style.FirstColumnWidth > 0)
@@ -215,7 +220,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.previewPanelScrollPosition = Vector2.zero;
 
-            this.BulkRenamer = new BulkRenamer();
             this.RenameOperationsToApply = new RenameOperationSequence<RenameOperation>();
             this.ObjectsToRename = new List<UnityEngine.Object>();
 
@@ -360,7 +364,8 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(disableRenameButton);
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
-                this.BulkRenamer.RenameObjects(this.ObjectsToRename, this.RenameOperationsToApply);
+                var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
+                bulkRenamer.RenameObjects(this.ObjectsToRename);
                 this.ObjectsToRename.Clear();
             }
 
@@ -613,7 +618,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsWithItems()
         {
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(this.RenameOperationsToApply, this.ObjectsToRename);
+            var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
+            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(bulkRenamer, this.ObjectsToRename);
 
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
@@ -624,7 +630,10 @@ namespace RedBlueGames.MulliganRenamer
             string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
             string newNameColumnHeader = "After";
 
-            EditorGUILayout.LabelField(originalNameColumnHeader, EditorStyles.boldLabel, GUILayout.Width(previewContents.LongestOriginalNameWidth));
+            EditorGUILayout.LabelField(
+                originalNameColumnHeader,
+                EditorStyles.boldLabel,
+                GUILayout.Width(previewContents.LongestOriginalNameWidth));
 
             bool shouldShowSecondColumn = this.IsPreviewStepModePreference;
             if (shouldShowSecondColumn)
@@ -937,6 +946,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             public Texture Icon { get; set; }
 
+            public Texture WarningIcon { get; set; }
+
             public RenameResultSequence RenameResultSequence { get; set; }
 
             public bool NamesAreDifferent
@@ -1008,19 +1019,17 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             public static PreviewPanelContents CreatePreviewContentsForObjects(
-                RenameOperationSequence<RenameOperation> renameSequence,
+                BulkRenamer bulkRenamer,
                 List<UnityEngine.Object> objects)
             {
+                var renameResultsPreviews = bulkRenamer.GetResultsPreview(objects);
                 var preview = new PreviewPanelContents();
-
                 preview.PreviewRowInfos = new PreviewRowModel[objects.Count];
-
-                for (int i = 0; i < preview.PreviewRowInfos.Length; ++i)
+                for (int i = 0; i < renameResultsPreviews.Count; ++i)
                 {
                     var info = new PreviewRowModel();
                     var originalName = objects[i].name;
-                    info.RenameResultSequence = renameSequence.GetRenamePreview(originalName, i);
-
+                    info.RenameResultSequence = renameResultsPreviews[i];
                     info.Icon = GetIconForObject(objects[i]);
 
                     preview.PreviewRowInfos[i] = info;
@@ -1031,13 +1040,15 @@ namespace RedBlueGames.MulliganRenamer
                 preview.LongestNewNameWidth = 0.0f;
                 foreach (var previewRowInfo in preview.PreviewRowInfos)
                 {
-                    float originalNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.RenameResultSequence.OriginalName)).x * paddingScaleForBold;
+                    float originalNameWidth = GUI.skin.label.CalcSize(
+                                                  new GUIContent(previewRowInfo.RenameResultSequence.OriginalName)).x * paddingScaleForBold;
                     if (originalNameWidth > preview.LongestOriginalNameWidth)
                     {
                         preview.LongestOriginalNameWidth = originalNameWidth;
                     }
 
-                    float newNameWidth = GUI.skin.label.CalcSize(new GUIContent(previewRowInfo.RenameResultSequence.NewName)).x * paddingScaleForBold;
+                    float newNameWidth = GUI.skin.label.CalcSize(
+                                             new GUIContent(previewRowInfo.RenameResultSequence.NewName)).x * paddingScaleForBold;
                     if (newNameWidth > preview.LongestNewNameWidth)
                     {
                         preview.LongestNewNameWidth = newNameWidth;
