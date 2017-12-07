@@ -73,7 +73,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             // Rename the objects and show a progress bar
-            int totalNumSteps = spritesToRename.Count + assetsToRename.Count + gameObjectsToRename.Count; 
+            int totalNumSteps = spritesToRename.Count + assetsToRename.Count + gameObjectsToRename.Count;
             int progressBarStep = 0;
             var spritesheetRenamers = new List<SpritesheetRenamer>();
             var deferredRenames = new List<ObjectNameDelta>();
@@ -86,18 +86,20 @@ namespace RedBlueGames.MulliganRenamer
             foreach (var assetToRename in assetsToRename)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
+                var newName = string.Empty;
                 if (RenamedAssetWillConflictWithAnotherAsset(assetToRename, objectsAndNewNames))
                 {
                     // Decrement progress bar count because we'll increment it later when we do the deferred objects.
                     --progressBarStep;
                     deferredRenames.Add(assetToRename);
-                    var tempname = assetToRename.NamedObject.GetInstanceID().ToString();
-                    RenameAsset(assetToRename.NamedObject, tempname);
+                    newName = assetToRename.NamedObject.GetInstanceID().ToString();
                 }
                 else
                 {
-                    RenameAsset(assetToRename.NamedObject, assetToRename.NewName);
+                    newName = assetToRename.NewName;
                 }
+
+                RenameAsset(assetToRename.NamedObject, newName);
             }
 
             foreach (var gameObjectToRename in gameObjectsToRename)
@@ -123,24 +125,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets a list of the RenameResultsSequences that show the rename steps that will be applied
-        /// to each object, if this renamer is used to rename the objects.
-        /// </summary>
-        /// <returns>The results preview.</returns>
-        /// <param name="objectsToRename">Objects to rename.</param>
-        public List<RenameResultSequence> GetResultsPreview(List<UnityEngine.Object> objectsToRename)
-        {
-            var renameResultPreviews = new List<RenameResultSequence>();
-            for (int i = 0; i < objectsToRename.Count; ++i)
-            {
-                renameResultPreviews.Add(
-                    this.operationSequence.GetRenamePreview(objectsToRename[i].name, i));
-            }
-
-            return renameResultPreviews;
-        }
-
-        /// <summary>
         /// Renames the specified Objects according to a supplied RenameOperationSequence.
         /// </summary>
         /// <param name="objectsToRename">Objects to rename.</param>
@@ -148,10 +132,18 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects(List<UnityEngine.Object> objectsToRename, bool ignoreUndo = false)
         {
             var nameChanges = new List<ObjectNameDelta>();
-            for (int i = 0; i < objectsToRename.Count; ++i)
+            var previews = this.GetResultsPreview(objectsToRename);
+            for (int i = 0; i < previews.NumObjects; ++i)
             {
-                var newName = this.operationSequence.GetResultingName(objectsToRename[i].name, i);
-                var originalName = objectsToRename[i].name;
+                // Don't request a rename if the preview has warnings
+                if (previews.HasWarningForIndex(i))
+                {
+                    continue;
+                }
+
+                var renameResult = previews.GetRenameResultAtIndex(i);
+                var newName = renameResult.NewName;
+                var originalName = renameResult.OriginalName;
 
                 // Don't request a rename if the name isn't going to change.
                 if (originalName.Equals(newName))
@@ -163,6 +155,97 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             BulkRenamer.ApplyNameDeltas(nameChanges, ignoreUndo);
+        }
+
+        /// <summary>
+        /// Gets a preview of the Bulk Rename that shows the rename steps that will be applied
+        /// to each object, if this renamer is used to rename the objects.
+        /// </summary>
+        /// <returns>The results preview.</returns>
+        /// <param name="objectsToRename">Objects to rename.</param>
+        public BulkRenamePreview GetResultsPreview(List<UnityEngine.Object> objectsToRename)
+        {
+            var renameResultPreviews = new BulkRenamePreview();
+            for (int i = 0; i < objectsToRename.Count; ++i)
+            {
+                renameResultPreviews.Add(
+                    objectsToRename[i],
+                    this.operationSequence.GetRenamePreview(objectsToRename[i].name, i));
+            }
+
+            var indecesWithErrors = this.GetIndecesOfPreviewsWithDuplicateNames(renameResultPreviews);
+            foreach (var index in indecesWithErrors)
+            {
+                renameResultPreviews.SetWarningForIndex(index, true);
+            }
+
+            return renameResultPreviews;
+        }
+
+        private List<int> GetIndecesOfPreviewsWithDuplicateNames(BulkRenamePreview preview)
+        {
+            // Iterate through all previews and:
+            // Check to make sure the new name won't overlap with any existing files (in the directory)
+            // - If the existing file is in the rename batch...
+            //    - If the new name for the existing file will overlap with this one, warn.
+            //    - If the new name for the existing file doesn't match this new one, we're ok. We fix it at runtime.
+            // - If the existing file is not in this batch, we can't fix it during the rename. Show a warning.
+            var problemIndeces = new List<int>();
+            for (int i = 0; i < preview.NumObjects; ++i)
+            {
+                var thisObject = preview.GetOriginalObjectAtIndex(i);
+                if (!AssetDatabase.Contains(thisObject))
+                {
+                    // Scene objects can be named the same thing, so skip these
+                    continue;
+                }
+
+                // If this object isn't being renamed, don't check it for warnings.
+                // This eliminates an issue where you'd always get two warnings -
+                // one for the object being renamed and one for the object it collides with.
+                var thisResult = preview.GetRenameResultAtIndex(i);
+                if (thisResult.NewName == thisResult.OriginalName)
+                {
+                    continue;
+                }
+
+                var assetPathToObject = AssetDatabase.GetAssetPath(thisObject);
+                var assetsInDirectory = AssetDatabaseUtility.LoadAssetsAtDirectory(assetPathToObject);
+                foreach (var assetInDirectory in assetsInDirectory)
+                {
+                    // Skip the current asset
+                    if (assetInDirectory == thisObject)
+                    {
+                        continue;
+                    }
+
+                    // Objects can have the same name if they aren't the same type.
+                    if (assetInDirectory.GetType() != thisObject.GetType())
+                    {
+                        continue;
+                    }
+
+                    string otherObjectName;
+                    if (preview.ContainsObject(assetInDirectory))
+                    {
+                        // Objects in the bulk rename only pose a problem if the new names will collide.
+                        // If the names collide during the rename process, bulk renamer will fix them as it goes.
+                        RenameResultSequence otherObject = preview.GetRenameResultForObject(assetInDirectory);
+                        otherObjectName = otherObject.NewName;
+                    }
+                    else
+                    {
+                        otherObjectName = assetInDirectory.name;
+                    }
+
+                    if (otherObjectName == thisResult.NewName)
+                    {
+                        problemIndeces.Add(i);
+                    }
+                }
+            }
+
+            return problemIndeces;
         }
 
         private static bool RenamedAssetWillConflictWithAnotherAsset(
@@ -266,6 +349,20 @@ namespace RedBlueGames.MulliganRenamer
         {
             var pathToAsset = AssetDatabase.GetAssetPath(asset);
             AssetDatabase.RenameAsset(pathToAsset, newName);
+
+            if (asset.name != newName)
+            {
+                var message = string.Format(
+                                  "Asset [{0}] not renamed when trying to RenameAsset in BulkRenamer. " +
+                                  "It may have been canceled because the new name was already taken by" +
+                                  " an object at the same path. The new name may also have contained " +
+                                  "special characters.\n" +
+                                  "OriginalPath: {1}, New Name: {1}",
+                                  asset.name,
+                                  pathToAsset,
+                                  newName);
+                throw new System.OperationCanceledException(message);
+            }
         }
     }
 }

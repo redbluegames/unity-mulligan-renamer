@@ -126,7 +126,7 @@ namespace RedBlueGames.MulliganRenamer
                 return !string.IsNullOrEmpty(obj.name);
             }
 
-            if (obj.GetType() == typeof(GameObject))
+            if (obj is GameObject)
             {
                 return true;
             }
@@ -180,23 +180,26 @@ namespace RedBlueGames.MulliganRenamer
 
             if (info.WarningIcon != null)
             {
-                GUILayout.Box(info.WarningIcon, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
+                var content = new GUIContent(
+                    info.WarningIcon,
+                    "Can't rename object. New name will match an existing file or another renamed object.");
+                GUILayout.Box(content, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
             }
 
             GUILayout.Box(info.Icon, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
 
             if (style.FirstColumnWidth > 0)
             {
-                var originalName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ? 
-                    info.RenameResultSequence.GetOriginalNameAtStep(previewStepIndex, style.DeletionColor) : 
+                var originalName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ?
+                    info.RenameResultSequence.GetOriginalNameAtStep(previewStepIndex, style.DeletionColor) :
                     info.RenameResultSequence.OriginalName;
                 EditorGUILayout.LabelField(originalName, style.FirstColumnStyle, GUILayout.Width(style.FirstColumnWidth));
             }
 
             if (style.SecondColumnWidth > 0)
             {
-                var newName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ? 
-                    info.RenameResultSequence.GetNewNameAtStep(previewStepIndex, style.InsertionColor) : 
+                var newName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ?
+                    info.RenameResultSequence.GetNewNameAtStep(previewStepIndex, style.InsertionColor) :
                     info.RenameResultSequence.NewName;
                 EditorGUILayout.LabelField(newName, style.SecondColumnStyle, GUILayout.Width(style.SecondColumnWidth));
             }
@@ -299,11 +302,11 @@ namespace RedBlueGames.MulliganRenamer
             if (EditorGUIUtility.isProSkin)
             {
                 string styleName = string.Empty;
-                #if UNITY_5
+#if UNITY_5
                 styleName = "AnimationCurveEditorBackground";
-                #else
+#else
                 styleName = "CurveEditorBackground";
-                #endif
+#endif
 
                 this.guiStyles.PreviewScroll = new GUIStyle(styleName);
 
@@ -344,7 +347,7 @@ namespace RedBlueGames.MulliganRenamer
 
             // Remove any objects that got deleted while working
             this.ObjectsToRename.RemoveNullObjects();
-            
+
             this.DrawToolbar();
 
             EditorGUILayout.BeginHorizontal();
@@ -352,7 +355,10 @@ namespace RedBlueGames.MulliganRenamer
 
             this.FocusForcedFocusControl();
 
-            this.DrawPreviewPanel();
+            // Generate preview contents
+            var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
+            var bulkRenamePreview = bulkRenamer.GetResultsPreview(this.ObjectsToRename);
+            this.DrawPreviewPanel(bulkRenamePreview);
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
@@ -360,13 +366,20 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.BeginHorizontal();
             GUILayout.Space(30.0f);
 
-            var disableRenameButton = this.RenameOperatationsHaveErrors() || this.ObjectsToRename.Count == 0;
+            var disableRenameButton =
+                this.RenameOperatationsHaveErrors() ||
+                this.ObjectsToRename.Count == 0;
             EditorGUI.BeginDisabledGroup(disableRenameButton);
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
-                var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
-                bulkRenamer.RenameObjects(this.ObjectsToRename);
-                this.ObjectsToRename.Clear();
+                var popupMessage = string.Concat(
+                    "Some objects have warnings and will not be renamed. Are you sure you want to continue renaming the objects?");
+                var skipWarning = !bulkRenamePreview.HasWarnings;
+                if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
+                {
+                    bulkRenamer.RenameObjects(this.ObjectsToRename);
+                    this.ObjectsToRename.Clear();
+                }
             }
 
             EditorGUI.EndDisabledGroup();
@@ -536,7 +549,7 @@ namespace RedBlueGames.MulliganRenamer
                     default:
                         {
                             Debug.LogError(string.Format(
-                                    "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event.", 
+                                    "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event.",
                                     buttonClickEvent));
                             return;
                         }
@@ -554,7 +567,7 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private void DrawPreviewPanel()
+        private void DrawPreviewPanel(BulkRenamePreview preview)
         {
             EditorGUILayout.BeginVertical();
 
@@ -567,7 +580,8 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                this.DrawPreviewPanelContentsWithItems();
+                var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
+                this.DrawPreviewPanelContentsWithItems(previewContents);
             }
 
             EditorGUILayout.EndScrollView();
@@ -616,11 +630,8 @@ namespace RedBlueGames.MulliganRenamer
             GUILayout.FlexibleSpace();
         }
 
-        private void DrawPreviewPanelContentsWithItems()
+        private void DrawPreviewPanelContentsWithItems(PreviewPanelContents previewContents)
         {
-            var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
-            var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(bulkRenamer, this.ObjectsToRename);
-
             EditorGUILayout.BeginHorizontal(GUILayout.Height(18.0f));
 
             // Space gives us a bit of padding or else we're just too bunched up to the side
@@ -665,19 +676,19 @@ namespace RedBlueGames.MulliganRenamer
                 var previewRowStyle = new PreviewRowStyle();
                 previewRowStyle.IconStyle = this.guiStyles.Icon;
 
-                previewRowStyle.FirstColumnStyle = content.NamesAreDifferent ? 
-                    this.guiStyles.OriginalNameLabelWhenModified : 
+                previewRowStyle.FirstColumnStyle = content.NamesAreDifferent ?
+                    this.guiStyles.OriginalNameLabelWhenModified :
                     this.guiStyles.OriginalNameLabelUnModified;
                 previewRowStyle.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
 
-                previewRowStyle.SecondColumnStyle = content.NamesAreDifferent ? 
-                    this.guiStyles.NewNameLabelModified : 
+                previewRowStyle.SecondColumnStyle = content.NamesAreDifferent ?
+                    this.guiStyles.NewNameLabelModified :
                     this.guiStyles.NewNameLabelUnModified;
 
                 previewRowStyle.SecondColumnWidth = showSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
 
-                previewRowStyle.ThirdColumnStyle = content.NamesAreDifferent ? 
-                    this.guiStyles.FinalNameLabelWhenModified : 
+                previewRowStyle.ThirdColumnStyle = content.NamesAreDifferent ?
+                    this.guiStyles.FinalNameLabelWhenModified :
                     this.guiStyles.FinalNameLabelUnModified;
 
                 previewRowStyle.ThirdColumnWidth = showThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
@@ -791,7 +802,7 @@ namespace RedBlueGames.MulliganRenamer
                 return;
             }
 
-            var controlNameToForceFocus = string.Empty; 
+            var controlNameToForceFocus = string.Empty;
             for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
                 var renameOp = this.RenameOperationsToApply[i];
@@ -1002,7 +1013,7 @@ namespace RedBlueGames.MulliganRenamer
 
             private PreviewRowModel[] PreviewRowInfos { get; set; }
 
-            public PreviewRowModel this [int index]
+            public PreviewRowModel this[int index]
             {
                 get
                 {
@@ -1018,78 +1029,53 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(
-                BulkRenamer bulkRenamer,
-                List<UnityEngine.Object> objects)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamePreview preview)
             {
-                var renameResultsPreviews = bulkRenamer.GetResultsPreview(objects);
-                var preview = new PreviewPanelContents();
-                preview.PreviewRowInfos = new PreviewRowModel[objects.Count];
-                for (int i = 0; i < renameResultsPreviews.Count; ++i)
+                var previewPanelContents = new PreviewPanelContents();
+                previewPanelContents.PreviewRowInfos = new PreviewRowModel[preview.NumObjects];
+                for (int i = 0; i < preview.NumObjects; ++i)
                 {
                     var info = new PreviewRowModel();
-                    var originalName = objects[i].name;
-                    info.RenameResultSequence = renameResultsPreviews[i];
-                    info.Icon = GetIconForObject(objects[i]);
+                    info.RenameResultSequence = preview.GetRenameResultAtIndex(i);
+                    info.Icon = preview.GetOriginalObjectAtIndex(i).GetEditorIcon();
 
-                    preview.PreviewRowInfos[i] = info;
+                    if (preview.HasWarningForIndex(i))
+                    {
+                        info.WarningIcon = (Texture2D)EditorGUIUtility.Load("icons/console.warnicon.sml.png");
+                    }
+                    else
+                    {
+                        info.WarningIcon = null;
+                    }
+
+                    previewPanelContents.PreviewRowInfos[i] = info;
                 }
 
                 float paddingScaleForBold = 1.11f;
-                preview.LongestOriginalNameWidth = 0.0f;
-                preview.LongestNewNameWidth = 0.0f;
-                foreach (var previewRowInfo in preview.PreviewRowInfos)
+                previewPanelContents.LongestOriginalNameWidth = 0.0f;
+                previewPanelContents.LongestNewNameWidth = 0.0f;
+                foreach (var previewRowInfo in previewPanelContents.PreviewRowInfos)
                 {
                     float originalNameWidth = GUI.skin.label.CalcSize(
                                                   new GUIContent(previewRowInfo.RenameResultSequence.OriginalName)).x * paddingScaleForBold;
-                    if (originalNameWidth > preview.LongestOriginalNameWidth)
+                    if (originalNameWidth > previewPanelContents.LongestOriginalNameWidth)
                     {
-                        preview.LongestOriginalNameWidth = originalNameWidth;
+                        previewPanelContents.LongestOriginalNameWidth = originalNameWidth;
                     }
 
                     float newNameWidth = GUI.skin.label.CalcSize(
                                              new GUIContent(previewRowInfo.RenameResultSequence.NewName)).x * paddingScaleForBold;
-                    if (newNameWidth > preview.LongestNewNameWidth)
+                    if (newNameWidth > previewPanelContents.LongestNewNameWidth)
                     {
-                        preview.LongestNewNameWidth = newNameWidth;
+                        previewPanelContents.LongestNewNameWidth = newNameWidth;
                     }
                 }
 
-                preview.LongestOriginalNameWidth = Mathf.Max(MinColumnWidth, preview.LongestOriginalNameWidth);
-                preview.LongestNewNameWidth = Mathf.Max(MinColumnWidth, preview.LongestNewNameWidth);
-                preview.LongestFinalNameWidth = preview.LongestNewNameWidth;
+                previewPanelContents.LongestOriginalNameWidth = Mathf.Max(MinColumnWidth, previewPanelContents.LongestOriginalNameWidth);
+                previewPanelContents.LongestNewNameWidth = Mathf.Max(MinColumnWidth, previewPanelContents.LongestNewNameWidth);
+                previewPanelContents.LongestFinalNameWidth = previewPanelContents.LongestNewNameWidth;
 
-                return preview;
-            }
-
-            private static Texture GetIconForObject(UnityEngine.Object unityObject)
-            {
-                var pathToObject = AssetDatabase.GetAssetPath(unityObject);
-                Texture icon = null;
-                if (string.IsNullOrEmpty(pathToObject))
-                {
-                    if (unityObject.GetType() == typeof(GameObject))
-                    {
-                        icon = EditorGUIUtility.FindTexture("GameObject Icon");
-                    }
-                    else
-                    {
-                        icon = EditorGUIUtility.FindTexture("DefaultAsset Icon");
-                    }
-                }
-                else
-                {
-                    if (unityObject is Sprite)
-                    {
-                        icon = AssetPreview.GetAssetPreview(unityObject);
-                    }
-                    else
-                    {
-                        icon = AssetDatabase.GetCachedIcon(pathToObject);
-                    }
-                }
-
-                return icon;
+                return previewPanelContents;
             }
         }
 

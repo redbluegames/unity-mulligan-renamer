@@ -40,13 +40,14 @@ namespace RedBlueGames.MulliganRenamer
         private static readonly string TestFixturesDirectory =
             string.Concat(TestFixturesPath, "/");
 
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             AssetDatabase.CreateFolder("Assets", TestFixturesFolderName);
+            AssetDatabase.CreateFolder(TestFixturesPath, "SubDirectory");
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void TearDown()
         {
             AssetDatabase.DeleteAsset(TestFixturesPath);
@@ -283,6 +284,78 @@ namespace RedBlueGames.MulliganRenamer
 
             var resultingNames = new List<string>();
             foreach (var obj in enumeratedObjects)
+            {
+                resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        [Test]
+        public void RenameObjects_ChangeObjectToExistingObjectName_DoesNothing()
+        {
+            // Arrange
+            var conflictingObject0 = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
+                new GameObject("ConflictingObject0"));
+            var existingObject = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
+                new GameObject("ExistingObject"));
+
+            var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
+            conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
+            conflictingObjectsWithoutAllNamesChanging.Add(existingObject);
+
+            var replaceFirstNameOp = new ReplaceStringOperation();
+            replaceFirstNameOp.SearchString = "ConflictingObject0";
+            replaceFirstNameOp.ReplacementString = "ExistingObject";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceFirstNameOp);
+
+            // Act and Assert
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(conflictingObjectsWithoutAllNamesChanging);
+            var expectedName = "ConflictingObject0";
+            Assert.AreEqual(expectedName, conflictingObject0.name);
+        }
+
+        [Test]
+        public void RenameObjects_RenameObjectToExistingObjectNameButAtDifferentPath_Succeeds()
+        {
+            // Arrange
+            var conflictingObject0 = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
+                new GameObject("ConflictingObject0"));
+            var existingObject = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "SubDirectory/ExistingObject.prefab"),
+                new GameObject("ExistingObject"));
+
+            var replaceFirstNameOp = new ReplaceStringOperation();
+            replaceFirstNameOp.SearchString = "ConflictingObject0";
+            replaceFirstNameOp.ReplacementString = "ExistingObject";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceFirstNameOp);
+
+            var expectedNames = new List<string>
+            {
+                "ExistingObject",
+                "ExistingObject"
+            };
+
+            var objectsToRename = new List<UnityEngine.Object>()
+            {
+                conflictingObject0,
+                existingObject,
+            };
+
+            // Act and Assert
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(objectsToRename);
+
+            var resultingNames = new List<string>();
+            foreach (var obj in objectsToRename)
             {
                 resultingNames.Add(obj.name);
             }
