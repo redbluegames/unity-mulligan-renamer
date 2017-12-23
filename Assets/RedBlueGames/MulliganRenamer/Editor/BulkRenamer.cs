@@ -141,7 +141,8 @@ namespace RedBlueGames.MulliganRenamer
                     continue;
                 }
 
-                var renameResult = previews.GetRenameResultAtIndex(i);
+                var renamePreview = previews.GetPreviewAtIndex(i);
+                var renameResult = renamePreview.RenameResultSequence;
                 var newName = renameResult.NewName;
                 var originalName = renameResult.OriginalName;
 
@@ -168,12 +169,13 @@ namespace RedBlueGames.MulliganRenamer
             var renameResultPreviews = new BulkRenamePreview();
             for (int i = 0; i < objectsToRename.Count; ++i)
             {
-                renameResultPreviews.Add(
-                    objectsToRename[i],
-                    this.operationSequence.GetRenamePreview(objectsToRename[i].name, i));
+                var singlePreview = new RenamePreview(
+                                        objectsToRename[i], 
+                                        this.operationSequence.GetRenamePreview(objectsToRename[i].name, i));
+                renameResultPreviews.AddEntry(singlePreview);
             }
 
-            var indecesWithErrors = this.GetIndecesOfPreviewsWithDuplicateNames(renameResultPreviews);
+            var indecesWithErrors = GetIndecesOfPreviewsWithDuplicateNames(renameResultPreviews);
             foreach (var index in indecesWithErrors)
             {
                 renameResultPreviews.SetWarningForIndex(index, true);
@@ -182,7 +184,7 @@ namespace RedBlueGames.MulliganRenamer
             return renameResultPreviews;
         }
 
-        private List<int> GetIndecesOfPreviewsWithDuplicateNames(BulkRenamePreview preview)
+        private static List<int> GetIndecesOfPreviewsWithDuplicateNames(BulkRenamePreview preview)
         {
             // Iterate through all previews and:
             // Check to make sure the new name won't overlap with any existing files (in the directory)
@@ -193,7 +195,8 @@ namespace RedBlueGames.MulliganRenamer
             var problemIndeces = new List<int>();
             for (int i = 0; i < preview.NumObjects; ++i)
             {
-                var thisObject = preview.GetOriginalObjectAtIndex(i);
+                var previewForObject = preview.GetPreviewAtIndex(i);
+                var thisObject = previewForObject.ObjectToRename;
                 if (!AssetDatabase.Contains(thisObject))
                 {
                     // Scene objects can be named the same thing, so skip these
@@ -203,7 +206,7 @@ namespace RedBlueGames.MulliganRenamer
                 // If this object isn't being renamed, don't check it for warnings.
                 // This eliminates an issue where you'd always get two warnings -
                 // one for the object being renamed and one for the object it collides with.
-                var thisResult = preview.GetRenameResultAtIndex(i);
+                var thisResult = previewForObject.RenameResultSequence;
                 if (thisResult.NewName == thisResult.OriginalName)
                 {
                     continue;
@@ -226,11 +229,12 @@ namespace RedBlueGames.MulliganRenamer
                     }
 
                     string otherObjectName;
-                    if (preview.ContainsObject(assetInDirectory))
+                    if (preview.ContainsPreviewForObject(assetInDirectory))
                     {
                         // Objects in the bulk rename only pose a problem if the new names will collide.
                         // If the names collide during the rename process, bulk renamer will fix them as it goes.
-                        RenameResultSequence otherObject = preview.GetRenameResultForObject(assetInDirectory);
+                        var assetPreview = preview.GetPreviewForObject(assetInDirectory);
+                        RenameResultSequence otherObject = assetPreview.RenameResultSequence;
                         otherObjectName = otherObject.NewName;
                     }
                     else

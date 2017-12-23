@@ -5,23 +5,16 @@
     using UnityEditor;
     using UnityEngine;
 
+    /// <summary>
+    /// Preview of all of the resultant renames from a BulkRename.
+    /// </summary>
     public class BulkRenamePreview
     {
         private List<RenamePreview> renamePreviews;
 
-        private List<RenamePreview> RenamePreviews
-        {
-            get
-            {
-                if (this.renamePreviews == null)
-                {
-                    this.renamePreviews = new List<RenamePreview>();
-                }
-
-                return this.renamePreviews;
-            }
-        }
-
+        /// <summary>
+        /// Gets the number of objects in the preview.
+        /// </summary>
         public int NumObjects
         {
             get
@@ -30,6 +23,9 @@
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this preview contains objects with warnings.
+        /// </summary>
         public bool HasWarnings
         {
             get
@@ -46,63 +42,85 @@
             }
         }
 
-        public void Add(UnityEngine.Object obj, RenameResultSequence renameResultSequence)
+        private List<RenamePreview> RenamePreviews
         {
-            var renamePreview = new RenamePreview(obj, renameResultSequence);
-            this.RenamePreviews.Add(renamePreview);
+            get
+            {
+                if (this.renamePreviews == null)
+                {
+                    this.renamePreviews = new List<RenamePreview>();
+                }
+
+                return this.renamePreviews;
+            }
         }
 
-        public RenameResultSequence GetRenameResultAtIndex(int index)
+        /// <summary>
+        /// Adds a preview entry into the bulk preview
+        /// </summary>
+        /// <param name="singlePreview">Single preview.</param>
+        public void AddEntry(RenamePreview singlePreview)
         {
-            return this.RenamePreviews[index].RenameResultSequence;
+            this.RenamePreviews.Add(singlePreview);
         }
 
-        public UnityEngine.Object GetOriginalObjectAtIndex(int index)
+        /// <summary>
+        /// Gets the preview for the object at the supplied index.
+        /// </summary>
+        /// <returns>The preview at index.</returns>
+        /// <param name="index">Index to query.</param>
+        public RenamePreview GetPreviewAtIndex(int index)
         {
-            return this.RenamePreviews[index].ObjectToRename;
+            return this.RenamePreviews[index];
         }
 
+        /// <summary>
+        /// Sets the warnings for the preview at the specified index.
+        /// </summary>
+        /// <param name="index">Index to set.</param>
+        /// <param name="warning">If set to <c>true</c> warning.</param>
         public void SetWarningForIndex(int index, bool warning)
         {
             this.RenamePreviews[index].HasWarnings = warning;
         }
 
+        /// <summary>
+        /// Determines whether this instance has warning for index the specified index.
+        /// </summary>
+        /// <returns><c>true</c> if this instance has warning for index the specified index; otherwise, <c>false</c>.</returns>
+        /// <param name="index">Index to query.</param>
         public bool HasWarningForIndex(int index)
         {
             return this.RenamePreviews[index].HasWarnings;
         }
 
-        public bool ContainsObject(UnityEngine.Object obj)
+        /// <summary>
+        /// Determines if the BulkPreview contains a preview for the specified object.
+        /// </summary>
+        /// <returns><c>true</c>, if object is in the bulk rename, <c>false</c> otherwise.</returns>
+        /// <param name="obj">Object to query.</param>
+        public bool ContainsPreviewForObject(UnityEngine.Object obj)
         {
-            return this.GetRenameResultForObject(obj) != null;
+            var previewForObject = this.GetPreviewForObject(obj);
+            return previewForObject != null;
         }
 
-        public RenameResultSequence GetRenameResultForObject(UnityEngine.Object obj)
+        /// <summary>
+        /// Gets the preview for the specified object.
+        /// </summary>
+        /// <returns>The preview for object.</returns>
+        /// <param name="obj">Object to query.</param>
+        public RenamePreview GetPreviewForObject(UnityEngine.Object obj)
         {
             foreach (var renamePreview in this.RenamePreviews)
             {
                 if (renamePreview.ObjectToRename == obj)
                 {
-                    return renamePreview.RenameResultSequence;
+                    return renamePreview;
                 }
             }
 
             return null;
-        }
-
-        private class RenamePreview
-        {
-            public UnityEngine.Object ObjectToRename { get; private set; }
-
-            public RenameResultSequence RenameResultSequence { get; private set; }
-
-            public bool HasWarnings { get; set; }
-
-            public RenamePreview(UnityEngine.Object obj, RenameResultSequence renameResultSequence)
-            {
-                this.ObjectToRename = obj;
-                this.RenameResultSequence = renameResultSequence;
-            }
         }
     }
 }

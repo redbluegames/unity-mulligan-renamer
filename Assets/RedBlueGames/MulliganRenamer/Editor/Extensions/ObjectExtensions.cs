@@ -41,7 +41,11 @@ namespace RedBlueGames.MulliganRenamer
             return AssetDatabase.Contains(obj);
         }
 
-
+        /// <summary>
+        /// Gets the editor icon for the Unity Object.
+        /// </summary>
+        /// <returns>The editor icon.</returns>
+        /// <param name="unityObject">Unity object.</param>
         public static Texture GetEditorIcon(this UnityEngine.Object unityObject)
         {
             var pathToObject = AssetDatabase.GetAssetPath(unityObject);

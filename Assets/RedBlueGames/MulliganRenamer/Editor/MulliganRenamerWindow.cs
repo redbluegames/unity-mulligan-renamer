@@ -1036,8 +1036,9 @@ namespace RedBlueGames.MulliganRenamer
                 for (int i = 0; i < preview.NumObjects; ++i)
                 {
                     var info = new PreviewRowModel();
-                    info.RenameResultSequence = preview.GetRenameResultAtIndex(i);
-                    info.Icon = preview.GetOriginalObjectAtIndex(i).GetEditorIcon();
+                    var previewForIndex = preview.GetPreviewAtIndex(i);
+                    info.RenameResultSequence = previewForIndex.RenameResultSequence;
+                    info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
 
                     if (preview.HasWarningForIndex(i))
                     {
