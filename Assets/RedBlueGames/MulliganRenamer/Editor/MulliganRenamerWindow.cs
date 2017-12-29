@@ -381,6 +381,10 @@ namespace RedBlueGames.MulliganRenamer
                     this.BulkRenamer.RenameObjects(this.ObjectsToRename);
                     this.ObjectsToRename.Clear();
                 }
+
+                // Opening the dialog breaks the layout stack, so ExitGUI to prevent a NullPtr.
+                // https://answers.unity.com/questions/1353442/editorutilitysavefilepane-and-beginhorizontal-caus.html
+                EditorGUIUtility.ExitGUI();
             }
 
             EditorGUI.EndDisabledGroup();
