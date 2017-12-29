@@ -229,6 +229,7 @@ namespace RedBlueGames.MulliganRenamer
             this.CacheRenameOperationPrototypes();
             this.LoadSavedRenameOperations();
 
+            this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
         }
 
@@ -356,8 +357,8 @@ namespace RedBlueGames.MulliganRenamer
             this.FocusForcedFocusControl();
 
             // Generate preview contents
-            var bulkRenamer = new BulkRenamer(this.RenameOperationsToApply);
-            var bulkRenamePreview = bulkRenamer.GetResultsPreview(this.ObjectsToRename);
+            this.BulkRenamer.SetRenameOperations(this.RenameOperationsToApply);
+            var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename);
             this.DrawPreviewPanel(bulkRenamePreview);
             EditorGUILayout.EndHorizontal();
 
@@ -377,7 +378,7 @@ namespace RedBlueGames.MulliganRenamer
                 var skipWarning = !bulkRenamePreview.HasWarnings;
                 if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
-                    bulkRenamer.RenameObjects(this.ObjectsToRename);
+                    this.BulkRenamer.RenameObjects(this.ObjectsToRename);
                     this.ObjectsToRename.Clear();
                 }
             }
