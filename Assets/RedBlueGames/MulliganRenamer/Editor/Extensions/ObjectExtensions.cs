@@ -40,5 +40,40 @@ namespace RedBlueGames.MulliganRenamer
         {
             return AssetDatabase.Contains(obj);
         }
+
+        /// <summary>
+        /// Gets the editor icon for the Unity Object.
+        /// </summary>
+        /// <returns>The editor icon.</returns>
+        /// <param name="unityObject">Unity object.</param>
+        public static Texture GetEditorIcon(this UnityEngine.Object unityObject)
+        {
+            var pathToObject = AssetDatabase.GetAssetPath(unityObject);
+            Texture icon = null;
+            if (string.IsNullOrEmpty(pathToObject))
+            {
+                if (unityObject is GameObject)
+                {
+                    icon = EditorGUIUtility.FindTexture("GameObject Icon");
+                }
+                else
+                {
+                    icon = EditorGUIUtility.FindTexture("DefaultAsset Icon");
+                }
+            }
+            else
+            {
+                if (unityObject is Sprite)
+                {
+                    icon = AssetPreview.GetAssetPreview(unityObject);
+                }
+                else
+                {
+                    icon = AssetDatabase.GetCachedIcon(pathToObject);
+                }
+            }
+
+            return icon;
+        }
     }
 }

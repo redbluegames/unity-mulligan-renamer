@@ -56,7 +56,6 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public void ReapplyNameChange()
         {
-            var bulkRenamer = new BulkRenamer();
             var validRenames = new List<ObjectNameDelta>();
 
             foreach (var renamedAsset in this.renamedAssets)
@@ -69,7 +68,7 @@ namespace RedBlueGames.MulliganRenamer
                 validRenames.Add(renamedAsset);
             }
 
-            bulkRenamer.RenameObjects(validRenames, true);
+            BulkRenamer.ApplyNameDeltas(validRenames, true);
         }
 
         /// <summary>
@@ -77,7 +76,6 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public void RevertNameChange()
         {
-            var bulkRenamer = new BulkRenamer();
             var reversedNames = new List<ObjectNameDelta>();
             foreach (var renamedAsset in this.renamedAssets)
             {
@@ -89,7 +87,7 @@ namespace RedBlueGames.MulliganRenamer
                 reversedNames.Add(new ObjectNameDelta(renamedAsset.NamedObject, renamedAsset.OldName));
             }
 
-            bulkRenamer.RenameObjects(reversedNames, true);
+            BulkRenamer.ApplyNameDeltas(reversedNames, true);
         }
 
         private static bool DoesObjectStillExist(UnityEngine.Object objectToTest)

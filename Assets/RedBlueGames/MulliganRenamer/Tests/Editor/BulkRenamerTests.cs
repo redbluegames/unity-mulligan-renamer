@@ -40,77 +40,165 @@ namespace RedBlueGames.MulliganRenamer
         private static readonly string TestFixturesDirectory =
             string.Concat(TestFixturesPath, "/");
 
-        private List<Object> singleAsset;
-        private List<Object> multipleAssets;
-        private List<Object> enumeratedObjects;
-
-        private List<Object> gameObjects;
-        private Texture2D textureWithSprites;
-
-        [OneTimeSetUp]
+        [SetUp]
         public void Setup()
         {
             AssetDatabase.CreateFolder("Assets", TestFixturesFolderName);
-
-            this.SetupSingleAssetTest();
-            this.SetupMultipleAssetsTest();
-            this.SetupGameObjects();
-            this.SetupEnumeratedObject();
-            this.SetupSpriteSheet();
+            AssetDatabase.CreateFolder(TestFixturesPath, "SubDirectory");
         }
 
-        private void SetupSingleAssetTest()
+        [TearDown]
+        public void TearDown()
+        {
+            AssetDatabase.DeleteAsset(TestFixturesPath);
+        }
+
+        [Test]
+        public void RenameObjects_SingleAsset_Renames()
         {
             var gameObjectAsset = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "Original.prefab"),
                                       new GameObject("Original"));
-            this.singleAsset = new List<Object>();
-            this.singleAsset.Add(gameObjectAsset);
+            var singleAsset = new List<Object>() { gameObjectAsset };
+
+            var replaceNameOp = new ReplaceNameOperation();
+            replaceNameOp.NewName = "NewName";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceNameOp);
+
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(singleAsset, true);
+
+            Assert.AreEqual("NewName", singleAsset[0].name);
         }
 
-        private void SetupMultipleAssetsTest()
+        [Test]
+        public void RenameObjects_MultipleAssets_Renames()
         {
+            // Arrange
             var multipleObject0 = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "Asset0.prefab"),
                                       new GameObject("Asset0"));
             var multipleObject1 = PrefabUtility.CreatePrefab(
                                       string.Concat(TestFixturesDirectory, "Asset1.prefab"),
                                       new GameObject("Asset1"));
+            var multipleAssets = new List<Object>()
+            {
+                multipleObject0,
+                multipleObject1
+            };
 
-            this.multipleAssets = new List<Object>();
-            this.multipleAssets.Add(multipleObject0);
-            this.multipleAssets.Add(multipleObject1);
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.SearchString = "Asset";
+            replaceStringOp.ReplacementString = "Thingy";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceStringOp);
+
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(multipleAssets, true);
+
+            var expectedNames = new List<string>
+            {
+                "Thingy0",
+                "Thingy1"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var obj in multipleAssets)
+            {
+                resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
         }
 
-        private void SetupEnumeratedObject()
+        [Test]
+        public void RenameObjects_MultipleGameObjects_Renames()
         {
-            var enumeratedObject0 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject0.prefab"),
-                                        new GameObject("EnumeratedObject0"));
-            var enumeratedObject1 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject1.prefab"),
-                                        new GameObject("EnumeratedObject1"));
-            var enumeratedObject2 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"),
-                                        new GameObject("EnumeratedObject2"));
 
-            this.enumeratedObjects = new List<Object>();
-            this.enumeratedObjects.Add(enumeratedObject0);
-            this.enumeratedObjects.Add(enumeratedObject1);
-            this.enumeratedObjects.Add(enumeratedObject2);
-        }
-
-        private void SetupGameObjects()
-        {
             var gameObject0 = new GameObject("GameObject0");
             var gameObject1 = new GameObject("GameObject1");
 
-            this.gameObjects = new List<Object>();
-            this.gameObjects.Add(gameObject0);
-            this.gameObjects.Add(gameObject1);
+            var gameObjects = new List<Object>()
+            {
+                gameObject0,
+                gameObject1
+            };
+
+            var replaceStringOp = new ReplaceStringOperation();
+            replaceStringOp.SearchString = "Object";
+            replaceStringOp.ReplacementString = "Thingy";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceStringOp);
+
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(gameObjects, true);
+
+            var expectedNames = new List<string>
+            {
+                "GameThingy0",
+                "GameThingy1"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var obj in gameObjects)
+            {
+                resultingNames.Add(obj.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
         }
 
-        private void SetupSpriteSheet()
+        [Test]
+        public void RenameObjects_Spritesheet_Renames()
+        {
+            // Arrange
+            var textureWithSprites = this.SetupSpriteSheet();
+            var replaceNameOp = new ReplaceNameOperation();
+            replaceNameOp.NewName = "NewSprite";
+
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.StartingCount = 1;
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceNameOp);
+            renameSequence.Add(enumerateOp);
+
+            var path = AssetDatabase.GetAssetPath(textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+            var allSprites = new List<Object>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                if (asset is Sprite)
+                {
+                    allSprites.Add(asset);
+                }
+            }
+
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(allSprites, true);
+
+            var expectedNames = new List<string>
+            {
+                "NewSprite1",
+                "NewSprite2",
+                "NewSprite3",
+                "NewSprite4"
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var sprite in allSprites)
+            {
+                resultingNames.Add(sprite.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        private Texture2D SetupSpriteSheet()
         {
             var texture = new Texture2D(64, 64, TextureFormat.ARGB32, false, true);
             for (int x = 0; x < 64; ++x)
@@ -128,8 +216,8 @@ namespace RedBlueGames.MulliganRenamer
             byte[] bytes = texture.EncodeToPNG();
             System.IO.File.WriteAllBytes(path, bytes);
             AssetDatabase.ImportAsset(path);
-            this.textureWithSprites = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            
+            var textureWithSprites = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+
             var importer = (TextureImporter)TextureImporter.GetAtPath(path);
             importer.isReadable = true;
             importer.textureType = TextureImporterType.Sprite;
@@ -145,89 +233,31 @@ namespace RedBlueGames.MulliganRenamer
             spriteMetaData[3].name = "Texture_Sprite3";
             importer.spritesheet = spriteMetaData;
             importer.SaveAndReimport();
-        }
 
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            AssetDatabase.DeleteAsset(TestFixturesPath);
-        }
-
-        [Test]
-        public void RenameObjects_SingleAsset_Renames()
-        {
-            var replaceNameOp = new ReplaceNameOperation();
-            replaceNameOp.NewName = "NewName";
-
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
-            renameSequence.Add(replaceNameOp);
-
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.singleAsset, renameSequence, true);
-
-            Assert.AreEqual("NewName", this.singleAsset[0].name);
-        }
-
-        [Test]
-        public void RenameObjects_MultipleAssets_Renames()
-        {
-            var replaceStringOp = new ReplaceStringOperation();
-            replaceStringOp.SearchString = "Asset";
-            replaceStringOp.ReplacementString = "Thingy";
-
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
-            renameSequence.Add(replaceStringOp);
-
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.multipleAssets, renameSequence, true);
-
-            var expectedNames = new List<string>
-            {
-                "Thingy0",
-                "Thingy1"
-            };
-
-            var resultingNames = new List<string>();
-            foreach (var obj in this.multipleAssets)
-            {
-                resultingNames.Add(obj.name);
-            }
-
-            Assert.AreEqual(expectedNames, resultingNames);
-        }
-
-        [Test]
-        public void RenameObjects_MultipleGameObjects_Renames()
-        {
-            var replaceStringOp = new ReplaceStringOperation();
-            replaceStringOp.SearchString = "Object";
-            replaceStringOp.ReplacementString = "Thingy";
-
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
-            renameSequence.Add(replaceStringOp);
-
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.gameObjects, renameSequence, true);
-
-            var expectedNames = new List<string>
-            {
-                "GameThingy0",
-                "GameThingy1"
-            };
-
-            var resultingNames = new List<string>();
-            foreach (var obj in this.gameObjects)
-            {
-                resultingNames.Add(obj.name);
-            }
-
-            Assert.AreEqual(expectedNames, resultingNames);
+            return textureWithSprites;
         }
 
         [Test]
         public void RenameObjects_EnumeratedObjectsWithDependentChanges_Renames()
         {
             // Arrange
+            var enumeratedObject0 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject0.prefab"),
+                                        new GameObject("EnumeratedObject0"));
+            var enumeratedObject1 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject1.prefab"),
+                                        new GameObject("EnumeratedObject1"));
+            var enumeratedObject2 = PrefabUtility.CreatePrefab(
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"),
+                                        new GameObject("EnumeratedObject2"));
+
+            var enumeratedObjects = new List<Object>()
+            {
+                enumeratedObject0,
+                enumeratedObject1,
+                enumeratedObject2,
+            };
+
             var removeCharactersOp = new RemoveCharactersOperation();
             var removeCharacterOptions = RemoveCharactersOperation.Numbers;
             removeCharactersOp.Options = removeCharacterOptions;
@@ -240,8 +270,8 @@ namespace RedBlueGames.MulliganRenamer
             renameSequence.Add(enumerateOp);
 
             // Act
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(this.enumeratedObjects, renameSequence, true);
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(enumeratedObjects, true);
 
             // Assert
             // Build two lists to compare against because Assert displays their differences nicely in its output.
@@ -253,7 +283,7 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var resultingNames = new List<string>();
-            foreach (var obj in this.enumeratedObjects)
+            foreach (var obj in enumeratedObjects)
             {
                 resultingNames.Add(obj.name);
             }
@@ -262,44 +292,72 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void RenameObjects_Spritesheet_Renames()
+        public void RenameObjects_ChangeObjectToExistingObjectName_DoesNothing()
         {
-            var replaceNameOp = new ReplaceNameOperation();
-            replaceNameOp.NewName = "NewSprite";
+            // Arrange
+            var conflictingObject0 = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
+                new GameObject("ConflictingObject0"));
+            var existingObject = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
+                new GameObject("ExistingObject"));
 
-            var enumerateOp = new EnumerateOperation();
-            enumerateOp.StartingCount = 1;
+            var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
+            conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
+            conflictingObjectsWithoutAllNamesChanging.Add(existingObject);
+
+            var replaceFirstNameOp = new ReplaceStringOperation();
+            replaceFirstNameOp.SearchString = "ConflictingObject0";
+            replaceFirstNameOp.ReplacementString = "ExistingObject";
 
             var renameSequence = new RenameOperationSequence<RenameOperation>();
-            renameSequence.Add(replaceNameOp);
-            renameSequence.Add(enumerateOp);
+            renameSequence.Add(replaceFirstNameOp);
 
-            var path = AssetDatabase.GetAssetPath(this.textureWithSprites);
-            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
-            var allSprites = new List<Object>();
-            foreach (var asset in allAssetsAtPath)
-            {
-                if (asset is Sprite)
-                {
-                    allSprites.Add(asset);
-                }
-            }
+            // Act and Assert
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(conflictingObjectsWithoutAllNamesChanging);
+            var expectedName = "ConflictingObject0";
+            Assert.AreEqual(expectedName, conflictingObject0.name);
+        }
 
-            var bulkRenamer = new BulkRenamer();
-            bulkRenamer.RenameObjects(allSprites, renameSequence, true);
+        [Test]
+        public void RenameObjects_RenameObjectToExistingObjectNameButAtDifferentPath_Succeeds()
+        {
+            // Arrange
+            var conflictingObject0 = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
+                new GameObject("ConflictingObject0"));
+            var existingObject = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "SubDirectory/ExistingObject.prefab"),
+                new GameObject("ExistingObject"));
+
+            var replaceFirstNameOp = new ReplaceStringOperation();
+            replaceFirstNameOp.SearchString = "ConflictingObject0";
+            replaceFirstNameOp.ReplacementString = "ExistingObject";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceFirstNameOp);
 
             var expectedNames = new List<string>
             {
-                "NewSprite1",
-                "NewSprite2",
-                "NewSprite3",
-                "NewSprite4"
+                "ExistingObject",
+                "ExistingObject"
             };
 
-            var resultingNames = new List<string>();
-            foreach (var sprite in allSprites)
+            var objectsToRename = new List<UnityEngine.Object>()
             {
-                resultingNames.Add(sprite.name);
+                conflictingObject0,
+                existingObject,
+            };
+
+            // Act and Assert
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(objectsToRename);
+
+            var resultingNames = new List<string>();
+            foreach (var obj in objectsToRename)
+            {
+                resultingNames.Add(obj.name);
             }
 
             Assert.AreEqual(expectedNames, resultingNames);
