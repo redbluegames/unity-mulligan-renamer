@@ -161,12 +161,12 @@ namespace RedBlueGames.MulliganRenamer
             for (int i = 0; i < previews.NumObjects; ++i)
             {
                 // Don't request a rename if the preview has warnings
-                if (previews.HasWarningForIndex(i))
+                var renamePreview = previews.GetPreviewAtIndex(i);
+                if (renamePreview.HasWarnings)
                 {
                     continue;
                 }
 
-                var renamePreview = previews.GetPreviewAtIndex(i);
                 var renameResult = renamePreview.RenameResultSequence;
                 var newName = renameResult.NewName;
                 var originalName = renameResult.OriginalName;
@@ -200,10 +200,25 @@ namespace RedBlueGames.MulliganRenamer
                 renameResultPreviews.AddEntry(singlePreview);
             }
 
-            var indecesWithErrors = GetIndecesOfPreviewsWithDuplicateNames(renameResultPreviews, ref this.assetCache);
-            foreach (var index in indecesWithErrors)
+            var indecesWithDuplicateNames = GetIndecesOfPreviewsWithDuplicateNames(renameResultPreviews, ref this.assetCache);
+            foreach (var index in indecesWithDuplicateNames)
             {
-                renameResultPreviews.SetWarningForIndex(index, true);
+                var previewAtIndex = renameResultPreviews.GetPreviewAtIndex(index);
+                previewAtIndex.WarningMessage = "New name matches an existing file or another renamed object.";
+            }
+
+            var indecesWithInvalidCharacters = GetIndecesOfPreviewsWithInvalidCharacters(renameResultPreviews);
+            foreach (var index in indecesWithInvalidCharacters)
+            {
+                var previewAtIndex = renameResultPreviews.GetPreviewAtIndex(index);
+                previewAtIndex.WarningMessage = "Name includes invalid characters (usually symbols such as ?.,).";
+            }
+
+            var indecesWithEmptyNames = GetIndecesOfPreviewsWithEmptyNames(renameResultPreviews);
+            foreach (var index in indecesWithEmptyNames)
+            {
+                var previewAtIndex = renameResultPreviews.GetPreviewAtIndex(index);
+                previewAtIndex.WarningMessage = "Asset has blank name.";
             }
 
             return renameResultPreviews;
@@ -270,6 +285,57 @@ namespace RedBlueGames.MulliganRenamer
                     if (otherObjectName == thisResult.NewName)
                     {
                         problemIndeces.Add(i);
+                    }
+                }
+            }
+
+            return problemIndeces;
+        }
+
+        private static List<int> GetIndecesOfPreviewsWithEmptyNames(BulkRenamePreview preview)
+        {
+            var problemIndeces = new List<int>();
+            for (int i = 0; i < preview.NumObjects; ++i)
+            {
+                var previewForObject = preview.GetPreviewAtIndex(i);
+                var thisObject = previewForObject.ObjectToRename;
+                if (!AssetDatabase.Contains(thisObject))
+                {
+                    // Scene objects can be empty names... even though that's a terrible idea. But still, skip them.
+                    continue;
+                }
+
+                var thisResult = previewForObject.RenameResultSequence;
+                if (string.IsNullOrEmpty(thisResult.NewName))
+                {
+                    problemIndeces.Add(i);
+                }
+            }
+
+            return problemIndeces;
+        }
+
+        private static List<int> GetIndecesOfPreviewsWithInvalidCharacters(BulkRenamePreview preview)
+        {
+            var invalidCharacters = new char[] {'?', '.', '/', '<', '>', '\\', '|', '*', ':', '"'};
+            var problemIndeces = new List<int>();
+            for (int i = 0; i < preview.NumObjects; ++i)
+            {
+                var previewForObject = preview.GetPreviewAtIndex(i);
+                var thisObject = previewForObject.ObjectToRename;
+                if (!AssetDatabase.Contains(thisObject))
+                {
+                    // Scene objects can have symbols
+                    continue;
+                }
+
+                var thisResult = previewForObject.RenameResultSequence;
+                foreach (var invalidCharacter in invalidCharacters)
+                {
+                    if (thisResult.NewName.Contains(invalidCharacter))
+                    {
+                        problemIndeces.Add(i);
+                        break;
                     }
                 }
             }
@@ -390,7 +456,7 @@ namespace RedBlueGames.MulliganRenamer
                                   asset.name,
                                   pathToAsset,
                                   newName);
-                throw new System.OperationCanceledException(message);
+                Debug.LogError(message, asset);
             }
         }
 

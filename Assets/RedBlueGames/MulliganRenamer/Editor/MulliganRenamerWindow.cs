@@ -180,9 +180,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (info.WarningIcon != null)
             {
-                var content = new GUIContent(
-                    info.WarningIcon,
-                    "Can't rename object. New name will match an existing file or another renamed object.");
+                var content = new GUIContent(info.WarningIcon, info.WarningMessage);
                 GUILayout.Box(content, style.IconStyle, GUILayout.Width(16.0f), GUILayout.Height(16.0f));
             }
 
@@ -964,6 +962,8 @@ namespace RedBlueGames.MulliganRenamer
 
             public Texture WarningIcon { get; set; }
 
+            public string WarningMessage { get; set; }
+
             public RenameResultSequence RenameResultSequence { get; set; }
 
             public bool NamesAreDifferent
@@ -1045,13 +1045,15 @@ namespace RedBlueGames.MulliganRenamer
                     info.RenameResultSequence = previewForIndex.RenameResultSequence;
                     info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
 
-                    if (preview.HasWarningForIndex(i))
+                    if (previewForIndex.HasWarnings)
                     {
                         info.WarningIcon = (Texture2D)EditorGUIUtility.Load("icons/console.warnicon.sml.png");
+                        info.WarningMessage = previewForIndex.WarningMessage;
                     }
                     else
                     {
                         info.WarningIcon = null;
+                        info.WarningMessage = string.Empty;
                     }
 
                     previewPanelContents.PreviewRowInfos[i] = info;

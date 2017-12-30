@@ -32,8 +32,19 @@
         public RenameResultSequence RenameResultSequence { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this instance has warnings.
+        /// Gets a value indicating whether this instance has warnings.
         /// </summary>
-        public bool HasWarnings { get; set; }
+        public bool HasWarnings
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(this.WarningMessage);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the warning message.
+        /// </summary>
+        public string WarningMessage { get; set; }
     }
 }

@@ -32,7 +32,8 @@
             {
                 for (int i = 0; i < this.NumObjects; ++i)
                 {
-                    if (this.HasWarningForIndex(i))
+                    var preview = this.GetPreviewAtIndex(i);
+                    if (preview.HasWarnings)
                     {
                         return true;
                     }
@@ -72,26 +73,6 @@
         public RenamePreview GetPreviewAtIndex(int index)
         {
             return this.RenamePreviews[index];
-        }
-
-        /// <summary>
-        /// Sets the warnings for the preview at the specified index.
-        /// </summary>
-        /// <param name="index">Index to set.</param>
-        /// <param name="warning">If set to <c>true</c> warning.</param>
-        public void SetWarningForIndex(int index, bool warning)
-        {
-            this.RenamePreviews[index].HasWarnings = warning;
-        }
-
-        /// <summary>
-        /// Determines whether this instance has warning for index the specified index.
-        /// </summary>
-        /// <returns><c>true</c> if this instance has warning for index the specified index; otherwise, <c>false</c>.</returns>
-        /// <param name="index">Index to query.</param>
-        public bool HasWarningForIndex(int index)
-        {
-            return this.RenamePreviews[index].HasWarnings;
         }
 
         /// <summary>
