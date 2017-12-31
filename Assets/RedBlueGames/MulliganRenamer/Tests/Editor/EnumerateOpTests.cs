@@ -171,5 +171,89 @@ namespace RedBlueGames.MulliganRenamer
             // Assert
             Assert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void RenameCountIncrement_ByTwo_CountsUpByTwo()
+        {
+            // Arrange
+            var names = new string[]
+            {
+                "BlockA",
+                "BlockB",
+                "BlockC",
+            };
+
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.CountFormat = "0";
+            enumerateOp.StartingCount = 1;
+            enumerateOp.Increment = 2;
+
+            var expectedRenameResults = new RenameResult[]
+            {
+                new RenameResult() { new Diff("BlockA", DiffOperation.Equal), new Diff("1", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockB", DiffOperation.Equal), new Diff("3", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockC", DiffOperation.Equal), new Diff("5", DiffOperation.Insertion) },
+            };
+
+            // Act
+            var results = new List<RenameResult>(names.Length);
+            for (int i = 0; i < names.Length; ++i)
+            {
+                results.Add(enumerateOp.Rename(names[i], i));
+            }
+
+            // Assert
+            Assert.AreEqual(
+                expectedRenameResults.Length,
+                results.Count,
+                "Expected Results and results should have the same number of entries but didn't.");
+            for (int i = 0; i < results.Count; ++i)
+            {
+                var expected = expectedRenameResults[i];
+                Assert.AreEqual(expected, results[i]);
+            }
+        }
+
+        [Test]
+        public void RenameCountIncrement_ByNegativeOne_CountsDown()
+        {
+            // Arrange
+            var names = new string[]
+            {
+                "BlockA",
+                "BlockB",
+                "BlockC",
+            };
+
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.CountFormat = "0";
+            enumerateOp.StartingCount = 1;
+            enumerateOp.Increment = -1;
+
+            var expectedRenameResults = new RenameResult[]
+            {
+                new RenameResult() { new Diff("BlockA", DiffOperation.Equal), new Diff("1", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockB", DiffOperation.Equal), new Diff("0", DiffOperation.Insertion) },
+                new RenameResult() { new Diff("BlockC", DiffOperation.Equal), new Diff("-1", DiffOperation.Insertion) },
+            };
+
+            // Act
+            var results = new List<RenameResult>(names.Length);
+            for (int i = 0; i < names.Length; ++i)
+            {
+                results.Add(enumerateOp.Rename(names[i], i));
+            }
+
+            // Assert
+            Assert.AreEqual(
+                expectedRenameResults.Length,
+                results.Count,
+                "Expected Results and results should have the same number of entries but didn't.");
+            for (int i = 0; i < results.Count; ++i)
+            {
+                var expected = expectedRenameResults[i];
+                Assert.AreEqual(expected, results[i]);
+            }
+        }
     }
 }
