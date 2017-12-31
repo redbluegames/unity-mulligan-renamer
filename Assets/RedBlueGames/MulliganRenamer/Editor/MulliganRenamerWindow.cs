@@ -37,9 +37,6 @@ namespace RedBlueGames.MulliganRenamer
         private const string VersionString = "1.0.0";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
-        private const string AddedTextColorTag = "<color=green>";
-        private const string DeletedTextColorTag = "<color=red>";
-
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
@@ -50,6 +47,8 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 renameOperationsPanelScrollPosition;
         private Vector2 previewPanelScrollPosition;
         private Rect scrollViewClippingRect;
+
+        private int NumPreviouslyRenamedObjects { get; set; }
 
         private BulkRenamer BulkRenamer { get; set; }
 
@@ -259,6 +258,9 @@ namespace RedBlueGames.MulliganRenamer
             this.guiContents.DropPromptHint = new GUIContent(
                 "Add more objects by dragging them here");
 
+            this.guiContents.DropPromptRepeat = new GUIContent(
+                "To rename more objects, drag them here, or");
+
             var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2017 RedBlueGames");
             this.guiContents.CopyrightLabel = new GUIContent(copyrightLabel);
         }
@@ -288,7 +290,15 @@ namespace RedBlueGames.MulliganRenamer
 
             this.guiStyles.DropPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPrompt.alignment = TextAnchor.MiddleCenter;
+            this.guiStyles.DropPromptRepeat = new GUIStyle(EditorStyles.label);
+            this.guiStyles.DropPromptRepeat.alignment = TextAnchor.MiddleCenter;
+
             this.guiStyles.DropPromptHint = EditorStyles.centeredGreyMiniLabel;
+
+            this.guiStyles.RenameSuccessPrompt = new GUIStyle(EditorStyles.label);
+            this.guiStyles.RenameSuccessPrompt.alignment = TextAnchor.MiddleCenter;
+            this.guiStyles.RenameSuccessPrompt.richText = true;
+            this.guiStyles.RenameSuccessPrompt.fontSize = 16;
 
             var previewHeaderStyle = new GUIStyle(EditorStyles.toolbar);
             var previewHeaderMargin = new RectOffset();
@@ -376,7 +386,7 @@ namespace RedBlueGames.MulliganRenamer
                 var skipWarning = !bulkRenamePreview.HasWarnings;
                 if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
-                    this.BulkRenamer.RenameObjects(this.ObjectsToRename);
+                    this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename);
                     this.ObjectsToRename.Clear();
                 }
 
@@ -622,7 +632,33 @@ namespace RedBlueGames.MulliganRenamer
         private void DrawPreviewPanelContentsEmpty()
         {
             GUILayout.FlexibleSpace();
-            EditorGUILayout.LabelField(this.guiContents.DropPrompt, this.guiStyles.DropPrompt);
+
+            if (this.NumPreviouslyRenamedObjects > 0)
+            {
+                var oldColor = GUI.contentColor;
+                GUI.contentColor = this.guiStyles.InsertionTextColor;
+                string noun;
+                if (this.NumPreviouslyRenamedObjects == 1)
+                {
+                    noun = "Object";
+                }
+                else
+                {
+                    noun = "Objects";
+                }
+
+                var renameSuccessContent = new GUIContent(string.Format("{0} {1} Renamed", this.NumPreviouslyRenamedObjects, noun));
+                EditorGUILayout.LabelField(renameSuccessContent, this.guiStyles.RenameSuccessPrompt);
+                GUI.contentColor = oldColor;
+
+                GUILayout.Space(16.0f);
+
+                EditorGUILayout.LabelField(this.guiContents.DropPromptRepeat, this.guiStyles.DropPromptRepeat);
+            }
+            else
+            {
+                EditorGUILayout.LabelField(this.guiContents.DropPrompt, this.guiStyles.DropPrompt);
+            }
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -905,6 +941,9 @@ namespace RedBlueGames.MulliganRenamer
 
             this.ObjectsToRename.AddRange(assets);
             this.ObjectsToRename.AddRange(gameObjects);
+
+            // Reset the number of previously renamed objects so that we don't show the success prompt if these are removed.
+            this.NumPreviouslyRenamedObjects = 0;
         }
 
         private List<UnityEngine.Object> GetValidSelectedObjects()
@@ -1109,6 +1148,10 @@ namespace RedBlueGames.MulliganRenamer
 
             public GUIStyle DropPromptHint { get; set; }
 
+            public GUIStyle DropPromptRepeat { get; set; }
+
+            public GUIStyle RenameSuccessPrompt { get; set; }
+
             public GUIStyle PreviewHeader { get; set; }
 
             public Color PreviewRowBackgroundOdd { get; set; }
@@ -1125,6 +1168,8 @@ namespace RedBlueGames.MulliganRenamer
         private class GUIContents
         {
             public GUIContent DropPrompt { get; set; }
+
+            public GUIContent DropPromptRepeat { get; set; }
 
             public GUIContent DropPromptHint { get; set; }
 
