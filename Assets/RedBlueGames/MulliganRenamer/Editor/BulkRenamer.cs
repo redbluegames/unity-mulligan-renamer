@@ -63,9 +63,10 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Renames the objects supplied as a list of object and new name pairings.
         /// </summary>
+        /// <returns>The number of successfully renamed objects.</returns>
         /// <param name="objectsAndNewNames">Objects with their new names.</param>
         /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
-        public static void ApplyNameDeltas(List<ObjectNameDelta> objectsAndNewNames, bool ignoreUndo = false)
+        public static int ApplyNameDeltas(List<ObjectNameDelta> objectsAndNewNames, bool ignoreUndo = false)
         {
             List<ObjectNameDelta> assetsToRename;
             List<ObjectNameDelta> spritesToRename;
@@ -89,6 +90,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             // Rename the objects and show a progress bar
+            int numFailedRenames = 0;
             int totalNumSteps = spritesToRename.Count + assetsToRename.Count + gameObjectsToRename.Count;
             int progressBarStep = 0;
             var spritesheetRenamers = new List<SpritesheetRenamer>();
@@ -127,7 +129,14 @@ namespace RedBlueGames.MulliganRenamer
             foreach (var deferredRename in deferredRenames)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
-                RenameAsset(deferredRename.NamedObject, deferredRename.NewName);
+                try
+                {
+                    RenameAsset(deferredRename.NamedObject, deferredRename.NewName);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    numFailedRenames++;
+                }
             }
 
             // Rename the sprites in the spritesheets
@@ -138,6 +147,8 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             EditorUtility.ClearProgressBar();
+
+            return totalNumSteps - numFailedRenames;
         }
 
         /// <summary>
@@ -152,9 +163,10 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Renames the specified Objects according to a supplied RenameOperationSequence.
         /// </summary>
+        /// <returns>The number of successfully renamed objects.</returns>
         /// <param name="objectsToRename">Objects to rename.</param>
         /// <param name="ignoreUndo">If set to <c>true</c> ignore undo.</param>
-        public void RenameObjects(List<UnityEngine.Object> objectsToRename, bool ignoreUndo = false)
+        public int RenameObjects(List<UnityEngine.Object> objectsToRename, bool ignoreUndo = false)
         {
             var nameChanges = new List<ObjectNameDelta>();
             var previews = this.GetBulkRenamePreview(objectsToRename);
@@ -180,7 +192,7 @@ namespace RedBlueGames.MulliganRenamer
                 nameChanges.Add(new ObjectNameDelta(objectsToRename[i], newName));
             }
 
-            BulkRenamer.ApplyNameDeltas(nameChanges, ignoreUndo);
+            return BulkRenamer.ApplyNameDeltas(nameChanges, ignoreUndo);
         }
 
         /// <summary>
@@ -456,7 +468,7 @@ namespace RedBlueGames.MulliganRenamer
                                   asset.name,
                                   pathToAsset,
                                   newName);
-                Debug.LogError(message, asset);
+                throw new System.OperationCanceledException(message);
             }
         }
 
