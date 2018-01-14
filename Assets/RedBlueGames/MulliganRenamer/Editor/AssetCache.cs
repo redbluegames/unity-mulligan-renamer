@@ -34,6 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     public class AssetCache
     {
         private Dictionary<string, List<Object>> cachedAssetsInDirectories;
+        private HashSet<string> cachedFilePaths;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:RedBlueGames.MulliganRenamer.AssetCache"/> class.
@@ -41,6 +42,7 @@ namespace RedBlueGames.MulliganRenamer
         public AssetCache()
         {
             this.cachedAssetsInDirectories = new Dictionary<string, List<Object>>();
+            this.cachedFilePaths = new HashSet<string>();
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 assetsInDirectory = AssetDatabaseUtility.LoadAssetsAtDirectory(assetRelativePath);
-                this.cachedAssetsInDirectories[assetRelativePath] = assetsInDirectory;
+                this.AddAssets(assetRelativePath, assetsInDirectory);
             }
 
             return assetsInDirectory;
@@ -71,6 +73,35 @@ namespace RedBlueGames.MulliganRenamer
         public void Clear()
         {
             this.cachedAssetsInDirectories = new Dictionary<string, List<Object>>();
+        }
+
+        /// <summary>
+        /// Gets all file paths hashed.
+        /// </summary>
+        /// <returns>The all file paths hashed.</returns>
+        public HashSet<string> GetAllPathsHashed()
+        {
+            var copy = new HashSet<string>(this.cachedFilePaths);
+            return copy;
+        }
+
+        private void AddAssets(string assetRelativePath, List<UnityEngine.Object> assets)
+        {
+            foreach (var asset in assets)
+            {
+                if (asset == null)
+                {
+                    continue;
+                }
+
+                var path = AssetDatabaseUtility.GetAssetPathWithSubAsset(asset);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    cachedFilePaths.Add(path);
+                }
+            }
+
+            this.cachedAssetsInDirectories[assetRelativePath] = assets;
         }
     }
 }
