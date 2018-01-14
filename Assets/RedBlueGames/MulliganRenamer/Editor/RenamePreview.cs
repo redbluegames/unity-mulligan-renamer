@@ -46,5 +46,31 @@
         /// Gets or sets the warning message.
         /// </summary>
         public string WarningMessage { get; set; }
+
+        /// <summary>
+        /// Gets the resulting path, with sub assets appended to a filepath with a directory separator.
+        /// </summary>
+        /// <returns>The resulting path.</returns>
+        public string GetResultingPath()
+        {
+            var pathToObject = AssetDatabase.GetAssetPath(this.ObjectToRename);
+
+            var resultingPath = string.Empty;
+            string newFilename = this.RenameResultSequence.NewName;
+            if (AssetDatabase.IsSubAsset(this.ObjectToRename))
+            {
+                resultingPath = string.Concat(pathToObject, "/", newFilename);
+            }
+            else
+            {
+                var pathWithoutFilename = System.IO.Path.GetDirectoryName(pathToObject);
+                resultingPath = string.Concat(
+                    pathWithoutFilename,
+                    this.RenameResultSequence.NewName,
+                    System.IO.Path.GetExtension(pathToObject));
+            }
+
+            return resultingPath;
+        }
     }
 }
