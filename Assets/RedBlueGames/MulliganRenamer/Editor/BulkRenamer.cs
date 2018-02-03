@@ -132,20 +132,20 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            var spritesheetRenamers = new List<SpritesheetRenamer>();
+            // Package all sprites into renamers so we can do the file IO
+            // all at once.
+            var spritesheetRenamers = new Dictionary <string, SpritesheetRenamer>();
             foreach (var spriteToRename in spritesToRename)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
                 MarkSpriteForRename((Sprite)spriteToRename.NamedObject, spriteToRename.NewName, ref spritesheetRenamers);
             }
 
-            // Rename the sprites in the spritesheets
-            // Sort of a bad smell, but this has to happen after Assets are renamed or else the sprites' parent textures
-            // will have different names, and fail to rename.
-            for (int i = 0; i < spritesheetRenamers.Count; ++i, ++progressBarStep)
+            // Rename the sprites in the spritesheets.
+            foreach (var kvp in spritesheetRenamers)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
-                spritesheetRenamers[i].RenameSprites();
+                kvp.Value.RenameSprites();
             }
 
             EditorUtility.ClearProgressBar();
@@ -438,29 +438,19 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private static void MarkSpriteForRename(Sprite sprite, string newName, ref List<SpritesheetRenamer> spritesheetRenamers)
+        private static void MarkSpriteForRename(Sprite sprite, string newName, ref Dictionary<string, SpritesheetRenamer> spritesheetRenamers)
         {
             var path = AssetDatabase.GetAssetPath(sprite);
-            SpritesheetRenamer existingSpritesheetRenamer = null;
-            for (int i = 0; i < spritesheetRenamers.Count; ++i)
+            if (spritesheetRenamers.ContainsKey(path))
             {
-                if (spritesheetRenamers[i].PathToTexture == path)
-                {
-                    existingSpritesheetRenamer = spritesheetRenamers[i];
-                    break;
-                }
-            }
-
-            if (existingSpritesheetRenamer != null)
-            {
-                existingSpritesheetRenamer.AddSpriteForRename(sprite, newName);
+                spritesheetRenamers[path].AddSpriteForRename(sprite, newName);
             }
             else
             {
                 var spritesheetRenamer = new SpritesheetRenamer();
                 spritesheetRenamer.AddSpriteForRename(sprite, newName);
 
-                spritesheetRenamers.Add(spritesheetRenamer);
+                spritesheetRenamers[path] = spritesheetRenamer;
             }
         }
 
