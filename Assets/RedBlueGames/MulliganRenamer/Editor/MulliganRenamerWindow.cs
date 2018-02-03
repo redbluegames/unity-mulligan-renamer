@@ -382,7 +382,7 @@ namespace RedBlueGames.MulliganRenamer
             if (GUILayout.Button("Rename", GUILayout.Height(24.0f)))
             {
                 var popupMessage = string.Concat(
-                    "Some objects have warnings and will not be renamed. Are you sure you want to continue renaming the objects?");
+                    "Some objects have warnings and will not be renamed. Do you want to rename the other objects in the group?");
                 var skipWarning = !bulkRenamePreview.HasWarnings;
                 if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
