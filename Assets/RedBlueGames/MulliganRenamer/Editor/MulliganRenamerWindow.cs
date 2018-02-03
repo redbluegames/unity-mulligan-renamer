@@ -685,7 +685,7 @@ namespace RedBlueGames.MulliganRenamer
                 EditorStyles.boldLabel,
                 GUILayout.Width(previewContents.LongestOriginalNameWidth));
 
-            bool shouldShowSecondColumn = this.IsPreviewStepModePreference;
+            bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count == 1;
             if (shouldShowSecondColumn)
             {
                 EditorGUILayout.LabelField(newNameColumnHeader, EditorStyles.boldLabel, GUILayout.Width(previewContents.LongestNewNameWidth));
