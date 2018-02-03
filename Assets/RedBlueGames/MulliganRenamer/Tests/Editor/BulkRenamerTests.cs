@@ -35,7 +35,7 @@ namespace RedBlueGames.MulliganRenamer
     public class BulkRenamerTests
     {
         private static readonly string TestFixturesFolderName = "TestFixtures";
-        private static readonly string TestFixturesPath = 
+        private static readonly string TestFixturesPath =
             string.Concat("Assets/", TestFixturesFolderName);
         private static readonly string TestFixturesDirectory =
             string.Concat(TestFixturesPath, "/");
@@ -156,7 +156,7 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_Spritesheet_Renames()
         {
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet();
+            var textureWithSprites = this.SetupSpriteSheet(2, "Texture_Sprite");
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "NewSprite";
 
@@ -196,45 +196,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             Assert.AreEqual(expectedNames, resultingNames);
-        }
-
-        private Texture2D SetupSpriteSheet()
-        {
-            var texture = new Texture2D(64, 64, TextureFormat.ARGB32, false, true);
-            for (int x = 0; x < 64; ++x)
-            {
-                for (int y = 0; y < 64; ++y)
-                {
-                    texture.SetPixel(x, y, Color.cyan);
-                }
-            }
-
-            texture.Apply();
-
-            // Need to save the texture as an Asset and store a reference to the Asset
-            var path = string.Concat(TestFixturesDirectory, "Texture.png");
-            byte[] bytes = texture.EncodeToPNG();
-            System.IO.File.WriteAllBytes(path, bytes);
-            AssetDatabase.ImportAsset(path);
-            var textureWithSprites = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-
-            var importer = (TextureImporter)TextureImporter.GetAtPath(path);
-            importer.isReadable = true;
-            importer.textureType = TextureImporterType.Sprite;
-            importer.spriteImportMode = SpriteImportMode.Multiple;
-            var spriteMetaData = new SpriteMetaData[4];
-            spriteMetaData[0].rect = new Rect(0, 0, 32, 32);
-            spriteMetaData[0].name = "Texture_Sprite0";
-            spriteMetaData[1].rect = new Rect(32, 0, 32, 32);
-            spriteMetaData[1].name = "Texture_Sprite1";
-            spriteMetaData[2].rect = new Rect(0, 32, 32, 32);
-            spriteMetaData[2].name = "Texture_Sprite2";
-            spriteMetaData[3].rect = new Rect(32, 32, 32, 32);
-            spriteMetaData[3].name = "Texture_Sprite3";
-            importer.spritesheet = spriteMetaData;
-            importer.SaveAndReimport();
-
-            return textureWithSprites;
         }
 
         [Test]
@@ -361,6 +322,112 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        [Test]
+        public void RenameObjects_SpritesheetWithTargetNameAsSubstringInMultipleSprites_Renames()
+        {
+            // Arrange
+            var textureWithSprites = this.SetupSpriteSheet(4, "Texture_Sprite");
+            var replaceNameOp = new ReplaceStringOperation();
+            replaceNameOp.SearchString = "Texture_Sprite1";
+            replaceNameOp.ReplacementString = "CoolSprite";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceNameOp);
+
+            var path = AssetDatabase.GetAssetPath(textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+            var allSprites = new List<Object>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                if (asset is Sprite)
+                {
+                    allSprites.Add(asset);
+                }
+            }
+
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(new List<Object>() { allSprites[0] }, true);
+
+            var expectedNames = new List<string>
+            {
+                "CoolSprite",
+                "Texture_Sprite2",
+                "Texture_Sprite3",
+                "Texture_Sprite4",
+                "Texture_Sprite5",
+                "Texture_Sprite6",
+                "Texture_Sprite7",
+                "Texture_Sprite8",
+                "Texture_Sprite9",
+                "Texture_Sprite10",
+                "Texture_Sprite11",
+                "Texture_Sprite12",
+                "Texture_Sprite13",
+                "Texture_Sprite14",
+                "Texture_Sprite15",
+                "Texture_Sprite16",
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var sprite in allSprites)
+            {
+                resultingNames.Add(sprite.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        private Texture2D SetupSpriteSheet(int cellsPerSide, string namePrefix)
+        {
+            var cellSize = 32;
+            var texture = new Texture2D(
+                cellSize * cellsPerSide,
+                cellSize * cellsPerSide,
+                TextureFormat.ARGB32,
+                false,
+                true);
+            var size = Vector2.one * cellSize * cellsPerSide;
+            for (int x = 0; x < size.x; ++x)
+            {
+                for (int y = 0; y < size.y; ++y)
+                {
+                    texture.SetPixel(x, y, Color.cyan);
+                }
+            }
+
+            texture.Apply();
+
+            // Need to save the texture as an Asset and store a reference to the Asset
+            var path = string.Concat(TestFixturesDirectory, "Texture.png");
+            byte[] bytes = texture.EncodeToPNG();
+            System.IO.File.WriteAllBytes(path, bytes);
+            AssetDatabase.ImportAsset(path);
+            var textureWithSprites = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+
+            var importer = (TextureImporter)TextureImporter.GetAtPath(path);
+            importer.isReadable = true;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            var spriteMetaData = new SpriteMetaData[cellsPerSide * cellsPerSide];
+            for (int i = 0; i < cellsPerSide; ++i)
+            {
+                for (int j = 0; j < cellsPerSide; ++j)
+                {
+                    var cellIndex = i * cellsPerSide + j;
+                    var x = i * cellSize;
+                    var y = j * cellSize;
+                    spriteMetaData[cellIndex].rect = new Rect(x, y, cellSize, cellSize);
+                    var name = string.Concat(namePrefix, (cellIndex + 1).ToString());
+                    spriteMetaData[cellIndex].name = name;
+                }
+            }
+
+            importer.spritesheet = spriteMetaData;
+            importer.SaveAndReimport();
+
+            return textureWithSprites;
         }
     }
 }

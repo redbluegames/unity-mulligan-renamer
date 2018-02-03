@@ -127,17 +127,17 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string ReplaceFileIDRecycleNames(string metafileText, string oldName, string newName)
         {
-            string fileIDPattern = "([\\d]{8}: )" + oldName;
+            string fileIDPattern = "([\\d]{8}: )" + oldName + "\n";
             var fileIDRegex = new System.Text.RegularExpressions.Regex(fileIDPattern);
-            string replacementText = "$1" + newName;
+            string replacementText = "$1" + newName + "\n";
             return fileIDRegex.Replace(metafileText, replacementText);
         }
 
         private static string ReplaceSpriteData(string metafileText, string oldName, string newName)
         {
-            string spritenamePattern = "(name: )" + oldName;
+            string spritenamePattern = "(name: )" + oldName + "\n";
             var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
-            string replacementText = "$1" + newName;
+            string replacementText = "$1" + newName + "\n";
             return spritenameRegex.Replace(metafileText, replacementText);
         }
 
