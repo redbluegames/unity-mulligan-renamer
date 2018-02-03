@@ -156,7 +156,7 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_Spritesheet_Renames()
         {
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet(2, "Texture_Sprite");
+            var textureWithSprites = this.SetupSpriteSheet(2, "Texture.png", "Texture_Sprite");
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "NewSprite";
 
@@ -327,8 +327,9 @@ namespace RedBlueGames.MulliganRenamer
         [Test]
         public void RenameObjects_SpritesheetWithTargetNameAsSubstringInMultipleSprites_Renames()
         {
+            // Tests Issue #143: https://github.com/redbluegames/unity-mulligan-renamer/issues/143
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet(4, "Texture_Sprite");
+            var textureWithSprites = this.SetupSpriteSheet(4, "Texture.png", "Texture_Sprite");
             var replaceNameOp = new ReplaceStringOperation();
             replaceNameOp.SearchString = "Texture_Sprite1";
             replaceNameOp.ReplacementString = "CoolSprite";
@@ -347,9 +348,11 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
+            // Act
             var bulkRenamer = new BulkRenamer(renameSequence);
             bulkRenamer.RenameObjects(new List<Object>() { allSprites[0] }, true);
 
+            // Assert
             var expectedNames = new List<string>
             {
                 "CoolSprite",
@@ -379,7 +382,43 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(expectedNames, resultingNames);
         }
 
-        private Texture2D SetupSpriteSheet(int cellsPerSide, string namePrefix)
+        [Test]
+        public void RenameObjects_SpriteAndTexture_Renames()
+        {
+            // Tests Issue #139: https://github.com/redbluegames/unity-mulligan-renamer/issues/139
+            // Arrange
+            var textureWithSprites = this.SetupSpriteSheet(1, "Texture.png", "Texture_Sprite");
+            var replaceNameOp = new ReplaceStringOperation();
+            replaceNameOp.SearchString = "Texture";
+            replaceNameOp.ReplacementString = "Cool";
+
+            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            renameSequence.Add(replaceNameOp);
+
+            var path = AssetDatabase.GetAssetPath(textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+
+            // Act
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(new List<Object>(allAssetsAtPath), true);
+
+            // Assert
+            var resultingNames = new List<string>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                resultingNames.Add(asset.name);
+            }
+
+            var expectedNames = new List<string>
+            {
+                "Cool",
+                "Cool_Sprite1",
+            };
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        private Texture2D SetupSpriteSheet(int cellsPerSide, string textureName, string namePrefix)
         {
             var cellSize = 32;
             var texture = new Texture2D(
@@ -400,7 +439,7 @@ namespace RedBlueGames.MulliganRenamer
             texture.Apply();
 
             // Need to save the texture as an Asset and store a reference to the Asset
-            var path = string.Concat(TestFixturesDirectory, "Texture.png");
+            var path = string.Concat(TestFixturesDirectory, textureName);
             byte[] bytes = texture.EncodeToPNG();
             System.IO.File.WriteAllBytes(path, bytes);
             AssetDatabase.ImportAsset(path);

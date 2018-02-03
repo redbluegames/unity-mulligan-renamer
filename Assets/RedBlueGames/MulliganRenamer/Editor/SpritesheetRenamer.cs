@@ -36,20 +36,6 @@ namespace RedBlueGames.MulliganRenamer
     {
         private Dictionary<Sprite, string> spritesAndNewNames;
 
-        /// <summary>
-        /// Gets the path to the associated texture with the sprites.
-        /// </summary>
-        /// <value>The path to texture.</value>
-        public string PathToTexture { get; private set; }
-
-        private string PathToTextureMetaFile
-        {
-            get
-            {
-                return this.PathToTexture + ".meta";
-            }
-        }
-
         private Dictionary<Sprite, string> SpritesAndNewNames
         {
             get
@@ -71,14 +57,16 @@ namespace RedBlueGames.MulliganRenamer
         public void AddSpriteForRename(Sprite sprite, string newName)
         {
             var pathToSprite = AssetDatabase.GetAssetPath(sprite);
-            if (!string.IsNullOrEmpty(this.PathToTexture) && pathToSprite != this.PathToTexture)
+
+            var existingPathToTexture = this.GetPathToTextureForFirstSprite();
+            if (!string.IsNullOrEmpty(existingPathToTexture) && pathToSprite != existingPathToTexture)
             {
                 var exception = string.Format(
                                     "Trying to add Sprite {0} to SpriteRenamer that has a different path to texture " +
                                     "than the other sprites. Received path {1}, expected {2}",
                                     sprite.name,
                                     pathToSprite,
-                                    this.PathToTexture);
+                                    existingPathToTexture);
                 throw new System.ArgumentException(exception);
             }
 
@@ -92,8 +80,6 @@ namespace RedBlueGames.MulliganRenamer
                 throw new System.ArgumentException(exception);
             }
 
-            this.PathToTexture = pathToSprite;
-
             // Unity doesn't let you name two sprites with the same name, so we shouldn't either.
             var uniqueName = this.CreateSpritesheetUniqueName(newName);
 
@@ -105,7 +91,21 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public void RenameSprites()
         {
-            string metaFileWithRenames = System.IO.File.ReadAllText(this.PathToTextureMetaFile);
+            // Nothing to rename
+            if (this.SpritesAndNewNames == null || this.spritesAndNewNames.Count == 0)
+            {
+                return;
+            }
+
+            // Get the path to the first sprite, so that we have an up to date
+            // path to the texture (texture could get renamed in between when the 
+            // sprites are added and later renamed).
+            // We know all the sprites have the same path because it is enforced
+            // in the Add function.
+            var pathToTexture = GetPathToTextureForFirstSprite ();
+            var pathToTextureMetaFile = pathToTexture + ".meta";
+            string metaFileWithRenames = System.IO.File.ReadAllText(pathToTextureMetaFile);
+
             foreach (var spriteNamePair in this.SpritesAndNewNames)
             {
                 var sprite = spriteNamePair.Key;
@@ -113,9 +113,9 @@ namespace RedBlueGames.MulliganRenamer
                 sprite.name = spriteNamePair.Value;
             }
 
-            System.IO.File.WriteAllText(this.PathToTextureMetaFile, metaFileWithRenames);
+            System.IO.File.WriteAllText(pathToTextureMetaFile, metaFileWithRenames);
 
-            AssetDatabase.ImportAsset(this.PathToTexture);
+            AssetDatabase.ImportAsset(pathToTexture);
         }
 
         private static string ReplaceSpriteInMetaFile(string metafileText, Sprite sprite, string newName)
@@ -152,6 +152,16 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return uniqueName;
+        }
+
+        private string GetPathToTextureForFirstSprite()
+        {
+            foreach (var spriteNamePair in this.SpritesAndNewNames)
+            {
+                return AssetDatabase.GetAssetPath(spriteNamePair.Key);
+            }
+
+            return string.Empty;
         }
     }
 }
