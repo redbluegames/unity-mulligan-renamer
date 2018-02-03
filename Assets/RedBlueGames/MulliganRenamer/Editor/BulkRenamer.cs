@@ -93,14 +93,7 @@ namespace RedBlueGames.MulliganRenamer
             int numFailedRenames = 0;
             int totalNumSteps = spritesToRename.Count + assetsToRename.Count + gameObjectsToRename.Count;
             int progressBarStep = 0;
-            var spritesheetRenamers = new List<SpritesheetRenamer>();
             var deferredRenames = new List<ObjectNameDelta>();
-            foreach (var spriteToRename in spritesToRename)
-            {
-                UpdateProgressBar(progressBarStep++, totalNumSteps);
-                MarkSpriteForRename((Sprite)spriteToRename.NamedObject, spriteToRename.NewName, ref spritesheetRenamers);
-            }
-
             foreach (var assetToRename in assetsToRename)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
@@ -139,7 +132,16 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
+            var spritesheetRenamers = new List<SpritesheetRenamer>();
+            foreach (var spriteToRename in spritesToRename)
+            {
+                UpdateProgressBar(progressBarStep++, totalNumSteps);
+                MarkSpriteForRename((Sprite)spriteToRename.NamedObject, spriteToRename.NewName, ref spritesheetRenamers);
+            }
+
             // Rename the sprites in the spritesheets
+            // Sort of a bad smell, but this has to happen after Assets are renamed or else the sprites' parent textures
+            // will have different names, and fail to rename.
             for (int i = 0; i < spritesheetRenamers.Count; ++i, ++progressBarStep)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
