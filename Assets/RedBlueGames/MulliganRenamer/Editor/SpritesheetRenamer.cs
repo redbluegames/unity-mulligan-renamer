@@ -113,7 +113,12 @@ namespace RedBlueGames.MulliganRenamer
                 sprite.name = spriteNamePair.Value;
             }
 
+            // If users have hidden meta files they will get an access exception.
+            // Need to unhide them briefly.
+            var originalFileAttributes = System.IO.File.GetAttributes(pathToTextureMetaFile);
+            System.IO.File.SetAttributes(pathToTextureMetaFile, originalFileAttributes & ~System.IO.FileAttributes.Hidden);
             System.IO.File.WriteAllText(pathToTextureMetaFile, metaFileWithRenames);
+            System.IO.File.SetAttributes(pathToTextureMetaFile, originalFileAttributes);
 
             AssetDatabase.ImportAsset(pathToTexture);
         }
