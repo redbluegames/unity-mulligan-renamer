@@ -34,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerWindow : EditorWindow
     {
-        private const string VersionString = "1.0.0";
+        private const string VersionString = "1.2.1";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
@@ -261,7 +261,7 @@ namespace RedBlueGames.MulliganRenamer
             this.guiContents.DropPromptRepeat = new GUIContent(
                 "To rename more objects, drag them here, or");
 
-            var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2017 RedBlueGames");
+            var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2018 RedBlueGames");
             this.guiContents.CopyrightLabel = new GUIContent(copyrightLabel);
         }
 
