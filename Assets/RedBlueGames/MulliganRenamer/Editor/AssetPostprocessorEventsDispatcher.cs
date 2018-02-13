@@ -23,43 +23,18 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
+    using UnityEditor;
 
     /// <summary>
-    /// Object name delta tracks name changes to an Object.
+    /// "Subscribes" to Unity's AssetPostprocessor events and dispatches them to a static class.
+    /// This allows us to subscribe code to the asset postprocessor events, without making these
+    /// PostProcessors aware of who is subscribing.
     /// </summary>
-    public class ObjectNameDelta
+    public class AssetPostprocessorEventsDispatcher : AssetPostprocessor
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectNameDelta"/> class.
-        /// </summary>
-        /// <param name="obj">Object associated with these names.</param>
-        /// <param name="newName">New name for the object</param>
-        public ObjectNameDelta(UnityEngine.Object obj, string newName)
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            this.NamedObject = obj;
-            this.OldName = obj.name;
-            this.NewName = newName;
+            AssetPostprocessorEvents.AssetsReimported.Invoke();
         }
-
-        /// <summary>
-        /// Gets the named object.
-        /// </summary>
-        /// <value>The named object.</value>
-        public UnityEngine.Object NamedObject { get; private set; }
-
-        /// <summary>
-        /// Gets the old name of the object.
-        /// </summary>
-        /// <value>The old name.</value>
-        public string OldName { get; private set; }
-
-        /// <summary>
-        /// Gets the new name of the object.
-        /// </summary>
-        /// <value>The new name.</value>
-        public string NewName { get; private set; }
     }
 }

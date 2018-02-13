@@ -49,6 +49,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.StartingCount = operationToCopy.StartingCount;
             this.CountFormat = operationToCopy.CountFormat;
+            this.Increment = operationToCopy.Increment;
 
             this.Initialize();
         }
@@ -76,6 +77,11 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <value>The count format.</value>
         public string CountFormat { get; set; }
+
+        /// <summary>
+        /// Gets or sets the increment to use when counting.
+        /// </summary>
+        public int Increment { get; set; }
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -143,7 +149,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (!string.IsNullOrEmpty(this.CountFormat))
             {
-                var currentCount = this.StartingCount + relativeCount;
+                var currentCount = this.StartingCount + (relativeCount * this.Increment);
                 try
                 {
                     var currentCountAsString = currentCount.ToString(this.CountFormat);
@@ -193,13 +199,24 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
             }
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Count From"));
-            this.StartingCount = EditorGUILayout.IntField("Count From", this.StartingCount);
+            var countFromContent = new GUIContent("Count From", "The value to start counting from. The first object will have this number.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFromContent.text));
+            this.StartingCount = EditorGUILayout.IntField(countFromContent, this.StartingCount);
+
+            var incrementContent = new GUIContent("Increment", "The value to add to each object when counting.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, incrementContent.text));
+            this.Increment = EditorGUILayout.IntField(incrementContent, this.Increment);
+
             selectedPreset.Format = this.CountFormat;
         }
 
         private void Initialize()
         {
+            this.Increment = 1;
+
+            // Give it an initially valid count format
+            this.CountFormat = "0";
+                
             var singleDigitPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "0, 1, 2...",

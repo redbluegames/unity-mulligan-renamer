@@ -23,43 +23,21 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections;
-    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
-    /// Object name delta tracks name changes to an Object.
+    /// Asset postprocessor events that are invoked by the AssetPostprocessorEventsDispatcher.
     /// </summary>
-    public class ObjectNameDelta
+    public static class AssetPostprocessorEvents
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectNameDelta"/> class.
+        /// Assets have been reimported
         /// </summary>
-        /// <param name="obj">Object associated with these names.</param>
-        /// <param name="newName">New name for the object</param>
-        public ObjectNameDelta(UnityEngine.Object obj, string newName)
+        public static UnityEngine.Events.UnityEvent AssetsReimported;
+
+        static AssetPostprocessorEvents()
         {
-            this.NamedObject = obj;
-            this.OldName = obj.name;
-            this.NewName = newName;
+            AssetsReimported = new UnityEngine.Events.UnityEvent();
         }
-
-        /// <summary>
-        /// Gets the named object.
-        /// </summary>
-        /// <value>The named object.</value>
-        public UnityEngine.Object NamedObject { get; private set; }
-
-        /// <summary>
-        /// Gets the old name of the object.
-        /// </summary>
-        /// <value>The old name.</value>
-        public string OldName { get; private set; }
-
-        /// <summary>
-        /// Gets the new name of the object.
-        /// </summary>
-        /// <value>The new name.</value>
-        public string NewName { get; private set; }
     }
 }
