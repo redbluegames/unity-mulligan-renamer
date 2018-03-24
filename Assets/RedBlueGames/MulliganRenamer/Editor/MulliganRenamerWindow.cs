@@ -133,29 +133,23 @@ namespace RedBlueGames.MulliganRenamer
             return false;
         }
 
-        private static int DrawPreviewBreadcrumbs(int selectedIndex, params PreviewBreadcrumbOptions[] breacrumbConfigs)
+        private static bool DrawPreviewBreadcrumb(Rect rect, PreviewBreadcrumbOptions breacrumbConfig)
         {
-            var lastSelectedIndex = selectedIndex;
-            for (int i = 0; i < breacrumbConfigs.Length; ++i)
+            var styleName = breacrumbConfig.StyleName;
+            var enabled = breacrumbConfig.Enabled;
+            bool selected = GUI.Toggle(rect, enabled, breacrumbConfig.Heading, styleName);
+            if (selected)
             {
-                var styleName = i == 0 ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
-                var enabled = i == lastSelectedIndex;
-                bool selected = GUILayout.Toggle(enabled, breacrumbConfigs[i].Heading, styleName);
-                if (selected)
-                {
-                    lastSelectedIndex = i;
-
-                    var coloredHighlightRect = GUILayoutUtility.GetLastRect();
-                    coloredHighlightRect.height = 2;
-                    coloredHighlightRect.x += -5.0f;
-                    var oldColor = GUI.color;
-                    GUI.color = breacrumbConfigs[i].HighlightColor;
-                    GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
-                    GUI.color = oldColor;
-                }
+                var coloredHighlightRect = new Rect(rect);
+                coloredHighlightRect.height = 2;
+                coloredHighlightRect.x += -5.0f;
+                var oldColor = GUI.color;
+                GUI.color = breacrumbConfig.HighlightColor;
+                GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
+                GUI.color = oldColor;
             }
 
-            return lastSelectedIndex;
+            return selected;
         }
 
         private static bool DrawPreviewRow(int previewStepIndex, PreviewRowModel info, PreviewRowStyle style)
@@ -263,6 +257,9 @@ namespace RedBlueGames.MulliganRenamer
 
             var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2018 RedBlueGames");
             this.guiContents.CopyrightLabel = new GUIContent(copyrightLabel);
+
+            var renameOpsLabel = new GUIContent("Rename Operations");
+            this.guiContents.RenameOpsLabel = renameOpsLabel;
         }
 
         private void InitializeGUIStyles()
@@ -419,47 +416,65 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar()
         {
-            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            var toolbarRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
 
-            GUILayout.Label("Rename Operations", GUILayout.Width(340.0f));
+            var renameOpsPanelWidth = 340.0f;
+            var renameOpsLabelRect = new Rect(toolbarRect.position, new Vector2(renameOpsPanelWidth, toolbarRect.height));
+            GUI.Label(renameOpsLabelRect, this.guiContents.RenameOpsLabel);
 
-            // The breadcrumb style spills to the left some so we need to leave extra space for it
-            const float BreadcrumbLeftOffset = 5.0f;
-            GUILayout.Space(BreadcrumbLeftOffset + 1.0f);
+            // The breadcrumb style spills to the left some so we need to claim extra space for it
+            const float BreadcrumbLeftOffset = 15.0f;
+            var breadcrumbRect = new Rect(
+                new Vector2(BreadcrumbLeftOffset + renameOpsLabelRect.x + renameOpsLabelRect.width, toolbarRect.y),
+                new Vector2(100.0f, toolbarRect.height));
+            float totalWidth = 0.0f;
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
             this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count <= 1;
             if (this.IsShowingPreviewSteps)
             {
-                var breadcrumbOptions = new PreviewBreadcrumbOptions[this.RenameOperationsToApply.Count];
                 for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
                 {
                     var operationAtBreadcrumb = this.RenameOperationsToApply[i];
-                    breadcrumbOptions[i].Heading = operationAtBreadcrumb.HeadingLabel;
-                    breadcrumbOptions[i].HighlightColor = operationAtBreadcrumb.HighlightColor;
-                }
+                    var breadcrumbOption = new PreviewBreadcrumbOptions();
+                    breadcrumbOption.Heading = operationAtBreadcrumb.HeadingLabel;
+                    breadcrumbOption.HighlightColor = operationAtBreadcrumb.HighlightColor;
 
-                var selectedBreadcrumbIndex = DrawPreviewBreadcrumbs(this.FocusedRenameOpIndex, breadcrumbOptions);
-                if (selectedBreadcrumbIndex != this.FocusedRenameOpIndex)
-                {
-                    var renameOp = this.RenameOperationsToApply[selectedBreadcrumbIndex];
-                    this.FocusRenameOperationDeferred(renameOp);
+                    breadcrumbOption.UseLeftStyle = i == 0;
+                    breadcrumbOption.Enabled = i == this.FocusedRenameOpIndex;
+
+                    var breadcrumbPosition = new Vector2(breadcrumbRect.x + totalWidth, breadcrumbRect.y);
+
+                    var style = new GUIStyle(breadcrumbOption.StyleName);
+                    var size = style.CalcSize(new GUIContent(breadcrumbOption.Heading, string.Empty));
+                    var nextBreadcrumbRect = new Rect(breadcrumbPosition, size);
+                    nextBreadcrumbRect.position = new Vector2(breadcrumbRect.x + totalWidth, breadcrumbRect.y);
+
+                    var selected = DrawPreviewBreadcrumb(nextBreadcrumbRect, breadcrumbOption);
+                    if (selected && i != this.FocusedRenameOpIndex)
+                    {
+                        var renameOp = this.RenameOperationsToApply[i];
+                        this.FocusRenameOperationDeferred(renameOp);
+                    }
+
+                    totalWidth += nextBreadcrumbRect.width;
                 }
             }
             else
             {
-                DrawPreviewBreadcrumbs(0, new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear });
+                DrawPreviewBreadcrumb(
+                    breadcrumbRect,
+                    new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true });
             }
-
-            GUILayout.FlexibleSpace();
 
             EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
             var buttonText = "Preview Steps";
-            this.IsPreviewStepModePreference = GUILayout.Toggle(this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
+            var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
+            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
+            var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
+            this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
             EditorGUI.EndDisabledGroup();
-
-            EditorGUILayout.EndHorizontal();
         }
 
         private void DrawOperationsPanel()
@@ -993,6 +1008,18 @@ namespace RedBlueGames.MulliganRenamer
             public string Heading { get; set; }
 
             public Color32 HighlightColor { get; set; }
+
+            public bool UseLeftStyle { get; set; }
+
+            public bool Enabled { get; set; }
+
+            public string StyleName
+            {
+                get
+                {
+                    return this.UseLeftStyle ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
+                }
+            }
         }
 
         private struct PreviewRowModel
@@ -1174,6 +1201,8 @@ namespace RedBlueGames.MulliganRenamer
             public GUIContent DropPromptHint { get; set; }
 
             public GUIContent CopyrightLabel { get; set; }
+
+            public GUIContent RenameOpsLabel { get; set; }
         }
     }
 }
