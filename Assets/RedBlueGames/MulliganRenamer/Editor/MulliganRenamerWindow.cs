@@ -426,14 +426,27 @@ namespace RedBlueGames.MulliganRenamer
             const float BreadcrumbLeftOffset = 15.0f;
             var breadcrumbRect = new Rect(
                 new Vector2(BreadcrumbLeftOffset + renameOpsLabelRect.x + renameOpsLabelRect.width, toolbarRect.y),
-                new Vector2(100.0f, toolbarRect.height));
-            float totalWidth = 0.0f;
+                new Vector2(toolbarRect.width - renameOpsPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
             this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count <= 1;
-            if (this.IsShowingPreviewSteps)
+            this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
+
+            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
+            var buttonText = "Preview Steps";
+            var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
+            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
+            var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
+            this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void DrawBreadcrumbs(bool isShowingPreviewSteps, Rect rect)
+        {
+            if (isShowingPreviewSteps)
             {
+                var totalWidth = 0.0f;
                 for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
                 {
                     var operationAtBreadcrumb = this.RenameOperationsToApply[i];
@@ -444,12 +457,10 @@ namespace RedBlueGames.MulliganRenamer
                     breadcrumbOption.UseLeftStyle = i == 0;
                     breadcrumbOption.Enabled = i == this.FocusedRenameOpIndex;
 
-                    var breadcrumbPosition = new Vector2(breadcrumbRect.x + totalWidth, breadcrumbRect.y);
+                    var breadcrumbPosition = new Vector2(rect.x + totalWidth, rect.y);
 
-                    var style = new GUIStyle(breadcrumbOption.StyleName);
-                    var size = style.CalcSize(new GUIContent(breadcrumbOption.Heading, string.Empty));
-                    var nextBreadcrumbRect = new Rect(breadcrumbPosition, size);
-                    nextBreadcrumbRect.position = new Vector2(breadcrumbRect.x + totalWidth, breadcrumbRect.y);
+                    var nextBreadcrumbRect = new Rect(breadcrumbPosition, breadcrumbOption.SizeForContent);
+                    nextBreadcrumbRect.position = new Vector2(rect.x + totalWidth, rect.y);
 
                     var selected = DrawPreviewBreadcrumb(nextBreadcrumbRect, breadcrumbOption);
                     if (selected && i != this.FocusedRenameOpIndex)
@@ -463,18 +474,10 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                DrawPreviewBreadcrumb(
-                    breadcrumbRect,
-                    new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true });
+                var breadcrumbeOptions =
+                    new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true };
+                DrawPreviewBreadcrumb(new Rect(rect.position, breadcrumbeOptions.SizeForContent), breadcrumbeOptions);
             }
-
-            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
-            var buttonText = "Preview Steps";
-            var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
-            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
-            var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
-            this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
-            EditorGUI.EndDisabledGroup();
         }
 
         private void DrawOperationsPanel()
@@ -1018,6 +1021,15 @@ namespace RedBlueGames.MulliganRenamer
                 get
                 {
                     return this.UseLeftStyle ? "GUIEditor.BreadcrumbLeft" : "GUIEditor.BreadcrumbMid";
+                }
+            }
+
+            public Vector2 SizeForContent
+            {
+                get
+                {
+                    var style = new GUIStyle(this.StyleName);
+                    return style.CalcSize(new GUIContent(this.Heading, string.Empty));
                 }
             }
         }
