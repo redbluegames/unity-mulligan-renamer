@@ -162,18 +162,25 @@ namespace RedBlueGames.MulliganRenamer
             return result;
         }
 
-        /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
-        {   
+        protected override float GetPreferredHeightForContents()
+        {
+            return this.CalculateHeightForGUILines(2);
+        }
+
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Front"));
-            this.NumFrontDeleteChars = EditorGUILayout.IntField("Delete from Front", this.NumFrontDeleteChars);
+            this.NumFrontDeleteChars = EditorGUI.IntField(
+                operationRect.GetSplitVertical(1, 2, RenameOperation.LineSpacing),
+                "Delete from Front",
+                this.NumFrontDeleteChars);
             this.NumFrontDeleteChars = Mathf.Max(0, this.NumFrontDeleteChars);
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Back"));
-            this.NumBackDeleteChars = EditorGUILayout.IntField("Delete from Back", this.NumBackDeleteChars);
+            this.NumBackDeleteChars = EditorGUI.IntField(
+                operationRect.GetSplitVertical(2, 2, RenameOperation.LineSpacing),
+                "Delete from Back",
+                this.NumBackDeleteChars);
             this.NumBackDeleteChars = Mathf.Max(0, this.NumBackDeleteChars);
         }
     }

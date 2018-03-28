@@ -40,6 +40,12 @@ namespace RedBlueGames.MulliganRenamer
         protected readonly Color32 DeleteColor = new Color32(239, 71, 111, 255);
         protected readonly Color32 ModifyColor = new Color32(255, 209, 102, 255);
 
+        protected const float LineSpacing = 2.0f;
+
+        private readonly RectOffset Padding = new RectOffset(4, 4, 4, 6);
+        private readonly float HeaderHeight = EditorGUIUtility.singleLineHeight;
+        private const float HeaderAndContentSpacing = 2.0f;
+
         private string queuedControlToFocus;
 
         /// <summary>
@@ -118,28 +124,38 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A clone of this instance</returns>
         public abstract RenameOperation Clone();
 
+        public float GetPreferredHeight()
+        {
+            var headerHeight = EditorGUIUtility.singleLineHeight + HeaderAndContentSpacing;
+            return headerHeight + this.GetPreferredHeightForContents() + Padding.top + Padding.bottom;
+        }
+
         /// <summary>
         /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
         /// Operation with the modified data. This way we mirror how regular GUI calls work.
         /// </summary>
         /// <param name = "guiOptions">Options to use when drawing the operation GUI.</param>
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
-        public ListButtonEvent DrawGUI(GUIOptions guiOptions)
+        public ListButtonEvent DrawGUI(Rect containingRect, GUIOptions guiOptions)
         {
+            var paddedContainer = containingRect.AddPadding(Padding.left, Padding.right, Padding.top, Padding.bottom);
             var operationStyle = new GUIStyle("ScriptText");
-            operationStyle.stretchHeight = false;
-            operationStyle.padding = new RectOffset(6, 6, 4, 4);
-            Rect operationRect = EditorGUILayout.BeginVertical(operationStyle);
+            GUI.Box(containingRect, "", operationStyle);
+            var headerRect = new Rect(paddedContainer);
+            headerRect.height = HeaderHeight;
             ListButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
+                                              headerRect,
                                               this.HeadingLabel,
                                               guiOptions.DisableUpButton,
                                               guiOptions.DisableDownButton);
             EditorGUI.indentLevel++;
-            this.DrawContents(guiOptions.ControlPrefix);
+            var contentsRect = new Rect(paddedContainer);
+            contentsRect.y += headerRect.height + HeaderAndContentSpacing;
+            contentsRect.height -= headerRect.height;
+            this.DrawContents(contentsRect, guiOptions.ControlPrefix);
             EditorGUI.indentLevel--;
-            EditorGUILayout.EndVertical();
 
-            var coloredHighlightRect = new Rect(operationRect);
+            var coloredHighlightRect = new Rect(containingRect);
             coloredHighlightRect.yMin += 2.0f;
             coloredHighlightRect.yMax -= 1.0f;
             coloredHighlightRect.xMin += 2.0f;
@@ -152,11 +168,20 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
+        protected abstract float GetPreferredHeightForContents();
+
         /// <summary>
         /// Draws the contents of the Rename Op using EditorGUILayout.
         /// </summary>
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected abstract void DrawContents(int controlPrefix);
+        protected abstract void DrawContents(Rect operationRect, int controlPrefix);
+
+        protected float CalculateHeightForGUILines(int numLines)
+        {
+            // This last bit of spacing is a mystery to me but it makes multiple lines line up with
+            // Unity defaults, so I kept it. It may be that there is spacing above and below a group of lines?
+            return (EditorGUIUtility.singleLineHeight + LineSpacing) * numLines + LineSpacing;
+        }
 
         /// <summary>
         /// Draws the header and reorder buttons.
@@ -165,7 +190,75 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="header">Header text to display.</param>
         /// <param name="disableUpButton">If set to <c>true</c> disable the MoveUp button.</param>
         /// <param name="disableDownButton">If set to <c>true</c> disable the MoveDown button.</param>
-        protected ListButtonEvent DrawHeaderAndReorderButtons(string header, bool disableUpButton, bool disableDownButton)
+        protected ListButtonEvent DrawHeaderAndReorderButtons(Rect containingRect, string header, bool disableUpButton, bool disableDownButton)
+        {
+            // Add some padding for the colored highlight
+            var labelRect = new Rect(containingRect);
+            var labelPaddingX = 4.0f;
+            labelRect.x += labelPaddingX;
+            labelRect.width -= labelPaddingX;
+            EditorGUI.LabelField(labelRect, header, EditorStyles.boldLabel);
+
+            ListButtonEvent buttonEvent = ListButtonEvent.None;
+            var buttonPaddingTop = 1.0f;
+            var buttonPaddingBottom = 1.0f;
+            var buttonGroupWidth = 60.0f;
+            var buttonRect = new Rect(
+                labelRect.x + labelRect.width - buttonGroupWidth,
+                labelRect.y + buttonPaddingTop,
+                buttonGroupWidth,
+                labelRect.height - (buttonPaddingBottom + buttonPaddingTop));
+            buttonEvent = this.DrawReorderingButtons(buttonRect, disableUpButton, disableDownButton);
+
+            return buttonEvent;
+        }
+
+        private ListButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
+        {
+            const string BigUpArrowUnicode = "\u25B2";
+            const string BigDownArrowUnicode = "\u25BC";
+            ListButtonEvent buttonEvent = ListButtonEvent.None;
+
+            EditorGUI.BeginDisabledGroup(disableUpButton);
+
+            var leftButtonStyle = new GUIStyle(EditorStyles.miniButtonLeft);
+            leftButtonStyle.margin = new RectOffset(-1, -1, leftButtonStyle.margin.top, leftButtonStyle.margin.bottom);
+            leftButtonStyle.fontSize = 8;
+            var leftSplit = containingRect.GetSplitHorizontal(1, 3, 0.0f);
+            if (GUI.Button(leftSplit, BigUpArrowUnicode, leftButtonStyle))
+            {
+                buttonEvent = ListButtonEvent.MoveUp;
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUI.BeginDisabledGroup(disableDownButton);
+
+            var midButtonStyle = new GUIStyle(EditorStyles.miniButtonMid);
+            midButtonStyle.margin = new RectOffset(-1, -1, midButtonStyle.margin.top, midButtonStyle.margin.bottom);
+            midButtonStyle.fontSize = 8;
+            var midSplit = containingRect.GetSplitHorizontal(2, 3, 0.0f);
+            if (GUI.Button(midSplit, BigDownArrowUnicode, midButtonStyle))
+            {
+                buttonEvent = ListButtonEvent.MoveDown;
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            var rightButtonStyle = new GUIStyle(EditorStyles.miniButtonRight);
+            rightButtonStyle.margin = new RectOffset(-1, -1, rightButtonStyle.margin.top, rightButtonStyle.margin.bottom);
+            rightButtonStyle.fontSize = 10;
+            var rightSplit = containingRect.GetSplitHorizontal(3, 3, 0.0f);
+            if (GUI.Button(rightSplit, "X", rightButtonStyle))
+            {
+                buttonEvent = ListButtonEvent.Delete;
+            }
+
+            return buttonEvent;
+        }
+
+        // TODO: REMOVE THIS WHEN GUI IS REFACTORED
+        protected ListButtonEvent DrawHeaderAndReorderButtonsLayout(string header, bool disableUpButton, bool disableDownButton)
         {
             EditorGUILayout.BeginHorizontal();
 
@@ -173,14 +266,15 @@ namespace RedBlueGames.MulliganRenamer
             GUILayout.Space(4.0f);
             EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
             ListButtonEvent buttonEvent = ListButtonEvent.None;
-            buttonEvent = this.DrawReorderingButtons(disableUpButton, disableDownButton);
+            buttonEvent = this.DrawReorderingButtonsLayout(disableUpButton, disableDownButton);
 
             EditorGUILayout.EndHorizontal();
 
             return buttonEvent;
         }
 
-        private ListButtonEvent DrawReorderingButtons(bool disableUpButton, bool disableDownButton)
+        // TODO: REMOVE THIS WHEN GUI IS REFACTORED
+        private ListButtonEvent DrawReorderingButtonsLayout(bool disableUpButton, bool disableDownButton)
         {
             const string BigUpArrowUnicode = "\u25B2";
             const string BigDownArrowUnicode = "\u25BC";

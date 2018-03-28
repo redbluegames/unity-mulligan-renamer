@@ -39,14 +39,14 @@ namespace RedBlueGames.MulliganRenamer
             CharactersAreRegex = true,
             IsCaseSensitive = false
         };
-        
+
         public static readonly RemoveCharactersOperationOptions Numbers = new RemoveCharactersOperationOptions()
         {
             CharactersToRemove = "\\d",
             CharactersAreRegex = true,
             IsCaseSensitive = false
         };
-        
+
         private RemoveCharactersOperationOptions custom = new RemoveCharactersOperationOptions()
         {
             CharactersToRemove = string.Empty,
@@ -62,6 +62,7 @@ namespace RedBlueGames.MulliganRenamer
         public RemoveCharactersOperation()
         {
             this.Initialize();
+            this.SelectedPresetIndex = 0;
         }
 
         /// <summary>
@@ -71,8 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="operationToCopy">Operation to copy.</param>
         public RemoveCharactersOperation(RemoveCharactersOperation operationToCopy)
         {
-            this.Initialize();
-            this.Options = operationToCopy.Options;
+            this.CopyFrom(operationToCopy);
         }
 
         /// <summary>
@@ -196,24 +196,56 @@ namespace RedBlueGames.MulliganRenamer
             return this.InternalReplaceStringOperation.Rename(input, relativeCount);
         }
 
-        /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
+        protected override float GetPreferredHeightForContents()
         {
+            var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
+            int numGUILines;
+            if (selectedPreset.IsReadOnly)
+            {
+                numGUILines = 2;
+            }
+            else
+            {
+                numGUILines = 3;
+            }
+
+            return this.CalculateHeightForGUILines(numGUILines);
+        }
+
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
+            // Read and write into copies so that we don't resize the view while it's being worked on,
+            // which is what is required when the user switches settings around and options (lines) are added into the GUI.
+            var modelPreDraw = new RemoveCharactersOperation(this);
+            var modelPostDraw = new RemoveCharactersOperation(modelPreDraw);
+
             var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
-            var names = new List<GUIContent>(this.GUIPresets.Count);
-            foreach (var preset in this.GUIPresets)
+            var names = new List<GUIContent>(modelPreDraw.GUIPresets.Count);
+            foreach (var preset in modelPreDraw.GUIPresets)
             {
                 names.Add(new GUIContent(preset.DisplayName));
             }
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
-            this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
-            var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
+            var currentSplit = 0;
+            int numSplits = 2;
+            if (modelPreDraw.GUIPresets[modelPreDraw.SelectedPresetIndex].IsReadOnly)
+            {
+                numSplits = 2;
+            }
+            else
+            {
+                numSplits = 3;
+            }
 
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
+            modelPostDraw.SelectedPresetIndex = EditorGUI.Popup(
+                operationRect.GetSplitVertical(++currentSplit, numSplits, RenameOperation.LineSpacing),
+                presetsContent,
+                modelPreDraw.SelectedPresetIndex,
+                names.ToArray());
+            var selectedPreset = modelPreDraw.GUIPresets[modelPreDraw.SelectedPresetIndex];
             var workingOptions = selectedPreset.Options;
+
             if (selectedPreset.IsReadOnly)
             {
                 // Label just looks better disabled.
@@ -221,22 +253,45 @@ namespace RedBlueGames.MulliganRenamer
                 var readonlyLabelContent = new GUIContent(selectedPreset.ReadOnlyLabel);
                 var labelStyle = new GUIStyle(EditorStyles.label);
                 labelStyle.alignment = TextAnchor.MiddleRight;
-                EditorGUILayout.LabelField(readonlyLabelContent, labelStyle);
+                EditorGUI.LabelField(
+                    operationRect.GetSplitVertical(++currentSplit, numSplits, RenameOperation.LineSpacing),
+                    readonlyLabelContent,
+                    labelStyle);
                 EditorGUI.EndDisabledGroup();
             }
             else
             {
                 var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
                 GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, charactersFieldContent.text));
-                workingOptions.CharactersToRemove = EditorGUILayout.TextField(charactersFieldContent, workingOptions.CharactersToRemove);
+                workingOptions.CharactersToRemove = EditorGUI.TextField(
+                    operationRect.GetSplitVertical(++currentSplit, numSplits, RenameOperation.LineSpacing),
+                    charactersFieldContent,
+                    workingOptions.CharactersToRemove);
 
                 var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
-                workingOptions.IsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveToggleContent, workingOptions.IsCaseSensitive);
+                workingOptions.IsCaseSensitive = EditorGUI.Toggle(
+                    operationRect.GetSplitVertical(++currentSplit, numSplits, RenameOperation.LineSpacing),
+                    caseSensitiveToggleContent,
+                    workingOptions.IsCaseSensitive);
             }
 
             // Structs were copied by value, so reapply the modified structs back to their sources
-            this.Options = workingOptions;
-            selectedPreset.Options = workingOptions;
+            modelPostDraw.Options = workingOptions;
+            modelPostDraw.GUIPresets[modelPostDraw.SelectedPresetIndex].Options = workingOptions;
+
+            this.CopyFrom(modelPostDraw);
+        }
+
+        private void CopyFrom(RemoveCharactersOperation other)
+        {
+            this.GUIPresets = new List<CharacterPresetGUI>(other.GUIPresets.Count);
+            for (int i = 0; i < other.GUIPresets.Count; ++i)
+            {
+                this.GUIPresets.Add(new CharacterPresetGUI(other.GUIPresets[i]));
+            }
+
+            this.SelectedPresetIndex = other.SelectedPresetIndex;
+            this.Options = other.Options;
         }
 
         private void Initialize()
@@ -269,8 +324,6 @@ namespace RedBlueGames.MulliganRenamer
                 numbersPreset,
                 customPreset
             };
-
-            this.SelectedPresetIndex = 0;
         }
 
         /// <summary>
@@ -308,6 +361,22 @@ namespace RedBlueGames.MulliganRenamer
             public string ReadOnlyLabel { get; set; }
 
             public bool IsReadOnly { get; set; }
+
+            public CharacterPresetGUI()
+            {
+                this.DisplayName = string.Empty;
+                this.Options = new RemoveCharactersOperationOptions();
+                this.ReadOnlyLabel = string.Empty;
+                this.IsReadOnly = false;
+            }
+
+            public CharacterPresetGUI(CharacterPresetGUI other)
+            {
+                this.DisplayName = other.DisplayName;
+                this.Options = other.Options;
+                this.ReadOnlyLabel = other.ReadOnlyLabel;
+                this.IsReadOnly = other.IsReadOnly;
+            }
         }
     }
 }
