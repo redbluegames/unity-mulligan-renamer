@@ -354,7 +354,8 @@ namespace RedBlueGames.MulliganRenamer
             // Remove any objects that got deleted while working
             this.ObjectsToRename.RemoveNullObjects();
 
-            this.DrawToolbar();
+            var toolbarRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
+            this.DrawToolbar(toolbarRect);
 
             EditorGUILayout.BeginHorizontal();
             this.DrawOperationsPanel();
@@ -414,10 +415,8 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private void DrawToolbar()
+        private void DrawToolbar(Rect toolbarRect)
         {
-            var toolbarRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
-
             var renameOpsPanelWidth = 340.0f;
             var renameOpsLabelRect = new Rect(toolbarRect.position, new Vector2(renameOpsPanelWidth, toolbarRect.height));
             GUI.Label(renameOpsLabelRect, this.guiContents.RenameOpsLabel);
@@ -488,7 +487,8 @@ namespace RedBlueGames.MulliganRenamer
                 this.renameOperationsPanelScrollPosition,
                 GUILayout.Width(350.0f));
 
-            this.DrawRenameOperations();
+            var operationRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
+            this.DrawRenameOperations(operationRect);
 
             EditorGUILayout.Space();
 
@@ -514,21 +514,29 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.EndVertical();
         }
 
-        private void DrawRenameOperations()
+        private void DrawRenameOperations(Rect operationRect)
         {
             // Store the op before buttons are pressed because buttons change focus
             var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
             bool saveOpsToPreferences = false;
             RenameOperation operationToFocus = null;
 
+            var spacing = new Vector2(2.0f, 2.0f);
+            var padding = new Vector2(4.0f, 4.0f);
+            var totalHeightDrawn = 0.0f;
             for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
             {
                 var currentElement = this.RenameOperationsToApply[i];
+                var rect = new Rect(0.0f, totalHeightDrawn, operationRect.width, currentElement.GetPreferredHeight());
+                rect.position += spacing;
+                rect.size -= padding;
+                totalHeightDrawn += rect.height;
+
                 var guiOptions = new RenameOperation.GUIOptions();
                 guiOptions.ControlPrefix = i;
                 guiOptions.DisableUpButton = i == 0;
                 guiOptions.DisableDownButton = i == this.RenameOperationsToApply.Count - 1;
-                var buttonClickEvent = currentElement.DrawGUI(guiOptions);
+                var buttonClickEvent = currentElement.DrawGUI(rect, guiOptions);
                 switch (buttonClickEvent)
                 {
                     case RenameOperation.ListButtonEvent.MoveUp:

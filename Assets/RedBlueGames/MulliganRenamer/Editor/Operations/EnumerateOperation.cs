@@ -119,6 +119,22 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public bool IsCountStringFormatValid
+        {
+            get
+            {
+                try
+                {
+                    this.StartingCount.ToString(this.CountFormat);
+                    return true;
+                }
+                catch (System.FormatException)
+                {
+                    return false;
+                }
+            }
+        }
+
         private List<EnumeratePresetGUI> GUIPresets { get; set; }
 
         private int SelectedPresetIndex { get; set; }
@@ -164,12 +180,25 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
-        /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
-        {   
+        protected override float GetPreferredHeightForContents()
+        {
+            var defaultHeight = this.CalculateHeightForGUILines(4);
+            var preferredHeight = defaultHeight;
+            if (!this.IsCountStringFormatValid)
+            {
+                preferredHeight += this.GetHeightForHelpBox();
+            }
+
+            return preferredHeight;
+        }
+
+        private float GetHeightForHelpBox()
+        {
+            return 56.0f;
+        }
+
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
             var presetsContent = new GUIContent("Format", "Select a preset format or specify your own format.");
             var names = new List<GUIContent>(this.GUIPresets.Count);
             foreach (var preset in this.GUIPresets)
@@ -177,37 +206,70 @@ namespace RedBlueGames.MulliganRenamer
                 names.Add(new GUIContent(preset.DisplayName));
             }
 
+            var currentLine = 0;
+            float[] weights;
+            bool countFormatWasValidBeforeDraw;
+            if (!this.IsCountStringFormatValid)
+            {
+                weights = new float[] { 1, 1, 3, 1, 1 };
+                countFormatWasValidBeforeDraw = false;
+            }
+            else
+            {
+                weights = new float[] { 1, 1, 1, 1 };
+                countFormatWasValidBeforeDraw = true;
+            }
+
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
-            this.SelectedPresetIndex = EditorGUILayout.Popup(presetsContent, this.SelectedPresetIndex, names.ToArray());
+            this.SelectedPresetIndex = EditorGUI.Popup(
+                operationRect.GetSplitVerticalWeighted(++currentLine,RenameOperation.LineSpacing, weights),
+                presetsContent,
+                this.SelectedPresetIndex,
+                names.ToArray());
             var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
 
             EditorGUI.BeginDisabledGroup(selectedPreset.ReadOnly);
             var countFormatContent = new GUIContent("Count Format", "The string format to use when adding the Count to the name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFormatContent.text));
-            this.CountFormat = EditorGUILayout.TextField(countFormatContent, selectedPreset.Format);
+            this.CountFormat = EditorGUI.TextField(
+                operationRect.GetSplitVerticalWeighted(++currentLine, RenameOperation.LineSpacing, weights),
+                countFormatContent,
+                selectedPreset.Format);
             EditorGUI.EndDisabledGroup();
 
-            try
+            selectedPreset.Format = this.CountFormat;
+
+            if (!this.IsCountStringFormatValid)
             {
-                this.StartingCount.ToString(this.CountFormat);
-            }
-            catch (System.FormatException)
-            {
+                // On the first frame a user sets the count invalid, measurements will be broken because
+                // the Height was calculated using the non-erroring size. So don't draw the error box until next frame
+                if (countFormatWasValidBeforeDraw)
+                {
+                    GUIUtility.ExitGUI();
+                    return;
+                }
+
                 var helpBoxMessage = "Invalid Count Format. Typical formats are D1 for one digit with no " +
                                      "leading zeros, D2, for two, etc." +
                                      "\nLookup the String.Format() method for more info on formatting options.";
-                EditorGUILayout.HelpBox(helpBoxMessage, MessageType.Warning);
+                var helpRect = operationRect.GetSplitVerticalWeighted(++currentLine, RenameOperation.LineSpacing, weights);
+                helpRect = helpRect.AddPadding(4, 4, 4, 4);
+                EditorGUI.HelpBox(helpRect, helpBoxMessage, MessageType.Warning);
             }
 
             var countFromContent = new GUIContent("Count From", "The value to start counting from. The first object will have this number.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFromContent.text));
-            this.StartingCount = EditorGUILayout.IntField(countFromContent, this.StartingCount);
+            this.StartingCount = EditorGUI.IntField(
+                operationRect.GetSplitVerticalWeighted(++currentLine, RenameOperation.LineSpacing,  weights),
+                countFromContent,
+                this.StartingCount);
 
             var incrementContent = new GUIContent("Increment", "The value to add to each object when counting.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, incrementContent.text));
-            this.Increment = EditorGUILayout.IntField(incrementContent, this.Increment);
-
-            selectedPreset.Format = this.CountFormat;
+            this.Increment = EditorGUI.IntField(
+                operationRect.GetSplitVerticalWeighted(++currentLine, RenameOperation.LineSpacing, weights),
+                incrementContent,
+                this.Increment);
         }
 
         private void Initialize()
@@ -216,14 +278,14 @@ namespace RedBlueGames.MulliganRenamer
 
             // Give it an initially valid count format
             this.CountFormat = "0";
-                
+
             var singleDigitPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "0, 1, 2...",
                 Format = "0",
                 ReadOnly = true
             };
-            
+
             var leadingZeroPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "00, 01, 02...",

@@ -137,15 +137,16 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
-        /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
-        {   
+        protected override float GetPreferredHeightForContents()
+        {
+            return this.CalculateHeightForGUILines(1);
+        }
+
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
-            this.NewName = EditorGUILayout.TextField(newNameContent, this.NewName);
+            this.NewName = EditorGUI.TextField(operationRect, newNameContent, this.NewName);
         }
     }
 }
