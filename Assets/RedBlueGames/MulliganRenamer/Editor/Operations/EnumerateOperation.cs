@@ -180,9 +180,14 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
+        /// <summary>
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            var defaultHeight = this.CalculateHeightForGUILines(4);
+            var defaultHeight = this.CalculateGUIHeightForLines(4);
             var preferredHeight = defaultHeight;
             if (!this.IsCountStringFormatValid)
             {
@@ -197,6 +202,10 @@ namespace RedBlueGames.MulliganRenamer
             return 56.0f;
         }
 
+        /// <summary>
+        /// Draws the contents of the Rename Op.
+        /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             var presetsContent = new GUIContent("Format", "Select a preset format or specify your own format.");
