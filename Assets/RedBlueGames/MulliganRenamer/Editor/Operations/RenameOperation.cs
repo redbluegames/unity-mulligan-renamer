@@ -124,6 +124,10 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A clone of this instance</returns>
         public abstract RenameOperation Clone();
 
+        /// <summary>
+        /// Gets the preferred height for the operation GUI.
+        /// </summary>
+        /// <returns>The preferred height for the GUI.</returns>
         public float GetPreferredHeight()
         {
             var headerHeight = EditorGUIUtility.singleLineHeight + HeaderAndContentSpacing;
@@ -131,9 +135,9 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Draws the element as a GUI using EditorGUILayout calls. This should return a copy of the 
-        /// Operation with the modified data. This way we mirror how regular GUI calls work.
+        /// Draws the element, returning an event that indicates how the minibuttons are pressed.
         /// </summary>
+        /// <param name="containingRect">The rect to draw the element inside.</param>
         /// <param name = "guiOptions">Options to use when drawing the operation GUI.</param>
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
         public ListButtonEvent DrawGUI(Rect containingRect, GUIOptions guiOptions)
@@ -168,15 +172,25 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
+        /// <summary>
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
         protected abstract float GetPreferredHeightForContents();
 
         /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
+        /// Draws the contents of the Rename Op.
         /// </summary>
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected abstract void DrawContents(Rect operationRect, int controlPrefix);
 
-        protected float CalculateHeightForGUILines(int numLines)
+        /// <summary>
+        /// Utility method for rename operations to use a consistent height based on a number of lines needed.
+        /// </summary>
+        /// <returns>The height for the number of lines.</returns>
+        /// <param name="numLines">Number of lines to measure.</param>
+        protected float CalculateGUIHeightForLines(int numLines)
         {
             // This last bit of spacing is a mystery to me but it makes multiple lines line up with
             // Unity defaults, so I kept it. It may be that there is spacing above and below a group of lines?
@@ -250,70 +264,6 @@ namespace RedBlueGames.MulliganRenamer
             rightButtonStyle.fontSize = 10;
             var rightSplit = containingRect.GetSplitHorizontal(3, 3, 0.0f);
             if (GUI.Button(rightSplit, "X", rightButtonStyle))
-            {
-                buttonEvent = ListButtonEvent.Delete;
-            }
-
-            return buttonEvent;
-        }
-
-        // TODO: REMOVE THIS WHEN GUI IS REFACTORED
-        protected ListButtonEvent DrawHeaderAndReorderButtonsLayout(string header, bool disableUpButton, bool disableDownButton)
-        {
-            EditorGUILayout.BeginHorizontal();
-
-            // Leave some space for the colored highlight
-            GUILayout.Space(4.0f);
-            EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
-            ListButtonEvent buttonEvent = ListButtonEvent.None;
-            buttonEvent = this.DrawReorderingButtonsLayout(disableUpButton, disableDownButton);
-
-            EditorGUILayout.EndHorizontal();
-
-            return buttonEvent;
-        }
-
-        // TODO: REMOVE THIS WHEN GUI IS REFACTORED
-        private ListButtonEvent DrawReorderingButtonsLayout(bool disableUpButton, bool disableDownButton)
-        {
-            const string BigUpArrowUnicode = "\u25B2";
-            const string BigDownArrowUnicode = "\u25BC";
-            ListButtonEvent buttonEvent = ListButtonEvent.None;
-
-            EditorGUI.BeginDisabledGroup(disableUpButton);
-
-            var leftButtonStyle = new GUIStyle(EditorStyles.miniButtonLeft);
-            leftButtonStyle.fixedHeight = EditorGUIUtility.singleLineHeight - 2;
-            leftButtonStyle.fixedWidth = 20;
-            leftButtonStyle.margin = new RectOffset(-1, -1, leftButtonStyle.margin.top, leftButtonStyle.margin.bottom);
-            leftButtonStyle.fontSize = 8;
-            if (GUILayout.Button(BigUpArrowUnicode, leftButtonStyle))
-            {
-                buttonEvent = ListButtonEvent.MoveUp;
-            }
-
-            EditorGUI.EndDisabledGroup();
-
-            EditorGUI.BeginDisabledGroup(disableDownButton);
-
-            var midButtonStyle = new GUIStyle(EditorStyles.miniButtonMid);
-            midButtonStyle.fixedHeight = EditorGUIUtility.singleLineHeight - 2;
-            midButtonStyle.fixedWidth = 20;
-            midButtonStyle.margin = new RectOffset(-1, -1, midButtonStyle.margin.top, midButtonStyle.margin.bottom);
-            midButtonStyle.fontSize = 8;
-            if (GUILayout.Button(BigDownArrowUnicode, midButtonStyle))
-            {
-                buttonEvent = ListButtonEvent.MoveDown;
-            }
-
-            EditorGUI.EndDisabledGroup();
-
-            var rightButtonStyle = new GUIStyle(EditorStyles.miniButtonRight);
-            rightButtonStyle.fixedHeight = EditorGUIUtility.singleLineHeight - 2;
-            rightButtonStyle.fixedWidth = 20;
-            rightButtonStyle.margin = new RectOffset(-1, -1, rightButtonStyle.margin.top, rightButtonStyle.margin.bottom);
-            rightButtonStyle.fontSize = 10;
-            if (GUILayout.Button("X", rightButtonStyle))
             {
                 buttonEvent = ListButtonEvent.Delete;
             }

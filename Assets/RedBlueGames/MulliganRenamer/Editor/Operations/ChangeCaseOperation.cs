@@ -189,11 +189,20 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
+        /// <summary>
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            return this.CalculateHeightForGUILines(1);
+            return this.CalculateGUIHeightForLines(1);
         }
 
+        /// <summary>
+        /// Draws the contents of the Rename Op.
+        /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");

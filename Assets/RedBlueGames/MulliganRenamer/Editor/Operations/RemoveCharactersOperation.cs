@@ -196,6 +196,11 @@ namespace RedBlueGames.MulliganRenamer
             return this.InternalReplaceStringOperation.Rename(input, relativeCount);
         }
 
+        /// <summary>
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
             var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
@@ -209,9 +214,13 @@ namespace RedBlueGames.MulliganRenamer
                 numGUILines = 3;
             }
 
-            return this.CalculateHeightForGUILines(numGUILines);
+            return this.CalculateGUIHeightForLines(numGUILines);
         }
 
+        /// <summary>
+        /// Draws the contents of the Rename Op using EditorGUILayout.
+        /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             // Read and write into copies so that we don't resize the view while it's being worked on,

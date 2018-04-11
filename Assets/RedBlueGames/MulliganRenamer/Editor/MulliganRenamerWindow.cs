@@ -369,8 +369,7 @@ namespace RedBlueGames.MulliganRenamer
             this.ObjectsToRename.RemoveNullObjects();
 
             // Breadcrumbs take up more than a single line so we add a bit more
-            var toolbarRect = EditorGUILayout.GetControlRect(GUILayout.ExpandWidth(true));
-            toolbarRect.height = EditorGUIUtility.singleLineHeight + 3.0f;
+            var toolbarRect = new Rect(0.0f, 0.0f, this.position.width, EditorGUIUtility.singleLineHeight + 3.0f);
             this.DrawToolbar(toolbarRect);
 
             var footerHeight = 60.0f;
@@ -419,6 +418,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 // Opening the dialog breaks the layout stack, so ExitGUI to prevent a NullPtr.
                 // https://answers.unity.com/questions/1353442/editorutilitysavefilepane-and-beginhorizontal-caus.html
+                // NOTE: This may no longer be necessary after reworking the gui to use non-layout.
                 EditorGUIUtility.ExitGUI();
             }
 

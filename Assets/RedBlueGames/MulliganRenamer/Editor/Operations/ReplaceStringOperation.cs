@@ -222,31 +222,35 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
+        /// <summary>
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            var defaultHeight = this.CalculateHeightForGUILines(4);
+            var defaultHeight = this.CalculateGUIHeightForLines(4);
             var preferredHeight = defaultHeight;
             if (this.HasErrors)
             {
                 if (!IsValidRegex(this.SearchRegexPattern))
                 {
-                    preferredHeight += this.GetHeightForHelpBox();
+                    preferredHeight += GetHeightForHelpBox();
                 }
 
                 if (!IsValidRegex(this.ReplacementString))
                 {
-                    preferredHeight += this.GetHeightForHelpBox();
+                    preferredHeight += GetHeightForHelpBox();
                 }
             }
 
             return preferredHeight;
         }
 
-        private float GetHeightForHelpBox()
-        {
-            return 34.0f;
-        }
-
+        /// <summary>
+        /// Draws the contents of the Rename Op.
+        /// </summary>
+        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             var preGUIModel = new ReplaceStringOperation(this);
@@ -339,12 +343,9 @@ namespace RedBlueGames.MulliganRenamer
             this.CopyFrom(postGUIModel);
         }
 
-        private void CopyFrom(ReplaceStringOperation other)
+        private static float GetHeightForHelpBox()
         {
-            this.UseRegex = other.UseRegex;
-            this.SearchString = other.SearchString;
-            this.SearchIsCaseSensitive = other.SearchIsCaseSensitive;
-            this.ReplacementString = other.ReplacementString;
+            return 34.0f;
         }
 
         private static bool IsValidRegex(string pattern)
@@ -365,6 +366,14 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return true;
+        }
+
+        private void CopyFrom(ReplaceStringOperation other)
+        {
+            this.UseRegex = other.UseRegex;
+            this.SearchString = other.SearchString;
+            this.SearchIsCaseSensitive = other.SearchIsCaseSensitive;
+            this.ReplacementString = other.ReplacementString;
         }
 
         private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
