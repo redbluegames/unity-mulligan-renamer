@@ -648,6 +648,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanel(Rect previewPanelRect, BulkRenamePreview preview)
         {
+            const float HeaderHeight = 18.0f;
+            const float RowHeight = 18.0f;
             var spaceBetweenFooterAndScrollview = 2.0f;
             var panelFooterToolbar = new Rect(previewPanelRect);
             panelFooterToolbar.height = EditorGUIUtility.singleLineHeight;
@@ -655,11 +657,11 @@ namespace RedBlueGames.MulliganRenamer
 
             var scrollViewRect = new Rect(previewPanelRect);
             scrollViewRect.height -= (panelFooterToolbar.height + spaceBetweenFooterAndScrollview);
-                
+
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
-            var scrollContentsRect = new Rect(previewPanelRect);
-            scrollContentsRect.height = EditorGUIUtility.singleLineHeight * preview.NumObjects;
+            var scrollContentsRect = new Rect(scrollViewRect);
+            scrollContentsRect.height = RowHeight * preview.NumObjects + HeaderHeight;
             this.previewPanelScrollPosition = GUI.BeginScrollView(
                 scrollViewRect,
                 this.previewPanelScrollPosition,
@@ -673,7 +675,11 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
-                this.DrawPreviewPanelContentsWithItems(scrollViewRect, previewContents);
+
+                // Show the one that doesn't quite fit by subtracting one
+                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / RowHeight) - 1, 0);  
+                var numItems = Mathf.CeilToInt(scrollViewRect.height / RowHeight) + 1; // Add one for the one that's off screen.
+                this.DrawPreviewPanelContentsWithItems(scrollViewRect, firstItem, numItems, previewContents);
             }
 
             GUI.EndScrollView();
@@ -748,7 +754,7 @@ namespace RedBlueGames.MulliganRenamer
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
-        private void DrawPreviewPanelContentsWithItems(Rect previewPanelRect, PreviewPanelContents previewContents)
+        private void DrawPreviewPanelContentsWithItems(Rect previewPanelRect, int firstItemIndex, int numItems, PreviewPanelContents previewContents)
         {
             // Space gives us a bit of padding or else we're just too bunched up to the side
             // It also includes space for the delete button and icons.
@@ -775,7 +781,7 @@ namespace RedBlueGames.MulliganRenamer
             var previewRowsRect = new Rect(previewPanelRect);
             previewRowsRect.height -= headerRect.height;
             previewRowsRect.y += headerRect.height;
-            this.DrawPreviewRows(previewRowsRect, renameStep, previewContents, shouldShowSecondColumn, shouldShowThirdColumn);
+            this.DrawPreviewRows(previewRowsRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
         }
 
         private void DrawPreviewHeader(
@@ -810,9 +816,9 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private void DrawPreviewRows(Rect previewRowsRect, int stepIndex, PreviewPanelContents previewContents, bool showSecondColumn, bool showThirdColumn)
+        private void DrawPreviewRows(Rect previewRowsRect, int stepIndex, PreviewPanelContents previewContents, int startingPreviewIndex, int numPreviewsToShow, bool showSecondColumn, bool showThirdColumn)
         {
-            for (int i = 0; i < previewContents.NumRows; ++i)
+            for (int i = startingPreviewIndex; i < startingPreviewIndex + numPreviewsToShow && i < previewContents.NumRows; ++i)
             {
                 var content = previewContents[i];
                 var previewRowStyle = new PreviewRowStyle();
