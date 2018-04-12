@@ -205,9 +205,12 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
+            // Split even a single line GUI so that we properly subtract out spacing
+            var singleLineRect = operationRect.GetSplitVertical(1, 1, RenameOperation.LineSpacing);
+
             var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
-            this.Casing = (CasingChange)EditorGUI.EnumPopup(operationRect, casingLabel, this.Casing);
+            this.Casing = (CasingChange)EditorGUI.EnumPopup(singleLineRect, casingLabel, this.Casing);
         }
     }
 }

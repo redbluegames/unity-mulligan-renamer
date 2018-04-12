@@ -153,9 +153,12 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
+            // Split even a single line GUI so that we properly subtract out spacing
+            var singleLineRect = operationRect.GetSplitVertical(1, 1, RenameOperation.LineSpacing);
+
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
-            this.NewName = EditorGUI.TextField(operationRect, newNameContent, this.NewName);
+            this.NewName = EditorGUI.TextField(singleLineRect, newNameContent, this.NewName);
         }
     }
 }
