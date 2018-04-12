@@ -192,9 +192,9 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="numLines">Number of lines to measure.</param>
         protected float CalculateGUIHeightForLines(int numLines)
         {
-            // This last bit of spacing is a mystery to me but it makes multiple lines line up with
-            // Unity defaults, so I kept it. It may be that there is spacing above and below a group of lines?
-            return (EditorGUIUtility.singleLineHeight + LineSpacing) * numLines + LineSpacing;
+            // Unity includes spacing at the end of the last element, so we can just
+            // add it into the line height.
+            return (EditorGUIUtility.singleLineHeight + LineSpacing) * numLines;
         }
 
         /// <summary>
