@@ -43,7 +43,6 @@ namespace RedBlueGames.MulliganRenamer
         private const float OperationPanelWidth = 350.0f;
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
         private const float PreviewRowHeight = 18.0f;
-        private const float PreviewHeaderHeight = 18.0f;
 
         private GUIStyles guiStyles;
         private GUIContents guiContents;
@@ -669,13 +668,6 @@ namespace RedBlueGames.MulliganRenamer
 
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
-            var scrollContentsRect = new Rect(scrollViewRect);
-            scrollContentsRect.height = PreviewRowHeight * preview.NumObjects + PreviewHeaderHeight;
-            this.previewPanelScrollPosition = GUI.BeginScrollView(
-                scrollViewRect,
-                this.previewPanelScrollPosition,
-                scrollContentsRect);
-
             bool panelIsEmpty = this.ObjectsToRename.Count == 0;
             if (panelIsEmpty)
             {
@@ -684,17 +676,8 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
-
-                // Show the one that doesn't quite fit by subtracting one
-                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
-
-                // Add one for the one that's off screen.
-                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1;
-
-                this.DrawPreviewPanelContentsWithItems(scrollViewRect, firstItem, numItems, previewContents);
+                this.DrawPreviewPanelContentsWithItems(scrollViewRect, previewContents);
             }
-
-            GUI.EndScrollView();
 
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
             if (draggedObjects.Count > 0)
@@ -721,23 +704,11 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
 
-                // When the scroll contents don't fit the view, move the label outside the scroll view.
-                var hintRectHeight = EditorGUIUtility.singleLineHeight;
-                if (scrollContentsRect.height + hintRectHeight > scrollViewRect.height)
-                {
-                    var hintRect = new Rect(scrollViewRect);
-                    hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
-                    hintRect.y += scrollViewRect.height;
-                    hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
-                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
-                }
-                else
-                {
-                    var hintRect = new Rect(scrollViewRect);
-                    hintRect.height = EditorGUIUtility.singleLineHeight;
-                    hintRect.y += scrollViewRect.height - hintRect.height;
-                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
-                }
+                var hintRect = new Rect(scrollViewRect);
+                hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
+                hintRect.y += scrollViewRect.height;
+                hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
+                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
             }
         }
 
@@ -789,13 +760,13 @@ namespace RedBlueGames.MulliganRenamer
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
-        private void DrawPreviewPanelContentsWithItems(Rect previewPanelRect, int firstItemIndex, int numItems, PreviewPanelContents previewContents)
+        private void DrawPreviewPanelContentsWithItems(Rect previewPanelRect, PreviewPanelContents previewContents)
         {
             // Space gives us a bit of padding or else we're just too bunched up to the side
             // It also includes space for the delete button and icons.
             var leftSpace = 52.0f;
             var headerRect = new Rect(previewPanelRect);
-            headerRect.height = PreviewHeaderHeight;
+            headerRect.height = 18.0f;
             headerRect.x += leftSpace;
             headerRect.width -= leftSpace;
 
@@ -812,10 +783,34 @@ namespace RedBlueGames.MulliganRenamer
                 shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f,
                 shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f);
 
-            var previewRowsRect = new Rect(previewPanelRect);
-            previewRowsRect.height -= headerRect.height;
-            previewRowsRect.y += headerRect.height;
-            this.DrawPreviewRows(previewRowsRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
+            var scrollRect = new Rect(previewPanelRect);
+            scrollRect.height -= headerRect.height;
+            scrollRect.y += headerRect.height;
+            var scrollContentsRect = new Rect(scrollRect);
+            scrollContentsRect.height = PreviewRowHeight * previewContents.NumRows;
+            this.previewPanelScrollPosition = GUI.BeginScrollView(
+                scrollRect,
+                this.previewPanelScrollPosition,
+                scrollContentsRect);
+
+            // Show the one that doesn't quite fit by subtracting one
+            var firstItemIndex = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
+
+            // Add one for the one that's off screen.
+            var numItems = Mathf.CeilToInt(scrollRect.height / PreviewRowHeight) + 1;
+
+            this.DrawPreviewRows(scrollRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
+
+            // Add the hint into the scroll view if there's room
+            var hintRect = new Rect(scrollRect);
+            hintRect.height = EditorGUIUtility.singleLineHeight;
+            if (scrollContentsRect.height + hintRect.height <= scrollRect.height)
+            {
+                hintRect.y += scrollRect.height - hintRect.height;
+                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
+            }
+        
+            GUI.EndScrollView();
         }
 
         private void DrawPreviewHeader(
