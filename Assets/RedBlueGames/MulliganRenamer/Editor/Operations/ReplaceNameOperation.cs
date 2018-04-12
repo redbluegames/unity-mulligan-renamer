@@ -138,14 +138,24 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
+        protected override float GetPreferredHeightForContents()
+        {
+            return this.CalculateGUIHeightForLines(1);
+        }
+
+        /// <summary>
+        /// Draws the contents of the Rename Op.
         /// </summary>
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
-        {   
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
             GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
-            this.NewName = EditorGUILayout.TextField(newNameContent, this.NewName);
+            this.NewName = EditorGUI.TextField(operationRect, newNameContent, this.NewName);
         }
     }
 }

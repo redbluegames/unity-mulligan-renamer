@@ -223,18 +223,70 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Draws the contents of the Rename Op using EditorGUILayout.
+        /// Gets the preferred height for the contents of the operation.
+        /// This allows inherited operations to specify their height.
+        /// </summary>
+        /// <returns>The preferred height for contents.</returns>
+        protected override float GetPreferredHeightForContents()
+        {
+            var defaultHeight = this.CalculateGUIHeightForLines(4);
+            var preferredHeight = defaultHeight;
+            if (this.HasErrors)
+            {
+                if (!IsValidRegex(this.SearchRegexPattern))
+                {
+                    preferredHeight += GetHeightForHelpBox();
+                }
+
+                if (!IsValidRegex(this.ReplacementString))
+                {
+                    preferredHeight += GetHeightForHelpBox();
+                }
+            }
+
+            return preferredHeight;
+        }
+
+        /// <summary>
+        /// Draws the contents of the Rename Op.
         /// </summary>
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(int controlPrefix)
-        {   
+        protected override void DrawContents(Rect operationRect, int controlPrefix)
+        {
+            var preGUIModel = new ReplaceStringOperation(this);
+            var postGUIModel = new ReplaceStringOperation(preGUIModel);
+            var weights = new List<float>(4);
+            for (int i = 0; i < 4; ++i)
+            {
+                weights.Add(1.0f);
+            }
+
+            if (this.HasErrors)
+            {
+                if (!IsValidRegex(this.SearchRegexPattern))
+                {
+                    weights.Add(2.0f);
+                }
+
+                if (!IsValidRegex(this.ReplacementString))
+                {
+                    weights.Add(2.0f);
+                }
+            }
+
+            var weightsArray = weights.ToArray();
+
+            int currentGUIElement = 0;
             var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, regexToggleContent.text));
-            this.UseRegex = EditorGUILayout.Toggle(regexToggleContent, this.UseRegex);
+            postGUIModel.UseRegex = EditorGUI.Toggle(
+                operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray),
+                regexToggleContent,
+                preGUIModel.UseRegex);
 
             GUIContent searchContent;
             GUIContent replacementContent;
-            if (this.UseRegex)
+            if (preGUIModel.UseRegex)
             {
                 searchContent = new GUIContent("Match Regex", "Regular Expression to use to match terms.");
                 replacementContent = new GUIContent("Replacement Regex", "Regular Expression to use when replacing matched patterns.");
@@ -242,41 +294,58 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 searchContent = new GUIContent(
-                    "Search for String", 
+                    "Search for String",
                     "Substrings to search for in the filenames. These strings will be replaced by the Replacement String.");
                 replacementContent = new GUIContent(
-                    "Replace with", 
+                    "Replace with",
                     "String to replace matching instances of the Search string.");
             }
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Search String"));
-            this.SearchString = EditorGUILayout.TextField(searchContent, this.SearchString);
+            postGUIModel.SearchString = EditorGUI.TextField(
+                operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray),
+                searchContent,
+                preGUIModel.SearchString);
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Replacement String"));
-            this.ReplacementString = EditorGUILayout.TextField(replacementContent, this.ReplacementString);
+            postGUIModel.ReplacementString = EditorGUI.TextField(
+                operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray),
+                replacementContent,
+                preGUIModel.ReplacementString);
 
             var caseSensitiveContent = new GUIContent(
-                                           "Case Sensitive", 
+                                           "Case Sensitive",
                                            "Search using case sensitivity. Only strings that match the supplied casing will be replaced.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, caseSensitiveContent.text));
-            this.SearchIsCaseSensitive = EditorGUILayout.Toggle(caseSensitiveContent, this.SearchIsCaseSensitive);
+            postGUIModel.SearchIsCaseSensitive = EditorGUI.Toggle(
+                operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray),
+                caseSensitiveContent,
+                preGUIModel.SearchIsCaseSensitive);
 
-            if (this.HasErrors)
+            if (preGUIModel.HasErrors)
             {
-                if (!IsValidRegex(this.SearchRegexPattern))
+                if (!IsValidRegex(preGUIModel.SearchRegexPattern))
                 {
-                    EditorGUILayout.HelpBox(
-                        "Match Expression is not a valid Regular Expression.",
-                        MessageType.Error);
+                    var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray);
+                    helpRect = helpRect.AddPadding(4, 4, 4, 4);
+                    EditorGUI.HelpBox(helpRect, "Match Expression is not a valid Regular Expression.", MessageType.Error);
                 }
 
-                if (!IsValidRegex(this.ReplacementString))
+                if (!IsValidRegex(preGUIModel.ReplacementString))
                 {
-                    EditorGUILayout.HelpBox(
-                        "Replacement Expression is not a valid Regular Expression.",
-                        MessageType.Error);
+                    var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, RenameOperation.LineSpacing, weightsArray);
+                    helpRect = helpRect.AddPadding(4, 4, 4, 4);
+                    EditorGUI.HelpBox(helpRect, "Replacement Expression is not a valid Regular Expression.", MessageType.Error);
                 }
             }
+
+            // Apply model back to this version to be represented next frame.
+            this.CopyFrom(postGUIModel);
+        }
+
+        private static float GetHeightForHelpBox()
+        {
+            return 34.0f;
         }
 
         private static bool IsValidRegex(string pattern)
@@ -297,6 +366,14 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return true;
+        }
+
+        private void CopyFrom(ReplaceStringOperation other)
+        {
+            this.UseRegex = other.UseRegex;
+            this.SearchString = other.SearchString;
+            this.SearchIsCaseSensitive = other.SearchIsCaseSensitive;
+            this.ReplacementString = other.ReplacementString;
         }
 
         private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
