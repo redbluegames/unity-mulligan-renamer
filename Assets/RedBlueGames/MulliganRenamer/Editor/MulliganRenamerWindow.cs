@@ -40,6 +40,7 @@ namespace RedBlueGames.MulliganRenamer
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
+        private const float OperationPanelWidth = 350.0f;
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
         private const float PreviewRowHeight = 18.0f;
         private const float PreviewHeaderHeight = 18.0f;
@@ -377,8 +378,8 @@ namespace RedBlueGames.MulliganRenamer
             var footerHeight = 60.0f;
             var operationPanelRect = new Rect(
                 1.0f,
-                toolbarRect.height,
-                351.0f,
+                0.0f,
+                OperationPanelWidth,
                 this.position.height - toolbarRect.height - footerHeight);
             this.DrawOperationsPanel(operationPanelRect);
 
@@ -448,16 +449,11 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var renameOpsLabelRect = new Rect(toolbarRect);
-            renameOpsLabelRect.width = 340.0f;
-
-            GUI.Label(renameOpsLabelRect, this.guiContents.RenameOpsLabel);
-
             // The breadcrumb style spills to the left some so we need to claim extra space for it
-            const float BreadcrumbLeftOffset = 15.0f;
+            const float BreadcrumbLeftOffset = 8.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + renameOpsLabelRect.x + renameOpsLabelRect.width, toolbarRect.y),
-                new Vector2(toolbarRect.width - renameOpsLabelRect.width - BreadcrumbLeftOffset, toolbarRect.height));
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
+                new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
@@ -523,7 +519,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var operationsContentsRect = new Rect(operationPanelRect);
-            operationsContentsRect.height = totalHeightOfOperations;
+            operationsContentsRect.height = totalHeightOfOperations + 18.0f;
 
             var buttonSize = new Vector2(150.0f, 20.0f);
             var spaceBetweenButton = 16.0f;
@@ -560,6 +556,14 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawRenameOperations(Rect operationRect, float spacing)
         {
+            var headerRect = new Rect(operationRect);
+            headerRect.height = 18.0f;
+            var operationStyle = new GUIStyle("ScriptText");
+            GUI.Box(headerRect, "", operationStyle);
+            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerStyle.alignment = TextAnchor.MiddleCenter;
+            EditorGUI.LabelField(headerRect, "Rename Operations", headerStyle);
+
             // Store the op before buttons are pressed because buttons change focus
             var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
             bool saveOpsToPreferences = false;
@@ -570,7 +574,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var currentElement = this.RenameOperationsToApply[i];
                 var rect = new Rect(operationRect);
-                rect.y += totalHeightDrawn + spacing;
+                rect.y += totalHeightDrawn + spacing + headerRect.height;
                 rect.height = currentElement.GetPreferredHeight();
                 totalHeightDrawn += rect.height + spacing;
 
