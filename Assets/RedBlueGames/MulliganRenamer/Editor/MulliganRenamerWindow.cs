@@ -307,6 +307,7 @@ namespace RedBlueGames.MulliganRenamer
 
             this.guiStyles.DropPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPrompt.alignment = TextAnchor.MiddleCenter;
+            this.guiStyles.DropPrompt.wordWrap = true;
             this.guiStyles.DropPromptRepeat = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPromptRepeat.alignment = TextAnchor.MiddleCenter;
 
@@ -742,10 +743,25 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanelContentsEmpty(Rect previewPanelRect)
         {
+            var showSuccessfulRenameLabels = this.NumPreviouslyRenamedObjects > 0;
             var labelRect = new Rect(previewPanelRect);
-            labelRect.height = EditorGUIUtility.singleLineHeight;
+            labelRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
             labelRect.y = previewPanelRect.height / 2.0f - labelRect.height;
-            if (this.NumPreviouslyRenamedObjects > 0)
+
+            var promptRect = new Rect(labelRect);
+            promptRect.y += labelRect.height;
+            if (!showSuccessfulRenameLabels)
+            {
+                promptRect.height = 0.0f;
+            }
+
+            var buttonRect = new Rect(promptRect);
+            buttonRect.y += promptRect.height;
+            buttonRect.width = 200.0f;
+            buttonRect.height = EditorGUIUtility.singleLineHeight;
+            buttonRect.x += previewPanelRect.width / 2.0f - buttonRect.width * 0.5f;
+
+            if (showSuccessfulRenameLabels)
             {
                 var oldColor = GUI.contentColor;
                 GUI.contentColor = this.guiStyles.InsertionTextColor;
@@ -763,8 +779,6 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUI.LabelField(labelRect, renameSuccessContent, this.guiStyles.RenameSuccessPrompt);
                 GUI.contentColor = oldColor;
 
-                var promptRect = new Rect(labelRect);
-                promptRect.y += 16.0f;
                 EditorGUI.LabelField(promptRect, this.guiContents.DropPromptRepeat, this.guiStyles.DropPromptRepeat);
             }
             else
@@ -772,10 +786,6 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUI.LabelField(labelRect, this.guiContents.DropPrompt, this.guiStyles.DropPrompt);
             }
 
-            var buttonRect = new Rect(labelRect);
-            buttonRect.y += 32.0f;
-            buttonRect.width = 200.0f;
-            buttonRect.x += previewPanelRect.width / 2.0f - buttonRect.width * 0.5f;
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
