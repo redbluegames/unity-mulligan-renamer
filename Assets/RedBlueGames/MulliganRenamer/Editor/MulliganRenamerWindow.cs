@@ -266,8 +266,11 @@ namespace RedBlueGames.MulliganRenamer
             this.guiContents.DropPrompt = new GUIContent(
                 "No objects specified for rename. Drag objects here to rename them, or");
 
-            this.guiContents.DropPromptHint = new GUIContent(
+            this.guiContents.DropPromptHintInsideScroll = new GUIContent(
                 "Add more objects by dragging them here");
+
+            this.guiContents.DropPromptHint = new GUIContent(
+                "Add more objects by dragging them into the above panel");
 
             this.guiContents.DropPromptRepeat = new GUIContent(
                 "To rename more objects, drag them here, or");
@@ -307,7 +310,8 @@ namespace RedBlueGames.MulliganRenamer
             this.guiStyles.DropPromptRepeat = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPromptRepeat.alignment = TextAnchor.MiddleCenter;
 
-            this.guiStyles.DropPromptHint = EditorStyles.centeredGreyMiniLabel;
+            this.guiStyles.DropPromptHintInsideScroll = EditorStyles.centeredGreyMiniLabel;
+            this.guiStyles.DropPromptHint = EditorStyles.wordWrappedMiniLabel;
 
             this.guiStyles.RenameSuccessPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.RenameSuccessPrompt.alignment = TextAnchor.MiddleCenter;
@@ -681,10 +685,10 @@ namespace RedBlueGames.MulliganRenamer
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
 
                 // Show the one that doesn't quite fit by subtracting one
-                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0); 
+                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
 
                 // Add one for the one that's off screen.
-                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1; 
+                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1;
 
                 this.DrawPreviewPanelContentsWithItems(scrollViewRect, firstItem, numItems, previewContents);
             }
@@ -700,11 +704,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (!panelIsEmpty)
             {
-                var hintRect = new Rect(scrollViewRect);
-                hintRect.height = EditorGUIUtility.singleLineHeight;
-                hintRect.y += scrollViewRect.height - hintRect.height;
-                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
-
+                var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
                 addSelectedObjectsButtonRect.width = 150.0f;
@@ -712,13 +712,31 @@ namespace RedBlueGames.MulliganRenamer
 
                 var removeAllButtonRect = new Rect(addSelectedObjectsButtonRect);
                 removeAllButtonRect.width = 100.0f;
-                removeAllButtonRect.x -= (removeAllButtonRect.width + 2.0f);
+                removeAllButtonRect.x -= (removeAllButtonRect.width + buttonSpacing);
                 if (GUI.Button(removeAllButtonRect, "Remove All"))
                 {
                     this.ObjectsToRename.Clear();
                 }
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
+
+                // When the scroll contents don't fit the view, move the label outside the scroll view.
+                var hintRectHeight = EditorGUIUtility.singleLineHeight;
+                if (scrollContentsRect.height + hintRectHeight > scrollViewRect.height)
+                {
+                    var hintRect = new Rect(scrollViewRect);
+                    hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
+                    hintRect.y += scrollViewRect.height;
+                    hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
+                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+                }
+                else
+                {
+                    var hintRect = new Rect(scrollViewRect);
+                    hintRect.height = EditorGUIUtility.singleLineHeight;
+                    hintRect.y += scrollViewRect.height - hintRect.height;
+                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
+                }
             }
         }
 
@@ -1287,6 +1305,8 @@ namespace RedBlueGames.MulliganRenamer
 
             public GUIStyle DropPromptHint { get; set; }
 
+            public GUIStyle DropPromptHintInsideScroll { get; set; }
+
             public GUIStyle DropPromptRepeat { get; set; }
 
             public GUIStyle RenameSuccessPrompt { get; set; }
@@ -1311,6 +1331,8 @@ namespace RedBlueGames.MulliganRenamer
             public GUIContent DropPromptRepeat { get; set; }
 
             public GUIContent DropPromptHint { get; set; }
+
+            public GUIContent DropPromptHintInsideScroll { get; set; }
 
             public GUIContent CopyrightLabel { get; set; }
 
