@@ -669,6 +669,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
             bool panelIsEmpty = this.ObjectsToRename.Count == 0;
+            var contentsFitWithoutScrolling = false;
             if (panelIsEmpty)
             {
                 this.DrawPreviewPanelContentsEmpty(scrollViewRect);
@@ -676,7 +677,7 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
-                this.DrawPreviewPanelContentsWithItems(scrollViewRect, previewContents);
+                contentsFitWithoutScrolling = this.DrawPreviewPanelContentsWithItems(scrollViewRect, previewContents);
             }
 
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
@@ -704,11 +705,14 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
 
-                var hintRect = new Rect(scrollViewRect);
-                hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
-                hintRect.y += scrollViewRect.height;
-                hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
-                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+                if (!contentsFitWithoutScrolling)
+                {
+                    var hintRect = new Rect(scrollViewRect);
+                    hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
+                    hintRect.y += scrollViewRect.height;
+                    hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
+                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+                }
             }
         }
 
@@ -760,7 +764,7 @@ namespace RedBlueGames.MulliganRenamer
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
-        private void DrawPreviewPanelContentsWithItems(Rect previewPanelRect, PreviewPanelContents previewContents)
+        private bool DrawPreviewPanelContentsWithItems(Rect previewPanelRect, PreviewPanelContents previewContents)
         {
             // Space gives us a bit of padding or else we're just too bunched up to the side
             // It also includes space for the delete button and icons.
@@ -804,13 +808,16 @@ namespace RedBlueGames.MulliganRenamer
             // Add the hint into the scroll view if there's room
             var hintRect = new Rect(scrollRect);
             hintRect.height = EditorGUIUtility.singleLineHeight;
-            if (scrollContentsRect.height + hintRect.height <= scrollRect.height)
+            var contentsFitWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
+            if (contentsFitWithoutScrolling)
             {
                 hintRect.y += scrollRect.height - hintRect.height;
                 EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
             }
         
             GUI.EndScrollView();
+
+            return contentsFitWithoutScrolling;
         }
 
         private void DrawPreviewHeader(
