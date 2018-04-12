@@ -40,6 +40,7 @@ namespace RedBlueGames.MulliganRenamer
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
+        private const float OperationPanelWidth = 350.0f;
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
         private const float PreviewRowHeight = 18.0f;
         private const float PreviewHeaderHeight = 18.0f;
@@ -265,8 +266,11 @@ namespace RedBlueGames.MulliganRenamer
             this.guiContents.DropPrompt = new GUIContent(
                 "No objects specified for rename. Drag objects here to rename them, or");
 
-            this.guiContents.DropPromptHint = new GUIContent(
+            this.guiContents.DropPromptHintInsideScroll = new GUIContent(
                 "Add more objects by dragging them here");
+
+            this.guiContents.DropPromptHint = new GUIContent(
+                "Add more objects by dragging them into the above panel");
 
             this.guiContents.DropPromptRepeat = new GUIContent(
                 "To rename more objects, drag them here, or");
@@ -306,7 +310,8 @@ namespace RedBlueGames.MulliganRenamer
             this.guiStyles.DropPromptRepeat = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPromptRepeat.alignment = TextAnchor.MiddleCenter;
 
-            this.guiStyles.DropPromptHint = EditorStyles.centeredGreyMiniLabel;
+            this.guiStyles.DropPromptHintInsideScroll = EditorStyles.centeredGreyMiniLabel;
+            this.guiStyles.DropPromptHint = EditorStyles.wordWrappedMiniLabel;
 
             this.guiStyles.RenameSuccessPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.RenameSuccessPrompt.alignment = TextAnchor.MiddleCenter;
@@ -377,8 +382,8 @@ namespace RedBlueGames.MulliganRenamer
             var footerHeight = 60.0f;
             var operationPanelRect = new Rect(
                 1.0f,
-                toolbarRect.height,
-                351.0f,
+                0.0f,
+                OperationPanelWidth,
                 this.position.height - toolbarRect.height - footerHeight);
             this.DrawOperationsPanel(operationPanelRect);
 
@@ -448,16 +453,11 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var renameOpsLabelRect = new Rect(toolbarRect);
-            renameOpsLabelRect.width = 340.0f;
-
-            GUI.Label(renameOpsLabelRect, this.guiContents.RenameOpsLabel);
-
             // The breadcrumb style spills to the left some so we need to claim extra space for it
-            const float BreadcrumbLeftOffset = 15.0f;
+            const float BreadcrumbLeftOffset = 8.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + renameOpsLabelRect.x + renameOpsLabelRect.width, toolbarRect.y),
-                new Vector2(toolbarRect.width - renameOpsLabelRect.width - BreadcrumbLeftOffset, toolbarRect.height));
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
+                new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
@@ -523,7 +523,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var operationsContentsRect = new Rect(operationPanelRect);
-            operationsContentsRect.height = totalHeightOfOperations;
+            operationsContentsRect.height = totalHeightOfOperations + 18.0f;
 
             var buttonSize = new Vector2(150.0f, 20.0f);
             var spaceBetweenButton = 16.0f;
@@ -560,6 +560,14 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawRenameOperations(Rect operationRect, float spacing)
         {
+            var headerRect = new Rect(operationRect);
+            headerRect.height = 18.0f;
+            var operationStyle = new GUIStyle("ScriptText");
+            GUI.Box(headerRect, "", operationStyle);
+            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerStyle.alignment = TextAnchor.MiddleCenter;
+            EditorGUI.LabelField(headerRect, "Rename Operations", headerStyle);
+
             // Store the op before buttons are pressed because buttons change focus
             var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
             bool saveOpsToPreferences = false;
@@ -570,7 +578,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var currentElement = this.RenameOperationsToApply[i];
                 var rect = new Rect(operationRect);
-                rect.y += totalHeightDrawn + spacing;
+                rect.y += totalHeightDrawn + spacing + headerRect.height;
                 rect.height = currentElement.GetPreferredHeight();
                 totalHeightDrawn += rect.height + spacing;
 
@@ -677,10 +685,10 @@ namespace RedBlueGames.MulliganRenamer
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
 
                 // Show the one that doesn't quite fit by subtracting one
-                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0); 
+                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
 
                 // Add one for the one that's off screen.
-                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1; 
+                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1;
 
                 this.DrawPreviewPanelContentsWithItems(scrollViewRect, firstItem, numItems, previewContents);
             }
@@ -696,11 +704,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (!panelIsEmpty)
             {
-                var hintRect = new Rect(scrollViewRect);
-                hintRect.height = EditorGUIUtility.singleLineHeight;
-                hintRect.y += scrollViewRect.height - hintRect.height;
-                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
-
+                var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
                 addSelectedObjectsButtonRect.width = 150.0f;
@@ -708,13 +712,31 @@ namespace RedBlueGames.MulliganRenamer
 
                 var removeAllButtonRect = new Rect(addSelectedObjectsButtonRect);
                 removeAllButtonRect.width = 100.0f;
-                removeAllButtonRect.x -= (removeAllButtonRect.width + 2.0f);
+                removeAllButtonRect.x -= (removeAllButtonRect.width + buttonSpacing);
                 if (GUI.Button(removeAllButtonRect, "Remove All"))
                 {
                     this.ObjectsToRename.Clear();
                 }
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
+
+                // When the scroll contents don't fit the view, move the label outside the scroll view.
+                var hintRectHeight = EditorGUIUtility.singleLineHeight;
+                if (scrollContentsRect.height + hintRectHeight > scrollViewRect.height)
+                {
+                    var hintRect = new Rect(scrollViewRect);
+                    hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
+                    hintRect.y += scrollViewRect.height;
+                    hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
+                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+                }
+                else
+                {
+                    var hintRect = new Rect(scrollViewRect);
+                    hintRect.height = EditorGUIUtility.singleLineHeight;
+                    hintRect.y += scrollViewRect.height - hintRect.height;
+                    EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
+                }
             }
         }
 
@@ -1283,6 +1305,8 @@ namespace RedBlueGames.MulliganRenamer
 
             public GUIStyle DropPromptHint { get; set; }
 
+            public GUIStyle DropPromptHintInsideScroll { get; set; }
+
             public GUIStyle DropPromptRepeat { get; set; }
 
             public GUIStyle RenameSuccessPrompt { get; set; }
@@ -1307,6 +1331,8 @@ namespace RedBlueGames.MulliganRenamer
             public GUIContent DropPromptRepeat { get; set; }
 
             public GUIContent DropPromptHint { get; set; }
+
+            public GUIContent DropPromptHintInsideScroll { get; set; }
 
             public GUIContent CopyrightLabel { get; set; }
 
