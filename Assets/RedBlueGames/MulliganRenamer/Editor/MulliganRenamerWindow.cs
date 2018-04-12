@@ -41,6 +41,8 @@ namespace RedBlueGames.MulliganRenamer
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
+        private const float PreviewRowHeight = 18.0f;
+        private const float PreviewHeaderHeight = 18.0f;
 
         private GUIStyles guiStyles;
         private GUIContents guiContents;
@@ -648,8 +650,6 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewPanel(Rect previewPanelRect, BulkRenamePreview preview)
         {
-            const float HeaderHeight = 18.0f;
-            const float RowHeight = 18.0f;
             var spaceBetweenFooterAndScrollview = 2.0f;
             var panelFooterToolbar = new Rect(previewPanelRect);
             panelFooterToolbar.height = EditorGUIUtility.singleLineHeight;
@@ -661,7 +661,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
             var scrollContentsRect = new Rect(scrollViewRect);
-            scrollContentsRect.height = RowHeight * preview.NumObjects + HeaderHeight;
+            scrollContentsRect.height = PreviewRowHeight * preview.NumObjects + PreviewHeaderHeight;
             this.previewPanelScrollPosition = GUI.BeginScrollView(
                 scrollViewRect,
                 this.previewPanelScrollPosition,
@@ -677,8 +677,11 @@ namespace RedBlueGames.MulliganRenamer
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
 
                 // Show the one that doesn't quite fit by subtracting one
-                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / RowHeight) - 1, 0);  
-                var numItems = Mathf.CeilToInt(scrollViewRect.height / RowHeight) + 1; // Add one for the one that's off screen.
+                var firstItem = Mathf.Max(Mathf.FloorToInt(this.previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0); 
+
+                // Add one for the one that's off screen.
+                var numItems = Mathf.CeilToInt(scrollViewRect.height / PreviewRowHeight) + 1; 
+
                 this.DrawPreviewPanelContentsWithItems(scrollViewRect, firstItem, numItems, previewContents);
             }
 
@@ -759,9 +762,8 @@ namespace RedBlueGames.MulliganRenamer
             // Space gives us a bit of padding or else we're just too bunched up to the side
             // It also includes space for the delete button and icons.
             var leftSpace = 52.0f;
-            var headerHeight = 18.0f;
             var headerRect = new Rect(previewPanelRect);
-            headerRect.height = headerHeight;
+            headerRect.height = PreviewHeaderHeight;
             headerRect.x += leftSpace;
             headerRect.width -= leftSpace;
 
@@ -847,7 +849,7 @@ namespace RedBlueGames.MulliganRenamer
                 previewRowStyle.DeletionColor = this.guiStyles.DeletionTextColor;
 
                 var rowRect = new Rect(previewRowsRect);
-                rowRect.height = 18.0f;
+                rowRect.height = PreviewRowHeight;
                 rowRect.y = previewRowsRect.y + (i * rowRect.height);
                 if (DrawPreviewRow(rowRect, stepIndex, content, previewRowStyle))
                 {
