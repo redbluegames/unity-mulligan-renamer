@@ -813,7 +813,9 @@ namespace RedBlueGames.MulliganRenamer
             // Add one for the one that's off screen.
             var numItems = Mathf.CeilToInt(scrollRect.height / PreviewRowHeight) + 1;
 
-            this.DrawPreviewRows(scrollRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
+            var rowRect = new Rect(scrollRect);
+            rowRect.width = Mathf.Max(scrollContentsRect.width, scrollRect.width);
+            this.DrawPreviewRows(rowRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
 
             // Add the hint into the scroll view if there's room
             var hintRect = new Rect(scrollRect);
