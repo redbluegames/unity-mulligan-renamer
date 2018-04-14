@@ -166,12 +166,15 @@ namespace RedBlueGames.MulliganRenamer
             var deleteButtonRect = new Rect(rowRect);
             deleteButtonRect.x += 4.0f;
             deleteButtonRect.width = 16.0f;
+            deleteButtonRect.height = 16.0f;
+            deleteButtonRect.y += Mathf.Max(0, (rowRect.height - deleteButtonRect.height) / 2.0f);
             if (GUI.Button(deleteButtonRect, "x", EditorStyles.miniButton))
             {
                 isDeleteClicked = true;
             }
 
             var warningRect = new Rect(deleteButtonRect);
+            warningRect.y = rowRect.y;
             warningRect.x += deleteButtonRect.width;
             warningRect.width = 16.0f;
             warningRect.height = 16.0f;
@@ -766,32 +769,39 @@ namespace RedBlueGames.MulliganRenamer
 
         private bool DrawPreviewPanelContentsWithItems(Rect previewPanelRect, PreviewPanelContents previewContents)
         {
-            // Space gives us a bit of padding or else we're just too bunched up to the side
-            // It also includes space for the delete button and icons.
-            var leftSpace = 52.0f;
+            var spaceBetweenHeaderAndScroll = 1.0f;
             var headerRect = new Rect(previewPanelRect);
             headerRect.height = 18.0f;
-            headerRect.x += leftSpace;
-            headerRect.width -= leftSpace;
+
+            var scrollRect = new Rect(previewPanelRect);
+            scrollRect.height -= (headerRect.height + spaceBetweenHeaderAndScroll);
+            scrollRect.y += (headerRect.height + spaceBetweenHeaderAndScroll);
 
             int renameStep = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
             string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
             string newNameColumnHeader = "After";
             bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.RenameOperationsToApply.Count == 1;
             bool shouldShowThirdColumn = !this.IsShowingPreviewSteps || this.RenameOperationsToApply.Count > 1;
-            this.DrawPreviewHeader(
-                headerRect,
-                originalNameColumnHeader,
-                newNameColumnHeader,
-                previewContents.LongestOriginalNameWidth,
-                shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f,
-                shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f);
+            var firstColumnWidth = previewContents.LongestOriginalNameWidth;
+            var secondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
+            var thirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
+            var totalColumnWidth = firstColumnWidth + secondColumnWidth + thirdColumnWidth;
 
-            var scrollRect = new Rect(previewPanelRect);
-            scrollRect.height -= headerRect.height;
-            scrollRect.y += headerRect.height;
             var scrollContentsRect = new Rect(scrollRect);
             scrollContentsRect.height = PreviewRowHeight * previewContents.NumRows;
+
+            var hackSizeForRowIcons = 48.0f;
+            scrollContentsRect.width = totalColumnWidth + hackSizeForRowIcons;
+
+            this.DrawPreviewHeader(
+                headerRect,
+                -this.previewPanelScrollPosition.x,
+                originalNameColumnHeader,
+                newNameColumnHeader,
+                firstColumnWidth,
+                secondColumnWidth,
+                thirdColumnWidth);
+
             this.previewPanelScrollPosition = GUI.BeginScrollView(
                 scrollRect,
                 this.previewPanelScrollPosition,
@@ -808,13 +818,14 @@ namespace RedBlueGames.MulliganRenamer
             // Add the hint into the scroll view if there's room
             var hintRect = new Rect(scrollRect);
             hintRect.height = EditorGUIUtility.singleLineHeight;
-            var contentsFitWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
+            var contentsFitWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height &&
+                                                                scrollContentsRect.width <= scrollRect.width;
             if (contentsFitWithoutScrolling)
             {
                 hintRect.y += scrollRect.height - hintRect.height;
                 EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
             }
-        
+
             GUI.EndScrollView();
 
             return contentsFitWithoutScrolling;
@@ -822,13 +833,30 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawPreviewHeader(
             Rect headerRect,
+            float scrollOffsetX,
             string firstColumnName,
             string secondColumnName,
             float firstColumnWidth,
             float secondColumnWidth,
             float thirdColumnWidth)
         {
-            var firstColumnRect = new Rect(headerRect);
+            var relativeHeaderRect = new Rect(headerRect);
+            relativeHeaderRect.x = scrollOffsetX;
+            relativeHeaderRect.y = 0.0f;
+
+            var backgroundRect = new Rect(headerRect);
+            backgroundRect.height -= 2.0f;
+            backgroundRect.y += 1.0f;
+            backgroundRect.width -= 2.0f;
+            backgroundRect.x += 1.0f;
+
+            var firstColumnRect = new Rect(relativeHeaderRect);
+            firstColumnRect.y += 2.0f;
+
+            // Space gives us a bit of padding or else we're just too bunched up to the side
+            // It also includes space for the delete button and icons.
+            var leftSpace = 52.0f;
+            firstColumnRect.x += leftSpace;
             firstColumnRect.width = firstColumnWidth;
 
             var secondColumnRect = new Rect(firstColumnRect);
@@ -839,6 +867,10 @@ namespace RedBlueGames.MulliganRenamer
             thirdColumnRect.x += secondColumnRect.width;
             thirdColumnRect.width = thirdColumnWidth;
 
+            GUI.Box(backgroundRect, "", this.guiStyles.PreviewHeader);
+
+            // Group lets us clip the header and scroll it with the scroll view
+            GUI.BeginGroup(headerRect);
             EditorGUI.LabelField(firstColumnRect, firstColumnName, EditorStyles.boldLabel);
 
             if (secondColumnWidth > 0.0f)
@@ -850,6 +882,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 EditorGUI.LabelField(thirdColumnRect, "Final Name", EditorStyles.boldLabel);
             }
+
+            GUI.EndGroup();
         }
 
         private void DrawPreviewRows(Rect previewRowsRect, int stepIndex, PreviewPanelContents previewContents, int startingPreviewIndex, int numPreviewsToShow, bool showSecondColumn, bool showThirdColumn)
