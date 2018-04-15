@@ -143,7 +143,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var coloredHighlightRect = new Rect(rect);
                 coloredHighlightRect.height = 2;
-                coloredHighlightRect.x += -5.0f;
+                coloredHighlightRect.x += breacrumbConfig.UseLeftStyle ? -5.0f : -4.0f;
                 var oldColor = GUI.color;
                 GUI.color = breacrumbConfig.HighlightColor;
                 GUI.DrawTexture(coloredHighlightRect, Texture2D.whiteTexture);
@@ -393,7 +393,7 @@ namespace RedBlueGames.MulliganRenamer
             this.FocusForcedFocusControl();
 
             // Generate preview contents
-            var previewPanelPadding = new RectOffset(2, 1, 0, 0);
+            var previewPanelPadding = new RectOffset(1, 1, -1, 0);
             var previewPanelRect = new Rect(
                 operationPanelRect.width + previewPanelPadding.left,
                 toolbarRect.height + previewPanelPadding.top,
@@ -457,7 +457,7 @@ namespace RedBlueGames.MulliganRenamer
         private void DrawToolbar(Rect toolbarRect)
         {
             // The breadcrumb style spills to the left some so we need to claim extra space for it
-            const float BreadcrumbLeftOffset = 8.0f;
+            const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
                 new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
@@ -478,41 +478,52 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawBreadcrumbs(bool isShowingPreviewSteps, Rect rect)
         {
-            if (isShowingPreviewSteps)
+            if (this.RenameOperationsToApply.Count == 0)
             {
-                var totalWidth = 0.0f;
-                for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
-                {
-                    var operationAtBreadcrumb = this.RenameOperationsToApply[i];
-                    var breadcrumbOption = new PreviewBreadcrumbOptions();
-                    breadcrumbOption.Heading = operationAtBreadcrumb.HeadingLabel;
-                    breadcrumbOption.HighlightColor = operationAtBreadcrumb.HighlightColor;
-
-                    breadcrumbOption.UseLeftStyle = i == 0;
-                    breadcrumbOption.Enabled = i == this.FocusedRenameOpIndex;
-
-                    var breadcrumbPosition = new Vector2(rect.x + totalWidth, rect.y);
-
-                    var nextBreadcrumbRect = new Rect(breadcrumbPosition, breadcrumbOption.SizeForContent);
-                    nextBreadcrumbRect.position = new Vector2(rect.x + totalWidth, rect.y);
-
-                    var selected = DrawPreviewBreadcrumb(nextBreadcrumbRect, breadcrumbOption);
-                    if (selected && i != this.FocusedRenameOpIndex)
-                    {
-                        var renameOp = this.RenameOperationsToApply[i];
-                        this.FocusRenameOperationDeferred(renameOp);
-                    }
-
-                    totalWidth += nextBreadcrumbRect.width;
-                }
+                var emptyBreadcrumbRect = new Rect(rect);
+                emptyBreadcrumbRect.width = 20.0f;
+                EditorGUI.BeginDisabledGroup(true);
+                GUI.Toggle(emptyBreadcrumbRect, false, string.Empty, "GUIEditor.BreadcrumbLeft");
+                EditorGUI.EndDisabledGroup();
             }
             else
             {
-                var breadcrumbeOptions =
-                    new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true };
-                var breadcrumbSize = breadcrumbeOptions.SizeForContent;
-                breadcrumbSize.y = rect.height;
-                DrawPreviewBreadcrumb(new Rect(rect.position, breadcrumbSize), breadcrumbeOptions);
+                if (isShowingPreviewSteps)
+                {
+                    var totalWidth = 0.0f;
+                    for (int i = 0; i < this.RenameOperationsToApply.Count; ++i)
+                    {
+                        var operationAtBreadcrumb = this.RenameOperationsToApply[i];
+                        var breadcrumbOption = new PreviewBreadcrumbOptions();
+                        breadcrumbOption.Heading = operationAtBreadcrumb.HeadingLabel;
+                        breadcrumbOption.HighlightColor = operationAtBreadcrumb.HighlightColor;
+
+                        breadcrumbOption.UseLeftStyle = i == 0;
+                        breadcrumbOption.Enabled = i == this.FocusedRenameOpIndex;
+
+                        var breadcrumbPosition = new Vector2(rect.x + totalWidth, rect.y);
+
+                        var nextBreadcrumbRect = new Rect(breadcrumbPosition, breadcrumbOption.SizeForContent);
+                        nextBreadcrumbRect.position = new Vector2(rect.x + totalWidth, rect.y);
+
+                        var selected = DrawPreviewBreadcrumb(nextBreadcrumbRect, breadcrumbOption);
+                        if (selected && i != this.FocusedRenameOpIndex)
+                        {
+                            var renameOp = this.RenameOperationsToApply[i];
+                            this.FocusRenameOperationDeferred(renameOp);
+                        }
+
+                        totalWidth += nextBreadcrumbRect.width;
+                    }
+                }
+                else
+                {
+                    var breadcrumbeOptions =
+                        new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true };
+                    var breadcrumbSize = breadcrumbeOptions.SizeForContent;
+                    breadcrumbSize.y = rect.height;
+                    DrawPreviewBreadcrumb(new Rect(rect.position, breadcrumbSize), breadcrumbeOptions);
+                }
             }
         }
 
@@ -838,7 +849,7 @@ namespace RedBlueGames.MulliganRenamer
                 -this.previewPanelScrollPosition.x + firstColumnWidth + hackSizeForRowIcons,
                 0.0f,
                 1.0f,
-                scrollRect.height);
+                previewPanelRect.height);
             GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
             var secondDividerRect = new Rect(firstDividerRect);
             secondDividerRect.x += firstColumnWidth;
