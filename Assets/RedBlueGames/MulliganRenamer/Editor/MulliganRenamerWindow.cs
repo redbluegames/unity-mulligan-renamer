@@ -844,12 +844,14 @@ namespace RedBlueGames.MulliganRenamer
             // Put dividers in group so that they scroll
             GUI.BeginGroup(previewPanelRect);
             var oldColor = GUI.color;
-            GUI.color = Color.gray;
+            GUI.color = new Color(0.6f,0.6f,0.6f,1.0f);
+
+            // Add 1 into y for the position so that it doesn't render on the panel's border
             var firstDividerRect = new Rect(
                 -this.previewPanelScrollPosition.x + firstColumnWidth + hackSizeForRowIcons,
-                0.0f,
                 1.0f,
-                previewPanelRect.height);
+                1.0f,
+                previewPanelRect.height - 1.0f);
             GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
             var secondDividerRect = new Rect(firstDividerRect);
             secondDividerRect.x += firstColumnWidth;
