@@ -143,6 +143,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var coloredHighlightRect = new Rect(rect);
                 coloredHighlightRect.height = 2;
+                coloredHighlightRect.width += 1.0f;
                 coloredHighlightRect.x += breacrumbConfig.UseLeftStyle ? -5.0f : -4.0f;
                 var oldColor = GUI.color;
                 GUI.color = breacrumbConfig.HighlightColor;
@@ -456,10 +457,13 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
+            var operationStyle = new GUIStyle("ScriptText");
+            GUI.Box(toolbarRect, "", operationStyle);
+
             // The breadcrumb style spills to the left some so we need to claim extra space for it
             const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 1),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
@@ -470,7 +474,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(this.RenameOperationsToApply.Count <= 1);
             var buttonText = "Preview Steps";
             var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
-            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
+            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y + 1);
             var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
             this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
             EditorGUI.EndDisabledGroup();
@@ -844,7 +848,7 @@ namespace RedBlueGames.MulliganRenamer
             // Put dividers in group so that they scroll
             GUI.BeginGroup(previewPanelRect);
             var oldColor = GUI.color;
-            GUI.color = new Color(0.6f,0.6f,0.6f,1.0f);
+            GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
 
             // Add 1 into y for the position so that it doesn't render on the panel's border
             var firstDividerRect = new Rect(
