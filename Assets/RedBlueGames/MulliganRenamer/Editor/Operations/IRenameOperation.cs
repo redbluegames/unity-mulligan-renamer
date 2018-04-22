@@ -31,11 +31,23 @@ namespace RedBlueGames.MulliganRenamer
     public interface IRenameOperation
     {
         /// <summary>
+        /// Checks if this RenameOperation has errors in its configuration.
+        /// </summary>
+        /// <returns><c>true</c>, if operation has errors, <c>false</c> otherwise.</returns>
+        bool HasErrors();
+
+        /// <summary>
         /// Rename the specified input, using the relativeCount.
         /// </summary>
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         RenameResult Rename(string input, int relativeCount);
+
+        /// <summary>
+        /// Clones this instance, returning a new one
+        /// </summary>
+        /// <returns>A new cloned instance.</returns>
+        IRenameOperation Clone();
     }
 }

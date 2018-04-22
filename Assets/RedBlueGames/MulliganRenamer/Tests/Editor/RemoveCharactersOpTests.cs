@@ -30,6 +30,20 @@ namespace RedBlueGames.MulliganRenamer
 
     public class RemoveCharactersOpTests
     {
+        public static readonly RemoveCharactersOperation.Configuration Symbols = new RemoveCharactersOperation.Configuration()
+        {
+            CharactersToRemove = "\\W",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+
+        public static readonly RemoveCharactersOperation.Configuration Numbers = new RemoveCharactersOperation.Configuration()
+        {
+            CharactersToRemove = "\\d",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };  
+
         [Test]
         public void RemoveCharacters_NullTarget_IsUnchanged()
         {
@@ -68,7 +82,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A!@#$%BD*(";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
+            removeCharactersOp.Config = Symbols;
 
             var expected = new RenameResult()
             {
@@ -96,7 +110,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "`~!@#$%^&*()+-=[]{}\\|;:'\",<.>/?";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = RemoveCharactersOperation.Symbols;
+            removeCharactersOp.Config = Symbols;
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -118,7 +132,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A251B637k911p";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
+            removeCharactersOp.Config = Numbers;
 
             var expected = new RenameResult()
             {
@@ -150,7 +164,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "1234567890";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = RemoveCharactersOperation.Numbers;
+            removeCharactersOp.Config = Numbers;
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -172,11 +186,11 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "abz35!450k";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = new RemoveCharactersOperation.RemoveCharactersOperationOptions()
+            removeCharactersOp.Config = new RemoveCharactersOperation.Configuration()
             {
                 CharactersToRemove = "ak!5"
             };
-            
+
             var expected = new RenameResult()
             {
                 new Diff("a", DiffOperation.Deletion),
@@ -202,7 +216,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "ABCDabcdD";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Options = new RemoveCharactersOperation.RemoveCharactersOperationOptions()
+            removeCharactersOp.Config = new RemoveCharactersOperation.Configuration()
             {
                 CharactersToRemove = "ABCD",
                 IsCaseSensitive = true
