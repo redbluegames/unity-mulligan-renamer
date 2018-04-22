@@ -27,17 +27,25 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
 
     /// <summary>
-    /// Extensions for Lists of Objects
+    /// Extensions for Lists
     /// </summary>
-    public static class ObjectListExtensions
+    public static class ListExtensions
     {
         /// <summary>
         /// Removes all null entries in the list.
         /// </summary>
         /// <param name="list">List to modify.</param>
-        public static void RemoveNullObjects(this List<UnityEngine.Object> list)
+        public static void RemoveNullObjects<T>(this List<T> list)
         {
             list.RemoveAll(item => item == null || item.Equals(null));
+        }
+
+        public static void MoveElementFromIndexToIndex<T>(this List<T> list, int fromIndex, int desiredIndex)
+        {
+            desiredIndex = Mathf.Clamp(desiredIndex, 0, list.Count - 1);
+            var destinationElementCopy = list[desiredIndex];
+            list[desiredIndex] = list[fromIndex];
+            list[fromIndex] = destinationElementCopy;
         }
     }
 }

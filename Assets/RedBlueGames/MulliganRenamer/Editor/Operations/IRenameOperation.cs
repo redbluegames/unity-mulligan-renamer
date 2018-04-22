@@ -30,6 +30,10 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public interface IRenameOperation
     {
+        /// <summary>
+        /// Checks if this RenameOperation has errors in its configuration.
+        /// </summary>
+        /// <returns><c>true</c>, if operation has errors, <c>false</c> otherwise.</returns>
         bool HasErrors();
 
         /// <summary>
@@ -40,6 +44,10 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         RenameResult Rename(string input, int relativeCount);
 
+        /// <summary>
+        /// Clones this instance, returning a new one
+        /// </summary>
+        /// <returns>A new cloned instance.</returns>
         IRenameOperation Clone();
     }
 }

@@ -154,6 +154,10 @@ namespace RedBlueGames.MulliganRenamer
             return clone;
         }
 
+        /// <summary>
+        /// Copies the state from one operation into this one.
+        /// </summary>
+        /// <param name="other">Other.</param>
         public void CopyFrom(ReplaceStringOperation other)
         {
             this.UseRegex = other.UseRegex;
