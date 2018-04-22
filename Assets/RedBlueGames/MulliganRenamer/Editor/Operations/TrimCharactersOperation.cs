@@ -30,7 +30,7 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// RenameOperation used to trim characters from the front or back of the rename string.
     /// </summary>
-    public class TrimCharactersOperation : RenameOperation
+    public class TrimCharactersOperation : IRenameOperation
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TrimCharactersOperation"/> class.
@@ -53,18 +53,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
-        /// </summary>
-        /// <value>The display path.</value>
-        public override string MenuDisplayPath
-        {
-            get
-            {
-                return "Delete/Trim Characters";
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the number of characters to delete from the front.
         /// </summary>
         /// <value>The number front delete chars.</value>
@@ -76,47 +64,16 @@ namespace RedBlueGames.MulliganRenamer
         /// <value>The number back delete chars.</value>
         public int NumBackDeleteChars { get; set; }
 
-        /// <summary>
-        /// Gets the heading label for the Rename Operation.
-        /// </summary>
-        /// <value>The heading label.</value>
-        public override string HeadingLabel
+        public bool HasErrors()
         {
-            get
-            {
-                return "Trim Characters";
-            }
-        }
-
-        /// <summary>
-        /// Gets the color to use for highlighting the operation.
-        /// </summary>
-        /// <value>The color of the highlight.</value>
-        public override Color32 HighlightColor
-        {
-            get
-            {
-                return this.DeleteColor;
-            }
-        }
-
-        /// <summary>
-        /// Gets the name of the control to focus when this operation is focused
-        /// </summary>
-        /// <value>The name of the control to focus.</value>
-        public override string ControlToFocus
-        {
-            get
-            {
-                return "Delete from Front";
-            }
+            return false;
         }
 
         /// <summary>
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override RenameOperation Clone()
+        public IRenameOperation Clone()
         {
             var clone = new TrimCharactersOperation(this);
             return clone;
@@ -128,7 +85,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override RenameResult Rename(string input, int relativeCount)
+        public RenameResult Rename(string input, int relativeCount)
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -160,37 +117,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Gets the preferred height for the contents of the operation.
-        /// This allows inherited operations to specify their height.
-        /// </summary>
-        /// <returns>The preferred height for contents.</returns>
-        protected override float GetPreferredHeightForContents()
-        {
-            return this.CalculateGUIHeightForLines(2);
-        }
-
-        /// <summary>
-        /// Draws the contents of the Rename Op.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(Rect operationRect, int controlPrefix)
-        {
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Front"));
-            this.NumFrontDeleteChars = EditorGUI.IntField(
-                operationRect.GetSplitVertical(1, 2, RenameOperation.LineSpacing),
-                "Delete from Front",
-                this.NumFrontDeleteChars);
-            this.NumFrontDeleteChars = Mathf.Max(0, this.NumFrontDeleteChars);
-
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Back"));
-            this.NumBackDeleteChars = EditorGUI.IntField(
-                operationRect.GetSplitVertical(2, 2, RenameOperation.LineSpacing),
-                "Delete from Back",
-                this.NumBackDeleteChars);
-            this.NumBackDeleteChars = Mathf.Max(0, this.NumBackDeleteChars);
         }
     }
 }

@@ -25,15 +25,10 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;
-    using System.Text.RegularExpressions;
-    using UnityEditor;
     using UnityEngine;
+    using UnityEditor;
 
-    /// <summary>
-    /// The base RenameOperation used by BulkRenamer. All Operations derive from this,
-    /// allowing for shared code.
-    /// </summary>
-    public abstract class RenameOperation : IRenameOperation
+    public abstract class RenameOperationDrawer<T> : IRenameOperationDrawer where T: IRenameOperation
     {
         protected readonly Color32 ReplaceColor = new Color32(17, 138, 178, 255);
         protected readonly Color32 AddColor = new Color32(6, 214, 160, 255);
@@ -48,55 +43,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private string queuedControlToFocus;
 
-        /// <summary>
-        /// Events that are returned by the GUI draw call to indicate what input was pressed.
-        /// </summary>
-        public enum ListButtonEvent
-        {
-            /// <summary>
-            /// No button was clicked.
-            /// </summary>
-            None,
-
-            /// <summary>
-            /// The move up button was clicked.
-            /// </summary>
-            MoveUp,
-
-            /// <summary>
-            /// The move down button was clicked.
-            /// </summary>
-            MoveDown,
-
-            /// <summary>
-            /// The delete button was clicked.
-            /// </summary>
-            Delete
-        }
-
-        /// <summary>
-        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
-        /// </summary>
-        /// <value>The display path.</value>
-        public abstract string MenuDisplayPath { get; }
-
-        /// <summary>
-        /// Gets the name of the control to focus when this operation is focused
-        /// </summary>
-        /// <value>The name of the control to focus.</value>
-        public abstract string ControlToFocus { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance has errors that prevent it from Renaming.
-        /// </summary>
-        /// <value><c>true</c> if this instance has errors; otherwise, <c>false</c>.</value>
-        public virtual bool HasErrors
-        {
-            get
-            {
-                return false;
-            }
-        }
+        private T model;
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -111,18 +58,38 @@ namespace RedBlueGames.MulliganRenamer
         public abstract Color32 HighlightColor { get; }
 
         /// <summary>
-        /// Rename the specified input, using the relativeCount.
+        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
         /// </summary>
-        /// <param name="input">Input String to rename.</param>
-        /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
-        /// <returns>A diff of the original name, renamed according to the rename operation's rules.</returns>
-        public abstract RenameResult Rename(string input, int relativeCount);
+        /// <value>The display path.</value>
+        public abstract string MenuDisplayPath { get; }
 
         /// <summary>
-        /// Clone this instance.
+        /// Gets the name of the control to focus when this operation is focused
         /// </summary>
-        /// <returns>A clone of this instance</returns>
-        public abstract RenameOperation Clone();
+        /// <value>The name of the control to focus.</value>
+        public abstract string ControlToFocus { get; }
+
+        /// <summary>
+        /// Gets the model this drawer represents.
+        /// </summary>
+        public T Model
+        {
+            get
+            {
+                return this.model;
+            }
+        }
+
+        /// <summary>
+        /// Sets the model for the drawer.
+        /// </summary>
+        /// <param name="modelInstance">Model instance.</param>
+        public void SetModel(IRenameOperation modelInstance)
+        {
+            // This cast is a *bit* of an assumption, that the passed model can be
+            // downcasted to a more derived type (T : IRenameOperation) than IRenameOperation.
+            this.model = (T) modelInstance;
+        }
 
         /// <summary>
         /// Gets the preferred height for the operation GUI.
@@ -140,14 +107,14 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="containingRect">The rect to draw the element inside.</param>
         /// <param name = "guiOptions">Options to use when drawing the operation GUI.</param>
         /// <returns>A ListButtonEvent indicating if a button was clicked.</returns>
-        public ListButtonEvent DrawGUI(Rect containingRect, GUIOptions guiOptions)
+        public RenameOperationSortingButtonEvent DrawGUI(Rect containingRect, RenameOperationGUIOptions guiOptions)
         {
             var paddedContainer = containingRect.AddPadding(Padding.left, Padding.right, Padding.top, Padding.bottom);
             var operationStyle = new GUIStyle("ScriptText");
             GUI.Box(containingRect, "", operationStyle);
             var headerRect = new Rect(paddedContainer);
             headerRect.height = HeaderHeight;
-            ListButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
+            RenameOperationSortingButtonEvent buttonEvent = this.DrawHeaderAndReorderButtons(
                                               headerRect,
                                               this.HeadingLabel,
                                               guiOptions.DisableUpButton,
@@ -204,7 +171,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="header">Header text to display.</param>
         /// <param name="disableUpButton">If set to <c>true</c> disable the MoveUp button.</param>
         /// <param name="disableDownButton">If set to <c>true</c> disable the MoveDown button.</param>
-        protected ListButtonEvent DrawHeaderAndReorderButtons(Rect containingRect, string header, bool disableUpButton, bool disableDownButton)
+        protected RenameOperationSortingButtonEvent DrawHeaderAndReorderButtons(Rect containingRect, string header, bool disableUpButton, bool disableDownButton)
         {
             // Add some padding for the colored highlight
             var labelRect = new Rect(containingRect);
@@ -213,7 +180,7 @@ namespace RedBlueGames.MulliganRenamer
             labelRect.width -= labelPaddingX;
             EditorGUI.LabelField(labelRect, header, EditorStyles.boldLabel);
 
-            ListButtonEvent buttonEvent = ListButtonEvent.None;
+            RenameOperationSortingButtonEvent buttonEvent = RenameOperationSortingButtonEvent.None;
             var buttonPaddingTop = 1.0f;
             var buttonPaddingBottom = 1.0f;
             var buttonGroupWidth = 60.0f;
@@ -227,11 +194,11 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
-        private ListButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
+        private RenameOperationSortingButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
         {
             const string BigUpArrowUnicode = "\u25B2";
             const string BigDownArrowUnicode = "\u25BC";
-            ListButtonEvent buttonEvent = ListButtonEvent.None;
+            RenameOperationSortingButtonEvent buttonEvent = RenameOperationSortingButtonEvent.None;
 
             EditorGUI.BeginDisabledGroup(disableUpButton);
 
@@ -241,7 +208,7 @@ namespace RedBlueGames.MulliganRenamer
             var leftSplit = containingRect.GetSplitHorizontal(1, 3, 0.0f);
             if (GUI.Button(leftSplit, BigUpArrowUnicode, leftButtonStyle))
             {
-                buttonEvent = ListButtonEvent.MoveUp;
+                buttonEvent = RenameOperationSortingButtonEvent.MoveUp;
             }
 
             EditorGUI.EndDisabledGroup();
@@ -254,7 +221,7 @@ namespace RedBlueGames.MulliganRenamer
             var midSplit = containingRect.GetSplitHorizontal(2, 3, 0.0f);
             if (GUI.Button(midSplit, BigDownArrowUnicode, midButtonStyle))
             {
-                buttonEvent = ListButtonEvent.MoveDown;
+                buttonEvent = RenameOperationSortingButtonEvent.MoveDown;
             }
 
             EditorGUI.EndDisabledGroup();
@@ -265,36 +232,10 @@ namespace RedBlueGames.MulliganRenamer
             var rightSplit = containingRect.GetSplitHorizontal(3, 3, 0.0f);
             if (GUI.Button(rightSplit, "X", rightButtonStyle))
             {
-                buttonEvent = ListButtonEvent.Delete;
+                buttonEvent = RenameOperationSortingButtonEvent.Delete;
             }
 
             return buttonEvent;
-        }
-
-        /// <summary>
-        /// GUI options to apply when drawing a RenameOperation
-        /// </summary>
-        public class GUIOptions
-        {
-            /// <summary>
-            /// Gets or sets a value indicating whether this <see cref="RenameOperation"/>
-            /// should be drawn with the Up Button disabled.
-            /// </summary>
-            /// <value><c>true</c> if the up button should be disabled; otherwise, <c>false</c>.</value>
-            public bool DisableUpButton { get; set; }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether this <see cref="RenameOperation"/>
-            /// should be drawn with the Down Button disabled.
-            /// </summary>
-            /// <value><c>true</c> if the down button should be disabled; otherwise, <c>false</c>.</value>
-            public bool DisableDownButton { get; set; }
-
-            /// <summary>
-            /// Gets or sets the prefix to use when setting control names for this <see cref="RenameOperation"/>
-            /// </summary>
-            /// <value>The control prefix.</value>
-            public int ControlPrefix { get; set; }
         }
     }
 }

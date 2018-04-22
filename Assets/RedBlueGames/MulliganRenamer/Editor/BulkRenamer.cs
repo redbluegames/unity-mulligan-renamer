@@ -34,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     public class BulkRenamer
     {
         private AssetCache assetCache;
-        private RenameOperationSequence<RenameOperation> operationSequence;
+        private RenameOperationSequence<IRenameOperation> operationSequence;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedBlueGames.MulliganRenamer.BulkRenamer"/> class.
@@ -53,7 +53,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Initializes a new instance of the <see cref="RedBlueGames.MulliganRenamer.BulkRenamer"/> class.
         /// </summary>
         /// <param name="renameOperationSequence">Rename operation sequence to apply when renaming.</param>
-        public BulkRenamer(RenameOperationSequence<RenameOperation> renameOperationSequence)
+        public BulkRenamer(RenameOperationSequence<IRenameOperation> renameOperationSequence)
         {
             this.Initialize();
 
@@ -157,7 +157,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Sets the rename operations to use when renaming objects.
         /// </summary>
         /// <param name="renameOperationSequence">Rename operation sequence.</param>
-        public void SetRenameOperations(RenameOperationSequence<RenameOperation> renameOperationSequence)
+        public void SetRenameOperations(RenameOperationSequence<IRenameOperation> renameOperationSequence)
         {
             this.operationSequence = renameOperationSequence;
         }

@@ -30,6 +30,8 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public interface IRenameOperation
     {
+        bool HasErrors();
+
         /// <summary>
         /// Rename the specified input, using the relativeCount.
         /// </summary>
@@ -37,5 +39,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
         RenameResult Rename(string input, int relativeCount);
+
+        IRenameOperation Clone();
     }
 }

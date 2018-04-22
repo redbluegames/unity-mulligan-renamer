@@ -64,7 +64,7 @@ namespace RedBlueGames.MulliganRenamer
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "NewName";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceNameOp);
 
             var bulkRenamer = new BulkRenamer(renameSequence);
@@ -93,7 +93,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceStringOp.SearchString = "Asset";
             replaceStringOp.ReplacementString = "Thingy";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceStringOp);
 
             var bulkRenamer = new BulkRenamer(renameSequence);
@@ -131,7 +131,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceStringOp.SearchString = "Object";
             replaceStringOp.ReplacementString = "Thingy";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceStringOp);
 
             var bulkRenamer = new BulkRenamer(renameSequence);
@@ -163,7 +163,7 @@ namespace RedBlueGames.MulliganRenamer
             var enumerateOp = new EnumerateOperation();
             enumerateOp.StartingCount = 1;
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceNameOp);
             renameSequence.Add(enumerateOp);
 
@@ -220,13 +220,16 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var removeCharactersOp = new RemoveCharactersOperation();
-            var removeCharacterOptions = RemoveCharactersOperation.Numbers;
-            removeCharactersOp.Options = removeCharacterOptions;
+            var removeCharacterOptions = new RemoveCharactersOperation.Configuration();
+            removeCharacterOptions.CharactersToRemove = "\\d";
+            removeCharacterOptions.CharactersAreRegex = true;
+            removeCharacterOptions.IsCaseSensitive = false;
+            removeCharactersOp.Config = removeCharacterOptions;
 
             var enumerateOp = new EnumerateOperation();
             enumerateOp.StartingCount = 1;
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(removeCharactersOp);
             renameSequence.Add(enumerateOp);
 
@@ -271,7 +274,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceFirstNameOp.SearchString = "ConflictingObject0";
             replaceFirstNameOp.ReplacementString = "ExistingObject";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceFirstNameOp);
 
             // Act and Assert
@@ -296,7 +299,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceFirstNameOp.SearchString = "ConflictingObject0";
             replaceFirstNameOp.ReplacementString = "ExistingObject";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceFirstNameOp);
 
             var expectedNames = new List<string>
@@ -334,7 +337,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceNameOp.SearchString = "Texture_Sprite1";
             replaceNameOp.ReplacementString = "CoolSprite";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceNameOp);
 
             var path = AssetDatabase.GetAssetPath(textureWithSprites);
@@ -392,7 +395,7 @@ namespace RedBlueGames.MulliganRenamer
             replaceNameOp.SearchString = "Texture";
             replaceNameOp.ReplacementString = "Cool";
 
-            var renameSequence = new RenameOperationSequence<RenameOperation>();
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
             renameSequence.Add(replaceNameOp);
 
             var path = AssetDatabase.GetAssetPath(textureWithSprites);

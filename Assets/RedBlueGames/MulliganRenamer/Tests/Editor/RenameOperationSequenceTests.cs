@@ -52,7 +52,7 @@ namespace RedBlueGames.MulliganRenamer
             enumerateOp.CountFormat = "D4";
             enumerateOp.StartingCount = 100;
 
-            var operationSequence = new RenameOperationSequence<RenameOperation>();
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
             operationSequence.Add(trimCharactersOp);
             operationSequence.Add(replaceStringOp);
             operationSequence.Add(addStringOp);
@@ -80,11 +80,11 @@ namespace RedBlueGames.MulliganRenamer
             var trimCharactersOp = new TrimCharactersOperation();
             trimCharactersOp.NumFrontDeleteChars = 4;
 
-            var operationSequence = new RenameOperationSequence<RenameOperation>();
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
             operationSequence.Add(replaceStringOp);
             operationSequence.Add(trimCharactersOp);
 
-            var operationSequenceReversed = new RenameOperationSequence<RenameOperation>();
+            var operationSequenceReversed = new RenameOperationSequence<IRenameOperation>();
             operationSequenceReversed.Add(trimCharactersOp);
             operationSequenceReversed.Add(replaceStringOp);
 
