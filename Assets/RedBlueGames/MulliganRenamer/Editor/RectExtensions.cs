@@ -5,6 +5,15 @@
 
     public static class RectExtensions
     {
+        /// <summary>
+        /// Adds padding to the rect, where positive numbers shrink the sides.
+        /// </summary>
+        /// <returns>The padding.</returns>
+        /// <param name="rect">Rect to modify.</param>
+        /// <param name="left">Left padding.</param>
+        /// <param name="right">Right padding.</param>
+        /// <param name="top">Top padding.</param>
+        /// <param name="bottom">Bottom padding.</param>
         public static Rect AddPadding(this Rect rect, int left, int right, int top, int bottom)
         {
             // We want to think of padding as positive, not an offset, so invert it here to 
@@ -13,12 +22,26 @@
             return rect.AddOffset(offset);
         }
 
+        /// <summary>
+        /// Adds the offset into the rect.
+        /// </summary>
+        /// <returns>The offset.</returns>
+        /// <param name="rect">Rect to modify.</param>
+        /// <param name="offsetAsPadding">Offset as padding.</param>
         public static Rect AddOffset(this Rect rect, RectOffset offsetAsPadding)
         {
             var paddedRect = offsetAsPadding.Add(rect);
             return paddedRect;
         }
 
+        /// <summary>
+        /// Splits the Rect horizontally into the specified number of divisions and returns the requested division.
+        /// </summary>
+        /// <returns>The split rect.</returns>
+        /// <param name="rect">Rect to split.</param>
+        /// <param name="division">Rect division to return.</param>
+        /// <param name="numDivisions">Number of total divisions.</param>
+        /// <param name="spacing">Spacing between divisions.</param>
         public static Rect GetSplitHorizontal(this Rect rect, int division, int numDivisions, float spacing)
         {
             if (numDivisions <= 0)
@@ -36,6 +59,15 @@
             return rect.GetSplitHorizontalWeighted(division, spacing, divisionWeights);
         }
 
+        /// <summary>
+        /// Splits the Rect horizontally into divisions, with each division getting a relative weight according to its
+        /// weight in the weights array. Returns the requested division.
+        /// </summary>
+        /// <returns>The split horizontal weighted.</returns>
+        /// <param name="rect">Rect to split.</param>
+        /// <param name="division">Rect division to return.</param>
+        /// <param name="spacing">Spacing between rects.</param>
+        /// <param name="weights">Weights for each split.</param>
         public static Rect GetSplitHorizontalWeighted(this Rect rect, int division, float spacing, float[] weights)
         {
             if (weights == null || weights.Length <= 0)
@@ -59,6 +91,14 @@
             return split;
         }
 
+        /// <summary>
+        /// Splits the Rect vertically into the specified number of divisions and returns the requested division.
+        /// </summary>
+        /// <returns>The split rect.</returns>
+        /// <param name="rect">Rect to split.</param>
+        /// <param name="division">Rect division to return.</param>
+        /// <param name="numDivisions">Number of total divisions.</param>
+        /// <param name="spacing">Spacing between divisions.</param>
         public static Rect GetSplitVertical(this Rect rect, int division, int numDivisions, float spacing)
         {
             if (numDivisions <= 0)
@@ -76,6 +116,15 @@
             return rect.GetSplitVerticalWeighted(division, spacing, divisionWeights);
         }
 
+        /// <summary>
+        /// Splits the Rect vertically into divisions, with each division getting a relative weight according to its
+        /// weight in the weights array. Returns the requested division.
+        /// </summary>
+        /// <returns>The split horizontal weighted.</returns>
+        /// <param name="rect">Rect to split.</param>
+        /// <param name="division">Rect division to return.</param>
+        /// <param name="spacing">Spacing between rects.</param>
+        /// <param name="weights">Weights for each split.</param>
         public static Rect GetSplitVerticalWeighted(this Rect rect, int division, float spacing, float[] weights)
         {
             if (weights == null || weights.Length <= 0)
