@@ -30,7 +30,7 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// RenameOperation used to delete all characters in a name and replace it with an entirely new one.
     /// </summary>
-    public class ReplaceNameOperation : RenameOperation
+    public class ReplaceNameOperation : IRenameOperation
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplaceNameOperation"/> class.
@@ -51,64 +51,21 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Gets the path that's displayed when this rename op is used in the Add Op menu.
-        /// </summary>
-        /// <value>The display path.</value>
-        public override string MenuDisplayPath
-        {
-            get
-            {
-                return "Replace/Rename";
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the new name.
         /// </summary>
         /// <value>The new name.</value>
         public string NewName { get; set; }
 
-        /// <summary>
-        /// Gets the heading label for the Rename Operation.
-        /// </summary>
-        /// <value>The heading label.</value>
-        public override string HeadingLabel
+        public bool HasErrors()
         {
-            get
-            {
-                return "Rename";
-            }
-        }
-
-        /// <summary>
-        /// Gets the color to use for highlighting the operation.
-        /// </summary>
-        /// <value>The color of the highlight.</value>
-        public override Color32 HighlightColor
-        {
-            get
-            {
-                return this.ReplaceColor;
-            }
-        }
-
-        /// <summary>
-        /// Gets the name of the control to focus when this operation is focused
-        /// </summary>
-        /// <value>The name of the control to focus.</value>
-        public override string ControlToFocus
-        {
-            get
-            {
-                return "New Name";
-            }
+            return false;
         }
 
         /// <summary>
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public override RenameOperation Clone()
+        public IRenameOperation Clone()
         {
             var clone = new ReplaceNameOperation(this);
             return clone;
@@ -120,7 +77,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="input">Input String to rename.</param>
         /// <param name="relativeCount">Relative count. This can be used for enumeration.</param>
         /// <returns>A new string renamed according to the rename operation's rules.</returns>
-        public override RenameResult Rename(string input, int relativeCount)
+        public RenameResult Rename(string input, int relativeCount)
         {
             var renameResult = new RenameResult();
 
@@ -135,30 +92,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return renameResult;
-        }
-
-        /// <summary>
-        /// Gets the preferred height for the contents of the operation.
-        /// This allows inherited operations to specify their height.
-        /// </summary>
-        /// <returns>The preferred height for contents.</returns>
-        protected override float GetPreferredHeightForContents()
-        {
-            return this.CalculateGUIHeightForLines(1);
-        }
-
-        /// <summary>
-        /// Draws the contents of the Rename Op.
-        /// </summary>
-        /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
-        protected override void DrawContents(Rect operationRect, int controlPrefix)
-        {
-            // Split even a single line GUI so that we properly subtract out spacing
-            var singleLineRect = operationRect.GetSplitVertical(1, 1, RenameOperation.LineSpacing);
-
-            GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
-            this.NewName = EditorGUI.TextField(singleLineRect, newNameContent, this.NewName);
         }
     }
 }
