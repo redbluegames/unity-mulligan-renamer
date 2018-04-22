@@ -182,19 +182,6 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
-        /// Moves the operation at the specified index to another index.
-        /// </summary>
-        /// <param name="fromIndex">Index at which to pull the item.</param>
-        /// <param name="desiredIndex">Desired index for the item.</param>
-        public void MoveOperationFromIndexToIndex(int fromIndex, int desiredIndex)
-        {
-            desiredIndex = Mathf.Clamp(desiredIndex, 0, this.operationSequence.Count - 1);
-            var destinationElementCopy = this.operationSequence[desiredIndex];
-            this.operationSequence[desiredIndex] = this.operationSequence[fromIndex];
-            this.operationSequence[fromIndex] = destinationElementCopy;
-        }
-
-        /// <summary>
         /// Gets a preview of how the sequence would apply to a string with a given count.
         /// </summary>
         /// <returns>The rename preview.</returns>

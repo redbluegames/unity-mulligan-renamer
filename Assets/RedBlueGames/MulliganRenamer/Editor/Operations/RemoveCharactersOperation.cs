@@ -84,6 +84,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Checks if the operation has errors and returns true if it does.
+        /// </summary>
+        /// <returns><c>true</c>, if errors exist, <c>false</c> otherwise.</returns>
         public bool HasErrors()
         {
             return false;
@@ -115,6 +119,10 @@ namespace RedBlueGames.MulliganRenamer
             return this.InternalReplaceStringOperation.Rename(input, relativeCount);
         }
 
+        /// <summary>
+        /// Copies the state from one operation into this one
+        /// </summary>
+        /// <param name="other">Other.</param>
         public void CopyFrom(RemoveCharactersOperation other)
         {
             this.Config = other.Config;

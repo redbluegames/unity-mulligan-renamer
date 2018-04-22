@@ -59,6 +59,14 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<RenameOperationDrawerBinding> RenameOperationsToApplyWithBindings { get; set; }
 
+        private int NumRenameOperations
+        {
+            get
+            {
+                return this.RenameOperationsToApplyWithBindings.Count;
+            }
+        }
+
         private IRenameOperation OperationToForceFocus { get; set; }
 
         private int FocusedRenameOpIndex
@@ -80,7 +88,7 @@ namespace RedBlueGames.MulliganRenamer
             get
             {
                 var focusedOpIndex = this.FocusedRenameOpIndex;
-                if (focusedOpIndex >= 0 && focusedOpIndex < this.RenameOperationsToApplyWithBindings.Count)
+                if (focusedOpIndex >= 0 && focusedOpIndex < this.NumRenameOperations)
                 {
                     return this.RenameOperationsToApplyWithBindings[this.FocusedRenameOpIndex].Operation;
                 }
@@ -487,10 +495,10 @@ namespace RedBlueGames.MulliganRenamer
 
             // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
             // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
-            this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.RenameOperationsToApplyWithBindings.Count <= 1;
+            this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.NumRenameOperations <= 1;
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
 
-            EditorGUI.BeginDisabledGroup(this.RenameOperationsToApplyWithBindings.Count <= 1);
+            EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
             var buttonText = "Preview Steps";
             var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
             var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y + 1);
@@ -501,7 +509,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawBreadcrumbs(bool isShowingPreviewSteps, Rect rect)
         {
-            if (this.RenameOperationsToApplyWithBindings.Count == 0)
+            if (this.NumRenameOperations == 0)
             {
                 var emptyBreadcrumbRect = new Rect(rect);
                 emptyBreadcrumbRect.width = 20.0f;
@@ -514,7 +522,7 @@ namespace RedBlueGames.MulliganRenamer
                 if (isShowingPreviewSteps)
                 {
                     var totalWidth = 0.0f;
-                    for (int i = 0; i < this.RenameOperationsToApplyWithBindings.Count; ++i)
+                    for (int i = 0; i < this.NumRenameOperations; ++i)
                     {
                         var drawerAtBreadcrumb = this.RenameOperationsToApplyWithBindings[i].Drawer;
                         var breadcrumbOption = new PreviewBreadcrumbOptions();
@@ -554,7 +562,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             var totalHeightOfOperations = 0.0f;
             var operationSpacing = 0.0f;
-            for (int i = 0; i < this.RenameOperationsToApplyWithBindings.Count; ++i)
+            for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 var drawer = RenameOperationsToApplyWithBindings[i].Drawer;
                 totalHeightOfOperations += drawer.GetPreferredHeight() + operationSpacing;
@@ -612,7 +620,7 @@ namespace RedBlueGames.MulliganRenamer
             IRenameOperation operationToFocus = null;
 
             var totalHeightDrawn = 0.0f;
-            for (int i = 0; i < this.RenameOperationsToApplyWithBindings.Count; ++i)
+            for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 var currentElement = this.RenameOperationsToApplyWithBindings[i];
                 var rect = new Rect(operationRect);
@@ -623,14 +631,13 @@ namespace RedBlueGames.MulliganRenamer
                 var guiOptions = new RenameOperationGUIOptions();
                 guiOptions.ControlPrefix = i;
                 guiOptions.DisableUpButton = i == 0;
-                guiOptions.DisableDownButton = i == this.RenameOperationsToApplyWithBindings.Count - 1;
+                guiOptions.DisableDownButton = i == this.NumRenameOperations - 1;
                 var buttonClickEvent = currentElement.Drawer.DrawGUI(rect, guiOptions);
                 switch (buttonClickEvent)
                 {
                     case RenameOperationSortingButtonEvent.MoveUp:
                         {
-                            // TODO: MOVE UP
-                            //this.RenameOperationsToApplyWithBindings.MoveOperationFromIndexToIndex(i, i - 1);
+                            this.RenameOperationsToApplyWithBindings.MoveElementFromIndexToIndex(i, i - 1);
                             saveOpsToPreferences = true;
 
                             // Move focus with the RenameOp. This techincally changes their focus within the 
@@ -641,8 +648,7 @@ namespace RedBlueGames.MulliganRenamer
 
                     case RenameOperationSortingButtonEvent.MoveDown:
                         {
-                            // TODO: MOVE DOWN
-                            //this.RenameOperationsToApplyWithBindings.MoveOperationFromIndexToIndex(i, i + 1);
+                            this.RenameOperationsToApplyWithBindings.MoveElementFromIndexToIndex(i, i + 1);
                             saveOpsToPreferences = true;
                             operationToFocus = focusedOpBeforeButtonPresses;
                             break;
@@ -650,16 +656,15 @@ namespace RedBlueGames.MulliganRenamer
 
                     case RenameOperationSortingButtonEvent.Delete:
                         {
-                            // DELETE
                             var removingFocusedOperation = focusedOpBeforeButtonPresses == currentElement;
 
                             this.RenameOperationsToApplyWithBindings.RemoveAt(i);
                             saveOpsToPreferences = true;
 
-                            if (removingFocusedOperation && this.RenameOperationsToApplyWithBindings.Count > 0)
+                            if (removingFocusedOperation && this.NumRenameOperations > 0)
                             {
                                 // Focus the RenameOp that took this one's place, if there is one. 
-                                var indexToFocus = Mathf.Min(this.RenameOperationsToApplyWithBindings.Count - 1, i);
+                                var indexToFocus = Mathf.Min(this.NumRenameOperations - 1, i);
                                 operationToFocus = this.RenameOperationsToApplyWithBindings[indexToFocus].Operation;
                             }
                             else
@@ -818,8 +823,8 @@ namespace RedBlueGames.MulliganRenamer
             int renameStep = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
             string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
             string newNameColumnHeader = "After";
-            bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.RenameOperationsToApplyWithBindings.Count == 1;
-            bool shouldShowThirdColumn = !this.IsShowingPreviewSteps || this.RenameOperationsToApplyWithBindings.Count > 1;
+            bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
+            bool shouldShowThirdColumn = !this.IsShowingPreviewSteps || this.NumRenameOperations > 1;
             var firstColumnWidth = previewContents.LongestOriginalNameWidth;
             var secondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
             var thirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
@@ -1032,10 +1037,10 @@ namespace RedBlueGames.MulliganRenamer
         private void SaveRenameOperationsToPreferences()
         {
             var allOpPathsCommaSeparated = string.Empty;
-            for (int i = 0; i < this.RenameOperationsToApplyWithBindings.Count; ++i)
+            for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 allOpPathsCommaSeparated += this.RenameOperationsToApplyWithBindings[i].Drawer.MenuDisplayPath;
-                if (i != this.RenameOperationsToApplyWithBindings.Count - 1)
+                if (i != this.NumRenameOperations - 1)
                 {
                     allOpPathsCommaSeparated += ",";
                 }
@@ -1071,7 +1076,7 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            if (this.RenameOperationsToApplyWithBindings.Count > 0)
+            if (this.NumRenameOperations > 0)
             {
                 this.FocusRenameOperationDeferred(this.RenameOperationsToApplyWithBindings.First().Operation);
             }
@@ -1090,7 +1095,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var controlNameToForceFocus = string.Empty;
-            for (int i = 0; i < this.RenameOperationsToApplyWithBindings.Count; ++i)
+            for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 var binding = this.RenameOperationsToApplyWithBindings[i];
                 if (binding.Operation == this.OperationToForceFocus)

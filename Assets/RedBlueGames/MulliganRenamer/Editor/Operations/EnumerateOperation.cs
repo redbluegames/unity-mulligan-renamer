@@ -71,6 +71,9 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public int Increment { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the count string format specified is parsable.
+        /// </summary>
         public bool IsCountStringFormatValid
         {
             get
@@ -87,6 +90,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Checks if this RenameOperation has errors in its configuration.
+        /// </summary>
+        /// <returns><c>true</c>, if operation has errors, <c>false</c> otherwise.</returns>
         public bool HasErrors()
         {
             return false;
