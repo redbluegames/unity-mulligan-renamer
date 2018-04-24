@@ -116,19 +116,15 @@ namespace RedBlueGames.MulliganRenamer
         public void RemoveSymbols_StringHasWhitespaceAndSymbols_KeepsWhitespace()
         {
             // Arrange
-            var name = "A B ~[ ]?CD ";
+            var name = "!A !";
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
 
             var expected = new RenameResult()
             {
-                new Diff("A B ", DiffOperation.Equal),
-                new Diff("~", DiffOperation.Deletion),
-                new Diff("[", DiffOperation.Deletion),
-                new Diff(" ", DiffOperation.Equal),
-                new Diff("]", DiffOperation.Deletion),
-                new Diff("?", DiffOperation.Deletion),
-                new Diff("CD ", DiffOperation.Equal),
+                new Diff("!", DiffOperation.Deletion),
+                new Diff("A ", DiffOperation.Equal),
+                new Diff("!", DiffOperation.Deletion),
             };
 
             // Act
@@ -177,6 +173,50 @@ namespace RedBlueGames.MulliganRenamer
             var name = "1234567890";
             var removeCharactersOp = new RemoveCharactersOperation();
             removeCharactersOp.Config = RemoveCharactersOperation.Numbers;
+
+            var expected = new RenameResult();
+            for (int i = 0; i < name.Length; ++i)
+            {
+                var substring = name.Substring(i, 1);
+                expected.Add(new Diff(substring, DiffOperation.Deletion));
+            }
+
+            // Act
+            var result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveWhitespace_LettersSymbolsAndWhitespaceInString_RemovesOnlyWhitespace()
+        {
+            // Arrange
+            var name = "A1! B";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Config = RemoveCharactersOperation.Whitespace;
+
+            var expected = new RenameResult()
+            {
+                new Diff("A1!", DiffOperation.Equal),
+                new Diff(" ", DiffOperation.Deletion),
+                new Diff("B", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RemoveWhitespace_AllWhitespace_IsEmpty()
+        {
+            // Arrange
+            var name = "    ";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Config = RemoveCharactersOperation.Whitespace;
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)

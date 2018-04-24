@@ -184,6 +184,15 @@
                 IsReadOnly = true
             };
 
+            var whitespacePreset = new CharacterPresetGUI()
+            {
+                DisplayName = "Whitespace",
+                ReadOnlyLabel = "Removes whitespace",
+                Options = RemoveCharactersOperation.Whitespace,
+                IsReadOnly = true
+            };
+
+
             var customOptions = new RemoveCharactersOperation.Configuration();
             customOptions.CharactersToRemove = string.Empty;
             customOptions.IsCaseSensitive = false;
@@ -200,6 +209,7 @@
             {
                 symbolsPreset,
                 numbersPreset,
+                whitespacePreset,
                 customPreset
             };
         }
