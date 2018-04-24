@@ -47,6 +47,13 @@ namespace RedBlueGames.MulliganRenamer
             IsCaseSensitive = false
         };
 
+        public static readonly RemoveCharactersOperation.Configuration Whitespace = new RemoveCharactersOperation.Configuration()
+        {
+            CharactersToRemove = "\\s",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+
         private ReplaceStringOperation internalReplaceStringOperation;
 
         /// <summary>
