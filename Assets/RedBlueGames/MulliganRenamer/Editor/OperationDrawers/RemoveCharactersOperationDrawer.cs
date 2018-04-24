@@ -6,29 +6,6 @@
 
     public class RemoveCharactersOperationDrawer : RenameOperationDrawer<RemoveCharactersOperation>
     {
-        public static readonly RemoveCharactersOperation.Configuration Symbols = new RemoveCharactersOperation.Configuration()
-        {
-            CharactersToRemove = "\\W",
-            CharactersAreRegex = true,
-            IsCaseSensitive = false
-        };
-
-        public static readonly RemoveCharactersOperation.Configuration Numbers = new RemoveCharactersOperation.Configuration()
-        {
-            CharactersToRemove = "\\d",
-            CharactersAreRegex = true,
-            IsCaseSensitive = false
-        };
-
-        private RemoveCharactersOperation.Configuration custom = new RemoveCharactersOperation.Configuration()
-        {
-            CharactersToRemove = string.Empty,
-            IsCaseSensitive = false,
-            CharactersAreRegex = false
-        };
-
-        private ReplaceStringOperation internalReplaceStringOperation;
-
         public RemoveCharactersOperationDrawer()
         {
             this.Initialize();
@@ -195,7 +172,7 @@
             {
                 DisplayName = "Symbols",
                 ReadOnlyLabel = "Removes special characters (ie. !@#$%^&*)",
-                Options = Symbols,
+                Options = RemoveCharactersOperation.Symbols,
                 IsReadOnly = true
             };
 
@@ -203,14 +180,18 @@
             {
                 DisplayName = "Numbers",
                 ReadOnlyLabel = "Removes digits 0-9",
-                Options = Numbers,
+                Options = RemoveCharactersOperation.Numbers,
                 IsReadOnly = true
             };
 
+            var customOptions = new RemoveCharactersOperation.Configuration();
+            customOptions.CharactersToRemove = string.Empty;
+            customOptions.IsCaseSensitive = false;
+            customOptions.CharactersAreRegex = false;
             var customPreset = new CharacterPresetGUI()
             {
                 DisplayName = "Custom",
-                Options = this.custom,
+                Options = customOptions,
                 IsReadOnly = false,
                 ReadOnlyLabel = string.Empty
             };

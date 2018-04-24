@@ -33,6 +33,20 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class RemoveCharactersOperation : IRenameOperation
     {
+        public static readonly RemoveCharactersOperation.Configuration Symbols = new RemoveCharactersOperation.Configuration()
+        {
+            CharactersToRemove = "^\\s\\w",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+
+        public static readonly RemoveCharactersOperation.Configuration Numbers = new RemoveCharactersOperation.Configuration()
+        {
+            CharactersToRemove = "\\d",
+            CharactersAreRegex = true,
+            IsCaseSensitive = false
+        };
+
         private ReplaceStringOperation internalReplaceStringOperation;
 
         /// <summary>
