@@ -30,20 +30,6 @@ namespace RedBlueGames.MulliganRenamer
 
     public class RemoveCharactersOpTests
     {
-        public static readonly RemoveCharactersOperation.Configuration Symbols = new RemoveCharactersOperation.Configuration()
-        {
-            CharactersToRemove = "\\W",
-            CharactersAreRegex = true,
-            IsCaseSensitive = false
-        };
-
-        public static readonly RemoveCharactersOperation.Configuration Numbers = new RemoveCharactersOperation.Configuration()
-        {
-            CharactersToRemove = "\\d",
-            CharactersAreRegex = true,
-            IsCaseSensitive = false
-        };  
-
         [Test]
         public void RemoveCharacters_NullTarget_IsUnchanged()
         {
@@ -82,7 +68,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A!@#$%BD*(";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = Symbols;
+            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
 
             var expected = new RenameResult()
             {
@@ -110,7 +96,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "`~!@#$%^&*()+-=[]{}\\|;:'\",<.>/?";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = Symbols;
+            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -127,12 +113,38 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void RemoveSymbols_StringHasWhitespaceAndSymbols_KeepsWhitespace()
+        {
+            // Arrange
+            var name = "A B ~[ ]?CD ";
+            var removeCharactersOp = new RemoveCharactersOperation();
+            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
+
+            var expected = new RenameResult()
+            {
+                new Diff("A B ", DiffOperation.Equal),
+                new Diff("~", DiffOperation.Deletion),
+                new Diff("[", DiffOperation.Deletion),
+                new Diff(" ", DiffOperation.Equal),
+                new Diff("]", DiffOperation.Deletion),
+                new Diff("?", DiffOperation.Deletion),
+                new Diff("CD ", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = removeCharactersOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void RemoveNumbers_LettersAndNumbersInString_RemovesOnlyNumbers()
         {
             // Arrange
             var name = "A251B637k911p";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = Numbers;
+            removeCharactersOp.Config = RemoveCharactersOperation.Numbers;
 
             var expected = new RenameResult()
             {
@@ -164,7 +176,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "1234567890";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = Numbers;
+            removeCharactersOp.Config = RemoveCharactersOperation.Numbers;
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
