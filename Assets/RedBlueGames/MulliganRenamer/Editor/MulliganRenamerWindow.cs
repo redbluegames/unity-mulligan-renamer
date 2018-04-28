@@ -874,7 +874,7 @@ namespace RedBlueGames.MulliganRenamer
 
             GUI.EndScrollView();
 
-            // Put dividers in group so that they scroll
+            // Put dividers in group so that they scroll (horizontally)
             GUI.BeginGroup(previewPanelRect);
             var oldColor = GUI.color;
             GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
@@ -892,9 +892,14 @@ namespace RedBlueGames.MulliganRenamer
                 1.0f,
                 dividerHeight - 1.0f);
             GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
-            var secondDividerRect = new Rect(firstDividerRect);
-            secondDividerRect.x += firstColumnWidth;
-            GUI.DrawTexture(secondDividerRect, Texture2D.whiteTexture);
+
+            if (shouldShowThirdColumn)
+            {
+                var secondDividerRect = new Rect(firstDividerRect);
+                secondDividerRect.x += secondColumnWidth;
+                GUI.DrawTexture(secondDividerRect, Texture2D.whiteTexture);
+            }
+
             GUI.color = oldColor;
             GUI.EndGroup();
 
