@@ -863,9 +863,10 @@ namespace RedBlueGames.MulliganRenamer
             // Add the hint into the scroll view if there's room
             var hintRect = new Rect(scrollRect);
             hintRect.height = EditorGUIUtility.singleLineHeight;
-            var contentsFitWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height &&
-                                                                scrollContentsRect.width <= scrollRect.width;
-            if (contentsFitWithoutScrolling)
+            var contentsFitHorizontallyWithoutScrolling = scrollContentsRect.width <= scrollRect.width;
+            var contentsFitVerticallyWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
+            var contentsFitWithoutAnyScrolling = contentsFitVerticallyWithoutScrolling && contentsFitVerticallyWithoutScrolling;
+            if (contentsFitVerticallyWithoutScrolling)
             {
                 hintRect.y += scrollRect.height - hintRect.height;
                 EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
@@ -879,11 +880,17 @@ namespace RedBlueGames.MulliganRenamer
             GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
 
             // Add 1 into y for the position so that it doesn't render on the panel's border
+            var dividerHeight = previewPanelRect.height - 1.0f;
+            if (!contentsFitHorizontallyWithoutScrolling)
+            {
+                var scrollbarHeight = 14.0f;
+                dividerHeight -= scrollbarHeight;
+            }
             var firstDividerRect = new Rect(
                 -this.previewPanelScrollPosition.x + firstColumnWidth + hackSizeForRowIcons,
                 1.0f,
                 1.0f,
-                previewPanelRect.height - 1.0f);
+                dividerHeight - 1.0f);
             GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
             var secondDividerRect = new Rect(firstDividerRect);
             secondDividerRect.x += firstColumnWidth;
@@ -891,7 +898,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.color = oldColor;
             GUI.EndGroup();
 
-            return contentsFitWithoutScrolling;
+            return contentsFitVerticallyWithoutScrolling;
         }
 
         private void DrawPreviewHeader(
