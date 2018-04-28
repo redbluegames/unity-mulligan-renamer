@@ -866,7 +866,7 @@ namespace RedBlueGames.MulliganRenamer
             var contentsFitHorizontallyWithoutScrolling = scrollContentsRect.width <= scrollRect.width;
             var contentsFitVerticallyWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
             var contentsFitWithoutAnyScrolling = contentsFitVerticallyWithoutScrolling && contentsFitVerticallyWithoutScrolling;
-            if (contentsFitVerticallyWithoutScrolling)
+            if (contentsFitWithoutAnyScrolling)
             {
                 hintRect.y += scrollRect.height - hintRect.height;
                 EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
@@ -903,7 +903,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.color = oldColor;
             GUI.EndGroup();
 
-            return contentsFitVerticallyWithoutScrolling;
+            return contentsFitWithoutAnyScrolling;
         }
 
         private void DrawPreviewHeader(
