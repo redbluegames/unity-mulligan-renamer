@@ -102,15 +102,34 @@ namespace RedBlueGames.MulliganRenamer
             // sprites are added and later renamed).
             // We know all the sprites have the same path because it is enforced
             // in the Add function.
-            var pathToTexture = GetPathToTextureForFirstSprite ();
+            var pathToTexture = GetPathToTextureForFirstSprite();
             var pathToTextureMetaFile = pathToTexture + ".meta";
             string metaFileWithRenames = System.IO.File.ReadAllText(pathToTextureMetaFile);
 
+            var spritesAndUniqueNames = new Dictionary<Sprite, string>();
             foreach (var spriteNamePair in this.SpritesAndNewNames)
             {
+                // First we set all sprites to a (almost) guaranteed unique name. This prevents us from
+                // naming it the same as another sprite in the sheet, which can result in both sprites being renamed and
+                // puts the spritesheet in an invalid state (no two sprites can share a name).
                 var sprite = spriteNamePair.Key;
-                metaFileWithRenames = ReplaceSpriteInMetaFile(metaFileWithRenames, sprite, spriteNamePair.Value);
-                sprite.name = spriteNamePair.Value;
+                var tempUniqueName = string.Concat(spriteNamePair.Value, Random.Range(100000, 999999));
+                spritesAndUniqueNames.Add(sprite, tempUniqueName);
+                metaFileWithRenames = ReplaceSpriteNameInMetaFile(metaFileWithRenames, sprite.name, tempUniqueName);
+            }
+
+            foreach (var uniqueSpriteNamePair in spritesAndUniqueNames)
+            {
+                var sprite = uniqueSpriteNamePair.Key;
+                var uniqueName = uniqueSpriteNamePair.Value;
+
+                // Strip off the random characters we added to make this sprite have a unique name
+                var newName = uniqueName.Substring(0, uniqueName.Length - 6);
+                metaFileWithRenames = ReplaceSpriteNameInMetaFile(metaFileWithRenames, uniqueName, newName);
+
+                // Write the new name to the sprite so that the sprite in memory has the new name, or else undo
+                // can't map it back to the previous sprite.
+                sprite.name = newName;
             }
 
             // If users have hidden meta files they will get an access exception.
@@ -123,10 +142,10 @@ namespace RedBlueGames.MulliganRenamer
             AssetDatabase.ImportAsset(pathToTexture);
         }
 
-        private static string ReplaceSpriteInMetaFile(string metafileText, Sprite sprite, string newName)
+        private static string ReplaceSpriteNameInMetaFile(string metafileText, string spriteName, string newName)
         {
-            string modifiedMetafile = ReplaceFileIDRecycleNames(metafileText, sprite.name, newName);
-            modifiedMetafile = ReplaceSpriteData(modifiedMetafile, sprite.name, newName);
+            string modifiedMetafile = ReplaceFileIDRecycleNames(metafileText, spriteName, newName);
+            modifiedMetafile = ReplaceSpriteData(modifiedMetafile, spriteName, newName);
             return modifiedMetafile;
         }
 
