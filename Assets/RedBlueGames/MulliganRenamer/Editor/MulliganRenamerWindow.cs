@@ -836,6 +836,16 @@ namespace RedBlueGames.MulliganRenamer
             var hackSizeForRowIcons = 48.0f;
             scrollContentsRect.width = totalColumnWidth + hackSizeForRowIcons;
 
+            var contentsFitHorizontallyWithoutScrolling = scrollContentsRect.width <= scrollRect.width;
+
+            // WORKAROUND FOR 5.5.5: Somehow you could "scroll" the preview area, even
+            // when there was nothing to scroll. Force it to not think it's scrolled because
+            // that was screwing up the Header.
+            if (contentsFitHorizontallyWithoutScrolling)
+            {
+                this.previewPanelScrollPosition.x = 0;
+            }
+
             this.DrawPreviewHeader(
                 headerRect,
                 -this.previewPanelScrollPosition.x,
@@ -863,7 +873,6 @@ namespace RedBlueGames.MulliganRenamer
             // Add the hint into the scroll view if there's room
             var hintRect = new Rect(scrollRect);
             hintRect.height = EditorGUIUtility.singleLineHeight;
-            var contentsFitHorizontallyWithoutScrolling = scrollContentsRect.width <= scrollRect.width;
             var contentsFitVerticallyWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
             var contentsFitWithoutAnyScrolling = contentsFitVerticallyWithoutScrolling && contentsFitVerticallyWithoutScrolling;
             if (contentsFitWithoutAnyScrolling)
