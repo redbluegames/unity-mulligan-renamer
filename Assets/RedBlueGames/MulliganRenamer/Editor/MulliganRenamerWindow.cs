@@ -34,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerWindow : EditorWindow
     {
-        private const string VersionString = "1.2.1";
+        private const string VersionString = "1.3.0";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
