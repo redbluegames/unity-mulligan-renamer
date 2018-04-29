@@ -156,7 +156,9 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_Spritesheet_Renames()
         {
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet(2, "Texture.png", "Texture_Sprite");
+            var spriteSheetConfig = new SpriteSheetGenerationConfig(2, "Texture.png");
+            spriteSheetConfig.NamePrefix = "Texture_Sprite";
+            var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
             var replaceNameOp = new ReplaceNameOperation();
             replaceNameOp.NewName = "NewSprite";
 
@@ -332,7 +334,9 @@ namespace RedBlueGames.MulliganRenamer
         {
             // Tests Issue #143: https://github.com/redbluegames/unity-mulligan-renamer/issues/143
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet(4, "Texture.png", "Texture_Sprite");
+            var spriteSheetConfig = new SpriteSheetGenerationConfig(4, "Texture.png");
+            spriteSheetConfig.NamePrefix = "Texture_Sprite";
+            var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
             var replaceNameOp = new ReplaceStringOperation();
             replaceNameOp.SearchString = "Texture_Sprite1";
             replaceNameOp.ReplacementString = "CoolSprite";
@@ -390,7 +394,9 @@ namespace RedBlueGames.MulliganRenamer
         {
             // Tests Issue #139: https://github.com/redbluegames/unity-mulligan-renamer/issues/139
             // Arrange
-            var textureWithSprites = this.SetupSpriteSheet(1, "Texture.png", "Texture_Sprite");
+            var spriteSheetConfig = new SpriteSheetGenerationConfig(1, "Texture.png");
+            spriteSheetConfig.NamePrefix = "Texture_Sprite";
+            var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
             var replaceNameOp = new ReplaceStringOperation();
             replaceNameOp.SearchString = "Texture";
             replaceNameOp.ReplacementString = "Cool";
@@ -421,16 +427,68 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(expectedNames, resultingNames);
         }
 
-        private Texture2D SetupSpriteSheet(int cellsPerSide, string textureName, string namePrefix)
+        [Test]
+        public void RenameObjects_SpritesheetWithNamesThatWillOverlap_Renames()
+        {
+            // Tests Issue #126: https://github.com/redbluegames/unity-mulligan-renamer/issues/126
+            // Arrange
+            var spriteSheetConfig = new SpriteSheetGenerationConfig(2, "Texture.png");
+            spriteSheetConfig.NamePrefix = "Texture_Sprite";
+            spriteSheetConfig.UseZeroBasedIndexing = true;
+            var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
+            var removeNumbersOp = new RemoveCharactersOperation();
+            removeNumbersOp.Config = RemoveCharactersOperation.Numbers;
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.StartingCount = 1;
+            enumerateOp.Increment = 1;
+
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
+            renameSequence.Add(removeNumbersOp);
+            renameSequence.Add(enumerateOp);
+
+            var path = AssetDatabase.GetAssetPath(textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+            var allSprites = new List<Object>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                if (asset is Sprite)
+                {
+                    allSprites.Add(asset);
+                }
+            }
+
+            // Act
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(allSprites, true);
+
+            // Assert
+            var expectedNames = new List<string>
+            {
+                "Texture_Sprite1",
+                "Texture_Sprite2",
+                "Texture_Sprite3",
+                "Texture_Sprite4",
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var sprite in allSprites)
+            {
+                resultingNames.Add(sprite.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
+        private Texture2D SetupSpriteSheet(SpriteSheetGenerationConfig config)
         {
             var cellSize = 32;
             var texture = new Texture2D(
-                cellSize * cellsPerSide,
-                cellSize * cellsPerSide,
+                cellSize * config.CellsPerSide,
+                cellSize * config.CellsPerSide,
                 TextureFormat.ARGB32,
                 false,
                 true);
-            var size = Vector2.one * cellSize * cellsPerSide;
+            var size = Vector2.one * cellSize * config.CellsPerSide;
             for (int x = 0; x < size.x; ++x)
             {
                 for (int y = 0; y < size.y; ++y)
@@ -442,7 +500,7 @@ namespace RedBlueGames.MulliganRenamer
             texture.Apply();
 
             // Need to save the texture as an Asset and store a reference to the Asset
-            var path = string.Concat(TestFixturesDirectory, textureName);
+            var path = string.Concat(TestFixturesDirectory, config.TextureName);
             byte[] bytes = texture.EncodeToPNG();
             System.IO.File.WriteAllBytes(path, bytes);
             AssetDatabase.ImportAsset(path);
@@ -452,16 +510,17 @@ namespace RedBlueGames.MulliganRenamer
             importer.isReadable = true;
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Multiple;
-            var spriteMetaData = new SpriteMetaData[cellsPerSide * cellsPerSide];
-            for (int i = 0; i < cellsPerSide; ++i)
+            var spriteMetaData = new SpriteMetaData[config.CellsPerSide * config.CellsPerSide];
+            for (int i = 0; i < config.CellsPerSide; ++i)
             {
-                for (int j = 0; j < cellsPerSide; ++j)
+                for (int j = 0; j < config.CellsPerSide; ++j)
                 {
-                    var cellIndex = i * cellsPerSide + j;
+                    var cellIndex = i * config.CellsPerSide + j;
                     var x = i * cellSize;
                     var y = j * cellSize;
                     spriteMetaData[cellIndex].rect = new Rect(x, y, cellSize, cellSize);
-                    var name = string.Concat(namePrefix, (cellIndex + 1).ToString());
+                    var spriteCount = config.UseZeroBasedIndexing ? cellIndex : cellIndex + 1;
+                    var name = string.Concat(config.NamePrefix, spriteCount.ToString());
                     spriteMetaData[cellIndex].name = name;
                 }
             }
@@ -470,6 +529,20 @@ namespace RedBlueGames.MulliganRenamer
             importer.SaveAndReimport();
 
             return textureWithSprites;
+        }
+
+        private class SpriteSheetGenerationConfig
+        {
+            public int CellsPerSide { get; set; }
+            public string TextureName { get; set; }
+            public string NamePrefix { get; set; }
+            public bool UseZeroBasedIndexing { get; set; }
+
+            public SpriteSheetGenerationConfig(int cellsPerSide, string textureName)
+            {
+                this.CellsPerSide = cellsPerSide;
+                this.TextureName = textureName;
+            }
         }
     }
 }
