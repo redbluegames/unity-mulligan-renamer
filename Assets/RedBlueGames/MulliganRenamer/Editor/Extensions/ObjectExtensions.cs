@@ -54,7 +54,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 if (unityObject is GameObject)
                 {
-                    icon = EditorGUIUtility.FindTexture("GameObject Icon");
+                    icon = EditorGUIUtility.ObjectContent(null, typeof(GameObject)).image;
                 }
                 else
                 {
