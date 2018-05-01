@@ -886,7 +886,14 @@ namespace RedBlueGames.MulliganRenamer
             // Put dividers in group so that they scroll (horizontally)
             GUI.BeginGroup(previewPanelRect);
             var oldColor = GUI.color;
-            GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+            if (EditorGUIUtility.isProSkin)
+            {
+                GUI.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
+            }
+            else
+            {
+                GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+            }
 
             // Add 1 into y for the position so that it doesn't render on the panel's border
             var dividerHeight = previewPanelRect.height - 1.0f;
