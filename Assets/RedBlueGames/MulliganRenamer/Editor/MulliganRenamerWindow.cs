@@ -55,7 +55,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<RenameOperationDrawerBinding> RenameOperationDrawerBindingPrototypes { get; set; }
 
-        private List<UnityEngine.Object> ObjectsToRename { get; set; }
+        private UniqueList<UnityEngine.Object> ObjectsToRename { get; set; }
 
         private List<RenameOperationDrawerBinding> RenameOperationsToApplyWithBindings { get; set; }
 
@@ -127,16 +127,16 @@ namespace RedBlueGames.MulliganRenamer
 
         private static bool ObjectIsValidForRename(UnityEngine.Object obj)
         {
+            if (obj is GameObject)
+            {
+                return true;
+            }
+
             if (AssetDatabase.Contains(obj))
             {
                 // Create -> Prefab results in assets that have no name. Typically you can't have Assets that have no name,
                 // so we will just ignore them for the utility.
                 return !string.IsNullOrEmpty(obj.name);
-            }
-
-            if (obj is GameObject)
-            {
-                return true;
             }
 
             return false;
@@ -243,7 +243,7 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanelScrollPosition = Vector2.zero;
 
             this.RenameOperationsToApplyWithBindings = new List<RenameOperationDrawerBinding>();
-            this.ObjectsToRename = new List<UnityEngine.Object>();
+            this.ObjectsToRename = new UniqueList<UnityEngine.Object>();
 
             this.CacheRenameOperationPrototypes();
             this.LoadSavedRenameOperations();
@@ -428,7 +428,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             this.BulkRenamer.SetRenameOperations(operationSequence);
-            var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename);
+            var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
             this.DrawPreviewPanel(previewPanelRect, bulkRenamePreview);
 
             var disableRenameButton =
@@ -450,7 +450,7 @@ namespace RedBlueGames.MulliganRenamer
                 var skipWarning = !bulkRenamePreview.HasWarnings;
                 if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
-                    this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename);
+                    this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename.ToList());
                     this.ObjectsToRename.Clear();
                 }
 
