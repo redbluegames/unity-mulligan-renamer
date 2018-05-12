@@ -120,7 +120,6 @@
 
             this.saveData.StyleCopSettingsFilePath = filePath;
 
-            // TODO: This feels a little sloppy...
             this.cachedIsStyleCopSettingsFileValid = true;
             this.CheckStyleCopFileSynced();
         }
@@ -249,7 +248,6 @@
                 if (this.SaveData == null)
                 {
                     // Uhh, wut.
-                    // TODO: Error message instead of throwing?
                     throw new System.InvalidOperationException("Failed to create StyleCopIgnoreUtility asset!");
                 }
             }

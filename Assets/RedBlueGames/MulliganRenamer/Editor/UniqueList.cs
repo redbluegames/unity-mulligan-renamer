@@ -8,6 +8,7 @@
     /// <summary>
     /// UniqueList enforces all elements in the list are unique, allowing for constant time Contains
     /// via a hashset.
+    /// TODO: This class should have tests
     /// </summary>
     public class UniqueList<T> : IList<T>
     {
