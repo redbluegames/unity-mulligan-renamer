@@ -321,7 +321,7 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.ShowPreviewSteps = this.IsShowingPreviewSteps;
             this.previewPanel.IsPreviewStepModePreference = this.IsPreviewStepModePreference;
             this.previewPanel.DisableAddSelectedObjectsButton = this.GetValidSelectedObjects().Count == 0;
-            this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
+            this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
 
             var disableRenameButton =
                 this.RenameOperatationsHaveErrors() ||
