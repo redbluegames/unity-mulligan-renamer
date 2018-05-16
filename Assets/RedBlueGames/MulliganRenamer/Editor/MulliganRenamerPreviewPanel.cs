@@ -34,8 +34,6 @@
         private GUIContents guiContents;
         private GUIStyles guiStyles;
 
-        public Vector2 PreviewPanelScrollPosition { get; private set; }
-
         public bool DisableAddSelectedObjectsButton { get; set; }
         public int NumRenameOperations { get; set; }
         public bool IsPreviewStepModePreference { get; set; }
@@ -213,7 +211,7 @@
             this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
         }
 
-        public void Draw(Rect previewPanelRect, Vector2 previewPanelScrollPosition, BulkRenamePreview preview)
+        public Vector2 Draw(Rect previewPanelRect, Vector2 previewPanelScrollPosition, BulkRenamePreview preview)
         {
             var spaceBetweenFooterAndScrollview = 2.0f;
             var panelFooterToolbar = new Rect(previewPanelRect);
@@ -227,6 +225,7 @@
 
             bool panelIsEmpty = preview.NumObjects == 0;
             var contentsFitWithoutScrolling = false;
+            var newScrollPosition = Vector2.zero;
             if (panelIsEmpty)
             {
                 this.DrawPreviewPanelContentsEmpty(scrollViewRect);
@@ -245,7 +244,7 @@
                     shouldShowSecondColumn,
                     shouldShowThirdColumn);
 
-                this.DrawPreviewPanelContentsWithItems(
+                newScrollPosition = this.DrawPreviewPanelContentsWithItems(
                     scrollLayout,
                     contentsLayout,
                     previewPanelScrollPosition,
@@ -295,6 +294,8 @@
                     EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
                 }
             }
+
+            return newScrollPosition;
         }
 
         private void DrawPreviewPanelContentsEmpty(Rect previewPanelRect)
@@ -345,7 +346,7 @@
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
-        private void DrawPreviewPanelContentsWithItems(
+        private Vector2 DrawPreviewPanelContentsWithItems(
             PreviewPanelLayout scrollLayout,
             PreviewPanelContentsLayout contentsLayout,
             Vector2 previewPanelScrollPosition,
@@ -373,13 +374,13 @@
                 contentsLayout.SecondColumnWidth,
                 contentsLayout.ThirdColumnWidth);
 
-            this.PreviewPanelScrollPosition = GUI.BeginScrollView(
+            var newScrollPosition = GUI.BeginScrollView(
                 scrollLayout.ScrollRect,
                 previewPanelScrollPosition,
                 contentsLayout.Rect);
 
             // Show the one that doesn't quite fit by subtracting one
-            var firstItemIndex = Mathf.Max(Mathf.FloorToInt(this.PreviewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
+            var firstItemIndex = Mathf.Max(Mathf.FloorToInt(newScrollPosition.y / PreviewRowHeight) - 1, 0);
 
             // Add one for the one that's off screen.
             var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 1;
@@ -419,7 +420,7 @@
             }
 
             var firstDividerRect = new Rect(
-                -this.PreviewPanelScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
+                -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
                 1.0f,
                 1.0f,
                 dividerHeight - 1.0f);
@@ -434,6 +435,8 @@
 
             GUI.color = oldColor;
             GUI.EndGroup();
+
+            return newScrollPosition;
         }
 
         private void DrawPreviewHeader(
