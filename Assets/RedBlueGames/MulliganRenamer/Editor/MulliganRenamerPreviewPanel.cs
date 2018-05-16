@@ -328,31 +328,17 @@
 
         private bool DrawPreviewPanelContentsWithItems(Rect previewPanelRect, Vector2 previewPanelScrollPosition, PreviewPanelContents previewContents)
         {
-            var spaceBetweenHeaderAndScroll = 1.0f;
-            var headerRect = new Rect(previewPanelRect);
-            headerRect.height = 18.0f;
+            var scrollLayout = new PreviewPanelLayout(previewPanelRect);
 
-            var scrollRect = new Rect(previewPanelRect);
-            scrollRect.height -= (headerRect.height + spaceBetweenHeaderAndScroll);
-            scrollRect.y += (headerRect.height + spaceBetweenHeaderAndScroll);
-
-            int renameStep = this.ShowPreviewSteps ? this.FocusedRenameOpIndex : -1;
-            string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
-            string newNameColumnHeader = "After";
             bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
             bool shouldShowThirdColumn = !this.ShowPreviewSteps || this.NumRenameOperations > 1;
-            var firstColumnWidth = previewContents.LongestOriginalNameWidth;
-            var secondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
-            var thirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
-            var totalColumnWidth = firstColumnWidth + secondColumnWidth + thirdColumnWidth;
+            var contentsLayout = new PreviewPanelContentsLayout(
+                scrollLayout.ScrollRect,
+                previewContents,
+                shouldShowSecondColumn,
+                shouldShowThirdColumn);
 
-            var scrollContentsRect = new Rect(scrollRect);
-            scrollContentsRect.height = PreviewRowHeight * previewContents.NumRows;
-
-            var hackSizeForRowIcons = 48.0f;
-            scrollContentsRect.width = totalColumnWidth + hackSizeForRowIcons;
-
-            var contentsFitHorizontallyWithoutScrolling = scrollContentsRect.width <= scrollRect.width;
+            var contentsFitHorizontallyWithoutScrolling = contentsLayout.Rect.width <= scrollLayout.ScrollRect.width;
 
             // WORKAROUND FOR 5.5.5: Somehow you could "scroll" the preview area, even
             // when there was nothing to scroll. Force it to not think it's scrolled because
@@ -362,38 +348,41 @@
                 previewPanelScrollPosition.x = 0;
             }
 
+            int renameStep = this.ShowPreviewSteps ? this.FocusedRenameOpIndex : -1;
+            string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
+            string newNameColumnHeader = "After";
             this.DrawPreviewHeader(
-                headerRect,
+                scrollLayout.HeaderRect,
                 -previewPanelScrollPosition.x,
                 originalNameColumnHeader,
                 newNameColumnHeader,
-                firstColumnWidth,
-                secondColumnWidth,
-                thirdColumnWidth);
+                contentsLayout.FirstColumnWidth,
+                contentsLayout.SecondColumnWidth,
+                contentsLayout.ThirdColumnWidth);
 
             this.PreviewPanelScrollPosition = GUI.BeginScrollView(
-                scrollRect,
+                scrollLayout.ScrollRect,
                 previewPanelScrollPosition,
-                scrollContentsRect);
+                contentsLayout.Rect);
 
             // Show the one that doesn't quite fit by subtracting one
             var firstItemIndex = Mathf.Max(Mathf.FloorToInt(this.PreviewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
 
             // Add one for the one that's off screen.
-            var numItems = Mathf.CeilToInt(scrollRect.height / PreviewRowHeight) + 1;
+            var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 1;
 
-            var rowRect = new Rect(scrollRect);
-            rowRect.width = Mathf.Max(scrollContentsRect.width, scrollRect.width);
+            var rowRect = new Rect(scrollLayout.ScrollRect);
+            rowRect.width = Mathf.Max(contentsLayout.Rect.width, scrollLayout.ScrollRect.width);
             this.DrawPreviewRows(rowRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
 
             // Add the hint into the scroll view if there's room
-            var hintRect = new Rect(scrollRect);
+            var hintRect = new Rect(scrollLayout.HintRect);
             hintRect.height = EditorGUIUtility.singleLineHeight;
-            var contentsFitVerticallyWithoutScrolling = scrollContentsRect.height + hintRect.height <= scrollRect.height;
+            var contentsFitVerticallyWithoutScrolling = contentsLayout.Rect.height + hintRect.height <= scrollLayout.ScrollRect.height;
             var contentsFitWithoutAnyScrolling = contentsFitVerticallyWithoutScrolling && contentsFitVerticallyWithoutScrolling;
             if (contentsFitWithoutAnyScrolling)
             {
-                hintRect.y += scrollRect.height - hintRect.height;
+                hintRect.y += scrollLayout.ScrollRect.height - hintRect.height;
                 EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
             }
 
@@ -419,7 +408,7 @@
                 dividerHeight -= scrollbarHeight;
             }
             var firstDividerRect = new Rect(
-                -this.PreviewPanelScrollPosition.x + firstColumnWidth + hackSizeForRowIcons,
+                -this.PreviewPanelScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
                 1.0f,
                 1.0f,
                 dividerHeight - 1.0f);
@@ -428,7 +417,7 @@
             if (shouldShowThirdColumn)
             {
                 var secondDividerRect = new Rect(firstDividerRect);
-                secondDividerRect.x += secondColumnWidth;
+                secondDividerRect.x += contentsLayout.SecondColumnWidth;
                 GUI.DrawTexture(secondDividerRect, Texture2D.whiteTexture);
             }
 
@@ -587,6 +576,65 @@
             }
 
             return droppedObjects;
+        }
+
+        private class PreviewPanelLayout
+        {
+            public Rect HeaderRect { get; private set; }
+            public Rect ScrollRect { get; private set; }
+            public Rect HintRect { get; private set; }
+
+            public PreviewPanelLayout(Rect previewPanelRect)
+            {
+                var spaceBetweenHeaderAndScroll = 1.0f;
+                var headerRect = new Rect(previewPanelRect);
+                headerRect.height = 18.0f;
+                this.HeaderRect = headerRect;
+
+                var scrollRect = new Rect(previewPanelRect);
+                scrollRect.height -= (this.HeaderRect.height + spaceBetweenHeaderAndScroll);
+                scrollRect.y += (this.HeaderRect.height + spaceBetweenHeaderAndScroll);
+                this.ScrollRect = scrollRect;
+
+                // Add the hint into the scroll view if there's room
+                var hintRect = new Rect(scrollRect);
+                hintRect.height = EditorGUIUtility.singleLineHeight;
+                this.HintRect = HintRect;
+            }
+        }
+
+        private class PreviewPanelContentsLayout
+        {
+            public float IconSize
+            {
+                get
+                {
+                    // For now we just use a flat 48 icon size.
+                    return 48.0f;
+                }
+            }
+
+            public Rect Rect { get; private set; }
+
+            public float FirstColumnWidth { get; private set; }
+
+            public float SecondColumnWidth { get; private set; }
+
+            public float ThirdColumnWidth { get; private set; }
+
+            public PreviewPanelContentsLayout(Rect scrollRect, PreviewPanelContents previewContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
+            {
+                this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
+                this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
+                this.ThirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
+
+                var totalColumnWidth = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth;
+
+                var rect = new Rect(scrollRect);
+                rect.height = PreviewRowHeight * previewContents.NumRows;
+                rect.width = totalColumnWidth + this.IconSize;
+                this.Rect = rect;
+            }
         }
 
         private class PreviewPanelContents
