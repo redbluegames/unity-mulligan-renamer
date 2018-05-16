@@ -178,6 +178,11 @@ namespace RedBlueGames.MulliganRenamer
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
 
+            this.InitializePreviewPanel();
+        }
+
+        private void InitializePreviewPanel()
+        {
             this.previewPanel = new MulliganRenamerPreviewPanel();
             this.previewPanel.ValidateObject = ObjectIsValidForRename;
             this.previewPanel.ObjectsDropped += this.HandleObjectsDroppedOverPreviewArea;
@@ -303,6 +308,12 @@ namespace RedBlueGames.MulliganRenamer
 
             this.BulkRenamer.SetRenameOperations(operationSequence);
             var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
+
+            // PreviewPanel goes null when we recompile while the window is open
+            if (this.previewPanel == null)
+            {
+                this.InitializePreviewPanel();
+            }
 
             this.previewPanel.NumPreviouslyRenamedObjects = this.NumPreviouslyRenamedObjects;
             this.previewPanel.NumRenameOperations = this.NumRenameOperations;

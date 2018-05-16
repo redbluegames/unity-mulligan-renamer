@@ -234,7 +234,26 @@
             else
             {
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
-                contentsFitWithoutScrolling = this.DrawPreviewPanelContentsWithItems(scrollViewRect, previewPanelScrollPosition, previewContents);
+
+                var scrollLayout = new PreviewPanelLayout(scrollViewRect);
+
+                bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
+                bool shouldShowThirdColumn = !this.ShowPreviewSteps || this.NumRenameOperations > 1;
+                var contentsLayout = new PreviewPanelContentsLayout(
+                    scrollLayout.ScrollRect,
+                    previewContents,
+                    shouldShowSecondColumn,
+                    shouldShowThirdColumn);
+
+                this.DrawPreviewPanelContentsWithItems(
+                    scrollLayout,
+                    contentsLayout,
+                    previewPanelScrollPosition,
+                    previewContents,
+                    shouldShowSecondColumn,
+                    shouldShowThirdColumn);
+
+                contentsFitWithoutScrolling = scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout);
             }
 
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
@@ -326,24 +345,18 @@
             this.DrawAddSelectedObjectsButton(buttonRect);
         }
 
-        private bool DrawPreviewPanelContentsWithItems(Rect previewPanelRect, Vector2 previewPanelScrollPosition, PreviewPanelContents previewContents)
+        private void DrawPreviewPanelContentsWithItems(
+            PreviewPanelLayout scrollLayout,
+            PreviewPanelContentsLayout contentsLayout,
+            Vector2 previewPanelScrollPosition,
+            PreviewPanelContents previewContents,
+            bool shouldShowSecondColumn,
+            bool shouldShowThirdColumn)
         {
-            var scrollLayout = new PreviewPanelLayout(previewPanelRect);
-
-            bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
-            bool shouldShowThirdColumn = !this.ShowPreviewSteps || this.NumRenameOperations > 1;
-            var contentsLayout = new PreviewPanelContentsLayout(
-                scrollLayout.ScrollRect,
-                previewContents,
-                shouldShowSecondColumn,
-                shouldShowThirdColumn);
-
-            var contentsFitHorizontallyWithoutScrolling = contentsLayout.Rect.width <= scrollLayout.ScrollRect.width;
-
             // WORKAROUND FOR 5.5.5: Somehow you could "scroll" the preview area, even
             // when there was nothing to scroll. Force it to not think it's scrolled because
             // that was screwing up the Header.
-            if (contentsFitHorizontallyWithoutScrolling)
+            if (scrollLayout.ContentsFitWithoutScrollingHorizontally(contentsLayout))
             {
                 previewPanelScrollPosition.x = 0;
             }
@@ -376,20 +389,15 @@
             this.DrawPreviewRows(rowRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
 
             // Add the hint into the scroll view if there's room
-            var hintRect = new Rect(scrollLayout.HintRect);
-            hintRect.height = EditorGUIUtility.singleLineHeight;
-            var contentsFitVerticallyWithoutScrolling = contentsLayout.Rect.height + hintRect.height <= scrollLayout.ScrollRect.height;
-            var contentsFitWithoutAnyScrolling = contentsFitVerticallyWithoutScrolling && contentsFitVerticallyWithoutScrolling;
-            if (contentsFitWithoutAnyScrolling)
+            if (scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
             {
-                hintRect.y += scrollLayout.ScrollRect.height - hintRect.height;
-                EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
+                EditorGUI.LabelField(scrollLayout.HintRect, this.guiContents.DropPromptHintInsideScroll, this.guiStyles.DropPromptHintInsideScroll);
             }
 
             GUI.EndScrollView();
 
             // Put dividers in group so that they scroll (horizontally)
-            GUI.BeginGroup(previewPanelRect);
+            GUI.BeginGroup(scrollLayout.ScrollRect);
             var oldColor = GUI.color;
             if (EditorGUIUtility.isProSkin)
             {
@@ -401,12 +409,15 @@
             }
 
             // Add 1 into y for the position so that it doesn't render on the panel's border
-            var dividerHeight = previewPanelRect.height - 1.0f;
-            if (!contentsFitHorizontallyWithoutScrolling)
+            var dividerHeight = scrollLayout.ScrollRect.height - 1.0f;
+
+            // Unity scroll view bars overlap the scroll rect when they render, so we have to shorten the dividers
+            if (!scrollLayout.ContentsFitWithoutScrollingHorizontally(contentsLayout))
             {
                 var scrollbarHeight = 14.0f;
                 dividerHeight -= scrollbarHeight;
             }
+
             var firstDividerRect = new Rect(
                 -this.PreviewPanelScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
                 1.0f,
@@ -423,8 +434,6 @@
 
             GUI.color = oldColor;
             GUI.EndGroup();
-
-            return contentsFitWithoutAnyScrolling;
         }
 
         private void DrawPreviewHeader(
@@ -592,14 +601,30 @@
                 this.HeaderRect = headerRect;
 
                 var scrollRect = new Rect(previewPanelRect);
-                scrollRect.height -= (this.HeaderRect.height + spaceBetweenHeaderAndScroll);
-                scrollRect.y += (this.HeaderRect.height + spaceBetweenHeaderAndScroll);
+                scrollRect.height -= (headerRect.height + spaceBetweenHeaderAndScroll);
+                scrollRect.y += (headerRect.height + spaceBetweenHeaderAndScroll);
                 this.ScrollRect = scrollRect;
 
-                // Add the hint into the scroll view if there's room
                 var hintRect = new Rect(scrollRect);
                 hintRect.height = EditorGUIUtility.singleLineHeight;
-                this.HintRect = HintRect;
+                hintRect.y += scrollRect.height - hintRect.height;
+                this.HintRect = hintRect;
+            }
+
+            public bool ContentsFitWithoutScrollingHorizontally(PreviewPanelContentsLayout contentsLayout)
+            {
+                return contentsLayout.Rect.width <= this.ScrollRect.width;
+            }
+
+            public bool ContentsFitWithoutScrollingVertically(PreviewPanelContentsLayout contentsLayout)
+            {
+                return contentsLayout.Rect.height + this.HintRect.height <= this.ScrollRect.height;
+            }
+
+            public bool ContentsFitWithoutAnyScrolling(PreviewPanelContentsLayout contentsLayout)
+            {
+                return this.ContentsFitWithoutScrollingHorizontally(contentsLayout) &&
+                           this.ContentsFitWithoutScrollingVertically(contentsLayout);
             }
         }
 
