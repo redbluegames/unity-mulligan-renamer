@@ -223,18 +223,16 @@
 
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
-            bool panelIsEmpty = preview.NumObjects == 0;
-            var contentsFitWithoutScrolling = false;
-            var newScrollPosition = Vector2.zero;
-            if (panelIsEmpty)
+            var newScrollPosition = previewPanelScrollPosition;
+            if (preview.NumObjects == 0)
             {
                 this.DrawPreviewPanelContentsEmpty(scrollViewRect);
             }
             else
             {
-                var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
-
                 var scrollLayout = new PreviewPanelLayout(scrollViewRect);
+
+                var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
 
                 bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
                 bool shouldShowThirdColumn = !this.ShowPreviewSteps || this.NumRenameOperations > 1;
@@ -251,21 +249,7 @@
                     previewContents,
                     shouldShowSecondColumn,
                     shouldShowThirdColumn);
-
-                contentsFitWithoutScrolling = scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout);
-            }
-
-            var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
-            if (draggedObjects.Count > 0)
-            {
-                if (this.ObjectsDropped != null)
-                {
-                    this.ObjectsDropped.Invoke(draggedObjects.ToArray());
-                }
-            }
-
-            if (!panelIsEmpty)
-            {
+                
                 var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
@@ -285,13 +269,22 @@
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
 
-                if (!contentsFitWithoutScrolling)
+                if (!scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
                 {
                     var hintRect = new Rect(scrollViewRect);
                     hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
                     hintRect.y += scrollViewRect.height;
                     hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
                     EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
+                }
+            }
+
+            var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
+            if (draggedObjects.Count > 0)
+            {
+                if (this.ObjectsDropped != null)
+                {
+                    this.ObjectsDropped.Invoke(draggedObjects.ToArray());
                 }
             }
 
