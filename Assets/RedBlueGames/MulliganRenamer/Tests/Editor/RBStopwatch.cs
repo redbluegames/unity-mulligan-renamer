@@ -34,10 +34,10 @@ public class RBStopwatch
     /// <param name="logTag">Log tag.</param>
     public void LogLap(string logTag)
     {
-        var logFormatString = string.Concat("[", name, "] ", logTag, " elapsed: {0} min, {1} sec, {2} milliseconds");
+        var logFormatString = string.Concat("[", name, "] ", logTag, " elapsed: {0} min, {1} sec, {2} milliseconds. Ticks: {3}");
         TimeSpan ts = stopwatch.Elapsed;
 
-        UnityEngine.Debug.LogFormat(null, logFormatString, ts.Minutes, ts.Seconds, ts.Milliseconds);
+        UnityEngine.Debug.LogFormat(null, logFormatString, ts.Minutes, ts.Seconds, ts.Milliseconds, stopwatch.ElapsedTicks);
 
         this.stopwatch.Stop();
         this.stopwatch.Reset();
