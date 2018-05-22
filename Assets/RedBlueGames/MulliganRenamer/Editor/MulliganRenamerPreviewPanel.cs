@@ -5,26 +5,64 @@
     using UnityEditor;
     using UnityEngine;
 
+    /// <summary>
+    /// Mulligan renamer preview panel handles drawing of BulkRenamePreviews.
+    /// </summary>
     public class MulliganRenamerPreviewPanel
     {
-        public event System.Action AddSelectedObjectsClicked;
-        public event System.Action<UnityEngine.Object[]> ObjectsDropped;
-        public event System.Action RemoveAllClicked;
-        public event System.Action<int> ObjectRemoved;
+        private const float PreviewPanelFirstColumnMinSize = 50.0f;
+        private const float PreviewRowHeight = 18.0f;
 
+        /// <summary>
+        /// Event fired when the AddSelectedObjects button is clicked
+        /// </summary>
+        public event System.Action AddSelectedObjectsClicked;
+
+        /// <summary>
+        /// Event fired when objects are dropped into the drag area
+        /// </summary>
+        public event System.Action<UnityEngine.Object[]> ObjectsDropped;
+
+        /// <summary>
+        /// Event fired when the RemoveAll button is clicked
+        /// </summary>
+        public event System.Action RemoveAllClicked;
+
+        /// <summary>
+        /// Event fired when an Object is removed
+        /// </summary>
+        public event System.Action<int> ObjectRemovedAtIndex;
+
+        /// <summary>
+        /// The validate object function, used to determine if objects should be
+        /// allows to be added.
+        /// </summary>
         public ValidateDraggedObject ValidateObject;
 
         public delegate bool ValidateDraggedObject(UnityEngine.Object obj);
 
-        private const float PreviewPanelFirstColumnMinSize = 50.0f;
-        private const float PreviewRowHeight = 18.0f;
-
         private GUIContents guiContents;
         private GUIStyles guiStyles;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this /// <see cref="T:RedBlueGames.MulliganRenamer.MulliganRenamerPreviewPanel"/>
+        /// should disable its AddSelectedObjects button.
+        /// </summary>
         public bool DisableAddSelectedObjectsButton { get; set; }
+
+        /// <summary>
+        /// Gets or sets the columns to show.
+        /// </summary>
         public ColumnStyle ColumnsToShow { get; set; }
+
+        /// <summary>
+        /// Gets or sets the preview step index to show. -1 means only original and final names should be shown.
+        /// </summary>
         public int PreviewStepIndexToShow { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of previously renamed objects.
+        /// </summary>
         public int NumPreviouslyRenamedObjects { get; set; }
 
         public enum ColumnStyle
@@ -83,7 +121,7 @@
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
-                EditorGUI.LabelField(firstColumnRect, info.OriginalName, style.FirstColumnStyle);
+                EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
@@ -198,6 +236,13 @@
             this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
         }
 
+        /// <summary>
+        /// Draw the specified BulkRenamePreview in the given rect, and returns the new scroll position.
+        /// </summary>
+        /// <returns>The new scroll position.</returns>
+        /// <param name="previewPanelRect">Preview panel rect.</param>
+        /// <param name="previewPanelScrollPosition">Preview panel scroll position.</param>
+        /// <param name="preview">Preview to draw.</param>
         public Vector2 Draw(Rect previewPanelRect, Vector2 previewPanelScrollPosition, BulkRenamePreview preview)
         {
             var spaceBetweenFooterAndScrollview = 2.0f;
@@ -511,9 +556,9 @@
                 rowRect.y = previewRowsRect.y + (i * rowRect.height);
                 if (DrawPreviewRow(rowRect, content, previewRowStyle))
                 {
-                    if (this.ObjectRemoved != null)
+                    if (this.ObjectRemovedAtIndex != null)
                     {
-                        this.ObjectRemoved.Invoke(i);
+                        this.ObjectRemovedAtIndex.Invoke(i);
                     }
 
                     break;
@@ -692,9 +737,9 @@
                     var info = new PreviewRowModel();
                     var previewForIndex = preview.GetPreviewAtIndex(i);
                     var originalName = stepIndex >= 0 && stepIndex < preview.NumSteps ?
-                        previewForIndex.RenameResultSequence.GetOriginalNameAtStep(stepIndex, deletionColor) :
+                        previewForIndex.RenameResultSequence.GetNameBeforeAtStep(stepIndex, deletionColor) :
                         previewForIndex.RenameResultSequence.OriginalName;
-                    info.OriginalName = originalName;
+                    info.NameBeforeStep = originalName;
 
                     var nameAtStep = stepIndex >= 0 && stepIndex < preview.NumSteps ?
                         previewForIndex.RenameResultSequence.GetNewNameAtStep(stepIndex, insertionColor) :
@@ -727,7 +772,7 @@
                     var labelStyle = GUI.skin.label;
                     labelStyle.richText = true;
                     float originalNameWidth = labelStyle.CalcSize(
-                              new GUIContent(previewRowInfo.OriginalName)).x * paddingScaleForBold;
+                              new GUIContent(previewRowInfo.NameBeforeStep)).x * paddingScaleForBold;
                     if (originalNameWidth > previewPanelContents.LongestOriginalNameWidth)
                     {
                         previewPanelContents.LongestOriginalNameWidth = originalNameWidth;
@@ -757,7 +802,7 @@
 
             public string WarningMessage { get; set; }
 
-            public string OriginalName { get; set; }
+            public string NameBeforeStep { get; set; }
 
             public string NameAtStep { get; set; }
 
@@ -767,7 +812,7 @@
             {
                 get
                 {
-                    return this.OriginalName != this.NameAtStep;
+                    return this.NameBeforeStep != this.NameAtStep;
                 }
             }
         }
