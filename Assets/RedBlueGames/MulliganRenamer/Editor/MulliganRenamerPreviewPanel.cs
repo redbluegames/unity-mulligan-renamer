@@ -264,8 +264,16 @@
             {
                 var scrollLayout = new PreviewPanelLayout(scrollViewRect);
 
+                // Show the one that doesn't quite fit by subtracting one
+                var firstItemIndex = Mathf.Max(Mathf.FloorToInt(previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
+
+                // Add one for the one that's off screen.
+                var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 1;
+
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(
                     preview,
+                    firstItemIndex,
+                    numItems,
                     this.PreviewStepIndexToShow,
                     this.guiStyles.DeletionTextColor,
                     this.guiStyles.InsertionTextColor);
@@ -409,15 +417,9 @@
                 previewPanelScrollPosition,
                 contentsLayout.Rect);
 
-            // Show the one that doesn't quite fit by subtracting one
-            var firstItemIndex = Mathf.Max(Mathf.FloorToInt(newScrollPosition.y / PreviewRowHeight) - 1, 0);
-
-            // Add one for the one that's off screen.
-            var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 1;
-
             var rowRect = new Rect(scrollLayout.ScrollRect);
             rowRect.width = Mathf.Max(contentsLayout.Rect.width, scrollLayout.ScrollRect.width);
-            this.DrawPreviewRows(rowRect, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
+            this.DrawPreviewRows(rowRect, previewContents, shouldShowSecondColumn, shouldShowThirdColumn);
 
             // Add the hint into the scroll view if there's room
             if (scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
@@ -524,9 +526,9 @@
             GUI.EndGroup();
         }
 
-        private void DrawPreviewRows(Rect previewRowsRect, PreviewPanelContents previewContents, int startingPreviewIndex, int numPreviewsToShow, bool showSecondColumn, bool showThirdColumn)
+        private void DrawPreviewRows(Rect previewRowsRect, PreviewPanelContents previewContents, bool showSecondColumn, bool showThirdColumn)
         {
-            for (int i = startingPreviewIndex; i < startingPreviewIndex + numPreviewsToShow && i < previewContents.NumRows; ++i)
+            for (int i = 0; i < previewContents.NumVisibleRows; ++i)
             {
                 var content = previewContents[i];
                 var previewRowStyle = new PreviewRowStyle();
@@ -553,7 +555,7 @@
 
                 var rowRect = new Rect(previewRowsRect);
                 rowRect.height = PreviewRowHeight;
-                rowRect.y = previewRowsRect.y + (i * rowRect.height);
+                rowRect.y = previewRowsRect.y + (content.IndexInPreview * rowRect.height);
                 if (DrawPreviewRow(rowRect, content, previewRowStyle))
                 {
                     if (this.ObjectRemovedAtIndex != null)
@@ -686,7 +688,7 @@
                 var totalColumnWidth = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth;
 
                 var rect = new Rect(scrollRect);
-                rect.height = PreviewRowHeight * previewContents.NumRows;
+                rect.height = PreviewRowHeight * previewContents.TotalNumRows;
                 rect.width = totalColumnWidth + this.IconSize;
                 this.Rect = rect;
             }
@@ -702,7 +704,9 @@
 
             public float LongestFinalNameWidth { get; private set; }
 
-            public int NumRows
+            public int TotalNumRows { get; set; }
+
+            public int NumVisibleRows
             {
                 get
                 {
@@ -728,14 +732,23 @@
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamePreview preview, int stepIndex, Color deletionColor, Color insertionColor)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(
+                BulkRenamePreview preview,
+                int firstPreviewIndex,
+                int numObjectsToShow,
+                int stepIndex,
+                Color deletionColor,
+                Color insertionColor)
             {
                 var previewPanelContents = new PreviewPanelContents();
-                previewPanelContents.PreviewRowInfos = new PreviewRowModel[preview.NumObjects];
-                for (int i = 0; i < preview.NumObjects; ++i)
+                var numVisibleObjects = Mathf.Min(numObjectsToShow, preview.NumObjects);
+                previewPanelContents.PreviewRowInfos = new PreviewRowModel[numVisibleObjects];
+
+                for (int j = 0; j < numVisibleObjects && j < preview.NumObjects - firstPreviewIndex; ++j)
                 {
                     var info = new PreviewRowModel();
-                    var previewForIndex = preview.GetPreviewAtIndex(i);
+                    var indexOfVisibleObject = firstPreviewIndex + j;
+                    var previewForIndex = preview.GetPreviewAtIndex(indexOfVisibleObject);
                     var originalName = stepIndex >= 0 && stepIndex < preview.NumSteps ?
                         previewForIndex.RenameResultSequence.GetNameBeforeAtStep(stepIndex, deletionColor) :
                         previewForIndex.RenameResultSequence.OriginalName;
@@ -761,9 +774,13 @@
                         info.WarningMessage = string.Empty;
                     }
 
-                    previewPanelContents.PreviewRowInfos[i] = info;
+                    info.IndexInPreview = indexOfVisibleObject;
+                    previewPanelContents.PreviewRowInfos[j] = info;
                 }
 
+                // Note that CalcSize is very slow, so it is a problem to do it to the entire list of objects...
+                // For now we only measure the ones that are visible. It causes the columns to resize as you scroll,
+                // but that's not the worst.
                 float paddingScaleForBold = 1.11f;
                 previewPanelContents.LongestOriginalNameWidth = 0.0f;
                 previewPanelContents.LongestNewNameWidth = 0.0f;
@@ -790,6 +807,8 @@
                 previewPanelContents.LongestNewNameWidth = Mathf.Max(MinColumnWidth, previewPanelContents.LongestNewNameWidth);
                 previewPanelContents.LongestFinalNameWidth = previewPanelContents.LongestNewNameWidth;
 
+                previewPanelContents.TotalNumRows = preview.NumObjects;
+
                 return previewPanelContents;
             }
         }
@@ -807,6 +826,8 @@
             public string NameAtStep { get; set; }
 
             public string FinalName { get; set; }
+
+            public int IndexInPreview { get; set; }
 
             public bool NameChangedThisStep
             {
