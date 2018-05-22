@@ -267,8 +267,8 @@
                 // Show the one that doesn't quite fit by subtracting one
                 var firstItemIndex = Mathf.Max(Mathf.FloorToInt(previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
 
-                // Add one for the one that's off screen.
-                var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 1;
+                // Add one for the one that's off screen above, and one for the one below. I think?
+                var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 2;
 
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(
                     preview,
