@@ -80,12 +80,12 @@ namespace RedBlueGames.MulliganRenamer
         private List<RenameResult> OperationResults { get; set; }
 
         /// <summary>
-        /// Gets the original name at the specified rename step.
+        /// Gets the name before it changed (or not) at the specified rename step.
         /// </summary>
         /// <returns>The original name at the rename step.</returns>
         /// <param name="stepIndex">Rename step index.</param>
         /// <param name="deletionTagColor">Color for deletions</param>
-        public string GetOriginalNameAtStep(int stepIndex, Color deletionTagColor)
+        public string GetNameBeforeAtStep(int stepIndex, Color deletionTagColor)
         {
             if (stepIndex < 0 || stepIndex >= this.NumSteps)
             {
