@@ -99,7 +99,15 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private bool IsShowingPreviewSteps { get; set; }
+        private bool IsShowingPreviewSteps
+        {
+            get
+            {
+                // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
+                // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
+                return this.IsPreviewStepModePreference || this.NumRenameOperations <= 1;
+            }
+        }
 
         private string LastFocusedControlName { get; set; }
 
@@ -177,8 +185,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
-
-            this.InitializePreviewPanel();
         }
 
         private void InitializePreviewPanel()
@@ -293,13 +299,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.FocusForcedFocusControl();
 
-            // Generate preview contents
-            var previewPanelPadding = new RectOffset(1, 1, -1, 0);
-            var previewPanelRect = new Rect(
-                operationPanelRect.width + previewPanelPadding.left,
-                toolbarRect.height + previewPanelPadding.top,
-                this.position.width - operationPanelRect.width - previewPanelPadding.left - previewPanelPadding.right,
-                this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
             var operationSequence = new RenameOperationSequence<IRenameOperation>();
             foreach (var binding in this.RenameOperationsToApplyWithBindings)
             {
@@ -309,19 +308,14 @@ namespace RedBlueGames.MulliganRenamer
             this.BulkRenamer.SetRenameOperations(operationSequence);
             var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
 
-            // PreviewPanel goes null when we recompile while the window is open
-            if (this.previewPanel == null)
-            {
-                this.InitializePreviewPanel();
-            }
+            var previewPanelPadding = new RectOffset(1, 1, -1, 0);
+            var previewPanelRect = new Rect(
+                operationPanelRect.width + previewPanelPadding.left,
+                toolbarRect.height + previewPanelPadding.top,
+                this.position.width - operationPanelRect.width - previewPanelPadding.left - previewPanelPadding.right,
+                this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
 
-            this.previewPanel.NumPreviouslyRenamedObjects = this.NumPreviouslyRenamedObjects;
-            this.previewPanel.NumRenameOperations = this.NumRenameOperations;
-            this.previewPanel.FocusedRenameOpIndex = this.FocusedRenameOpIndex;
-            this.previewPanel.ShowPreviewSteps = this.IsShowingPreviewSteps;
-            this.previewPanel.IsPreviewStepModePreference = this.IsPreviewStepModePreference;
-            this.previewPanel.DisableAddSelectedObjectsButton = this.GetValidSelectedObjects().Count == 0;
-            this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
+            this.DrawPreviewPanel(previewPanelRect, bulkRenamePreview);
 
             var disableRenameButton =
                 this.RenameOperatationsHaveErrors() ||
@@ -385,9 +379,6 @@ namespace RedBlueGames.MulliganRenamer
                 new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 1),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
-            // Show step previewing mode when only one operation is left because Results mode is pointless with one op only.
-            // But don't actually change the mode preference so that adding ops restores whatever mode the user was in.
-            this.IsShowingPreviewSteps = this.IsPreviewStepModePreference || this.NumRenameOperations <= 1;
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
 
             EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
@@ -624,6 +615,40 @@ namespace RedBlueGames.MulliganRenamer
             this.ScrollRenameOperationsToBottom();
 
             this.FocusRenameOperationDeferred(renameOp);
+        }
+
+        private void DrawPreviewPanel(Rect previewPanelRect, BulkRenamePreview bulkRenamePreview)
+        {
+            // PreviewPanel goes null when we recompile while the window is open
+            if (this.previewPanel == null)
+            {
+                this.InitializePreviewPanel();
+            }
+
+            this.previewPanel.NumPreviouslyRenamedObjects = this.NumPreviouslyRenamedObjects;
+
+            // If we aren't doing stepwise preview, send an invalid prefix so that the panel only renders before and after
+            var previewIndex = this.IsShowingPreviewSteps ? this.FocusedRenameOpIndex : -1;
+            this.previewPanel.PreviewStepIndexToShow = previewIndex;
+
+            MulliganRenamerPreviewPanel.ColumnStyle columnStyle = MulliganRenamerPreviewPanel.ColumnStyle.OriginalAndFinalOnly;
+            if (this.NumRenameOperations <= 1)
+            {
+                columnStyle = MulliganRenamerPreviewPanel.ColumnStyle.StepwiseHideFinal;
+            }
+            else if (this.IsShowingPreviewSteps)
+            {
+                columnStyle = MulliganRenamerPreviewPanel.ColumnStyle.Stepwise;
+            }
+            else
+            {
+                columnStyle = MulliganRenamerPreviewPanel.ColumnStyle.OriginalAndFinalOnly;
+            }
+
+            this.previewPanel.ColumnsToShow = columnStyle;
+            this.previewPanel.DisableAddSelectedObjectsButton = this.GetValidSelectedObjects().Count == 0;
+            this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
+
         }
 
         private void SaveRenameOperationsToPreferences()

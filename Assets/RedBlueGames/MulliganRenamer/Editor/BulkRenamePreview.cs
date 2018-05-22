@@ -25,6 +25,23 @@
         }
 
         /// <summary>
+        /// Gets the number of steps in the rename sequence
+        /// </summary>
+        public int NumSteps
+        {
+            get
+            {
+                if (this.NumObjects == 0)
+                {
+                    return 0;
+                }
+
+                // All rename results sequences should have the same number of steps so just grab the first
+                return this.RenamePreviewsList[0].RenameResultSequence.NumSteps;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this preview contains objects with warnings.
         /// </summary>
         public bool HasWarnings

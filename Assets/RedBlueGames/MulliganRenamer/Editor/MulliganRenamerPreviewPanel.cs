@@ -7,18 +7,6 @@
 
     public class MulliganRenamerPreviewPanel
     {
-        // TODO: Cleanup -
-        // ShowPreviewSteps. 
-        // StepIndex (DrawPreviewRow should just be told what to draw, it shouldn't figure it out.
-        // FocusedRenameOpIndex
-        // IsPreviewStepModePreference (again, it shouldn't infer how to draw it should just be told)
-        // NumRenameOperations
-
-        // NumPreviouslyRenamedObjects?
-
-        // previewPanelScrollPosition doesn't need to get saved, I don't think...
-        //      YUCK "Contents fit without scrolling" also makes it impossible to return the scroll position. But SHOULD Draw return scroll position??
-
         public event System.Action AddSelectedObjectsClicked;
         public event System.Action<UnityEngine.Object[]> ObjectsDropped;
         public event System.Action RemoveAllClicked;
@@ -35,11 +23,16 @@
         private GUIStyles guiStyles;
 
         public bool DisableAddSelectedObjectsButton { get; set; }
-        public int NumRenameOperations { get; set; }
-        public bool IsPreviewStepModePreference { get; set; }
-        public int FocusedRenameOpIndex { get; set; }
-        public bool ShowPreviewSteps { get; set; }
+        public ColumnStyle ColumnsToShow { get; set; }
+        public int PreviewStepIndexToShow { get; set; }
         public int NumPreviouslyRenamedObjects { get; set; }
+
+        public enum ColumnStyle
+        {
+            OriginalAndFinalOnly,
+            Stepwise,
+            StepwiseHideFinal
+        }
 
         public MulliganRenamerPreviewPanel()
         {
@@ -47,7 +40,7 @@
             this.InitializeGUIContents();
         }
 
-        private static bool DrawPreviewRow(Rect rowRect, int previewStepIndex, PreviewRowModel info, PreviewRowStyle style)
+        private static bool DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
         {
             bool isDeleteClicked = false;
 
@@ -90,10 +83,7 @@
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
-                var originalName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ?
-                    info.RenameResultSequence.GetOriginalNameAtStep(previewStepIndex, style.DeletionColor) :
-                    info.RenameResultSequence.OriginalName;
-                EditorGUI.LabelField(firstColumnRect, originalName, style.FirstColumnStyle);
+                EditorGUI.LabelField(firstColumnRect, info.OriginalName, style.FirstColumnStyle);
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
@@ -102,10 +92,7 @@
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
-                var newName = previewStepIndex >= 0 && previewStepIndex < info.RenameResultSequence.NumSteps ?
-                    info.RenameResultSequence.GetNewNameAtStep(previewStepIndex, style.InsertionColor) :
-                    info.RenameResultSequence.NewName;
-                EditorGUI.LabelField(secondColumnRect, newName, style.SecondColumnStyle);
+                EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
             }
 
             var thirdColumnRect = new Rect(secondColumnRect);
@@ -114,7 +101,7 @@
             thirdColumnRect.height = rowRect.height;
             if (style.ThirdColumnWidth > 0)
             {
-                EditorGUI.LabelField(thirdColumnRect, info.RenameResultSequence.NewName, style.ThirdColumnStyle);
+                EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
             return isDeleteClicked;
@@ -232,10 +219,14 @@
             {
                 var scrollLayout = new PreviewPanelLayout(scrollViewRect);
 
-                var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(preview);
+                var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(
+                    preview,
+                    this.PreviewStepIndexToShow,
+                    this.guiStyles.DeletionTextColor,
+                    this.guiStyles.InsertionTextColor);
 
-                bool shouldShowSecondColumn = this.IsPreviewStepModePreference || this.NumRenameOperations == 1;
-                bool shouldShowThirdColumn = !this.ShowPreviewSteps || this.NumRenameOperations > 1;
+                bool shouldShowSecondColumn = this.ColumnsToShow != ColumnStyle.OriginalAndFinalOnly;
+                bool shouldShowThirdColumn = this.ColumnsToShow != ColumnStyle.StepwiseHideFinal;
                 var contentsLayout = new PreviewPanelContentsLayout(
                     scrollLayout.ScrollRect,
                     previewContents,
@@ -247,9 +238,10 @@
                     contentsLayout,
                     previewPanelScrollPosition,
                     previewContents,
+                    this.PreviewStepIndexToShow,
                     shouldShowSecondColumn,
                     shouldShowThirdColumn);
-                
+
                 var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
@@ -344,6 +336,7 @@
             PreviewPanelContentsLayout contentsLayout,
             Vector2 previewPanelScrollPosition,
             PreviewPanelContents previewContents,
+            int renameStep,
             bool shouldShowSecondColumn,
             bool shouldShowThirdColumn)
         {
@@ -355,7 +348,6 @@
                 previewPanelScrollPosition.x = 0;
             }
 
-            int renameStep = this.ShowPreviewSteps ? this.FocusedRenameOpIndex : -1;
             string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
             string newNameColumnHeader = "After";
             this.DrawPreviewHeader(
@@ -380,7 +372,7 @@
 
             var rowRect = new Rect(scrollLayout.ScrollRect);
             rowRect.width = Mathf.Max(contentsLayout.Rect.width, scrollLayout.ScrollRect.width);
-            this.DrawPreviewRows(rowRect, renameStep, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
+            this.DrawPreviewRows(rowRect, previewContents, firstItemIndex, numItems, shouldShowSecondColumn, shouldShowThirdColumn);
 
             // Add the hint into the scroll view if there's room
             if (scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
@@ -487,7 +479,7 @@
             GUI.EndGroup();
         }
 
-        private void DrawPreviewRows(Rect previewRowsRect, int stepIndex, PreviewPanelContents previewContents, int startingPreviewIndex, int numPreviewsToShow, bool showSecondColumn, bool showThirdColumn)
+        private void DrawPreviewRows(Rect previewRowsRect, PreviewPanelContents previewContents, int startingPreviewIndex, int numPreviewsToShow, bool showSecondColumn, bool showThirdColumn)
         {
             for (int i = startingPreviewIndex; i < startingPreviewIndex + numPreviewsToShow && i < previewContents.NumRows; ++i)
             {
@@ -495,18 +487,18 @@
                 var previewRowStyle = new PreviewRowStyle();
                 previewRowStyle.IconStyle = this.guiStyles.Icon;
 
-                previewRowStyle.FirstColumnStyle = content.NamesAreDifferent ?
+                previewRowStyle.FirstColumnStyle = content.NameChangedThisStep ?
                     this.guiStyles.OriginalNameLabelWhenModified :
                     this.guiStyles.OriginalNameLabelUnModified;
                 previewRowStyle.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
 
-                previewRowStyle.SecondColumnStyle = content.NamesAreDifferent ?
+                previewRowStyle.SecondColumnStyle = content.NameChangedThisStep ?
                     this.guiStyles.NewNameLabelModified :
                     this.guiStyles.NewNameLabelUnModified;
 
                 previewRowStyle.SecondColumnWidth = showSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
 
-                previewRowStyle.ThirdColumnStyle = content.NamesAreDifferent ?
+                previewRowStyle.ThirdColumnStyle = content.NameChangedThisStep ?
                     this.guiStyles.FinalNameLabelWhenModified :
                     this.guiStyles.FinalNameLabelUnModified;
 
@@ -514,13 +506,10 @@
 
                 previewRowStyle.BackgroundColor = i % 2 == 0 ? this.guiStyles.PreviewRowBackgroundEven : this.guiStyles.PreviewRowBackgroundOdd;
 
-                previewRowStyle.InsertionColor = this.guiStyles.InsertionTextColor;
-                previewRowStyle.DeletionColor = this.guiStyles.DeletionTextColor;
-
                 var rowRect = new Rect(previewRowsRect);
                 rowRect.height = PreviewRowHeight;
                 rowRect.y = previewRowsRect.y + (i * rowRect.height);
-                if (DrawPreviewRow(rowRect, stepIndex, content, previewRowStyle))
+                if (DrawPreviewRow(rowRect, content, previewRowStyle))
                 {
                     if (this.ObjectRemoved != null)
                     {
@@ -694,7 +683,7 @@
                 }
             }
 
-            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamePreview preview)
+            public static PreviewPanelContents CreatePreviewContentsForObjects(BulkRenamePreview preview, int stepIndex, Color deletionColor, Color insertionColor)
             {
                 var previewPanelContents = new PreviewPanelContents();
                 previewPanelContents.PreviewRowInfos = new PreviewRowModel[preview.NumObjects];
@@ -702,7 +691,18 @@
                 {
                     var info = new PreviewRowModel();
                     var previewForIndex = preview.GetPreviewAtIndex(i);
-                    info.RenameResultSequence = previewForIndex.RenameResultSequence;
+                    var originalName = stepIndex >= 0 && stepIndex < preview.NumSteps ?
+                        previewForIndex.RenameResultSequence.GetOriginalNameAtStep(stepIndex, deletionColor) :
+                        previewForIndex.RenameResultSequence.OriginalName;
+                    info.OriginalName = originalName;
+
+                    var nameAtStep = stepIndex >= 0 && stepIndex < preview.NumSteps ?
+                        previewForIndex.RenameResultSequence.GetNewNameAtStep(stepIndex, insertionColor) :
+                        previewForIndex.RenameResultSequence.NewName;
+                    info.NameAtStep = nameAtStep;
+
+                    info.FinalName = previewForIndex.RenameResultSequence.NewName;
+
                     info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
 
                     if (previewForIndex.HasWarnings)
@@ -724,15 +724,17 @@
                 previewPanelContents.LongestNewNameWidth = 0.0f;
                 foreach (var previewRowInfo in previewPanelContents.PreviewRowInfos)
                 {
-                    float originalNameWidth = GUI.skin.label.CalcSize(
-                                                  new GUIContent(previewRowInfo.RenameResultSequence.OriginalName)).x * paddingScaleForBold;
+                    var labelStyle = GUI.skin.label;
+                    labelStyle.richText = true;
+                    float originalNameWidth = labelStyle.CalcSize(
+                              new GUIContent(previewRowInfo.OriginalName)).x * paddingScaleForBold;
                     if (originalNameWidth > previewPanelContents.LongestOriginalNameWidth)
                     {
                         previewPanelContents.LongestOriginalNameWidth = originalNameWidth;
                     }
 
-                    float newNameWidth = GUI.skin.label.CalcSize(
-                                             new GUIContent(previewRowInfo.RenameResultSequence.NewName)).x * paddingScaleForBold;
+                    float newNameWidth = labelStyle.CalcSize(
+                                             new GUIContent(previewRowInfo.NameAtStep)).x * paddingScaleForBold;
                     if (newNameWidth > previewPanelContents.LongestNewNameWidth)
                     {
                         previewPanelContents.LongestNewNameWidth = newNameWidth;
@@ -755,13 +757,17 @@
 
             public string WarningMessage { get; set; }
 
-            public RenameResultSequence RenameResultSequence { get; set; }
+            public string OriginalName { get; set; }
 
-            public bool NamesAreDifferent
+            public string NameAtStep { get; set; }
+
+            public string FinalName { get; set; }
+
+            public bool NameChangedThisStep
             {
                 get
                 {
-                    return this.RenameResultSequence.OriginalName != this.RenameResultSequence.NewName;
+                    return this.OriginalName != this.NameAtStep;
                 }
             }
         }
@@ -769,10 +775,6 @@
         private struct PreviewRowStyle
         {
             public GUIStyle IconStyle { get; set; }
-
-            public Color DeletionColor { get; set; }
-
-            public Color InsertionColor { get; set; }
 
             public GUIStyle FirstColumnStyle { get; set; }
 
