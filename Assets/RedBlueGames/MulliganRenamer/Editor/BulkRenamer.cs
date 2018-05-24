@@ -352,20 +352,16 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var previewForObject = preview.GetPreviewAtIndex(i);
                 var thisObject = previewForObject.ObjectToRename;
-                if (!AssetDatabase.Contains(thisObject))
+                if (!thisObject.IsAsset())
                 {
                     // Scene objects can have symbols
                     continue;
                 }
 
                 var thisResult = previewForObject.RenameResultSequence;
-                foreach (var invalidCharacter in invalidCharacters)
+                if (thisResult.NewName.IndexOfAny(invalidCharacters) >= 0)
                 {
-                    if (thisResult.NewName.Contains(invalidCharacter))
-                    {
-                        problemPreviews.Add(previewForObject);
-                        break;
-                    }
+                    problemPreviews.Add(previewForObject);
                 }
             }
 
