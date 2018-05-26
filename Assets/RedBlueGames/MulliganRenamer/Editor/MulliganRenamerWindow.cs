@@ -53,6 +53,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private BulkRenamer BulkRenamer { get; set; }
 
+        private BulkRenamePreview BulkRenamePreview { get; set; }
+
         private List<RenameOperationDrawerBinding> RenameOperationDrawerBindingPrototypes { get; set; }
 
         private UniqueList<UnityEngine.Object> ObjectsToRename { get; set; }
@@ -185,6 +187,23 @@ namespace RedBlueGames.MulliganRenamer
 
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
+
+            EditorApplication.update += this.CacheBulkRenamerPreview;
+
+            // Sometimes, GUI happens before Editor Update, so also cache a preview now.
+            this.CacheBulkRenamerPreview();
+        }
+
+        private void CacheBulkRenamerPreview()
+        {
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
+            foreach (var binding in this.RenameOperationsToApplyWithBindings)
+            {
+                operationSequence.Add(binding.Operation);
+            }
+
+            this.BulkRenamer.SetRenameOperations(operationSequence);
+            this.BulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
         }
 
         private void InitializePreviewPanel()
@@ -221,6 +240,7 @@ namespace RedBlueGames.MulliganRenamer
         private void OnDisable()
         {
             Selection.selectionChanged -= this.Repaint;
+            EditorApplication.update -= this.CacheBulkRenamerPreview;
         }
 
         private void CacheRenameOperationPrototypes()
@@ -299,15 +319,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.FocusForcedFocusControl();
 
-            var operationSequence = new RenameOperationSequence<IRenameOperation>();
-            foreach (var binding in this.RenameOperationsToApplyWithBindings)
-            {
-                operationSequence.Add(binding.Operation);
-            }
-
-            this.BulkRenamer.SetRenameOperations(operationSequence);
-            var bulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
-
             var previewPanelPadding = new RectOffset(1, 1, -1, 0);
             var previewPanelRect = new Rect(
                 operationPanelRect.width + previewPanelPadding.left,
@@ -315,7 +326,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.width - operationPanelRect.width - previewPanelPadding.left - previewPanelPadding.right,
                 this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
 
-            this.DrawPreviewPanel(previewPanelRect, bulkRenamePreview);
+            this.DrawPreviewPanel(previewPanelRect, this.BulkRenamePreview);
 
             var disableRenameButton =
                 this.RenameOperatationsHaveErrors() ||
@@ -333,7 +344,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var popupMessage = string.Concat(
                     "Some objects have warnings and will not be renamed. Do you want to rename the other objects in the group?");
-                var skipWarning = !bulkRenamePreview.HasWarnings;
+                var skipWarning = !BulkRenamePreview.HasWarnings;
                 if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
                     this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename.ToList());
