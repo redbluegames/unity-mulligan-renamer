@@ -134,7 +134,7 @@ namespace RedBlueGames.MulliganRenamer
 
             // Package all sprites into renamers so we can do the file IO
             // all at once.
-            var spritesheetRenamers = new Dictionary <string, SpritesheetRenamer>();
+            var spritesheetRenamers = new Dictionary<string, SpritesheetRenamer>();
             foreach (var spriteToRename in spritesToRename)
             {
                 UpdateProgressBar(progressBarStep++, totalNumSteps);
@@ -256,9 +256,7 @@ namespace RedBlueGames.MulliganRenamer
             HashSet<string> allFinalFilePaths = assetCache.GetAllPathsHashed();
             foreach (var assetPreview in assetPreviews)
             {
-                var thisObject = assetPreview.ObjectToRename;
-                var assetPath = AssetDatabaseUtility.GetAssetPathWithSubAsset(thisObject);
-                allFinalFilePaths.Remove(assetPath);
+                allFinalFilePaths.Remove(assetPreview.OriginalPathToSubAsset);
             }
 
             // Now hash the new names and check if they collide with the existing assets
@@ -316,7 +314,9 @@ namespace RedBlueGames.MulliganRenamer
                     continue;
                 }
 
-                var assetDirectory = AssetDatabaseUtility.GetAssetPathDirectory(thisObject);
+                var assetDirectory = AssetDatabaseUtility.GetDirectoryFromAssetPath(
+                    previewForObject.OriginalPathToObject);
+
                 assetCache.LoadAssetsInAssetDirectory(assetDirectory);
             }
         }
