@@ -41,7 +41,17 @@ namespace RedBlueGames.MulliganRenamer
         public static string GetAssetPathDirectory(UnityEngine.Object asset)
         {
             var path = AssetDatabase.GetAssetPath(asset);
-            var directory = string.Concat(System.IO.Path.GetDirectoryName(path), System.IO.Path.DirectorySeparatorChar);
+            return GetDirectoryFromAssetPath(path);
+        }
+
+        /// <summary>
+        /// Gets the directory for the specified asset path.
+        /// </summary>
+        /// <returns>The directory from the asset path.</returns>
+        /// <param name="assetPath">Asset path.</param>
+        public static string GetDirectoryFromAssetPath(string assetPath)
+        {
+            var directory = string.Concat(System.IO.Path.GetDirectoryName(assetPath), System.IO.Path.DirectorySeparatorChar);
             return directory;
         }
 

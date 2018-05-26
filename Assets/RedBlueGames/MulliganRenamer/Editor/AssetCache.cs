@@ -73,6 +73,7 @@ namespace RedBlueGames.MulliganRenamer
         public void Clear()
         {
             this.cachedAssetsInDirectories = new Dictionary<string, List<Object>>();
+            this.cachedFilePaths = new HashSet<string>();
         }
 
         /// <summary>

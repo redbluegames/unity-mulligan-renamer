@@ -38,7 +38,15 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="obj">Object to test.</param>
         public static bool IsAsset(this UnityEngine.Object obj)
         {
-            return AssetDatabase.Contains(obj);
+            if (obj is GameObject)
+            {
+                var prefabType = PrefabUtility.GetPrefabType(obj);
+                return prefabType == PrefabType.Prefab || prefabType == PrefabType.ModelPrefab;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         /// <summary>
