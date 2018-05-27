@@ -293,7 +293,7 @@ namespace RedBlueGames.MulliganRenamer
             var conflictingObject0 = PrefabUtility.CreatePrefab(
                 string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
                 new GameObject("ConflictingObject0"));
-            var existingObject = PrefabUtility.CreatePrefab(
+            PrefabUtility.CreatePrefab(
                 string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
                 new GameObject("ExistingObject"));
 
