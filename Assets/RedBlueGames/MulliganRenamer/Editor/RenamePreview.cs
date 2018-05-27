@@ -76,6 +76,7 @@
                 var pathWithoutFilename = System.IO.Path.GetDirectoryName(this.OriginalPathToObject);
                 resultingPath = string.Concat(
                     pathWithoutFilename,
+                    System.IO.Path.DirectorySeparatorChar,
                     this.RenameResultSequence.NewName,
                     System.IO.Path.GetExtension(this.OriginalPathToObject));
             }
