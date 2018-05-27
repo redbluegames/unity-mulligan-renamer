@@ -74,7 +74,6 @@
             var rootElement = (XmlElement)xmlDocument.SelectSingleNode("/StyleCopSettings");
             if (rootElement == null)
             {
-                // TODO: Error - XML doesn't contain StyleCop stuff
                 return new string[0];
             }
 
@@ -107,7 +106,6 @@
             var rootElement = (XmlElement)xmlDocument.SelectSingleNode("/StyleCopSettings");
             if (rootElement == null)
             {
-                // TODO: Error - XML doesn't contain StyleCop stuff
                 return false;
             }
 
@@ -191,7 +189,6 @@
         private static string[] GetIgnoredFileNamesFromSourceFileList(XmlDocument xmlDocument)
         {
             // Check its contents for any SourceFileList element(s)
-            // TODO: This does not support multiple SourceFileLists (each with their own rule-sets)!
             var fileListElement = (XmlElement)xmlDocument.SelectSingleNode("/StyleCopSettings" + "/SourceFileList");
             if (fileListElement == null)
             {
@@ -200,7 +197,6 @@
             }
 
             // Get the source filenames from the SourceFileList found above
-            // HACK: See TODO above - this SourceFileList may not have the 'ignore' rule at all!
             var ignoredFileNames = new List<string>();
             foreach (XmlElement child in fileListElement.ChildNodes)
             {
