@@ -357,7 +357,7 @@ namespace RedBlueGames.MulliganRenamer
                     {
                         var errorMessage = string.Concat(
                             "Sorry, some objects failed to rename. Something went wrong with Mulligan." +
-                            "Please report a bug (see README for details). The rename operation will be undone",
+                            "Please report a bug (see UserManual for details). This rename operation will be automatically undone",
                             "\n\nException: ",
                             e.Message);
                         if (EditorUtility.DisplayDialog("Error", errorMessage, "Ok"))
