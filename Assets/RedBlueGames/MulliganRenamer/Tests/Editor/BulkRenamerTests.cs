@@ -258,7 +258,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void RenameObjects_ChangeObjectToExistingObjectName_DoesNothing()
+        public void RenameObjects_ChangeObjectToExistingObjectName_SkipsRename()
         {
             // Arrange
             var conflictingObject0 = PrefabUtility.CreatePrefab(
@@ -271,6 +271,34 @@ namespace RedBlueGames.MulliganRenamer
             var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
             conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
             conflictingObjectsWithoutAllNamesChanging.Add(existingObject);
+
+            var replaceFirstNameOp = new ReplaceStringOperation();
+            replaceFirstNameOp.SearchString = "ConflictingObject0";
+            replaceFirstNameOp.ReplacementString = "ExistingObject";
+
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
+            renameSequence.Add(replaceFirstNameOp);
+
+            // Act and Assert
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(conflictingObjectsWithoutAllNamesChanging);
+            var expectedName = "ConflictingObject0";
+            Assert.AreEqual(expectedName, conflictingObject0.name);
+        }
+
+        [Test]
+        public void RenameObjects_ChangeObjectToExistingObjectNameNotInRenameGroup_SkipsRename()
+        {
+            // Arrange
+            var conflictingObject0 = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
+                new GameObject("ConflictingObject0"));
+            var existingObject = PrefabUtility.CreatePrefab(
+                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
+                new GameObject("ExistingObject"));
+
+            var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
+            conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
 
             var replaceFirstNameOp = new ReplaceStringOperation();
             replaceFirstNameOp.SearchString = "ConflictingObject0";

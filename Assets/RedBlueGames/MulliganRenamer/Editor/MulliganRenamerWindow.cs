@@ -344,11 +344,29 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var popupMessage = string.Concat(
                     "Some objects have warnings and will not be renamed. Do you want to rename the other objects in the group?");
-                var skipWarning = !BulkRenamePreview.HasWarnings;
-                if (skipWarning || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
+                var renamesHaveNoWarnings = !BulkRenamePreview.HasWarnings;
+                if (renamesHaveNoWarnings || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
                 {
-                    this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename.ToList());
-                    this.ObjectsToRename.Clear();
+                    var undoGroupBeforeRename = Undo.GetCurrentGroup();
+                    try
+                    {
+                        this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename.ToList());
+                        this.ObjectsToRename.Clear();
+                    }
+                    catch (System.OperationCanceledException e)
+                    {
+                        var errorMessage = string.Concat(
+                            "Sorry, some objects failed to rename. Something went wrong with Mulligan." +
+                            "Please report a bug (see UserManual for details). This rename operation will be automatically undone",
+                            "\n\nException: ",
+                            e.Message);
+                        if (EditorUtility.DisplayDialog("Error", errorMessage, "Ok"))
+                        {
+                            Undo.RevertAllDownToGroup(undoGroupBeforeRename);
+                        }
+
+                        EditorGUIUtility.ExitGUI();
+                    }
                 }
 
                 // Opening the dialog breaks the layout stack, so ExitGUI to prevent a NullPtr.
