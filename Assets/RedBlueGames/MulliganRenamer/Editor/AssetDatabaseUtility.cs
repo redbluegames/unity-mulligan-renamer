@@ -119,6 +119,13 @@ namespace RedBlueGames.MulliganRenamer
                         // may as well. Skip them.
                         if (subAsset != null)
                         {
+                            // Ignore objects that are hidden in the hierarchy, as
+                            // from the user's perspective they aren't there.
+                            if ((subAsset.hideFlags & HideFlags.HideInHierarchy) != 0)
+                            {
+                                continue;
+                            }
+
                             assetsAtPath.Add(subAsset);
                         }
                     }
