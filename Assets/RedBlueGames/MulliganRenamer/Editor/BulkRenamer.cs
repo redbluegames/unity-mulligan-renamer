@@ -205,14 +205,16 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="objectsToRename">Objects to rename.</param>
         public BulkRenamePreview GetBulkRenamePreview(List<UnityEngine.Object> objectsToRename)
         {
-            var renameResultPreviews = new BulkRenamePreview();
+            var previews = new RenamePreview[objectsToRename.Count];
             for (int i = 0; i < objectsToRename.Count; ++i)
             {
                 var singlePreview = new RenamePreview(
                                         objectsToRename[i],
                                         this.operationSequence.GetRenamePreview(objectsToRename[i].name, i));
-                renameResultPreviews.AddEntry(singlePreview);
+                previews[i] = singlePreview;
             }
+
+            var renameResultPreviews = new BulkRenamePreview(previews);
 
             var previewsWithDuplicateNames = GetPreviewsWithDuplicateNames(renameResultPreviews, ref this.assetCache);
             foreach (var preview in previewsWithDuplicateNames)
