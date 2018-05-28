@@ -507,6 +507,55 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(expectedNames, resultingNames);
         }
 
+        [Test]
+        public void RenameObjects_SpritesheetsWithPrefixedNumbers_Renames()
+        {
+            // Tests Issue #163: https://github.com/redbluegames/unity-mulligan-renamer/issues/163
+            // Arrange
+            var spriteSheetConfig = new SpriteSheetGenerationConfig(2, "NumberedSprites.png");
+            spriteSheetConfig.NamePrefix = "0_NumberedSprites";
+            spriteSheetConfig.UseZeroBasedIndexing = true;
+            var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
+            var replaceStringOperation = new ReplaceStringOperation();
+            replaceStringOperation.SearchString = "Numbered";
+            replaceStringOperation.ReplacementString = string.Empty;
+
+            var renameSequence = new RenameOperationSequence<IRenameOperation>();
+            renameSequence.Add(replaceStringOperation);
+
+            var path = AssetDatabase.GetAssetPath(textureWithSprites);
+            var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
+            var allSprites = new List<Object>();
+            foreach (var asset in allAssetsAtPath)
+            {
+                if (asset is Sprite)
+                {
+                    allSprites.Add(asset);
+                }
+            }
+
+            // Act
+            var bulkRenamer = new BulkRenamer(renameSequence);
+            bulkRenamer.RenameObjects(allSprites, true);
+
+            // Assert
+            var expectedNames = new List<string>
+            {
+                "0_Sprites0",
+                "0_Sprites1",
+                "0_Sprites2",
+                "0_Sprites3",
+            };
+
+            var resultingNames = new List<string>();
+            foreach (var sprite in allSprites)
+            {
+                resultingNames.Add(sprite.name);
+            }
+
+            Assert.AreEqual(expectedNames, resultingNames);
+        }
+
         private Texture2D SetupSpriteSheet(SpriteSheetGenerationConfig config)
         {
             var cellSize = 32;

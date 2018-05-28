@@ -106,12 +106,12 @@ namespace RedBlueGames.MulliganRenamer
             var pathToTextureMetaFile = pathToTexture + ".meta";
             string metaFileWithRenames = System.IO.File.ReadAllText(pathToTextureMetaFile);
 
+            // First we set all sprites to a (almost) guaranteed unique name. This prevents us from
+            // naming it the same as another sprite in the sheet, which can result in both sprites being renamed and
+            // puts the spritesheet in an invalid state (no two sprites can share a name).
             var spritesAndUniqueNames = new Dictionary<Sprite, string>();
             foreach (var spriteNamePair in this.SpritesAndNewNames)
             {
-                // First we set all sprites to a (almost) guaranteed unique name. This prevents us from
-                // naming it the same as another sprite in the sheet, which can result in both sprites being renamed and
-                // puts the spritesheet in an invalid state (no two sprites can share a name).
                 var sprite = spriteNamePair.Key;
                 var tempUniqueName = string.Concat(spriteNamePair.Value, Random.Range(100000, 999999));
                 spritesAndUniqueNames.Add(sprite, tempUniqueName);
@@ -151,18 +151,20 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string ReplaceFileIDRecycleNames(string metafileText, string oldName, string newName)
         {
-            string fileIDPattern = "([\\d]{8}: )" + oldName + "(\r?\n)";
-            var fileIDRegex = new System.Text.RegularExpressions.Regex(fileIDPattern);
-            string replacementText = "$1" + newName + "$2";
-            return fileIDRegex.Replace(metafileText, replacementText);
+            string fileIDPattern = "([\\d]{8}: )(" + oldName + ")(\r?\n)";
+            return System.Text.RegularExpressions.Regex.Replace(
+                metafileText,
+                fileIDPattern,
+                m => m.Groups[1].Value + newName + m.Groups[3].Value);
         }
 
         private static string ReplaceSpriteData(string metafileText, string oldName, string newName)
         {
-            string spritenamePattern = "(name: )" + oldName + "(\r?\n)";
-            var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
-            string replacementText = "$1" + newName + "$2";
-            return spritenameRegex.Replace(metafileText, replacementText);
+            string spritenamePattern = "(name: )(" + oldName + ")(\r?\n)";
+            return System.Text.RegularExpressions.Regex.Replace(
+                metafileText,
+                spritenamePattern,
+                m => m.Groups[1].Value + newName + m.Groups[3].Value);
         }
 
         private string CreateSpritesheetUniqueName(string newName)
