@@ -137,16 +137,26 @@ namespace RedBlueGames.MulliganRenamer
 
         private static bool ObjectIsRenamable(UnityEngine.Object obj)
         {
-            if (obj is GameObject)
-            {
-                return true;
-            }
-
             if (AssetDatabase.Contains(obj))
             {
+                // Renaming children of prefabs is not currently supported so don't let them be added.
+                if (obj is GameObject)
+                {
+                    var gameObj = (GameObject)obj;
+                    if (gameObj.transform.parent != null)
+                    {
+                        return false;
+                    }
+                }
+
                 // Create -> Prefab results in assets that have no name. Typically you can't have Assets that have no name,
                 // so we will just ignore them for the utility.
                 return !string.IsNullOrEmpty(obj.name);
+            }
+
+            if (obj is GameObject)
+            {
+                return true;
             }
 
             return false;
