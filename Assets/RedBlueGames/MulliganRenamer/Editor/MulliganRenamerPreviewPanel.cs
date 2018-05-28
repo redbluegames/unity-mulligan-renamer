@@ -763,10 +763,17 @@
 
                     info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
 
-                    if (previewForIndex.HasWarnings)
+                    if (previewForIndex.HasWarnings || preview.WillRenameCollideWithExistingAsset(previewForIndex))
                     {
                         info.WarningIcon = (Texture2D)EditorGUIUtility.Load("icons/console.warnicon.sml.png");
-                        info.WarningMessage = previewForIndex.WarningMessage;
+                        if (previewForIndex.HasWarnings)
+                        {
+                            info.WarningMessage = GetWarningMessageForRenamePreview(previewForIndex);
+                        }
+                        else
+                        {
+                            info.WarningMessage = "New name matches an existing file or another renamed object.";
+                        }
                     }
                     else
                     {
@@ -810,6 +817,22 @@
                 previewPanelContents.TotalNumRows = preview.NumObjects;
 
                 return previewPanelContents;
+            }
+
+            private static string GetWarningMessageForRenamePreview(RenamePreview preview)
+            {
+                if (preview.HasInvalidEmptyFinalName)
+                {
+                    return "Asset has blank name.";
+                }
+                else if (preview.FinalNameContainsInvalidCharacters)
+                {
+                    return "Name includes invalid characters (usually symbols such as ?.,).";
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
         }
 

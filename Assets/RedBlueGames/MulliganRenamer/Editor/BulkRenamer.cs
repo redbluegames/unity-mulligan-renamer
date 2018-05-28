@@ -176,7 +176,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 // Don't request a rename if the preview has warnings
                 var renamePreview = previews.GetPreviewAtIndex(i);
-                if (renamePreview.HasWarnings)
+                if (renamePreview.HasWarnings || previews.WillRenameCollideWithExistingAsset(renamePreview))
                 {
                     continue;
                 }
@@ -214,160 +214,26 @@ namespace RedBlueGames.MulliganRenamer
                 previews[i] = singlePreview;
             }
 
-            var renameResultPreviews = new BulkRenamePreview(previews);
-
-            var previewsWithDuplicateNames = GetPreviewsWithDuplicateNames(renameResultPreviews, ref this.assetCache);
-            foreach (var preview in previewsWithDuplicateNames)
+            // First collect all assets in directories of preview objects into the assetCache.
+            for (int i = 0; i < objectsToRename.Count; ++i)
             {
-                preview.WarningMessage = "New name matches an existing file or another renamed object.";
+                var obj = objectsToRename[i];
+                if (obj.IsAsset())
+                {
+                    CacheAsestsInSameDirectoryAsAsset(obj, ref this.assetCache);
+                }
             }
 
-            var previewsWithInvalidCharacters = GetPreviewsWithInvalidCharacters(renameResultPreviews);
-            foreach (var preview in previewsWithInvalidCharacters)
-            {
-                preview.WarningMessage = "Name includes invalid characters (usually symbols such as ?.,).";
-            }
-
-            var previewsEmptyNames = GetPreviewsWithEmptyNames(renameResultPreviews);
-            foreach (var preview in previewsEmptyNames)
-            {
-                preview.WarningMessage = "Asset has blank name.";
-            }
+            var renameResultPreviews = new BulkRenamePreview(previews, this.assetCache);
 
             return renameResultPreviews;
         }
 
-        private static List<RenamePreview> GetPreviewsWithDuplicateNames(BulkRenamePreview preview, ref AssetCache assetCache)
+        private static void CacheAsestsInSameDirectoryAsAsset(UnityEngine.Object asset, ref AssetCache assetCache)
         {
-            // First collect all assets in directories of preview objects into the assetCache.
-            CacheAssetsInSameDirectories(preview, ref assetCache);
-
-            var assetPreviews = new List<RenamePreview>();
-            for (int i = 0; i < preview.NumObjects; ++i)
-            {
-                var previewForObject = preview.GetPreviewAtIndex(i);
-                if (previewForObject.ObjectToRename.IsAsset())
-                {
-                    assetPreviews.Add(previewForObject);
-                }
-            }
-
-            // Get all the cached file paths, but remove any that are in the preview
-            // because those names could be different. We want to test that NEW names
-            // don't collide with existing assets.
-            HashSet<string> allFinalFilePaths = assetCache.GetAllPathsHashed();
-            foreach (var assetPreview in assetPreviews)
-            {
-                allFinalFilePaths.Remove(assetPreview.OriginalPathToSubAsset);
-            }
-
-            // Now hash the new names and check if they collide with the existing assets
-            var problemPreviews = new List<RenamePreview>();
-            var unchangedAssetPreviews = new List<RenamePreview>();
-            var changedAssetPreviews = new List<RenamePreview>();
-
-            // Separate unchangedAssets from changedAsests
-            foreach (var assetPreview in assetPreviews)
-            {
-                var thisObject = assetPreview.ObjectToRename;
-                var thisResult = assetPreview.RenameResultSequence;
-                if (thisResult.NewName == thisResult.OriginalName)
-                {
-                    unchangedAssetPreviews.Add(assetPreview);
-                }
-                else
-                {
-                    changedAssetPreviews.Add(assetPreview);
-                }
-            }
-
-            // First add all the unchanged results, so that we collide on the
-            // first time adding new names. This fixes an issue where
-            // you'd rename one object which now matches a second, but the second gets
-            // the warning instead of the first.
-            var previewsSorted = new List<RenamePreview>();
-            previewsSorted.AddRange(unchangedAssetPreviews);
-            previewsSorted.AddRange(changedAssetPreviews);
-            foreach (var renamePreview in previewsSorted)
-            {
-                var resultingPath = renamePreview.GetResultingPath();
-                if (allFinalFilePaths.Contains(resultingPath))
-                {
-                    problemPreviews.Add(renamePreview);
-                }
-                else
-                {
-                    allFinalFilePaths.Add(resultingPath);
-                }
-            }
-
-            return problemPreviews;
-        }
-
-        private static void CacheAssetsInSameDirectories(BulkRenamePreview preview, ref AssetCache assetCache)
-        {
-            for (int i = 0; i < preview.NumObjects; ++i)
-            {
-                var previewForObject = preview.GetPreviewAtIndex(i);
-                var thisObject = previewForObject.ObjectToRename;
-                if (!thisObject.IsAsset())
-                {
-                    // Scene objects can be named the same thing, so skip these
-                    continue;
-                }
-
-                var assetDirectory = AssetDatabaseUtility.GetDirectoryFromAssetPath(
-                    previewForObject.OriginalPathToObject);
-
-                assetCache.LoadAssetsInAssetDirectory(assetDirectory);
-            }
-        }
-
-        private static List<RenamePreview> GetPreviewsWithEmptyNames(BulkRenamePreview preview)
-        {
-            var problemPreviews = new List<RenamePreview>();
-            for (int i = 0; i < preview.NumObjects; ++i)
-            {
-                var previewForObject = preview.GetPreviewAtIndex(i);
-                var thisObject = previewForObject.ObjectToRename;
-                if (!AssetDatabase.Contains(thisObject))
-                {
-                    // Scene objects can be empty names... even though that's a terrible idea. But still, skip them.
-                    continue;
-                }
-
-                var thisResult = previewForObject.RenameResultSequence;
-                if (string.IsNullOrEmpty(thisResult.NewName))
-                {
-                    problemPreviews.Add(previewForObject);
-                }
-            }
-
-            return problemPreviews;
-        }
-
-        private static List<RenamePreview> GetPreviewsWithInvalidCharacters(BulkRenamePreview preview)
-        {
-            var invalidCharacters = new char[] { '?', '.', '/', '<', '>', '\\', '|', '*', ':', '"' };
-            var problemPreviews = new List<RenamePreview>();
-            for (int i = 0; i < preview.NumObjects; ++i)
-            {
-                var previewForObject = preview.GetPreviewAtIndex(i);
-                var thisObject = previewForObject.ObjectToRename;
-                if (!thisObject.IsAsset())
-                {
-                    // Scene objects can have symbols
-                    continue;
-                }
-
-                var thisResult = previewForObject.RenameResultSequence;
-                if (thisResult.NewName.IndexOfAny(invalidCharacters) >= 0)
-                {
-                    problemPreviews.Add(previewForObject);
-                }
-            }
-
-            return problemPreviews;
+            var path = AssetDatabase.GetAssetPath(asset);
+            var assetDirectory = AssetDatabaseUtility.GetDirectoryFromAssetPath(path);
+            assetCache.LoadAssetsInAssetDirectory(assetDirectory);
         }
 
         private static bool RenamedAssetWillShareNameWithAnotherAsset(
