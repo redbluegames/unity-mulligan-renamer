@@ -153,7 +153,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             string fileIDPattern = "([\\d]{8}: )" + oldName + "(\r?\n)";
             var fileIDRegex = new System.Text.RegularExpressions.Regex(fileIDPattern);
-            string replacementText = "$1" + newName + "$2";
+            string replacementText = "${1}" + newName + "${2}";
             return fileIDRegex.Replace(metafileText, replacementText);
         }
 
@@ -161,7 +161,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             string spritenamePattern = "(name: )" + oldName + "(\r?\n)";
             var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
-            string replacementText = "$1" + newName + "$2";
+            string replacementText = "${1}" + newName + "${2}";
             return spritenameRegex.Replace(metafileText, replacementText);
         }
 
