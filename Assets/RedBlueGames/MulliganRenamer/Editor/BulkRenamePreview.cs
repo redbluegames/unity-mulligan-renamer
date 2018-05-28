@@ -20,7 +20,7 @@
         {
             get
             {
-                return this.RenamePreviewsList.Count;
+                return this.renamePreviewsList.Count;
             }
         }
 
@@ -37,7 +37,7 @@
                 }
 
                 // All rename results sequences should have the same number of steps so just grab the first
-                return this.RenamePreviewsList[0].RenameResultSequence.NumSteps;
+                return this.renamePreviewsList[0].RenameResultSequence.NumSteps;
             }
         }
 
@@ -61,43 +61,15 @@
             }
         }
 
-        private Dictionary<UnityEngine.Object, RenamePreview> RenamePreviews
+        public BulkRenamePreview(RenamePreview[] previews)
         {
-            get
+            this.renamePreviews = new Dictionary<UnityEngine.Object, RenamePreview>();
+            this.renamePreviewsList = new List<RenamePreview>(previews.Length);
+
+            for (int i = 0; i < previews.Length; ++i)
             {
-                if (this.renamePreviews == null)
-                {
-                    this.renamePreviews = new Dictionary<UnityEngine.Object, RenamePreview>();
-                }
-
-                return this.renamePreviews;
+                this.AddEntry(previews[i]);
             }
-        }
-
-        private List<RenamePreview> RenamePreviewsList
-        {
-            get
-            {
-                if (this.renamePreviewsList == null)
-                {
-                    this.renamePreviewsList = new List<RenamePreview>();
-                }
-
-                return this.renamePreviewsList;
-            }
-        }
-
-
-        /// <summary>
-        /// Adds a preview entry into the bulk preview
-        /// </summary>
-        /// <param name="singlePreview">Single preview.</param>
-        public void AddEntry(RenamePreview singlePreview)
-        {
-            // Keeping a list and a dictionary for fast access by index and by object...
-            // Not good to have to keep both structures in sync, though.
-            this.RenamePreviews.Add(singlePreview.ObjectToRename, singlePreview);
-            this.RenamePreviewsList.Add(singlePreview);
         }
 
         /// <summary>
@@ -107,7 +79,7 @@
         /// <param name="index">Index to query.</param>
         public RenamePreview GetPreviewAtIndex(int index)
         {
-            return this.RenamePreviewsList[index];
+            return this.renamePreviewsList[index];
         }
 
         /// <summary>
@@ -117,7 +89,7 @@
         /// <param name="obj">Object to query.</param>
         public bool ContainsPreviewForObject(UnityEngine.Object obj)
         {
-            return this.RenamePreviews.ContainsKey(obj);
+            return this.renamePreviews.ContainsKey(obj);
         }
 
         /// <summary>
@@ -127,7 +99,14 @@
         /// <param name="obj">Object to query.</param>
         public RenamePreview GetPreviewForObject(UnityEngine.Object obj)
         {
-            return this.RenamePreviews[obj];
+            return this.renamePreviews[obj];
+            }
+
+        private void AddEntry(RenamePreview singlePreview)
+        {
+            // Keeping a list and a dictionary for fast access by index and by object...
+            this.renamePreviews.Add(singlePreview.ObjectToRename, singlePreview);
+            this.renamePreviewsList.Add(singlePreview);
         }
     }
 }
