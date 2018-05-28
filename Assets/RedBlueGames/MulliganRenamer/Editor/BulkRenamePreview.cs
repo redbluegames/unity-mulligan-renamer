@@ -13,6 +13,8 @@
         private Dictionary<UnityEngine.Object, RenamePreview> renamePreviews;
         private List<RenamePreview> renamePreviewsList;
 
+        private HashSet<RenamePreview> duplicatePreviews;
+
         /// <summary>
         /// Gets the number of objects in the preview.
         /// </summary>
@@ -61,14 +63,25 @@
             }
         }
 
-        public BulkRenamePreview(RenamePreview[] previews)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:RedBlueGames.MulliganRenamer.BulkRenamePreview"/> class.
+        /// </summary>
+        /// <param name="previews">Previews in the collection.</param>
+        public BulkRenamePreview(RenamePreview[] previews, AssetCache existingAssets)
         {
             this.renamePreviews = new Dictionary<UnityEngine.Object, RenamePreview>();
             this.renamePreviewsList = new List<RenamePreview>(previews.Length);
+            this.duplicatePreviews = new HashSet<RenamePreview>();
 
             for (int i = 0; i < previews.Length; ++i)
             {
                 this.AddEntry(previews[i]);
+            }
+
+            var previewsWithDuplicateNames = GetPreviewsWithDuplicateNames(this.renamePreviewsList, existingAssets);
+            foreach (var preview in previewsWithDuplicateNames)
+            {
+                this.duplicatePreviews.Add(preview);
             }
         }
 
@@ -100,13 +113,88 @@
         public RenamePreview GetPreviewForObject(UnityEngine.Object obj)
         {
             return this.renamePreviews[obj];
-            }
+        }
+
+        /// <summary>
+        /// Check if the RenamePreview's final name will match an existing asset's name. This means it will fail
+        /// to be renamed if we try.
+        /// </summary>
+        /// <returns><c>true</c>, if the renamed object's name will collide with existing asset, <c>false</c> otherwise.</returns>
+        /// <param name="preview">Preview to check.</param>
+        public bool WillRenameCollideWithExistingAsset(RenamePreview preview)
+        {
+            return this.duplicatePreviews.Contains(preview);
+        }
 
         private void AddEntry(RenamePreview singlePreview)
         {
             // Keeping a list and a dictionary for fast access by index and by object...
             this.renamePreviews.Add(singlePreview.ObjectToRename, singlePreview);
             this.renamePreviewsList.Add(singlePreview);
+        }
+
+        private static List<RenamePreview> GetPreviewsWithDuplicateNames(IList<RenamePreview> previews, AssetCache assetCache)
+        {
+            var assetPreviews = new List<RenamePreview>();
+            for (int i = 0; i < previews.Count; ++i)
+            {
+                var previewForObject = previews[i];
+                if (previewForObject.ObjectToRename.IsAsset())
+                {
+                    assetPreviews.Add(previewForObject);
+                }
+            }
+
+            // Get all the cached file paths, but remove any that are in the preview
+            // because those names could be different. We want to test that NEW names
+            // don't collide with existing assets.
+            HashSet<string> allFinalFilePaths = assetCache.GetAllPathsHashed();
+            foreach (var assetPreview in assetPreviews)
+            {
+                allFinalFilePaths.Remove(assetPreview.OriginalPathToSubAsset);
+            }
+
+            // Now hash the new names and check if they collide with the existing assets
+            var problemPreviews = new List<RenamePreview>();
+            var unchangedAssetPreviews = new List<RenamePreview>();
+            var changedAssetPreviews = new List<RenamePreview>();
+
+            // Separate unchangedAssets from changedAsests
+            foreach (var assetPreview in assetPreviews)
+            {
+                var thisObject = assetPreview.ObjectToRename;
+                var thisResult = assetPreview.RenameResultSequence;
+                if (thisResult.NewName == thisResult.OriginalName)
+                {
+                    unchangedAssetPreviews.Add(assetPreview);
+                }
+                else
+                {
+                    changedAssetPreviews.Add(assetPreview);
+                }
+            }
+
+            // First add all the unchanged results, so that we collide on the
+            // first time adding new names. This fixes an issue where
+            // you'd rename one object which now matches a second, but the second gets
+            // the warning instead of the first.
+            var previewsSorted = new List<RenamePreview>();
+            previewsSorted.AddRange(unchangedAssetPreviews);
+            previewsSorted.AddRange(changedAssetPreviews);
+            foreach (var renamePreview in previewsSorted)
+            {
+                var resultingPath = renamePreview.GetResultingPath();
+                if (allFinalFilePaths.Contains(resultingPath))
+                {
+                    problemPreviews.Add(renamePreview);
+                }
+                else
+                {
+                    allFinalFilePaths.Add(resultingPath);
+                }
+            }
+
+            return problemPreviews;
         }
     }
 }

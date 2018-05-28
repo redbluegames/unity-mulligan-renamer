@@ -50,14 +50,46 @@
         {
             get
             {
-                return !string.IsNullOrEmpty(this.WarningMessage);
+                return this.HasInvalidEmptyFinalName || this.FinalNameContainsInvalidCharacters;
             }
         }
 
         /// <summary>
-        /// Gets or sets the warning message.
+        /// Gets a value indicating whether this <see cref="T:RedBlueGames.MulliganRenamer.RenamePreview"/> has an invalid
+        /// empty final name (Scene GameObjects can have empty names).
         /// </summary>
-        public string WarningMessage { get; set; }
+        public bool HasInvalidEmptyFinalName
+        {
+            get
+            {
+                // Scene objects can be empty names... even though that's a terrible idea. But still, it's allowed.
+                if (!this.ObjectToRename.IsAsset())
+                {
+                    return false;
+                }
+
+                return string.IsNullOrEmpty(this.RenameResultSequence.NewName);
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="T:RedBlueGames.MulliganRenamer.RenamePreview"/> final name
+        /// contains invalid characters.
+        /// </summary>
+        public bool FinalNameContainsInvalidCharacters
+        {
+            get
+            {
+                if (!this.ObjectToRename.IsAsset())
+                {
+                    // Scene objects can have symbols
+                    return false;
+                }
+
+                var invalidCharacters = new char[] { '?', '.', '/', '<', '>', '\\', '|', '*', ':', '"' };
+                return this.RenameResultSequence.NewName.IndexOfAny(invalidCharacters) >= 0;
+            }
+        }
 
         /// <summary>
         /// Gets the resulting path, with sub assets appended to a filepath with a directory separator.
