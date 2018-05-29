@@ -139,14 +139,10 @@ namespace RedBlueGames.MulliganRenamer
         {
             if (AssetDatabase.Contains(obj))
             {
-                // Renaming children of prefabs is not currently supported so don't let them be added.
-                if (obj is GameObject)
+                // Only sub assets of sprites are currently supported, so let's just not let them be added.
+                if (AssetDatabase.IsSubAsset(obj) && !(obj is Sprite))
                 {
-                    var gameObj = (GameObject)obj;
-                    if (gameObj.transform.parent != null)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
 
                 // Create -> Prefab results in assets that have no name. Typically you can't have Assets that have no name,
