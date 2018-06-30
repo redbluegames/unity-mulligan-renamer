@@ -126,6 +126,8 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        private List<UnityEngine.Object> ValidSelectedObjects { get; set; }
+
         [MenuItem(WindowMenuPath, false)]
         private static void ShowRenameSpritesheetWindow()
         {
@@ -195,9 +197,11 @@ namespace RedBlueGames.MulliganRenamer
             Selection.selectionChanged += this.Repaint;
 
             EditorApplication.update += this.CacheBulkRenamerPreview;
+            EditorApplication.update += this.CacheValidSelectedObjects;
 
             // Sometimes, GUI happens before Editor Update, so also cache a preview now.
             this.CacheBulkRenamerPreview();
+            this.CacheValidSelectedObjects();
         }
 
         private void CacheBulkRenamerPreview()
@@ -210,6 +214,11 @@ namespace RedBlueGames.MulliganRenamer
 
             this.BulkRenamer.SetRenameOperations(operationSequence);
             this.BulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
+        }
+
+        private void CacheValidSelectedObjects()
+        {
+            this.ValidSelectedObjects = Selection.objects.Where((obj) => ObjectIsValidForRename(obj)).ToList();
         }
 
         private void InitializePreviewPanel()
@@ -681,7 +690,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             this.previewPanel.ColumnsToShow = columnStyle;
-            this.previewPanel.DisableAddSelectedObjectsButton = this.GetValidSelectedObjects().Count == 0;
+            this.previewPanel.DisableAddSelectedObjectsButton = this.ValidSelectedObjects.Count == 0;
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
 
         }
@@ -783,7 +792,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void LoadSelectedObjects()
         {
-            this.AddObjectsToRename(this.GetValidSelectedObjects());
+            this.AddObjectsToRename(this.ValidSelectedObjects);
 
             // Scroll to the bottom to focus the newly added objects.
             this.ScrollPreviewPanelToBottom();
@@ -820,11 +829,6 @@ namespace RedBlueGames.MulliganRenamer
 
             // Reset the number of previously renamed objects so that we don't show the success prompt if these are removed.
             this.NumPreviouslyRenamedObjects = 0;
-        }
-
-        private List<UnityEngine.Object> GetValidSelectedObjects()
-        {
-            return Selection.objects.Where((obj) => ObjectIsValidForRename(obj)).ToList();
         }
 
         private bool ObjectIsValidForRename(UnityEngine.Object obj)
