@@ -429,43 +429,8 @@
 
             GUI.EndScrollView();
 
-            // Put dividers in group so that they scroll (horizontally)
-            GUI.BeginGroup(scrollLayout.ScrollRect);
-            var oldColor = GUI.color;
-            if (EditorGUIUtility.isProSkin)
-            {
-                GUI.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
-            }
-            else
-            {
-                GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
-            }
+            this.DrawDividers(newScrollPosition, scrollLayout, contentsLayout, shouldShowThirdColumn);
 
-            // Add 1 into y for the position so that it doesn't render on the panel's border
-            var dividerHeight = scrollLayout.ScrollRect.height - 1.0f;
-
-            // Unity scroll view bars overlap the scroll rect when they render, so we have to shorten the dividers
-            if (!scrollLayout.ContentsFitWithoutScrollingHorizontally(contentsLayout))
-            {
-                var scrollbarHeight = 14.0f;
-                dividerHeight -= scrollbarHeight;
-            }
-
-            var firstDividerRect = new Rect(
-                -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
-                1.0f,
-                1.0f,
-                dividerHeight - 1.0f);
-            GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
-
-            if (shouldShowThirdColumn)
-            {
-                var secondDividerRect = new Rect(firstDividerRect);
-                secondDividerRect.x += contentsLayout.SecondColumnWidth;
-                GUI.DrawTexture(secondDividerRect, Texture2D.whiteTexture);
-            }
-
-            GUI.color = oldColor;
             GUI.EndGroup();
 
             return newScrollPosition;
@@ -566,6 +531,54 @@
                     break;
                 }
             }
+        }
+
+        private void DrawDividers(
+            Vector2 newScrollPosition,
+            PreviewPanelLayout scrollLayout,
+            PreviewPanelContentsLayout contentsLayout,
+            bool shouldShowThirdColumn)
+        {
+            // Put dividers in group so that they scroll (horizontally)
+            var dividerGroup = new Rect(scrollLayout.ScrollRect);
+            dividerGroup.y -= scrollLayout.HeaderRect.height;
+            dividerGroup.height += scrollLayout.HeaderRect.height;
+            GUI.BeginGroup(dividerGroup);
+            var oldColor = GUI.color;
+            if (EditorGUIUtility.isProSkin)
+            {
+                GUI.color = new Color(0.3f, 0.3f, 0.3f, 1.0f);
+            }
+            else
+            {
+                GUI.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+            }
+
+            // Add 1 into y for the position so that it doesn't render on the panel's border
+            var dividerHeight = dividerGroup.height;
+
+            // Unity scroll view bars overlap the scroll rect when they render, so we have to shorten the dividers
+            if (!scrollLayout.ContentsFitWithoutScrollingHorizontally(contentsLayout))
+            {
+                var scrollbarHeight = 14.0f;
+                dividerHeight -= scrollbarHeight;
+            }
+
+            var firstDividerRect = new Rect(
+                -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
+                0.0f,
+                1.0f,
+                dividerHeight - 1.0f);
+            GUI.DrawTexture(firstDividerRect, Texture2D.whiteTexture);
+
+            if (shouldShowThirdColumn)
+            {
+                var secondDividerRect = new Rect(firstDividerRect);
+                secondDividerRect.x += contentsLayout.SecondColumnWidth;
+                GUI.DrawTexture(secondDividerRect, Texture2D.whiteTexture);
+            }
+
+            GUI.color = oldColor;
         }
 
         private void DrawAddSelectedObjectsButton(Rect buttonRect)
