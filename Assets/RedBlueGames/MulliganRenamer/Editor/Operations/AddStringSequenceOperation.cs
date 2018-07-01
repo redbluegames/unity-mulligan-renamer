@@ -37,6 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public AddStringSequenceOperation()
         {
+            this.StringSequence = new string[0];
         }
 
         /// <summary>

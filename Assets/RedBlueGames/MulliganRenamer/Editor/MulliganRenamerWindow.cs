@@ -282,6 +282,9 @@ namespace RedBlueGames.MulliganRenamer
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new RemoveCharactersOperation(), new RemoveCharactersOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new AddStringSequenceOperation(), new AddStringSequenceOperationDrawer()));
         }
 
         private void InitializeGUIContents()
