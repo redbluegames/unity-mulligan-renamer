@@ -23,72 +23,38 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
 
     /// <summary>
-    /// RenameOperation that enumerates characters onto the end of the rename string.
+    /// Rename operation that adds a string from a sequence to the end of a target string.
+    /// The sequence string is chosen based on the relative count passed into the Rename.
     /// </summary>
-    public class EnumerateOperation : IRenameOperation
+    public class AddStringSequenceOperation : IRenameOperation
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="T:RedBlueGames.MulliganRenamer.AddStringSequenceOperation"/> class.
         /// </summary>
-        public EnumerateOperation()
+        public AddStringSequenceOperation()
         {
-            this.Initialize();
+            this.StringSequence = new string[0];
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
+        /// Initializes a new instance of the <see cref="T:RedBlueGames.MulliganRenamer.AddStringSequenceOperation"/> class.
         /// This is a clone constructor, copying the values from one to another.
         /// </summary>
         /// <param name="operationToCopy">Operation to copy.</param>
-        public EnumerateOperation(EnumerateOperation operationToCopy)
+        public AddStringSequenceOperation(AddStringSequenceOperation operationToCopy)
         {
-            this.Initialize();
-
-            this.StartingCount = operationToCopy.StartingCount;
-            this.CountFormat = operationToCopy.CountFormat;
-            this.Increment = operationToCopy.Increment;
+            this.StringSequence = new string[operationToCopy.StringSequence.Length];
+            operationToCopy.StringSequence.CopyTo(this.StringSequence, 0);
         }
 
         /// <summary>
-        /// Gets or sets the starting count.
+        /// Gets or sets the string sequence, which is iterated over based on the rename count.
         /// </summary>
-        /// <value>The starting count.</value>
-        public int StartingCount { get; set; }
-
-        /// <summary>
-        /// Gets or sets the format for the count, appended to the end of the string.
-        /// </summary>
-        /// <value>The count format.</value>
-        public string CountFormat { get; set; }
-
-        /// <summary>
-        /// Gets or sets the increment to use when counting.
-        /// </summary>
-        public int Increment { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the count string format specified is parsable.
-        /// </summary>
-        public bool IsCountStringFormatValid
-        {
-            get
-            {
-                try
-                {
-                    this.StartingCount.ToString(this.CountFormat);
-                    return true;
-                }
-                catch (System.FormatException)
-                {
-                    return false;
-                }
-            }
-        }
+        public string[] StringSequence { get; set; }
 
         /// <summary>
         /// Checks if this RenameOperation has errors in its configuration.
@@ -105,7 +71,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>A clone of this instance</returns>
         public IRenameOperation Clone()
         {
-            var clone = new EnumerateOperation(this);
+            var clone = new AddStringSequenceOperation(this);
             return clone;
         }
 
@@ -123,29 +89,17 @@ namespace RedBlueGames.MulliganRenamer
                 renameResult.Add(new Diff(input, DiffOperation.Equal));
             }
 
-            if (!string.IsNullOrEmpty(this.CountFormat))
+            if (this.StringSequence != null && this.StringSequence.Length > 0)
             {
-                var currentCount = this.StartingCount + (relativeCount * this.Increment);
-                try
+                var wrappedIndex = relativeCount % this.StringSequence.Length;
+                var stringToInsert = this.StringSequence[wrappedIndex];
+                if (!string.IsNullOrEmpty(stringToInsert))
                 {
-                    var currentCountAsString = currentCount.ToString(this.CountFormat);
-                    renameResult.Add(new Diff(currentCountAsString, DiffOperation.Insertion));
-                }
-                catch (System.FormatException)
-                {
-                    // Can't append anything if format is bad.
+                    renameResult.Add(new Diff(this.StringSequence[wrappedIndex], DiffOperation.Insertion));
                 }
             }
 
             return renameResult;
-        }
-
-        private void Initialize()
-        {
-            this.Increment = 1;
-
-            // Give it an initially valid count format
-            this.CountFormat = "0";
         }
     }
 }
