@@ -13,7 +13,7 @@
         {
             get
             {
-                return "Add/Add Prefix or Suffix";
+                return "Add/Prefix or Suffix";
             }
         }
 

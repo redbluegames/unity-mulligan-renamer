@@ -263,16 +263,22 @@ namespace RedBlueGames.MulliganRenamer
             // This binds Operations to their respective Drawers
             this.RenameOperationDrawerBindingPrototypes = new List<RenameOperationDrawerBinding>();
             this.RenameOperationDrawerBindingPrototypes.Add(
-                new RenameOperationDrawerBinding(new AddStringOperation(), new AddStringOperationDrawer()));
-
-            this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ReplaceStringOperation(), new ReplaceStringOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ReplaceNameOperation(), new ReplaceNameOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new AddStringOperation(), new AddStringOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new EnumerateOperation(), new EnumerateOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new CountByLetterOperation(), new CountByLetterOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new CountByLetterOperation(), new AddStringSequenceOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ChangeCaseOperation(), new ChangeCaseOperationDrawer()));
@@ -282,9 +288,6 @@ namespace RedBlueGames.MulliganRenamer
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new RemoveCharactersOperation(), new RemoveCharactersOperationDrawer()));
-
-            this.RenameOperationDrawerBindingPrototypes.Add(
-                new RenameOperationDrawerBinding(new AddStringSequenceOperation(), new AddStringSequenceOperationDrawer()));
         }
 
         private void InitializeGUIContents()

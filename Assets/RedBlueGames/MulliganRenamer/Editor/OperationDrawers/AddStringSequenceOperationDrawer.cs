@@ -1,9 +1,10 @@
 ﻿namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using UnityEngine;
     using UnityEditor;
 
-    public class AddStringSequenceOperationDrawer : RenameOperationDrawer<AddStringSequenceOperation>
+    public class AddStringSequenceOperationDrawer : RenameOperationDrawer<CountByLetterOperation>
     {
         /// <summary>
         /// Gets the path that's displayed when this rename op is used in the Add Op menu.
@@ -13,7 +14,7 @@
         {
             get
             {
-                return "Add/Add String Sequence";
+                return "Add/String Sequence";
             }
         }
 
@@ -53,6 +54,8 @@
             }
         }
 
+        private int SelectedModeIndex { get; set; }
+
         /// <summary>
         /// Gets the preferred height for the contents of the operation.
         /// This allows inherited operations to specify their height.
@@ -69,37 +72,36 @@
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
+            // AddStringSequence is just a CountByLetter without carrying over
+            this.RenameOperation.DoNotCarryOver = true;
+
+            var currentRectSplit = 0;
+            var numLines = 1;
+
+            var stringRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
+            var stringSequence = this.DrawStringSequenceField(
+                stringRect,
+                controlPrefix,
+                this.RenameOperation.CountSequence);
+            if (stringSequence != null)
+            {
+                this.RenameOperation.CountSequence = stringSequence;
+            }
+        }
+
+        private string[] DrawStringSequenceField(Rect rect, int controlPrefix, string[] stringSequence)
+        {
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Sequence"));
 
-            var content = new GUIContent("Sequence", "The sequence of strings to add, comma separted.");
-            var oldSequence = AddComasBetweenStrings(this.RenameOperation.StringSequence);
+            var sequenceContent = new GUIContent("Sequence", "The sequence of strings to add, comma separted.");
+            var oldSequence = StringUtilities.AddCommasBetweenStrings(stringSequence);
+            var sequenceStrings = oldSequence;
             var sequenceWithCommas = EditorGUI.TextField(
-                operationRect.GetSplitVertical(1, 1, LineSpacing),
-                content,
-                oldSequence);
+                rect,
+                sequenceContent,
+                sequenceStrings);
 
-            this.RenameOperation.StringSequence = StripComasFromString(sequenceWithCommas);
-        }
-
-        private static string[] StripComasFromString(string stringWithComas)
-        {
-            var splits = stringWithComas.Split(',');
-            return splits;
-        }
-
-        private static string AddComasBetweenStrings(string[] strings)
-        {
-            var fullString = string.Empty;
-            for (int i = 0; i < strings.Length; ++i)
-            {
-                fullString = string.Concat(fullString, strings[i]);
-                if (i < strings.Length - 1)
-                {
-                    fullString = string.Concat(fullString, ",");
-                }
-            }
-
-            return fullString;
+            return StringUtilities.StripCommasFromString(sequenceWithCommas);
         }
     }
 }
