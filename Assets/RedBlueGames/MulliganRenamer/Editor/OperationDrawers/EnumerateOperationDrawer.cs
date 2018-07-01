@@ -72,7 +72,7 @@
         {
             var defaultHeight = this.CalculateGUIHeightForLines(4);
             var preferredHeight = defaultHeight;
-            if (!this.Model.IsCountStringFormatValid)
+            if (!this.RenameOperation.IsCountStringFormatValid)
             {
                 preferredHeight += this.GetHeightForHelpBox();
             }
@@ -101,7 +101,7 @@
             var currentLine = 0;
             float[] weights;
             bool countFormatWasValidBeforeDraw;
-            if (!this.Model.IsCountStringFormatValid)
+            if (!this.RenameOperation.IsCountStringFormatValid)
             {
                 weights = new float[] { 1, 1, 3, 1, 1 };
                 countFormatWasValidBeforeDraw = false;
@@ -123,15 +123,15 @@
             EditorGUI.BeginDisabledGroup(selectedPreset.ReadOnly);
             var countFormatContent = new GUIContent("Count Format", "The string format to use when adding the Count to the name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFormatContent.text));
-            this.Model.CountFormat = EditorGUI.TextField(
+            this.RenameOperation.CountFormat = EditorGUI.TextField(
                 operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
                 countFormatContent,
                 selectedPreset.Format);
             EditorGUI.EndDisabledGroup();
 
-            selectedPreset.Format = this.Model.CountFormat;
+            selectedPreset.Format = this.RenameOperation.CountFormat;
 
-            if (!this.Model.IsCountStringFormatValid)
+            if (!this.RenameOperation.IsCountStringFormatValid)
             {
                 // On the first frame a user sets the count invalid, measurements will be broken because
                 // the Height was calculated using the non-erroring size. So don't draw the error box until next frame
@@ -151,17 +151,17 @@
 
             var countFromContent = new GUIContent("Count From", "The value to start counting from. The first object will have this number.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFromContent.text));
-            this.Model.StartingCount = EditorGUI.IntField(
+            this.RenameOperation.StartingCount = EditorGUI.IntField(
                 operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
                 countFromContent,
-                this.Model.StartingCount);
+                this.RenameOperation.StartingCount);
 
             var incrementContent = new GUIContent("Increment", "The value to add to each object when counting.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, incrementContent.text));
-            this.Model.Increment = EditorGUI.IntField(
+            this.RenameOperation.Increment = EditorGUI.IntField(
                 operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
                 incrementContent,
-                this.Model.Increment);
+                this.RenameOperation.Increment);
         }
 
         private void Initialize()

@@ -70,18 +70,18 @@
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Front"));
-            this.Model.NumFrontDeleteChars = EditorGUI.IntField(
+            this.RenameOperation.NumFrontDeleteChars = EditorGUI.IntField(
                 operationRect.GetSplitVertical(1, 2, LineSpacing),
                 "Delete from Front",
-                this.Model.NumFrontDeleteChars);
-            this.Model.NumFrontDeleteChars = Mathf.Max(0, this.Model.NumFrontDeleteChars);
+                this.RenameOperation.NumFrontDeleteChars);
+            this.RenameOperation.NumFrontDeleteChars = Mathf.Max(0, this.RenameOperation.NumFrontDeleteChars);
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delete from Back"));
-            this.Model.NumBackDeleteChars = EditorGUI.IntField(
+            this.RenameOperation.NumBackDeleteChars = EditorGUI.IntField(
                 operationRect.GetSplitVertical(2, 2, LineSpacing),
                 "Delete from Back",
-                this.Model.NumBackDeleteChars);
-            this.Model.NumBackDeleteChars = Mathf.Max(0, this.Model.NumBackDeleteChars);
+                this.RenameOperation.NumBackDeleteChars);
+            this.RenameOperation.NumBackDeleteChars = Mathf.Max(0, this.RenameOperation.NumBackDeleteChars);
         }
     }
 }

@@ -95,7 +95,7 @@
             // after it's already been measured based on it's PRE Update state.
             var selectedPresetIndexPreDraw = this.SelectedPresetIndex;
             var selectedPresetIndexPostDraw = selectedPresetIndexPreDraw;
-            var modelPreDraw = (RemoveCharactersOperation)this.Model.Clone();
+            var modelPreDraw = (RemoveCharactersOperation)this.RenameOperation.Clone();
             var modelPostDraw = (RemoveCharactersOperation)modelPreDraw.Clone();
 
             var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
@@ -159,7 +159,7 @@
             modelPostDraw.Config = workingConfig;
 
             // Apply model back to this version to be represented next frame.
-            this.Model.CopyFrom(modelPostDraw);
+            this.RenameOperation.CopyFrom(modelPostDraw);
 
             // Also apply working gui state into this object so that it's represented next frame
             this.GUIPresets[selectedPresetIndexPreDraw].Options = workingConfig;

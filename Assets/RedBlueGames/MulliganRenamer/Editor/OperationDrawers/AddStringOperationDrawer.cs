@@ -70,16 +70,16 @@
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Prefix"));
-            this.Model.Prefix = EditorGUI.TextField(
+            this.RenameOperation.Prefix = EditorGUI.TextField(
                 operationRect.GetSplitVertical(1, 2, LineSpacing),
                 "Prefix",
-                this.Model.Prefix);
+                this.RenameOperation.Prefix);
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Suffix"));
-            this.Model.Suffix = EditorGUI.TextField(
+            this.RenameOperation.Suffix = EditorGUI.TextField(
                 operationRect.GetSplitVertical(2, 2, LineSpacing),
                 "Suffix",
-                this.Model.Suffix);
+                this.RenameOperation.Suffix);
         }
     }
 }

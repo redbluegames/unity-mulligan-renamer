@@ -74,10 +74,10 @@
 
             var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
-            this.Model.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.EnumPopup(
+            this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.EnumPopup(
                 singleLineRect,
                 casingLabel,
-                this.Model.Casing);
+                this.RenameOperation.Casing);
         }
     }
 }

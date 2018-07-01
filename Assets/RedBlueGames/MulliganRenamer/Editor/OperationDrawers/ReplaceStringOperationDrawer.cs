@@ -63,14 +63,14 @@
         {
             var defaultHeight = this.CalculateGUIHeightForLines(4);
             var preferredHeight = defaultHeight;
-            if (this.Model.HasErrors())
+            if (this.RenameOperation.HasErrors())
             {
-                if (!this.Model.SearchStringIsValidRegex)
+                if (!this.RenameOperation.SearchStringIsValidRegex)
                 {
                     preferredHeight += GetHeightForHelpBox();
                 }
 
-                if (!this.Model.ReplacementStringIsValidRegex)
+                if (!this.RenameOperation.ReplacementStringIsValidRegex)
                 {
                     preferredHeight += GetHeightForHelpBox();
                 }
@@ -85,7 +85,7 @@
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
-            var preGUIModel = (ReplaceStringOperation)this.Model.Clone();
+            var preGUIModel = (ReplaceStringOperation)this.RenameOperation.Clone();
             var postGUIModel = (ReplaceStringOperation)preGUIModel.Clone();
             var weights = new List<float>(4);
             for (int i = 0; i < 4; ++i)
@@ -173,7 +173,7 @@
             }
 
             // Apply model back to this version to be represented next frame.
-            this.Model.CopyFrom(postGUIModel);
+            this.RenameOperation.CopyFrom(postGUIModel);
         }
 
         private static float GetHeightForHelpBox()

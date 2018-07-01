@@ -43,7 +43,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private string queuedControlToFocus;
 
-        private T model;
+        private T renameOperation;
 
         /// <summary>
         /// Gets the heading label for the Rename Operation.
@@ -70,25 +70,25 @@ namespace RedBlueGames.MulliganRenamer
         public abstract string ControlToFocus { get; }
 
         /// <summary>
-        /// Gets the model this drawer represents.
+        /// Gets the RenameOperation this drawer represents.
         /// </summary>
-        public T Model
+        public T RenameOperation
         {
             get
             {
-                return this.model;
+                return this.renameOperation;
             }
         }
 
         /// <summary>
-        /// Sets the model for the drawer.
+        /// Sets the RenameOperation instance represented by the drawer.
         /// </summary>
-        /// <param name="modelInstance">Model instance.</param>
-        public void SetModel(IRenameOperation modelInstance)
+        /// <param name="renameOperationInstance">RenameOperation instance.</param>
+        public void SetModel(IRenameOperation renameOperationInstance)
         {
-            // This cast is a *bit* of an assumption, that the passed model can be
+            // This cast is a *bit* of an assumption, that the passed instance can be
             // downcasted to a more derived type (T : IRenameOperation) than IRenameOperation.
-            this.model = (T) modelInstance;
+            this.renameOperation = (T) renameOperationInstance;
         }
 
         /// <summary>

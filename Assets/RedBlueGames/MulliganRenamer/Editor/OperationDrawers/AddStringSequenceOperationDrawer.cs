@@ -13,7 +13,7 @@
         {
             get
             {
-                return "Add/String Sequence";
+                return "Add/Add String Sequence";
             }
         }
 
@@ -72,13 +72,13 @@
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Sequence"));
 
             var content = new GUIContent("Sequence", "The sequence of strings to add, comma separted.");
-            var oldSequence = AddComasBetweenStrings(this.Model.StringSequence);
+            var oldSequence = AddComasBetweenStrings(this.RenameOperation.StringSequence);
             var sequenceWithCommas = EditorGUI.TextField(
                 operationRect.GetSplitVertical(1, 1, LineSpacing),
                 content,
                 oldSequence);
 
-            this.Model.StringSequence = StripComasFromString(sequenceWithCommas);
+            this.RenameOperation.StringSequence = StripComasFromString(sequenceWithCommas);
         }
 
         private static string[] StripComasFromString(string stringWithComas)
