@@ -821,11 +821,18 @@
                     {
                         previewPanelContents.LongestNewNameWidth = newNameWidth;
                     }
+
+                    float finalNameWidth = labelStyle.CalcSize(
+                                             new GUIContent(previewRowInfo.FinalName)).x * paddingScaleForBold;
+                    if (finalNameWidth > previewPanelContents.LongestFinalNameWidth)
+                    {
+                        previewPanelContents.LongestFinalNameWidth = finalNameWidth;
+                    }
                 }
 
                 previewPanelContents.LongestOriginalNameWidth = Mathf.Max(MinColumnWidth, previewPanelContents.LongestOriginalNameWidth);
                 previewPanelContents.LongestNewNameWidth = Mathf.Max(MinColumnWidth, previewPanelContents.LongestNewNameWidth);
-                previewPanelContents.LongestFinalNameWidth = previewPanelContents.LongestNewNameWidth;
+                previewPanelContents.LongestFinalNameWidth = previewPanelContents.LongestFinalNameWidth;
 
                 previewPanelContents.TotalNumRows = preview.NumObjects;
 
