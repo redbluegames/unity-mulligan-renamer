@@ -1,0 +1,14 @@
+{
+    "name": "RBG.Mulligan.Tests",
+    "references": [
+        "RBG.Mulligan"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

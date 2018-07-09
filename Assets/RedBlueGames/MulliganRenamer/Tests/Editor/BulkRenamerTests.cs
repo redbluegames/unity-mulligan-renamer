@@ -27,7 +27,6 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    using UnityEngine.TestTools;
     using NUnit.Framework;
 
     using Object = UnityEngine.Object;
