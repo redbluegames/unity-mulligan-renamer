@@ -153,7 +153,9 @@ namespace RedBlueGames.MulliganRenamer
         private string[] DrawCustomSequenceField(Rect rect, int controlPrefix, CountByLetterPresetGUI preset)
         {
             EditorGUI.BeginDisabledGroup(preset.IsReadOnly);
-            var customSequenceContent = new GUIContent("Strings", "The string format to use when adding the Count to the name.");
+            var customSequenceContent = new GUIContent("Strings", "The strings of letters to add, comma separated. Ex: \"A,B,C\" will append " +
+                                                       "A, B, and C to the first three objects respectively. After that it will add another " +
+                                                       "sequence, starting with AA, then AB, then AC, etc.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, customSequenceContent.text));
             var displaySequence = preset.IsReadOnly ? preset.DisplaySequence :
                                         StringUtilities.AddCommasBetweenStrings(preset.CountSequence);
