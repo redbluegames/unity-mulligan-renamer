@@ -494,30 +494,48 @@ namespace RedBlueGames.MulliganRenamer
         private void DrawOperationsPanel(Rect operationPanelRect)
         {
             var totalHeightOfOperations = 0.0f;
-            var operationSpacing = 0.0f;
             for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 var drawer = RenameOperationsToApplyWithBindings[i].Drawer;
-                totalHeightOfOperations += drawer.GetPreferredHeight() + operationSpacing;
+                totalHeightOfOperations += drawer.GetPreferredHeight();
             }
 
-            var operationsContentsRect = new Rect(operationPanelRect);
-            operationsContentsRect.height = totalHeightOfOperations + 18.0f;
+            var headerRect = new Rect(operationPanelRect);
+            headerRect.height = 18.0f;
+            var operationStyle = new GUIStyle("ScriptText");
+            GUI.Box(headerRect, "", operationStyle);
+            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerStyle.alignment = TextAnchor.MiddleCenter;
+            EditorGUI.LabelField(headerRect, "Rename Operations", headerStyle);
+
+            // The border on the header's box doesn't show, so add one to the y to reveal it
+            var scrollAreaRect = new Rect(operationPanelRect);
+            scrollAreaRect.y += headerRect.height + 1;
+            scrollAreaRect.height -= headerRect.height + 1;
 
             var buttonSize = new Vector2(150.0f, 20.0f);
             var spaceBetweenButton = 16.0f;
-            var scrollContents = new Rect(operationsContentsRect);
-            scrollContents.height += spaceBetweenButton + buttonSize.y;
-            this.renameOperationsPanelScrollPosition = GUI.BeginScrollView(
-                operationPanelRect,
-                this.renameOperationsPanelScrollPosition,
-                scrollContents);
+            var scrollContentsRect = new Rect(scrollAreaRect);
+            scrollContentsRect.height = totalHeightOfOperations + spaceBetweenButton + buttonSize.y;
 
-            this.DrawRenameOperations(operationPanelRect, operationSpacing);
+            // If we need to scroll vertically, subtract out room for the vertical scrollbar so we don't
+            // have to also scroll horiztonally
+            var contentsFit = scrollContentsRect.height <= scrollAreaRect.height;
+            if (!contentsFit)
+            {
+                scrollContentsRect.width -= 15.0f;
+            }
+
+            this.renameOperationsPanelScrollPosition = GUI.BeginScrollView(
+                scrollAreaRect,
+                this.renameOperationsPanelScrollPosition,
+                scrollContentsRect);
+
+            this.DrawRenameOperations(scrollContentsRect);
 
             var buttonRect = new Rect();
-            buttonRect.x = operationsContentsRect.x + (operationsContentsRect.size.x / 2.0f) - (buttonSize.x / 2.0f);
-            buttonRect.y = operationsContentsRect.y + operationsContentsRect.height + spaceBetweenButton;
+            buttonRect.x = scrollContentsRect.x + (scrollContentsRect.size.x / 2.0f) - (buttonSize.x / 2.0f);
+            buttonRect.y = scrollContentsRect.y + scrollContentsRect.height - buttonSize.y;
             buttonRect.height = buttonSize.y;
             buttonRect.width = buttonSize.x;
 
@@ -537,16 +555,8 @@ namespace RedBlueGames.MulliganRenamer
             GUI.EndScrollView();
         }
 
-        private void DrawRenameOperations(Rect operationRect, float spacing)
+        private void DrawRenameOperations(Rect operationsRect)
         {
-            var headerRect = new Rect(operationRect);
-            headerRect.height = 18.0f;
-            var operationStyle = new GUIStyle("ScriptText");
-            GUI.Box(headerRect, "", operationStyle);
-            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
-            headerStyle.alignment = TextAnchor.MiddleCenter;
-            EditorGUI.LabelField(headerRect, "Rename Operations", headerStyle);
-
             // Store the op before buttons are pressed because buttons change focus
             var focusedOpBeforeButtonPresses = this.FocusedRenameOp;
             bool saveOpsToPreferences = false;
@@ -556,10 +566,10 @@ namespace RedBlueGames.MulliganRenamer
             for (int i = 0; i < this.NumRenameOperations; ++i)
             {
                 var currentElement = this.RenameOperationsToApplyWithBindings[i];
-                var rect = new Rect(operationRect);
-                rect.y += totalHeightDrawn + spacing + headerRect.height;
+                var rect = new Rect(operationsRect);
+                rect.y += totalHeightDrawn;
                 rect.height = currentElement.Drawer.GetPreferredHeight();
-                totalHeightDrawn += rect.height + spacing;
+                totalHeightDrawn += rect.height;
 
                 var guiOptions = new RenameOperationGUIOptions();
                 guiOptions.ControlPrefix = i;
