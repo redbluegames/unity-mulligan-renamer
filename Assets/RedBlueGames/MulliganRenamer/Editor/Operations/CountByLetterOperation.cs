@@ -51,6 +51,7 @@ namespace RedBlueGames.MulliganRenamer
             this.StartingCount = 0;
             this.Increment = 1;
             this.CountSequence = new string[0];
+            this.Prepend = false;
         }
 
         /// <summary>
@@ -64,6 +65,7 @@ namespace RedBlueGames.MulliganRenamer
             this.StartingCount = operationToCopy.StartingCount;
             this.Increment = operationToCopy.Increment;
             this.CountSequence = new string[operationToCopy.CountSequence.Length];
+            this.Prepend = operationToCopy.Prepend;
             operationToCopy.CountSequence.CopyTo(this.CountSequence, 0);
         }
 
@@ -89,6 +91,13 @@ namespace RedBlueGames.MulliganRenamer
         /// over the sequence to another "digit".
         /// </summary>
         public bool DoNotCarryOver { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this
+        /// <see cref="T:RedBlueGames.MulliganRenamer.CountByLetterOperation"/> should prepend the count
+        /// to the front of the string
+        /// </summary>
+        public bool Prepend { get; set; }
 
         /// <summary>
         /// Checks if this RenameOperation has errors in its configuration.
@@ -118,7 +127,7 @@ namespace RedBlueGames.MulliganRenamer
         public RenameResult Rename(string input, int relativeCount)
         {
             var renameResult = new RenameResult();
-            if (!string.IsNullOrEmpty(input))
+            if (!string.IsNullOrEmpty(input) && !this.Prepend)
             {
                 renameResult.Add(new Diff(input, DiffOperation.Equal));
             }
@@ -128,6 +137,11 @@ namespace RedBlueGames.MulliganRenamer
             if (!string.IsNullOrEmpty(stringToInsert))
             {
                 renameResult.Add(new Diff(stringToInsert, DiffOperation.Insertion));
+            }
+
+            if (this.Prepend)
+            {
+                renameResult.Add(new Diff(input, DiffOperation.Equal));
             }
 
             return renameResult;

@@ -88,6 +88,29 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void Rename_PrefixedCount_PrependsCount()
+        {
+            // Arrange
+            var name = "Char_Hero";
+            var enumerateOp = new EnumerateOperation();
+            enumerateOp.CountFormat = "0";
+            enumerateOp.StartingCount = 0;
+            enumerateOp.Prepend = true;
+
+            var expected = new RenameResult()
+            {
+                new Diff("0", DiffOperation.Insertion),
+                new Diff(name, DiffOperation.Equal)
+            };
+
+            // Act
+            var result = enumerateOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void RenameCount_CountSeveralItems_CountsUp()
         {
             // Arrange

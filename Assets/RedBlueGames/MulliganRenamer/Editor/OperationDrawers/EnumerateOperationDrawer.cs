@@ -93,7 +93,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            var defaultHeight = this.CalculateGUIHeightForLines(4);
+            var defaultHeight = this.CalculateGUIHeightForLines(5);
             var preferredHeight = defaultHeight;
             if (!this.RenameOperation.IsCountStringFormatValid)
             {
@@ -126,12 +126,12 @@ namespace RedBlueGames.MulliganRenamer
             bool countFormatWasValidBeforeDraw;
             if (!this.RenameOperation.IsCountStringFormatValid)
             {
-                weights = new float[] { 1, 1, 3, 1, 1 };
+                weights = new float[] { 1, 1, 3, 1, 1, 1 };
                 countFormatWasValidBeforeDraw = false;
             }
             else
             {
-                weights = new float[] { 1, 1, 1, 1 };
+                weights = new float[] { 1, 1, 1, 1, 1 };
                 countFormatWasValidBeforeDraw = true;
             }
 
@@ -186,6 +186,13 @@ namespace RedBlueGames.MulliganRenamer
                 operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
                 incrementContent,
                 this.RenameOperation.Increment);
+
+            var prependContent = new GUIContent("Add as Prefix", "Add the count to the front of the object's name.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, prependContent.text));
+            this.RenameOperation.Prepend = EditorGUI.Toggle(
+                operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
+                prependContent,
+                this.RenameOperation.Prepend);
         }
 
         private void Initialize()

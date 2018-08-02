@@ -72,6 +72,11 @@ namespace RedBlueGames.MulliganRenamer
         public int Increment { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether or not to add the count to the front of the string
+        /// </summary>
+        public bool Prepend { get; set; }
+
+        /// <summary>
         /// Gets a value indicating whether the count string format specified is parsable.
         /// </summary>
         public bool IsCountStringFormatValid
@@ -118,7 +123,7 @@ namespace RedBlueGames.MulliganRenamer
         public RenameResult Rename(string input, int relativeCount)
         {
             var renameResult = new RenameResult();
-            if (!string.IsNullOrEmpty(input))
+            if (!string.IsNullOrEmpty(input) && !this.Prepend)
             {
                 renameResult.Add(new Diff(input, DiffOperation.Equal));
             }
@@ -135,6 +140,11 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     // Can't append anything if format is bad.
                 }
+            }
+
+            if (this.Prepend)
+            {
+                renameResult.Add(new Diff(input, DiffOperation.Equal));
             }
 
             return renameResult;

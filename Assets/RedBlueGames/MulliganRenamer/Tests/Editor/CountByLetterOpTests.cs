@@ -97,6 +97,26 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void Rename_UppercaseAddFirstToSomethingPrefixed_PrependsA()
+        {
+            // Arrange
+            string name = "Something"; ;
+            var countByLetterOp = new CountByLetterOperation();
+            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.Prepend = true;
+
+            var expected = new RenameResult() {
+                new Diff("A", DiffOperation.Insertion),
+                new Diff("Something", DiffOperation.Equal) };
+
+            // Act
+            var result = countByLetterOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void Rename_UppercaseAdd26thToEmpty_AddsZ()
         {
             // Arrange

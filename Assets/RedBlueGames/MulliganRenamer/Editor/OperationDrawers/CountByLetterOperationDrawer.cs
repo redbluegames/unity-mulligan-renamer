@@ -93,7 +93,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            return this.CalculateGUIHeightForLines(4);
+            return this.CalculateGUIHeightForLines(5);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace RedBlueGames.MulliganRenamer
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
             var currentRectSplit = 0;
-            var numLines = 4;
+            var numLines = 5;
 
             var sequenceRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
             var newlySelectedPreset = this.DrawSequenceSelection(sequenceRect, controlPrefix);
@@ -129,6 +129,12 @@ namespace RedBlueGames.MulliganRenamer
                 incrementRect,
                 controlPrefix,
                 this.RenameOperation.Increment);
+
+            var prependRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
+            this.RenameOperation.Prepend = this.DrawPrependField(
+                prependRect,
+                controlPrefix,
+                this.RenameOperation.Prepend);
         }
 
         private CountByLetterPresetGUI DrawSequenceSelection(Rect rect, int controlPrefix)
@@ -203,6 +209,13 @@ namespace RedBlueGames.MulliganRenamer
             var content = new GUIContent("Increment", "The value to add to the count after naming an object.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, content.text));
             return EditorGUI.IntField(rect, content, originalIncrement);
+        }
+
+        private bool DrawPrependField(Rect rect, int controlPrefix, bool originalPrepend)
+        {
+            var content = new GUIContent("Add as Prefix", "Add the count to the front of the object's name.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, content.text));
+            return EditorGUI.Toggle(rect, content, originalPrepend);
         }
 
         private void Initialize()
