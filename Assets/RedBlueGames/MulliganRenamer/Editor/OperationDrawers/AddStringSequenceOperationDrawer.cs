@@ -86,7 +86,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            return this.CalculateGUIHeightForLines(1);
+            return this.CalculateGUIHeightForLines(2);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace RedBlueGames.MulliganRenamer
             this.RenameOperation.DoNotCarryOver = true;
 
             var currentRectSplit = 0;
-            var numLines = 1;
+            var numLines = 2;
 
             var stringRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
             var stringSequence = this.DrawStringSequenceField(
@@ -110,6 +110,9 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.RenameOperation.CountSequence = stringSequence;
             }
+
+            var prependRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
+            this.RenameOperation.Prepend = this.DrawPrependField(prependRect, controlPrefix, this.RenameOperation.Prepend);
         }
 
         private string[] DrawStringSequenceField(Rect rect, int controlPrefix, string[] stringSequence)
@@ -125,6 +128,13 @@ namespace RedBlueGames.MulliganRenamer
                 sequenceStrings);
 
             return StringUtilities.StripCommasFromString(sequenceWithCommas);
+        }
+
+        private bool DrawPrependField(Rect rect, int controlPrefix, bool originalPrepend)
+        {
+            var content = new GUIContent("Add as Prefix", "Add the count to the front of the object's name.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, content.text));
+            return EditorGUI.Toggle(rect, content, originalPrepend);
         }
     }
 }
