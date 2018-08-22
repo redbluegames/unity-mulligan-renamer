@@ -221,11 +221,11 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var removeCharactersOp = new RemoveCharactersOperation();
-            var removeCharacterOptions = new RemoveCharactersOperation.Configuration();
+            var removeCharacterOptions = new RemoveCharactersOperation.RenameOptions();
             removeCharacterOptions.CharactersToRemove = "\\d";
             removeCharacterOptions.CharactersAreRegex = true;
             removeCharacterOptions.IsCaseSensitive = false;
-            removeCharactersOp.Config = removeCharacterOptions;
+            removeCharactersOp.SetOptions(removeCharacterOptions);
 
             var enumerateOp = new EnumerateOperation();
             enumerateOp.StartingCount = 1;
@@ -464,7 +464,7 @@ namespace RedBlueGames.MulliganRenamer
             spriteSheetConfig.UseZeroBasedIndexing = true;
             var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
             var removeNumbersOp = new RemoveCharactersOperation();
-            removeNumbersOp.Config = RemoveCharactersOperation.Numbers;
+            removeNumbersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Numbers);
             var enumerateOp = new EnumerateOperation();
             enumerateOp.StartingCount = 1;
             enumerateOp.Increment = 1;

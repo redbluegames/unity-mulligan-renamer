@@ -52,17 +52,45 @@ namespace RedBlueGames.MulliganRenamer
             this.NumBackDeleteChars = operationToCopy.NumBackDeleteChars;
         }
 
+        [SerializeField]
+        private int numFrontDeleteChars;
+
+        [SerializeField]
+        private int numBackDeleteChars;
+
         /// <summary>
         /// Gets or sets the number of characters to delete from the front.
         /// </summary>
         /// <value>The number front delete chars.</value>
-        public int NumFrontDeleteChars { get; set; }
+        public int NumFrontDeleteChars
+        {
+            get
+            {
+                return this.numFrontDeleteChars;
+            }
+
+            set
+            {
+                this.numFrontDeleteChars = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the number of characters to delete from the back.
         /// </summary>
         /// <value>The number back delete chars.</value>
-        public int NumBackDeleteChars { get; set; }
+        public int NumBackDeleteChars
+        {
+            get
+            {
+                return this.numBackDeleteChars;
+            }
+
+            set
+            {
+                this.numBackDeleteChars = value;
+            }
+        }
 
         public bool HasErrors()
         {

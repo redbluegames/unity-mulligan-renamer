@@ -50,11 +50,25 @@ namespace RedBlueGames.MulliganRenamer
             this.NewName = operationToCopy.NewName;
         }
 
+        [SerializeField]
+        private string newName;
+
         /// <summary>
         /// Gets or sets the new name.
         /// </summary>
         /// <value>The new name.</value>
-        public string NewName { get; set; }
+        public string NewName
+        {
+            get
+            {
+                return this.newName;
+            }
+
+            set
+            {
+                this.newName = value;
+            }
+        }
 
         public bool HasErrors()
         {

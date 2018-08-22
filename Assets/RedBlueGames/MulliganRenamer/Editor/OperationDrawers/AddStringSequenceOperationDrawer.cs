@@ -27,7 +27,7 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using UnityEditor;
 
-    public class AddStringSequenceOperationDrawer : RenameOperationDrawer<CountByLetterOperation>
+    public class AddStringSequenceOperationDrawer : RenameOperationDrawer<AddStringSequenceOperation>
     {
         /// <summary>
         /// Gets the path that's displayed when this rename op is used in the Add Op menu.
@@ -108,7 +108,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.RenameOperation.CountSequence);
             if (stringSequence != null)
             {
-                this.RenameOperation.CountSequence = stringSequence;
+                this.RenameOperation.SetCountSequence(stringSequence);
             }
 
             var prependRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);

@@ -54,30 +54,86 @@ namespace RedBlueGames.MulliganRenamer
             this.CopyFrom(operationToCopy);
         }
 
+        [SerializeField]
+        private bool userRegex;
+
+        [SerializeField]
+        private string searchString;
+
+        [SerializeField]
+        private bool searchIsCaseSensitive;
+
+        [SerializeField]
+        private string replacementString;
+
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="ReplaceStringOperation"/>
         /// uses a regex expression for input.
         /// </summary>
         /// <value><c>true</c> if input is a regular expression; otherwise, <c>false</c>.</value>
-        public bool UseRegex { get; set; }
+        public bool UseRegex
+        {
+            get
+            {
+                return this.userRegex;
+            }
+
+            set
+            {
+                this.userRegex = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the search string that will be replaced.
         /// </summary>
         /// <value>The search string.</value>
-        public string SearchString { get; set; }
+        public string SearchString
+        {
+            get
+            {
+                return this.searchString;
+            }
+
+            set
+            {
+                this.searchString = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the search is case sensitive.
         /// </summary>
         /// <value><c>true</c> if search is case sensitive; otherwise, <c>false</c>.</value>
-        public bool SearchIsCaseSensitive { get; set; }
+        public bool SearchIsCaseSensitive
+        {
+            get
+            {
+                return this.searchIsCaseSensitive;
+            }
+
+            set
+            {
+                this.searchIsCaseSensitive = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the replacement string, which replaces instances of the search token.
         /// </summary>
         /// <value>The replacement string.</value>
-        public string ReplacementString { get; set; }
+        public string ReplacementString
+        {
+            get
+            {
+                return this.replacementString;
+            }
+
+            set
+            {
+                this.replacementString = value;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this instance has errors that prevent it from Renaming.

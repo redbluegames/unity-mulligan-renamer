@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = null;
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 0;
 
             var expected = new RenameResult() { new Diff("0", DiffOperation.Insertion) };
@@ -54,7 +54,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "Char_Hero";
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = string.Empty;
+            enumerateOp.SetCountFormat(string.Empty);
 
             var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
 
@@ -71,7 +71,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "Char_Hero";
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 0;
 
             var expected = new RenameResult()
@@ -93,7 +93,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "Char_Hero";
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 0;
             enumerateOp.Prepend = true;
 
@@ -123,7 +123,7 @@ namespace RedBlueGames.MulliganRenamer
                 "BlockE",
             };
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 1;
 
             var expectedRenameResults = new RenameResult[]
@@ -160,7 +160,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "Char_Hero";
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = -1;
 
 
@@ -183,7 +183,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "Char_Hero";
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "s";
+            enumerateOp.SetCountFormat("s");
             enumerateOp.StartingCount = 100;
 
             var expected = new RenameResult() { new Diff(name, DiffOperation.Equal) };
@@ -207,7 +207,7 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 1;
             enumerateOp.Increment = 2;
 
@@ -249,7 +249,7 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "0";
+            enumerateOp.SetCountFormat("0");
             enumerateOp.StartingCount = 1;
             enumerateOp.Increment = -1;
 

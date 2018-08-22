@@ -30,8 +30,12 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// RenameOperation that changes the case of the characters in the name.
     /// </summary>
+    [System.Serializable]
     public class ChangeCaseOperation : IRenameOperation
     {
+        [SerializeField]
+        private CasingChange casing;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class.
         /// </summary>
@@ -69,7 +73,18 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets or sets the desired casing.
         /// </summary>
         /// <value>The desired casing.</value>
-        public CasingChange Casing { get; set; }
+        public CasingChange Casing
+        {
+            get
+            {
+                return this.casing;
+            }
+
+            set
+            {
+                this.casing = value;
+            }
+        }
 
         public bool HasErrors()
         {

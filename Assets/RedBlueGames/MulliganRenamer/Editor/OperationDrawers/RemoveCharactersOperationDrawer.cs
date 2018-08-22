@@ -84,7 +84,30 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<CharacterPresetGUI> GUIPresets { get; set; }
 
-        private int SelectedPresetIndex { get; set; }
+        private int SelectedPresetIndex
+        {
+            get
+            {
+                if (this.RenameOperation == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    for (int i = 0; i < this.GUIPresets.Count; ++i)
+                    {
+                        if (this.GUIPresets[i].PresetID == this.RenameOperation.CurrentPresetID)
+                        {
+                            return i;
+                        }
+                    }
+
+                    // Could not find a GUIPreset that uses the operation's preset.
+                    // Just fallback to 0
+                    return 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the preferred height for the contents of the operation.
@@ -116,21 +139,11 @@ namespace RedBlueGames.MulliganRenamer
             // Read and write into copies so that we don't resize the view while it's being worked on,
             // which is what is required when the user switches settings around and options (lines) are added into the GUI,
             // after it's already been measured based on it's PRE Update state.
-            var selectedPresetIndexPreDraw = this.SelectedPresetIndex;
-            var selectedPresetIndexPostDraw = selectedPresetIndexPreDraw;
-            var modelPreDraw = (RemoveCharactersOperation)this.RenameOperation.Clone();
-            var modelPostDraw = (RemoveCharactersOperation)modelPreDraw.Clone();
-
-            var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
-            var names = new List<GUIContent>(this.GUIPresets.Count);
-            foreach (var preset in this.GUIPresets)
-            {
-                names.Add(new GUIContent(preset.DisplayName));
-            }
+            var originalPresetIndex = this.SelectedPresetIndex;
 
             var currentSplit = 0;
             int numSplits = 2;
-            if (this.GUIPresets[selectedPresetIndexPreDraw].IsReadOnly)
+            if (this.GUIPresets[originalPresetIndex].IsReadOnly)
             {
                 numSplits = 2;
             }
@@ -139,19 +152,42 @@ namespace RedBlueGames.MulliganRenamer
                 numSplits = 3;
             }
 
+            var presetsContent = new GUIContent("Preset", "Select a preset or specify your own characters.");
+            var names = new List<GUIContent>(this.GUIPresets.Count);
+            foreach (var preset in this.GUIPresets)
+            {
+                names.Add(new GUIContent(preset.DisplayName));
+            }
+
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
-            selectedPresetIndexPostDraw = EditorGUI.Popup(
+            var selectedPresetIndex = EditorGUI.Popup(
                 operationRect.GetSplitVertical(++currentSplit, numSplits, LineSpacing),
                 presetsContent,
-                selectedPresetIndexPreDraw,
+                originalPresetIndex,
                 names.ToArray());
 
-            var selectedPreset = this.GUIPresets[selectedPresetIndexPreDraw];
-            var workingConfig = selectedPreset.Options;
+            var selectedPreset = this.GUIPresets[selectedPresetIndex];
+            var workingOptions = new RemoveCharactersOperation.RenameOptions();
+
+            // We can't resize the Rects mid-GUI loop (GetHeight already said how tall it would be),
+            // so if we've changed presets we just apply the defaults for the new change. They can
+            // modify it next frame.
+            if (selectedPresetIndex != originalPresetIndex)
+            {
+                if (selectedPreset.IsReadOnly)
+                {
+                    this.RenameOperation.SetOptionPreset(selectedPreset.PresetID);
+                }
+                else
+                {
+                    this.RenameOperation.SetOptions(workingOptions);
+                }
+                return;
+            }
 
             if (selectedPreset.IsReadOnly)
             {
-                // Label just looks better disabled.
+                // The Readonly Label just looks better disabled.
                 EditorGUI.BeginDisabledGroup(true);
                 var readonlyLabelContent = new GUIContent(selectedPreset.ReadOnlyLabel);
                 var labelStyle = new GUIStyle(EditorStyles.label);
@@ -166,27 +202,26 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var charactersFieldContent = new GUIContent("Characters to Remove", "All characters that will be removed from the names.");
                 GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, charactersFieldContent.text));
-                workingConfig.CharactersToRemove = EditorGUI.TextField(
+                workingOptions.CharactersToRemove = EditorGUI.TextField(
                     operationRect.GetSplitVertical(++currentSplit, numSplits, LineSpacing),
                     charactersFieldContent,
-                    workingConfig.CharactersToRemove);
+                    this.RenameOperation.CharactersToRemove);
 
                 var caseSensitiveToggleContent = new GUIContent("Case Sensitive", "Flag the search to match only the specified case");
-                workingConfig.IsCaseSensitive = EditorGUI.Toggle(
+                workingOptions.IsCaseSensitive = EditorGUI.Toggle(
                     operationRect.GetSplitVertical(++currentSplit, numSplits, LineSpacing),
                     caseSensitiveToggleContent,
-                    workingConfig.IsCaseSensitive);
+                    this.RenameOperation.IsCaseSensitive);
             }
 
-            // Structs were copied by value, so reapply the modified structs back to their sources
-            modelPostDraw.Config = workingConfig;
-
-            // Apply model back to this version to be represented next frame.
-            this.RenameOperation.CopyFrom(modelPostDraw);
-
-            // Also apply working gui state into this object so that it's represented next frame
-            this.GUIPresets[selectedPresetIndexPreDraw].Options = workingConfig;
-            this.SelectedPresetIndex = selectedPresetIndexPostDraw;
+            if (selectedPreset.IsReadOnly)
+            {
+                this.RenameOperation.SetOptionPreset(selectedPreset.PresetID);
+            }
+            else
+            {
+                this.RenameOperation.SetOptions(workingOptions);
+            }
         }
 
         private void Initialize()
@@ -195,7 +230,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 DisplayName = "Symbols",
                 ReadOnlyLabel = "Removes special characters (ie. !@#$%^&*)",
-                Options = RemoveCharactersOperation.Symbols,
+                PresetID = RemoveCharactersOperation.PresetID.Symbols,
                 IsReadOnly = true
             };
 
@@ -203,7 +238,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 DisplayName = "Numbers",
                 ReadOnlyLabel = "Removes digits 0-9",
-                Options = RemoveCharactersOperation.Numbers,
+                PresetID = RemoveCharactersOperation.PresetID.Numbers,
                 IsReadOnly = true
             };
 
@@ -211,19 +246,14 @@ namespace RedBlueGames.MulliganRenamer
             {
                 DisplayName = "Whitespace",
                 ReadOnlyLabel = "Removes whitespace",
-                Options = RemoveCharactersOperation.Whitespace,
+                PresetID = RemoveCharactersOperation.PresetID.Whitespace,
                 IsReadOnly = true
             };
 
-
-            var customOptions = new RemoveCharactersOperation.Configuration();
-            customOptions.CharactersToRemove = string.Empty;
-            customOptions.IsCaseSensitive = false;
-            customOptions.CharactersAreRegex = false;
             var customPreset = new CharacterPresetGUI()
             {
                 DisplayName = "Custom",
-                Options = customOptions,
+                PresetID = RemoveCharactersOperation.PresetID.Custom,
                 IsReadOnly = false,
                 ReadOnlyLabel = string.Empty
             };
@@ -241,27 +271,11 @@ namespace RedBlueGames.MulliganRenamer
         {
             public string DisplayName { get; set; }
 
-            public RemoveCharactersOperation.Configuration Options { get; set; }
+            public RemoveCharactersOperation.PresetID PresetID { get; set; }
 
             public string ReadOnlyLabel { get; set; }
 
             public bool IsReadOnly { get; set; }
-
-            public CharacterPresetGUI()
-            {
-                this.DisplayName = string.Empty;
-                this.Options = new RemoveCharactersOperation.Configuration();
-                this.ReadOnlyLabel = string.Empty;
-                this.IsReadOnly = false;
-            }
-
-            public CharacterPresetGUI(CharacterPresetGUI other)
-            {
-                this.DisplayName = other.DisplayName;
-                this.Options = other.Options;
-                this.ReadOnlyLabel = other.ReadOnlyLabel;
-                this.IsReadOnly = other.IsReadOnly;
-            }
         }
     }
 }

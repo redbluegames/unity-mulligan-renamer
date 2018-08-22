@@ -29,6 +29,12 @@ namespace RedBlueGames.MulliganRenamer
 
     public class CountByLetterOperationDrawer : RenameOperationDrawer<CountByLetterOperation>
     {
+        private readonly GUIContent CustomSequenceContent = new GUIContent(
+            "Strings", "The strings of letters to add, comma separated. Ex: \"A,B,C\" will append " +
+            "A, B, and C to the first three objects respectively. After that it will add another " +
+            "sequence, starting with AA, then AB, then AC, etc.");
+
+
         public CountByLetterOperationDrawer()
         {
             this.Initialize();
@@ -84,7 +90,30 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<CountByLetterPresetGUI> GUIPresets { get; set; }
 
-        private int SelectedModeIndex { get; set; }
+        private int SelectedModeIndex
+        {
+            get
+            {
+                if (this.RenameOperation == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    for (int i = 0; i < this.GUIPresets.Count; ++i)
+                    {
+                        if (this.GUIPresets[i].Preset == this.RenameOperation.Preset)
+                        {
+                            return i;
+                        }
+                    }
+
+                    // Could not find a GUIPreset that uses the selected string sequence preset,
+                    // Just fallback to 0
+                    return 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the preferred height for the contents of the operation.
@@ -109,14 +138,26 @@ namespace RedBlueGames.MulliganRenamer
             var newlySelectedPreset = this.DrawSequenceSelection(sequenceRect, controlPrefix);
 
             var customSequenceRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
-            this.RenameOperation.CountSequence = this.DrawCustomSequenceField(
-                customSequenceRect,
-                controlPrefix,
-                newlySelectedPreset);
+            if (newlySelectedPreset.Preset != CountByLetterOperation.StringPreset.Custom)
+            {
+                this.DrawPlaceholderSequenceField(customSequenceRect, controlPrefix, newlySelectedPreset.SequenceToDisplay);
+                this.RenameOperation.SetCountSequencePreset(newlySelectedPreset.Preset);
+            }
+            else
+            {
+                // Clear out the sequence when moving from a non-custom to Custom so that they don't
+                // see it prepopulated with the previous preset's entries.
+                if (this.RenameOperation.Preset != CountByLetterOperation.StringPreset.Custom)
+                {
+                    this.RenameOperation.SetCountSequence(new string[] { });
+                }
 
-            // Reapply the count sequence to the preset so that it doesn't get cleared out when they click away.
-            // This keeps it from being pre-populated with the alphabet when you switch to Custom from Alphabet.
-            newlySelectedPreset.CountSequence = this.RenameOperation.CountSequence;
+                var customSequence = this.DrawCustomSequenceField(
+                    customSequenceRect,
+                    controlPrefix,
+                    this.RenameOperation.CountSequence);
+                this.RenameOperation.SetCountSequence(customSequence);
+            }
 
             var countFromRect = operationRect.GetSplitVertical(++currentRectSplit, numLines, LineSpacing);
             this.RenameOperation.StartingCount = this.DrawCountFromField(
@@ -147,35 +188,32 @@ namespace RedBlueGames.MulliganRenamer
                 optionsContent[i] = new GUIContent(this.GUIPresets[i].DisplayName);
             }
 
-            this.SelectedModeIndex = EditorGUI.Popup(
+            var newlySelectedIndex = EditorGUI.Popup(
                 rect,
                 modeContent,
                 this.SelectedModeIndex,
                 optionsContent);
 
-            return this.GUIPresets[this.SelectedModeIndex];
+            return this.GUIPresets[newlySelectedIndex];
         }
 
-        private string[] DrawCustomSequenceField(Rect rect, int controlPrefix, CountByLetterPresetGUI preset)
+        private void DrawPlaceholderSequenceField(Rect rect, int controlPrefix, string placeholderText)
         {
-            EditorGUI.BeginDisabledGroup(preset.IsReadOnly);
-            var customSequenceContent = new GUIContent("Strings", "The strings of letters to add, comma separated. Ex: \"A,B,C\" will append " +
-                                                       "A, B, and C to the first three objects respectively. After that it will add another " +
-                                                       "sequence, starting with AA, then AB, then AC, etc.");
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, customSequenceContent.text));
-            var displaySequence = preset.IsReadOnly ? preset.DisplaySequence :
-                                        StringUtilities.AddCommasBetweenStrings(preset.CountSequence);
-            var customSequence = EditorGUI.TextField(rect, customSequenceContent, displaySequence);
-            EditorGUI.EndDisabledGroup();
+            EditorGUI.BeginDisabledGroup(true);
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, CustomSequenceContent.text));
 
-            if (preset.IsReadOnly)
-            {
-                return preset.CountSequence;
-            }
-            else
-            {
-                return StringUtilities.StripCommasFromString(customSequence);
-            }
+            EditorGUI.TextField(rect, CustomSequenceContent, placeholderText);
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private string[] DrawCustomSequenceField(Rect rect, int controlPrefix, string[] displaySequence)
+        {
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, CustomSequenceContent.text));
+
+            var sequenceWithCommas = StringUtilities.AddCommasBetweenStrings(displaySequence);
+            var customSequence = EditorGUI.TextField(rect, CustomSequenceContent, sequenceWithCommas);
+
+            return StringUtilities.StripCommasFromString(customSequence);
         }
 
         private int DrawCountFromField(Rect rect, int controlPrefix, int originalIndex)
@@ -223,25 +261,23 @@ namespace RedBlueGames.MulliganRenamer
             var uppercasePreset = new CountByLetterPresetGUI()
             {
                 DisplayName = "Uppercase Alphabet",
-                CountSequence = CountByLetterOperation.UppercaseAlphabet,
-                DisplaySequence = "A,B,C...",
-                IsReadOnly = true
+                SequenceToDisplay = "A, B, C...",
+                Preset = CountByLetterOperation.StringPreset.UppercaseAlphabet,
             };
 
             var lowercasePreset = new CountByLetterPresetGUI()
             {
                 DisplayName = "Lowercase Alphabet",
-                CountSequence = CountByLetterOperation.LowercaseAlphabet,
-                DisplaySequence = "a,b,c...",
-                IsReadOnly = true
+                SequenceToDisplay = "a, b, c...",
+                Preset = CountByLetterOperation.StringPreset.LowercaseAlphabet,
             };
 
             var customPreset = new CountByLetterPresetGUI()
             {
                 DisplayName = "Custom",
                 CountSequence = new string[0],
-                DisplaySequence = "",
-                IsReadOnly = false
+                SequenceToDisplay = string.Empty,
+                Preset = CountByLetterOperation.StringPreset.Custom,
             };
 
             this.GUIPresets = new List<CountByLetterPresetGUI>
@@ -250,8 +286,6 @@ namespace RedBlueGames.MulliganRenamer
                 lowercasePreset,
                 customPreset
             };
-
-            this.SelectedModeIndex = 0;
         }
 
         private class CountByLetterPresetGUI
@@ -260,9 +294,9 @@ namespace RedBlueGames.MulliganRenamer
 
             public string[] CountSequence { get; set; }
 
-            public string DisplaySequence { get; set; }
+            public string SequenceToDisplay { get; set; }
 
-            public bool IsReadOnly { get; set; }
+            public CountByLetterOperation.StringPreset Preset { get; set; }
         }
     }
 }

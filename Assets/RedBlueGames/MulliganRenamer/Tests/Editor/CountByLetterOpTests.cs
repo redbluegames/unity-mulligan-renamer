@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = null;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = new string[] { "A" };
+            countByLetterOp.SetCountSequence(new string[] { "A" });
 
             var expected = new RenameResult() { new Diff("A", DiffOperation.Insertion) };
 
@@ -66,7 +66,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("A", DiffOperation.Insertion) };
 
@@ -83,7 +83,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = "Something"; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() {
                 new Diff("Something", DiffOperation.Equal),
@@ -102,7 +102,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = "Something"; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
             countByLetterOp.Prepend = true;
 
             var expected = new RenameResult() {
@@ -122,7 +122,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("Z", DiffOperation.Insertion) };
 
@@ -139,7 +139,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("AA", DiffOperation.Insertion) };
 
@@ -156,7 +156,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("AB", DiffOperation.Insertion) };
 
@@ -173,7 +173,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("ZZ", DiffOperation.Insertion) };
 
@@ -190,7 +190,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             var expected = new RenameResult() { new Diff("AAA", DiffOperation.Insertion) };
 
@@ -207,7 +207,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
 
             // Act / Assert
             for (int i = 0; i < 25; ++i)
@@ -225,7 +225,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.LowercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.LowercaseAlphabet);
 
             // Act / Assert
             for (int i = 0; i < 25; ++i)
@@ -243,7 +243,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
             countByLetterOp.StartingCount = 1;
 
             var expected = new RenameResult() { new Diff("B", DiffOperation.Insertion) };
@@ -261,7 +261,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
             countByLetterOp.StartingCount = 25;
 
             var expected = new RenameResult() { new Diff("AA", DiffOperation.Insertion) };
@@ -279,7 +279,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = CountByLetterOperation.UppercaseAlphabet;
+            countByLetterOp.SetCountSequencePreset(CountByLetterOperation.StringPreset.UppercaseAlphabet);
             countByLetterOp.StartingCount = 53;
 
             var expected = new RenameResult() { new Diff("BC", DiffOperation.Insertion) };
@@ -297,7 +297,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = new string[] { "X", "Y", "Z" };
+            countByLetterOp.SetCountSequence(new string[] { "X", "Y", "Z" });
             countByLetterOp.DoNotCarryOver = true;
 
             var expected = new RenameResult() { new Diff("X", DiffOperation.Insertion) };
@@ -315,7 +315,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             string name = string.Empty; ;
             var countByLetterOp = new CountByLetterOperation();
-            countByLetterOp.CountSequence = new string[] { "X", "Y", "Z" };
+            countByLetterOp.SetCountSequence(new string[] { "X", "Y", "Z" });
             countByLetterOp.Increment = 2;
 
             var expected = new RenameResult() { new Diff("XY", DiffOperation.Insertion) };
