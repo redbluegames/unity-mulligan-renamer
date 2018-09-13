@@ -49,7 +49,7 @@ namespace RedBlueGames.MulliganRenamer
             addStringOp.Suffix = "AA";
 
             var enumerateOp = new EnumerateOperation();
-            enumerateOp.CountFormat = "D4";
+            enumerateOp.SetCountFormat("D4");
             enumerateOp.StartingCount = 100;
 
             var operationSequence = new RenameOperationSequence<IRenameOperation>();
@@ -98,6 +98,118 @@ namespace RedBlueGames.MulliganRenamer
             // Assert
             Assert.AreEqual(expected, result);
             Assert.AreEqual(expectedReversed, resultReversed);
+        }
+
+        [Test]
+        public void SerializeToString_OneOperation_Serialize()
+        {
+            var dummyOperation = new DummyOperation();
+            dummyOperation.Value = "Test";
+
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
+            operationSequence.Add(dummyOperation);
+
+            string expectedSerializedString =
+                "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
+                "{\"value\":\"Test\"}";
+
+            Assert.AreEqual(expectedSerializedString, operationSequence.ToSerializableString());
+        }
+
+        [Test]
+        public void SerializeToString_TwoOperations_Serialize()
+        {
+            var dummyOperation1 = new DummyOperation();
+            dummyOperation1.Value = "First value";
+
+            var dummyOperation2 = new DummyOperation();
+            dummyOperation2.Value = "The next value";
+
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
+            operationSequence.Add(dummyOperation1);
+            operationSequence.Add(dummyOperation2);
+
+            string expectedSerializedString =
+                "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
+                "{\"value\":\"First value\"}\n" +
+                "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
+                "{\"value\":\"The next value\"}";
+
+            Assert.AreEqual(expectedSerializedString, operationSequence.ToSerializableString());
+        }
+
+        [Test]
+        public void DeserializeFromString_ValidOperations_Deserializes()
+        {
+            // Arrange
+            string serializedString =
+                "[" + typeof(DummyOperation).AssemblyQualifiedName + "]" +
+                "{\"value\":\"Serialized value\"}";
+
+            var dummyOperation = new DummyOperation();
+            dummyOperation.Value = "Serialized value";
+            var expectedSequence = new RenameOperationSequence<IRenameOperation>();
+            expectedSequence.Add(dummyOperation);
+
+            // Act
+            var deserializedSequence = RenameOperationSequence<IRenameOperation>.FromString(serializedString);
+
+            // Assert
+            CollectionAssert.AreEqual(expectedSequence, deserializedSequence);
+        }
+
+        [System.Serializable]
+        private class DummyOperation : IRenameOperation
+        {
+            [SerializeField]
+            private string value;
+
+            public string Value
+            {
+                get
+                {
+                    return this.value;
+                }
+
+                set
+                {
+                    this.value = value;
+                }
+            }
+
+            public IRenameOperation Clone()
+            {
+                return new DummyOperation() { value = this.value };
+            }
+
+            public bool HasErrors()
+            {
+                return false;
+            }
+
+            public RenameResult Rename(string input, int relativeCount)
+            {
+                var result = new RenameResult();
+                result.Add(new Diff(input, DiffOperation.Equal));
+                return result;
+            }
+
+            public override bool Equals(object obj)
+            {
+                var item = obj as DummyOperation;
+
+                if (item == null)
+                {
+                    return false;
+                }
+
+                return item.Value.Equals(this.value);
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
         }
     }
 }

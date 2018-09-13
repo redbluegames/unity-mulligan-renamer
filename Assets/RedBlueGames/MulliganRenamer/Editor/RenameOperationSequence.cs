@@ -26,6 +26,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     /// <summary>
@@ -74,7 +75,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <param name="index">Index to access.</param>
         /// <returns>The element at the specified index</returns>
-        public T this [int index]
+        public T this[int index]
         {
             get
             {
@@ -205,6 +206,66 @@ namespace RedBlueGames.MulliganRenamer
         {
             var resultSequence = this.GetRenamePreview(originalName, count);
             return resultSequence.NewName;
+        }
+
+        /// <summary>
+        /// Converts the sequence into a string that can be used to serialize it
+        /// </summary>
+        /// <returns>The serializable string.</returns>
+        public string ToSerializableString()
+        {
+            var stringBuilder = new System.Text.StringBuilder();
+            foreach (var op in this.operationSequence)
+            {
+                if (!op.Equals(this.operationSequence[0]))
+                {
+                    stringBuilder.Append('\n');
+                }
+
+                stringBuilder.Append(ConvertOperationToStringEntry(op));
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        /// <summary>
+        /// Creates an operation sequence from its serialized string
+        /// </summary>
+        /// <returns>The operation sequence.</returns>
+        /// <param name="str">Formerly serialized string.</param>
+        public static RenameOperationSequence<IRenameOperation> FromString(string str)
+        {
+            var sequence = new RenameOperationSequence<IRenameOperation>();
+            var lines = str.Split('\n');
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                sequence.Add(GetOperationFromStringEntry(line));
+            }
+
+            return sequence;
+        }
+
+        private static string ConvertOperationToStringEntry(IRenameOperation op)
+        {
+            return string.Format("[{0}]{1}", op.GetType(), JsonUtility.ToJson(op));
+        }
+
+        private static IRenameOperation GetOperationFromStringEntry(string entry)
+        {
+            // Capture the type inside brackets, and capture the rest of the line
+            var typeRegex = new Regex("\\[([^\\]]*)\\](.*)\\n*");
+            var typeMatch = typeRegex.Match(entry);
+            var opTypeStr = typeMatch.Groups[1].Value;
+            var opJson = typeMatch.Groups[2].Value;
+
+            System.Type opType = System.Type.GetType(opTypeStr, true);
+
+            return (IRenameOperation)JsonUtility.FromJson(opJson, opType);
         }
 
         private List<RenameResult> GetRenameSequenceForName(string originalName, int count)

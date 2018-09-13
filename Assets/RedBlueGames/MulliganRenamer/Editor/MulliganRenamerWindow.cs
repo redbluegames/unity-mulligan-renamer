@@ -38,6 +38,7 @@ namespace RedBlueGames.MulliganRenamer
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
+        private const string RenameOpsEditorPrefsVersionTag = "[Version = 1]";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
         private const float OperationPanelWidth = 350.0f;
@@ -254,6 +255,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private void OnDisable()
         {
+            this.SaveRenameOperationsToPreferences();
+
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
         }
@@ -278,7 +281,7 @@ namespace RedBlueGames.MulliganRenamer
                 new RenameOperationDrawerBinding(new CountByLetterOperation(), new CountByLetterOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
-                new RenameOperationDrawerBinding(new CountByLetterOperation(), new AddStringSequenceOperationDrawer()));
+                new RenameOperationDrawerBinding(new AddStringSequenceOperation(), new AddStringSequenceOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ChangeCaseOperation(), new ChangeCaseOperationDrawer()));
@@ -708,27 +711,64 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.ColumnsToShow = columnStyle;
             this.previewPanel.DisableAddSelectedObjectsButton = this.ValidSelectedObjects.Count == 0;
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
-
         }
 
         private void SaveRenameOperationsToPreferences()
         {
-            var allOpPathsCommaSeparated = string.Empty;
-            for (int i = 0; i < this.NumRenameOperations; ++i)
+            var operationSequence = new RenameOperationSequence<IRenameOperation>();
+            foreach (var binding in this.RenameOperationsToApplyWithBindings)
             {
-                allOpPathsCommaSeparated += this.RenameOperationsToApplyWithBindings[i].Drawer.MenuDisplayPath;
-                if (i != this.NumRenameOperations - 1)
-                {
-                    allOpPathsCommaSeparated += ",";
-                }
+                operationSequence.Add(binding.Operation);
             }
 
-            EditorPrefs.SetString(RenameOpsEditorPrefsKey, allOpPathsCommaSeparated);
+            var operationsSerialized = this.CreateSerializedStringForOperationSequence(operationSequence);
+            EditorPrefs.SetString(RenameOpsEditorPrefsKey, operationsSerialized);
+        }
+
+        private string CreateSerializedStringForOperationSequence(RenameOperationSequence<IRenameOperation> sequence)
+        {
+            var sequenceWithVersion = string.Format(
+                "{0}{1}",
+                RenameOpsEditorPrefsVersionTag,
+                sequence.ToSerializableString());
+            return sequenceWithVersion;
         }
 
         private void LoadSavedRenameOperations()
         {
             var serializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
+
+            // Versioning - convert old to new
+            var isValueCircaPreVersion = string.IsNullOrEmpty(serializedOps) || serializedOps[0] != '[';
+            if (isValueCircaPreVersion)
+            {
+                var ops = serializedOps.Split(',');
+                var operations = new RenameOperationSequence<IRenameOperation>();
+                foreach (var op in ops)
+                {
+                    foreach (var binding in this.RenameOperationDrawerBindingPrototypes)
+                    {
+                        if (binding.Drawer.MenuDisplayPath == op)
+                        {
+                            operations.Add(binding.Operation);
+                            break;
+                        }
+                    }
+                }
+
+                serializedOps = this.CreateSerializedStringForOperationSequence(operations);
+            }
+
+            this.LoadSerializedOperationSequence(serializedOps);
+        }
+
+        private void LoadSerializedOperationSequence(string serializedOps)
+        {
+            // Strip the version
+            serializedOps = serializedOps.Substring(
+                RenameOpsEditorPrefsVersionTag.Length,
+                serializedOps.Length - RenameOpsEditorPrefsVersionTag.Length);
+
             if (string.IsNullOrEmpty(serializedOps))
             {
                 var operation = new ReplaceStringOperation();
@@ -739,23 +779,25 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                var ops = serializedOps.Split(',');
-                foreach (var op in ops)
+                var sequence = RenameOperationSequence<IRenameOperation>.FromString(serializedOps);
+                this.RenameOperationsToApplyWithBindings = new List<RenameOperationDrawerBinding>();
+                foreach (var op in sequence)
                 {
-                    foreach (var binding in this.RenameOperationDrawerBindingPrototypes)
+                    // Find the drawer that goes with this operation's type
+                    foreach (var drawerBinding in this.RenameOperationDrawerBindingPrototypes)
                     {
-                        if (binding.Drawer.MenuDisplayPath == op)
+                        if (drawerBinding.Operation.GetType() == op.GetType())
                         {
-                            this.AddRenameOperation(binding);
+                            this.AddRenameOperation(new RenameOperationDrawerBinding(op, drawerBinding.Drawer));
                             break;
                         }
                     }
                 }
-            }
 
-            if (this.NumRenameOperations > 0)
-            {
-                this.FocusRenameOperationDeferred(this.RenameOperationsToApplyWithBindings.First().Operation);
+                if (this.NumRenameOperations > 0)
+                {
+                    this.FocusRenameOperationDeferred(this.RenameOperationsToApplyWithBindings.First().Operation);
+                }
             }
         }
 

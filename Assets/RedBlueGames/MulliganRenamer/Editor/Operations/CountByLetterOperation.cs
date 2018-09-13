@@ -29,29 +29,56 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// Rename operation that counts using letters of the alphabet.
     /// </summary>
+    [System.Serializable]
     public class CountByLetterOperation : IRenameOperation
     {
-        public static readonly string[] UppercaseAlphabet = new string[]
+        private static readonly string[] UppercaseAlphabet = new string[]
         {
             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O",
             "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
         };
 
-        public static readonly string[] LowercaseAlphabet = new string[]
+        private static readonly string[] LowercaseAlphabet = new string[]
         {
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
             "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
         };
+
+        [SerializeField]
+        private string[] countSequence;
+
+        [SerializeField]
+        private int startingCount;
+
+        [SerializeField]
+        private int increment;
+
+        [SerializeField]
+        private bool doNotCarryOver;
+
+        [SerializeField]
+        private bool prepend;
+
+        [SerializeField]
+        private StringPreset preset;
+
+        public enum StringPreset
+        {
+            Custom = 0,
+            LowercaseAlphabet = 1,
+            UppercaseAlphabet = 2
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:RedBlueGames.MulliganRenamer.CountByLetterOperation"/> class.
         /// </summary>
         public CountByLetterOperation()
         {
-            this.StartingCount = 0;
-            this.Increment = 1;
-            this.CountSequence = new string[0];
-            this.Prepend = false;
+            this.countSequence = new string[0];
+            this.startingCount = 0;
+            this.increment = 1;
+            this.doNotCarryOver = false;
+            this.prepend = false;
         }
 
         /// <summary>
@@ -64,40 +91,110 @@ namespace RedBlueGames.MulliganRenamer
             this.DoNotCarryOver = operationToCopy.DoNotCarryOver;
             this.StartingCount = operationToCopy.StartingCount;
             this.Increment = operationToCopy.Increment;
-            this.CountSequence = new string[operationToCopy.CountSequence.Length];
+            this.preset = operationToCopy.preset;
+            this.countSequence = new string[operationToCopy.CountSequence.Length];
+            operationToCopy.countSequence.CopyTo(this.countSequence, 0);
             this.Prepend = operationToCopy.Prepend;
-            operationToCopy.CountSequence.CopyTo(this.CountSequence, 0);
         }
 
         /// <summary>
         /// Gets or sets the count sequence, the sequence of strings to apply in order, corresponding
         /// with the count.
         /// </summary>
-        public string[] CountSequence { get; set; }
+        public string[] CountSequence
+        {
+            get
+            {
+                if (this.preset == StringPreset.LowercaseAlphabet)
+                {
+                    return LowercaseAlphabet;
+                }
+                else if (this.preset == StringPreset.UppercaseAlphabet)
+                {
+                    return UppercaseAlphabet;
+                }
+                else
+                {
+                    return this.countSequence;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the starting count which offsets all letter assignments.
         /// </summary>
-        public int StartingCount { get; set; }
+        public int StartingCount
+        {
+            get
+            {
+                return this.startingCount;
+            }
+
+            set
+            {
+                this.startingCount = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the increment to use when counting.
         /// </summary>
-        public int Increment { get; set; }
+        public int Increment
+        {
+            get
+            {
+                return this.increment;
+            }
+
+            set
+            {
+                this.increment = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether this
         /// <see cref="T:RedBlueGames.MulliganRenamer.CountByLetterOperation"/> should not carry
         /// over the sequence to another "digit".
         /// </summary>
-        public bool DoNotCarryOver { get; set; }
+        public bool DoNotCarryOver
+        {
+            get
+            {
+                return this.doNotCarryOver;
+            }
+
+            set
+            {
+                this.doNotCarryOver = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether this
         /// <see cref="T:RedBlueGames.MulliganRenamer.CountByLetterOperation"/> should prepend the count
         /// to the front of the string
         /// </summary>
-        public bool Prepend { get; set; }
+        public bool Prepend
+        {
+            get
+            {
+                return this.prepend;
+            }
+
+            set
+            {
+                this.prepend = value;
+            }
+        }
+
+        public StringPreset Preset
+        {
+            get
+            {
+                return this.preset;
+            }
+        }
 
         /// <summary>
         /// Checks if this RenameOperation has errors in its configuration.
@@ -112,7 +209,7 @@ namespace RedBlueGames.MulliganRenamer
         /// Clone this instance.
         /// </summary>
         /// <returns>A clone of this instance</returns>
-        public IRenameOperation Clone()
+        public virtual IRenameOperation Clone()
         {
             var clone = new CountByLetterOperation(this);
             return clone;
@@ -169,6 +266,25 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Sets a custom string sequence to count from.
+        /// </summary>
+        /// <param name="sequence">Sequence of strings to count from</param>
+        public void SetCountSequence(string[] sequence)
+        {
+            this.preset = StringPreset.Custom;
+            this.countSequence = sequence;
+        }
+
+        /// <summary>
+        /// Sets a preset to use when counting.
+        /// </summary>
+        /// <param name="countPreset">Preset of strings to use when counting.</param>
+        public void SetCountSequencePreset(StringPreset countPreset)
+        {
+            this.preset = countPreset;
         }
     }
 }

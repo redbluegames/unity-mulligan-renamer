@@ -84,7 +84,30 @@ namespace RedBlueGames.MulliganRenamer
 
         private List<EnumeratePresetGUI> GUIPresets { get; set; }
 
-        private int SelectedPresetIndex { get; set; }
+        private int SelectedPresetIndex
+        {
+            get
+            {
+                if (this.RenameOperation == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    for (int i = 0; i < this.GUIPresets.Count; ++i)
+                    {
+                        if (this.GUIPresets[i].Preset == this.RenameOperation.FormatPreset)
+                        {
+                            return i;
+                        }
+                    }
+
+                    // Could not find a GUIPreset that uses the operation's preset.
+                    // Just fallback to 0
+                    return 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the preferred height for the contents of the operation.
@@ -136,24 +159,39 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, presetsContent.text));
-            this.SelectedPresetIndex = EditorGUI.Popup(
+            var newlySelectedIndex = EditorGUI.Popup(
                 operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
                 presetsContent,
                 this.SelectedPresetIndex,
                 names.ToArray());
-            var selectedPreset = this.GUIPresets[this.SelectedPresetIndex];
+            var selectedPreset = this.GUIPresets[newlySelectedIndex];
 
             EditorGUI.BeginDisabledGroup(selectedPreset.ReadOnly);
             var countFormatContent = new GUIContent("Count Format", "The string format to use when adding the Count to the name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, countFormatContent.text));
-            this.RenameOperation.CountFormat = EditorGUI.TextField(
-                operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
-                countFormatContent,
-                selectedPreset.Format);
-            EditorGUI.EndDisabledGroup();
+            if (selectedPreset.ReadOnly)
+            {
+                EditorGUI.TextField(operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
+                       countFormatContent,
+                       this.RenameOperation.CountFormat);
+                this.RenameOperation.SetCountFormatPreset(selectedPreset.Preset);
+            }
+            else
+            {
+                // Clear out the sequence when moving from a non-custom to Custom so that they don't
+                // see it prepopulated with the previous preset's entries.
+                if (this.RenameOperation.FormatPreset != EnumerateOperation.CountFormatPreset.Custom)
+                {
+                    this.RenameOperation.SetCountFormat("0");
+                }
 
-            // Reapply the format back to the preset so that Custom gets updated. This prevents it from getting cleared out.
-            selectedPreset.Format = this.RenameOperation.CountFormat;
+                this.RenameOperation.SetCountFormat(EditorGUI.TextField(
+                    operationRect.GetSplitVerticalWeighted(++currentLine, LineSpacing, weights),
+                    countFormatContent,
+                    this.RenameOperation.CountFormat));
+            }
+
+            EditorGUI.EndDisabledGroup();
 
             if (!this.RenameOperation.IsCountStringFormatValid)
             {
@@ -200,28 +238,28 @@ namespace RedBlueGames.MulliganRenamer
             var singleDigitPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "0, 1, 2...",
-                Format = "0",
+                Preset = EnumerateOperation.CountFormatPreset.SingleDigit,
                 ReadOnly = true
             };
 
             var leadingZeroPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "00, 01, 02...",
-                Format = "00",
+                Preset = EnumerateOperation.CountFormatPreset.LeadingZero,
                 ReadOnly = true
             };
 
             var underscorePreset = new EnumeratePresetGUI()
             {
                 DisplayName = "_00, _01, _02...",
-                Format = "_00",
+                Preset = EnumerateOperation.CountFormatPreset.Underscore,
                 ReadOnly = true
             };
 
             var customPreset = new EnumeratePresetGUI()
             {
                 DisplayName = "Custom",
-                Format = string.Empty,
+                Preset = EnumerateOperation.CountFormatPreset.Custom,
                 ReadOnly = false
             };
 
@@ -232,15 +270,13 @@ namespace RedBlueGames.MulliganRenamer
                 underscorePreset,
                 customPreset
             };
-
-            this.SelectedPresetIndex = 0;
         }
 
         private class EnumeratePresetGUI
         {
             public string DisplayName { get; set; }
 
-            public string Format { get; set; }
+            public EnumerateOperation.CountFormatPreset Preset { get; set; }
 
             public bool ReadOnly { get; set; }
         }

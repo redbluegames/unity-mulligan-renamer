@@ -68,7 +68,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A!@#$%BD*(";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Symbols);
 
             var expected = new RenameResult()
             {
@@ -96,7 +96,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "`~!@#$%^&*()+-=[]{}\\|;:'\",<.>/?";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Symbols);
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -118,7 +118,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "!A !";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Symbols;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Symbols);
 
             var expected = new RenameResult()
             {
@@ -140,7 +140,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A251B637k911p";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Numbers;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Numbers);
 
             var expected = new RenameResult()
             {
@@ -172,7 +172,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "1234567890";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Numbers;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Numbers);
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -194,7 +194,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "A1! B";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Whitespace;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Whitespace);
 
             var expected = new RenameResult()
             {
@@ -216,7 +216,7 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "    ";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = RemoveCharactersOperation.Whitespace;
+            removeCharactersOp.SetOptionPreset(RemoveCharactersOperation.PresetID.Whitespace);
 
             var expected = new RenameResult();
             for (int i = 0; i < name.Length; ++i)
@@ -238,10 +238,12 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "abz35!450k";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = new RemoveCharactersOperation.Configuration()
+            var customOptions = new RemoveCharactersOperation.RenameOptions()
             {
                 CharactersToRemove = "ak!5"
             };
+
+            removeCharactersOp.SetOptions(customOptions);
 
             var expected = new RenameResult()
             {
@@ -268,11 +270,13 @@ namespace RedBlueGames.MulliganRenamer
             // Arrange
             var name = "ABCDabcdD";
             var removeCharactersOp = new RemoveCharactersOperation();
-            removeCharactersOp.Config = new RemoveCharactersOperation.Configuration()
+            var customOptions = new RemoveCharactersOperation.RenameOptions()
             {
                 CharactersToRemove = "ABCD",
                 IsCaseSensitive = true
             };
+
+            removeCharactersOp.SetOptions(customOptions);
 
             var expected = new RenameResult()
             {

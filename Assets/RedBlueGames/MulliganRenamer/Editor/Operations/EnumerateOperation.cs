@@ -30,8 +30,32 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// RenameOperation that enumerates characters onto the end of the rename string.
     /// </summary>
+    [System.Serializable]
     public class EnumerateOperation : IRenameOperation
     {
+        [SerializeField]
+        private int startingCount;
+
+        [SerializeField]
+        private string countFormat;
+
+        [SerializeField]
+        private int increment;
+
+        [SerializeField]
+        private bool prepend;
+
+        [SerializeField]
+        private CountFormatPreset formatPreset;
+
+        public enum CountFormatPreset
+        {
+            Custom = 0,
+            SingleDigit = 1,
+            LeadingZero = 2,
+            Underscore = 3,
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EnumerateOperation"/> class.
         /// </summary>
@@ -49,32 +73,97 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.Initialize();
 
+            this.formatPreset = operationToCopy.formatPreset;
+            this.countFormat = operationToCopy.countFormat;
+
             this.StartingCount = operationToCopy.StartingCount;
-            this.CountFormat = operationToCopy.CountFormat;
             this.Increment = operationToCopy.Increment;
+            this.Prepend = operationToCopy.Prepend;
         }
 
         /// <summary>
         /// Gets or sets the starting count.
         /// </summary>
         /// <value>The starting count.</value>
-        public int StartingCount { get; set; }
+        public int StartingCount
+        {
+            get
+            {
+                return this.startingCount;
+            }
+
+            set
+            {
+                this.startingCount = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the format for the count, appended to the end of the string.
         /// </summary>
         /// <value>The count format.</value>
-        public string CountFormat { get; set; }
+        public string CountFormat
+        {
+            get
+            {
+                if (this.formatPreset == CountFormatPreset.SingleDigit)
+                {
+                    return "0";
+                }
+                else if (this.formatPreset == CountFormatPreset.LeadingZero)
+                {
+                    return "00";
+                }
+                else if (this.formatPreset == CountFormatPreset.Underscore)
+                {
+                    return "_00";
+                }
+                else
+                {
+                    return this.countFormat;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the increment to use when counting.
         /// </summary>
-        public int Increment { get; set; }
+        public int Increment
+        {
+            get
+            {
+                return this.increment;
+            }
+
+            set
+            {
+                this.increment = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether or not to add the count to the front of the string
         /// </summary>
-        public bool Prepend { get; set; }
+        public bool Prepend
+        {
+            get
+            {
+                return this.prepend;
+            }
+
+            set
+            {
+                this.prepend = value;
+            }
+        }
+
+        public CountFormatPreset FormatPreset
+        {
+            get
+            {
+                return this.formatPreset;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the count string format specified is parsable.
@@ -150,12 +239,36 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
+        /// <summary>
+        /// Sets a custom string format to use when counting.
+        /// </summary>
+        /// <param name="format">String format to use when counting</param>
+        public void SetCountFormat(string format)
+        {
+            this.countFormat = format;
+            this.formatPreset = CountFormatPreset.Custom;
+        }
+
+
+        /// <summary>
+        /// Sets a format preset to use when counting.
+        /// </summary>
+        /// <param name="preset">Preset format to use when counting.</param>
+        public void SetCountFormatPreset(CountFormatPreset preset)
+        {
+            this.formatPreset = preset;
+        }
+
         private void Initialize()
         {
             this.Increment = 1;
 
             // Give it an initially valid count format
-            this.CountFormat = "0";
+            this.countFormat = "0";
+
+            // Start in Single digit just because it's more readable and shows the user
+            // what to do.
+            this.formatPreset = CountFormatPreset.SingleDigit;
         }
     }
 }

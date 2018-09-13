@@ -29,8 +29,15 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// RenameOperation that adds a string to the rename string.
     /// </summary>
+    [System.Serializable]
     public class AddStringOperation : IRenameOperation
     {
+        [SerializeField]
+        private string prefix;
+
+        [SerializeField]
+        private string suffix;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AddStringOperation"/> class.
         /// </summary>
@@ -54,14 +61,34 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Gets or sets the prefix to add.
         /// </summary>
-        /// <value>The prefix to add..</value>
-        public string Prefix { get; set; }
+        public string Prefix
+        {
+            get
+            {
+                return this.prefix;
+            }
+
+            set
+            {
+                this.prefix = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the suffix to add.
         /// </summary>
-        /// <value>The suffix to add.</value>
-        public string Suffix { get; set; }
+        public string Suffix
+        {
+            get
+            {
+                return this.suffix;
+            }
+
+            set
+            {
+                this.suffix = value;
+            }
+        }
 
         /// <summary>
         /// Clone this instance.
