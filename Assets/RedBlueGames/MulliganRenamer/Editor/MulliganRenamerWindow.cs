@@ -130,7 +130,7 @@ namespace RedBlueGames.MulliganRenamer
         private List<UnityEngine.Object> ValidSelectedObjects { get; set; }
 
         [MenuItem(WindowMenuPath, false)]
-        private static void ShowRenameSpritesheetWindow()
+        private static void ShowWindow()
         {
             var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(true, "Mulligan Renamer", true);
 
@@ -429,7 +429,7 @@ namespace RedBlueGames.MulliganRenamer
             // The breadcrumb style spills to the left some so we need to claim extra space for it
             const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 1),
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 2),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
