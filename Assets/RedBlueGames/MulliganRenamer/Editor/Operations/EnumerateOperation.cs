@@ -259,6 +259,63 @@ namespace RedBlueGames.MulliganRenamer
             this.formatPreset = preset;
         }
 
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.StartingCount.GetHashCode();
+            hash = hash * 23 + this.Increment.GetHashCode();
+            hash = hash * 23 + this.CountFormat.GetHashCode();
+            hash = hash * 23 + this.FormatPreset.GetHashCode();
+            hash = hash * 23 + this.Prepend.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as EnumerateOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.StartingCount != otherAsOp.StartingCount)
+            {
+                return false;
+            }
+
+            if (this.Increment != otherAsOp.Increment)
+            {
+                return false;
+            }
+
+            if (this.CountFormat != otherAsOp.CountFormat)
+            {
+                return false;
+            }
+
+            if (this.FormatPreset != otherAsOp.FormatPreset)
+            {
+                return false;
+            }
+
+            if (this.Prepend != otherAsOp.Prepend)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private void Initialize()
         {
             this.Increment = 1;

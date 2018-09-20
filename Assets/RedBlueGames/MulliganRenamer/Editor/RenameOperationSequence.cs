@@ -198,6 +198,50 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
+        /// Gets a HashCode for the sequence
+        /// </summary>
+        /// <returns>A hash code</returns>
+        public override int GetHashCode()
+        {
+            // I'm never going to hash these so just use base
+            return base.GetHashCode();
+        }
+
+        /// <summary>
+        /// Compares this RenameOperationSequence to another and returns true if they are equal.
+        /// </summary>
+        /// <param name="obj">Object to compare to</param>
+        /// <returns>True if they are equal, false otherwise</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            var otherSequence = obj as RenameOperationSequence<IRenameOperation>;
+            if (otherSequence == null)
+            {
+                return false;
+            }
+
+            if (this.operationSequence.Count != otherSequence.operationSequence.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < this.operationSequence.Count; ++i)
+            {
+                if (!this.operationSequence[i].Equals(otherSequence[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Gets a preview of how the sequence would apply to a string with a given count.
         /// </summary>
         /// <returns>The rename preview.</returns>

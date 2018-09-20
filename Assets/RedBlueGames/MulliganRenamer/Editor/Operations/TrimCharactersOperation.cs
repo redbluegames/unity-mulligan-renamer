@@ -146,5 +146,44 @@ namespace RedBlueGames.MulliganRenamer
 
             return result;
         }
+
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.NumFrontDeleteChars.GetHashCode();
+            hash = hash * 23 + this.NumBackDeleteChars.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as TrimCharactersOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.NumFrontDeleteChars != otherAsOp.NumFrontDeleteChars)
+            {
+                return false;
+            }
+
+            if (this.NumBackDeleteChars != otherAsOp.NumBackDeleteChars)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

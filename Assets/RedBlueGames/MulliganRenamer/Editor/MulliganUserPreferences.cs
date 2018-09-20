@@ -7,6 +7,9 @@
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
         [SerializeField]
+        private string lastUsedPresetName;
+
+        [SerializeField]
         private string serializedPreviousSequence;
 
         [SerializeField]
@@ -41,6 +44,19 @@
             }
         }
 
+        public string LastUsedPresetName
+        {
+            get
+            {
+                return this.lastUsedPresetName;
+            }
+
+            set
+            {
+                this.lastUsedPresetName = value;
+            }
+        }
+
         public MulliganUserPreferences()
         {
             // Default previous sequence to a replace string op just because it's
@@ -51,21 +67,50 @@
             this.savedPresets = new List<RenameSequencePreset>();
         }
 
+        public RenameSequencePreset GetSavedPresetWithName(string name)
+        {
+            var index = this.GetSavedPresetIndexWithName(name);
+            if (index >= 0)
+            {
+                return this.SavedPresets[index];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public int GetSavedPresetIndexWithName(string name)
+        {
+            for (int i = 0; i < this.SavedPresets.Count; ++i)
+            {
+                if (this.SavedPresets[i].Name == name)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public void SavePreset(RenameSequencePreset preset)
+        {
+            var existingPresetIndex = this.GetSavedPresetIndexWithName(preset.Name);
+
+            if (existingPresetIndex >= 0)
+            {
+                this.SavedPresets.RemoveAt(existingPresetIndex);
+                this.SavedPresets.Insert(existingPresetIndex, preset);
+            }
+            else
+            {
+                this.SavedPresets.Add(preset);
+            }
+        }
+
         public void OnBeforeSerialize()
         {
             this.serializedPreviousSequence = this.PreviousSequence.ToSerializableString();
-
-            // TODO: DO WE NEED TO SERIALIZE THIS LIKE THIS?
-            /*
-            foreach (var preset in this.ActivePreferences.SavedPresets)
-            {
-                stringBuilder.Append("Preset:");
-                var presetAsJson = JsonUtility.ToJson(preset);
-                Debug.Log(presetAsJson);
-                stringBuilder.Append(JsonUtility.ToJson(preset));
-                stringBuilder.Append("}\n");
-            }
-			 */
         }
 
         public void OnAfterDeserialize()

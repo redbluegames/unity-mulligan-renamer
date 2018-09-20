@@ -42,13 +42,47 @@
 
         public void OnBeforeSerialize()
         {
-            this.serializedOperationSequence = this.OperationSequence.ToSerializableString();
+            if (this.OperationSequence != null)
+            {
+                this.serializedOperationSequence = this.OperationSequence.ToSerializableString();
+            }
+            else
+            {
+                this.serializedOperationSequence = string.Empty;
+            }
         }
 
         public void OnAfterDeserialize()
         {
             this.operationSequence = RenameOperationSequence<IRenameOperation>.FromString(
                 this.serializedOperationSequence);
+        }
+
+        public override int GetHashCode()
+        {
+            // I'm never going to hash these so just use base
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            var otherPreset = obj as RenameSequencePreset;
+            if (otherPreset == null)
+            {
+                return false;
+            }
+
+            if (this.Name != otherPreset.Name)
+            {
+                return false;
+            }
+
+            return this.OperationSequence.Equals(otherPreset.OperationSequence);
         }
     }
 }

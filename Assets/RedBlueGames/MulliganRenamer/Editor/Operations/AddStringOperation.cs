@@ -131,5 +131,44 @@ namespace RedBlueGames.MulliganRenamer
 
             return renameResult;
         }
+        
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.Prefix.GetHashCode();
+            hash = hash * 23 + this.Prefix.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as AddStringOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.Prefix != otherAsOp.Prefix)
+            {
+                return false;
+            }
+
+            if (this.Suffix != otherAsOp.Suffix)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
