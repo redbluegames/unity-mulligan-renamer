@@ -563,17 +563,6 @@ namespace RedBlueGames.MulliganRenamer
             headerLabelRect.width -= 2.0f;
 
             var headerLabel = "Rename Operations";
-            if (!string.IsNullOrEmpty(this.CurrentPresetName))
-            {
-                headerLabel = string.Concat(headerLabel, " - ", this.CurrentPresetName);
-                var currentPreset = this.CreatePresetFromCurrentSequence(this.CurrentPresetName);
-                var existingPreset = this.ActivePreferences.GetSavedPresetWithName(this.CurrentPresetName);
-                if (existingPreset != null && !existingPreset.Equals(currentPreset))
-                {
-                    headerLabel = string.Concat(headerLabel, "*");
-                }
-            }
-
             var renameOpsLabel = new GUIContent(headerLabel);
             EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerStyle);
 
@@ -603,7 +592,6 @@ namespace RedBlueGames.MulliganRenamer
                 }
 
                 menu.AddSeparator(string.Empty);
-                menu.AddItem(new GUIContent("Save"), false, () => this.SaveCurrentPreset());
                 menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
                 menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
                 menu.AddItem(new GUIContent("DEBUG: Delete all Prefs..."), false, () =>
@@ -772,14 +760,6 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
         }
 
-        private void SaveCurrentPreset()
-        {
-            if (!string.IsNullOrEmpty(this.CurrentPresetName))
-            {
-                this.SaveNewPresetFromCurrentOperations(this.CurrentPresetName);
-            }
-        }
-
         private void ShowSavePresetWindow()
         {
             var windowMinSize = new Vector2(250.0f, 40.0f);
@@ -790,6 +770,7 @@ namespace RedBlueGames.MulliganRenamer
             var window = EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
             window.minSize = windowMinSize;
             window.PresetSaved += this.HandlePresetSaved;
+            window.SetName(this.CurrentPresetName);
         }
 
         private void HandlePresetSaved(string presetName)
@@ -817,7 +798,7 @@ namespace RedBlueGames.MulliganRenamer
         private void DeleteSavedPreferenceAtIndex(int index)
         {
             var currentPresetIndex = this.ActivePreferences.GetSavedPresetIndexWithName(this.CurrentPresetName);
-            if(index == currentPresetIndex)
+            if (index == currentPresetIndex)
             {
                 // Clear the current save so that we aren't writing to a preset that will no longer exist
                 this.CurrentPresetName = string.Empty;

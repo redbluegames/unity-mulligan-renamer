@@ -35,6 +35,11 @@ namespace RedBlueGames.MulliganRenamer
 
         private string enteredName;
 
+        public void SetName(string name)
+        {
+            this.enteredName = name;
+        }
+
         private void OnGUI()
         {
             var presetFieldName = "SavePresetField";
