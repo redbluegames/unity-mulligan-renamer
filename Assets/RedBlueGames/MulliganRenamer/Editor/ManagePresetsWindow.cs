@@ -81,11 +81,15 @@ namespace RedBlueGames.MulliganRenamer
 
             var previousNameRect = new Rect(rect);
             previousNameRect.width = rect.width * 0.25f;
+            previousNameRect.height = EditorGUIUtility.singleLineHeight;
+            previousNameRect.y += (rect.height - previousNameRect.height) / 2.0f;
             EditorGUI.LabelField(previousNameRect, this.uniqueNames[preset]);
 
             var newNameRect = new Rect(rect);
             newNameRect.width = rect.width - previousNameRect.width;
             newNameRect.x = previousNameRect.xMax;
+            newNameRect.height = EditorGUIUtility.singleLineHeight;
+            newNameRect.y += (rect.height - newNameRect.height) / 2.0f;
             var newName = EditorGUI.TextField(newNameRect, preset.Name);
 
             // Don't let them name is an empty name
