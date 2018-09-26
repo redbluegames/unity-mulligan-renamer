@@ -24,40 +24,115 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
 
+    /// <summary>
+    /// SavePresetWindow allows users to type in a value for a name and executes a callback when
+    /// the name is saved.
+    /// </summary>
     public class SavePresetWindow : EditorWindow
     {
         public event Action<string> PresetSaved;
 
+        private bool textFieldNeedsFocus;
         private string enteredName;
+        private List<string> existingPresetNames;
+        private Vector2 startingMinSize;
 
+        /// <summary>
+        /// Set the value for the name to edit.
+        /// </summary>
+        /// <param name="name">Name to edit</param>
         public void SetName(string name)
         {
             this.enteredName = name;
         }
 
+        /// <summary>
+        /// Set the existing presets to check against
+        /// </summary>
+        /// <param name="existingPresetNames">Preset names to test against.</param>
+        public void SetExistingPresetNames(IEnumerable<string> existingPresetNames)
+        {
+            this.existingPresetNames.Clear();
+            this.existingPresetNames.AddRange(existingPresetNames);
+        }
+
+        private static bool IsNameValid(string name)
+        {
+            return !string.IsNullOrEmpty(name);
+        }
+
+        private void OnEnable()
+        {
+            this.existingPresetNames = new List<string>();
+            this.textFieldNeedsFocus = true;
+            this.startingMinSize = this.minSize;
+        }
+
         private void OnGUI()
         {
+            // This window is based on Unity's Save Layout window:
+            // https://github.com/Unity-Technologies/UnityCsReference/blob/73f36bfe71b68d241a6802e0396dc6d6822cb520/Editor/Mono/GUI/WindowLayout.cs#L868
+
+            GUILayout.Space(5.0f);
+
+            // Detect the enter key. Note this must come before the Text Field is shown.
+            Event currentEvent = Event.current;
+            bool hitEnter = currentEvent.type == EventType.KeyDown &&
+                (currentEvent.keyCode == KeyCode.Return || currentEvent.keyCode == KeyCode.KeypadEnter);
+
             var presetFieldName = "SavePresetField";
             GUI.SetNextControlName(presetFieldName);
             this.enteredName = EditorGUILayout.TextField(this.enteredName);
 
-            GUI.FocusControl(presetFieldName);
-            EditorGUI.FocusTextInControl(presetFieldName);
-
-            if (GUILayout.Button("Save"))
+            if (this.textFieldNeedsFocus)
             {
-                if (this.PresetSaved != null)
+                EditorGUI.FocusTextInControl(presetFieldName);
+                this.textFieldNeedsFocus = false;
+            }
+
+            EditorGUI.BeginDisabledGroup(!IsNameValid(this.enteredName));
+            if (GUILayout.Button("Save") || (hitEnter && IsNameValid(this.enteredName)))
+            {
+                var saveAndClose = false;
+                if (this.existingPresetNames.Contains(this.enteredName))
                 {
-                    this.PresetSaved.Invoke(this.enteredName);
+                    var popupMessage = string.Format(
+                        "A preset named \"{0}\" already exists. Do you want to replace it?",
+                        this.enteredName
+                    );
+
+                    saveAndClose = EditorUtility.DisplayDialog("Warning", popupMessage, "Replace", "No");
+                }
+                else
+                {
+                    saveAndClose = true;
                 }
 
-                this.Close();
-            };
+                if (saveAndClose)
+                {
+                    this.InvokePresetSaved();
+                    this.Close();
+                }
+            }
+            else
+            {
+                // Keep focus on the text field
+                this.textFieldNeedsFocus = true;
+            }
+
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private void InvokePresetSaved()
+        {
+            if (this.PresetSaved != null)
+            {
+                this.PresetSaved.Invoke(this.enteredName);
+            }
         }
     }
 }

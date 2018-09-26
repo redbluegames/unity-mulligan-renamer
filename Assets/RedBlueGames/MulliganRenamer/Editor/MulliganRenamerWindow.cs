@@ -49,6 +49,7 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 renameOperationsPanelScrollPosition;
         private Vector2 previewPanelScrollPosition;
         private MulliganRenamerPreviewPanel previewPanel;
+        private SavePresetWindow activeSavePresetWindow;
 
         private int NumPreviouslyRenamedObjects { get; set; }
 
@@ -257,6 +258,13 @@ namespace RedBlueGames.MulliganRenamer
         private void OnDisable()
         {
             this.SaveUserPreferences();
+
+            // If they've opened up the save preset window and are closing mulligan window, close the save preset
+            // window because it can cause bugs since it can still invoke callbacks.
+            if (this.activeSavePresetWindow != null)
+            {
+                this.activeSavePresetWindow.Close();
+            }
 
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
@@ -762,15 +770,18 @@ namespace RedBlueGames.MulliganRenamer
 
         private void ShowSavePresetWindow()
         {
-            var windowMinSize = new Vector2(250.0f, 40.0f);
+            var windowMinSize = new Vector2(250.0f, 48.0f);
             var savePresetPosition = new Rect(this.position);
             savePresetPosition.size = windowMinSize;
-            savePresetPosition.x = this.position.x + (this.position.xMax - this.position.xMin) / 2.0f;
-            savePresetPosition.y = this.position.y + (this.position.yMax - this.position.yMin) / 2.0f;
-            var window = EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
-            window.minSize = windowMinSize;
-            window.PresetSaved += this.HandlePresetSaved;
-            window.SetName(this.CurrentPresetName);
+            savePresetPosition.x = this.position.x + (this.position.width / 2.0f);
+            savePresetPosition.y = this.position.y + (this.position.height / 2.0f);
+            this.activeSavePresetWindow =
+                EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
+            this.activeSavePresetWindow.minSize = windowMinSize;
+            this.activeSavePresetWindow.maxSize = new Vector2(windowMinSize.x * 2.0f, windowMinSize.y);
+            this.activeSavePresetWindow.PresetSaved += this.HandlePresetSaved;
+            this.activeSavePresetWindow.SetName(this.CurrentPresetName);
+            this.activeSavePresetWindow.SetExistingPresetNames(this.ActivePreferences.PresetNames);
         }
 
         private void HandlePresetSaved(string presetName)

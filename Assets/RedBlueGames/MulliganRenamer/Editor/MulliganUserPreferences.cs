@@ -57,6 +57,20 @@
             }
         }
 
+        public List<string> PresetNames
+        {
+            get
+            {
+                var names = new List<string>(this.savedPresets.Count);
+                foreach (var preset in this.savedPresets)
+                {
+                    names.Add(preset.Name);
+                }
+
+                return names;
+            }
+        }
+
         public MulliganUserPreferences()
         {
             // Default previous sequence to a replace string op just because it's
