@@ -782,6 +782,12 @@ namespace RedBlueGames.MulliganRenamer
 
         private void ShowSavePresetWindow()
         {
+            // Don't let them have both preset management windows open at once because it gets weird.
+            if (this.activePresetManagementWindow != null)
+            {
+                this.activePresetManagementWindow.Close();
+            }
+
             var existingWindow = this.activeSavePresetWindow;
             var windowMinSize = new Vector2(250.0f, 48.0f);
             var savePresetPosition = new Rect(this.position);
@@ -810,6 +816,12 @@ namespace RedBlueGames.MulliganRenamer
 
         private void ShowManagePresetsWindow()
         {
+            // Don't let them have both preset management windows open at once because it gets weird.
+            if (this.activeSavePresetWindow != null)
+            {
+                this.activeSavePresetWindow.Close();
+            }
+
             var existingWindow = this.activePresetManagementWindow;
             this.activePresetManagementWindow = EditorWindow.GetWindow<ManagePresetsWindow>(true, "Manage Presets", true);
             this.activePresetManagementWindow.PopulateWithPresets(this.ActivePreferences.SavedPresets);
