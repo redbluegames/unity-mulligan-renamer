@@ -123,6 +123,18 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.reorderableList.DoLayoutList();
             }
+            else
+            {
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.Space(50.0f);
+                EditorGUILayout.LabelField(
+                    "You have no saved Rename Operation presets. Select 'Save as...' in the \"Presets\" dropdown to create a new preset.",
+                    EditorStyles.wordWrappedLabel);
+                GUILayout.Space(50.0f);
+                EditorGUILayout.EndHorizontal();
+                GUILayout.FlexibleSpace();
+            }
         }
 
         private void HandleElementRemoved(UnityEditorInternal.ReorderableList list)
