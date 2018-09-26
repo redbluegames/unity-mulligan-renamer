@@ -614,12 +614,6 @@ namespace RedBlueGames.MulliganRenamer
                 menu.AddSeparator(string.Empty);
                 menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
                 menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
-                menu.AddItem(new GUIContent("DEBUG: Delete all Prefs..."), false, () =>
-                {
-                    this.CurrentPresetName = string.Empty;
-                    EditorPrefs.DeleteKey(UserPreferencesPrefKey);
-                    this.LoadUserPreferences();
-                });
 
                 menu.ShowAsContext();
             }
