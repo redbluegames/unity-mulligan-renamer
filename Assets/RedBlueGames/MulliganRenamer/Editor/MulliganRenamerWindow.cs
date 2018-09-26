@@ -50,6 +50,7 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 previewPanelScrollPosition;
         private MulliganRenamerPreviewPanel previewPanel;
         private SavePresetWindow activeSavePresetWindow;
+        private ManagePresetsWindow activePresetManagementWindow;
 
         private int NumPreviouslyRenamedObjects { get; set; }
 
@@ -201,6 +202,11 @@ namespace RedBlueGames.MulliganRenamer
             this.CurrentPresetName = string.Empty;
             this.LoadUserPreferences();
 
+            // Intentionally forget their last preset when opening the window, because the user won't
+            // remember they previously loaded a preset. It will only confuse them if the Save As
+            // is populated with this name.
+            this.CurrentPresetName = string.Empty;
+
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
 
@@ -261,9 +267,15 @@ namespace RedBlueGames.MulliganRenamer
 
             // If they've opened up the save preset window and are closing mulligan window, close the save preset
             // window because it can cause bugs since it can still invoke callbacks.
+            // Same for presets window.
             if (this.activeSavePresetWindow != null)
             {
                 this.activeSavePresetWindow.Close();
+            }
+
+            if (this.activePresetManagementWindow != null)
+            {
+                this.activePresetManagementWindow.Close();
             }
 
             Selection.selectionChanged -= this.Repaint;
@@ -770,6 +782,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void ShowSavePresetWindow()
         {
+            var existingWindow = this.activeSavePresetWindow;
             var windowMinSize = new Vector2(250.0f, 48.0f);
             var savePresetPosition = new Rect(this.position);
             savePresetPosition.size = windowMinSize;
@@ -779,9 +792,14 @@ namespace RedBlueGames.MulliganRenamer
                 EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
             this.activeSavePresetWindow.minSize = windowMinSize;
             this.activeSavePresetWindow.maxSize = new Vector2(windowMinSize.x * 2.0f, windowMinSize.y);
-            this.activeSavePresetWindow.PresetSaved += this.HandlePresetSaved;
             this.activeSavePresetWindow.SetName(this.CurrentPresetName);
             this.activeSavePresetWindow.SetExistingPresetNames(this.ActivePreferences.PresetNames);
+
+            // Only subscribe if it's a new, previously unopened window.
+            if (existingWindow == null)
+            {
+                this.activeSavePresetWindow.PresetSaved += this.HandlePresetSaved;
+            }
         }
 
         private void HandlePresetSaved(string presetName)
@@ -792,10 +810,37 @@ namespace RedBlueGames.MulliganRenamer
 
         private void ShowManagePresetsWindow()
         {
-            var window = EditorWindow.GetWindow<ManagePresetsWindow>(true, "Manage Presets", true);
-            window.PopulateWithPresets(this.ActivePreferences.SavedPresets);
-            window.PresetDeleted += (i) => this.DeleteSavedPreferenceAtIndex(i);
-            window.PresetRenamed += (i, newName) => this.ActivePreferences.SavedPresets[i].Name = newName;
+            var existingWindow = this.activePresetManagementWindow;
+            this.activePresetManagementWindow = EditorWindow.GetWindow<ManagePresetsWindow>(true, "Manage Presets", true);
+            this.activePresetManagementWindow.PopulateWithPresets(this.ActivePreferences.SavedPresets);
+
+            // Only subscribe if it's a new, previously unopened window.
+            if (existingWindow == null)
+            {
+                this.activePresetManagementWindow.PresetsChanged += this.HandlePresetsChanged;
+            }
+        }
+
+        private void HandlePresetsChanged(List<RenameSequencePreset> presets)
+        {
+            var presetCopies = new List<RenameSequencePreset>(presets.Count);
+            foreach (var preset in presets)
+            {
+                var copySerialized = JsonUtility.ToJson(preset);
+                var copy = JsonUtility.FromJson<RenameSequencePreset>(copySerialized);
+                presetCopies.Add(copy);
+            }
+
+            this.ActivePreferences.SavedPresets = presetCopies;
+
+            // Clear the current preset name if it no longer exists after they changed.
+            // This way we don't write to a preset that doesn't exist (if we were to auto save changes back to the preset).
+            // Also so we don't populate the Save As field with a name that's bogus.
+            var currentPresetIndex = this.ActivePreferences.GetSavedPresetIndexWithName(this.CurrentPresetName);
+            if (currentPresetIndex < 0)
+            {
+                this.CurrentPresetName = string.Empty;
+            }
         }
 
         private void SaveUserPreferences()
@@ -804,18 +849,6 @@ namespace RedBlueGames.MulliganRenamer
             this.ActivePreferences.PreviousSequence = operationSequence;
 
             EditorPrefs.SetString(UserPreferencesPrefKey, JsonUtility.ToJson(this.ActivePreferences));
-        }
-
-        private void DeleteSavedPreferenceAtIndex(int index)
-        {
-            var currentPresetIndex = this.ActivePreferences.GetSavedPresetIndexWithName(this.CurrentPresetName);
-            if (index == currentPresetIndex)
-            {
-                // Clear the current save so that we aren't writing to a preset that will no longer exist
-                this.CurrentPresetName = string.Empty;
-            }
-
-            this.ActivePreferences.SavedPresets.RemoveAt(index);
         }
 
         private void LoadUserPreferences()
