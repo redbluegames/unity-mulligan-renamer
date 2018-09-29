@@ -24,12 +24,15 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEditorInternal;
     using UnityEngine;
 
+    /// <summary>
+    /// Window to manage presets. Currently this is Renaming and Deleting, but it could be extended
+    /// to support adding them to the right click menu.
+    /// </summary>
     public class ManagePresetsWindow : EditorWindow
     {
         public event Action<List<RenameSequencePreset>> PresetsChanged;

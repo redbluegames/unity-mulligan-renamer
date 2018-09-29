@@ -842,7 +842,7 @@ namespace RedBlueGames.MulliganRenamer
             // Clear the current preset name if it no longer exists after they changed.
             // This way we don't write to a preset that doesn't exist (if we were to auto save changes back to the preset).
             // Also so we don't populate the Save As field with a name that's bogus.
-            var currentPresetIndex = this.ActivePreferences.GetSavedPresetIndexWithName(this.CurrentPresetName);
+            var currentPresetIndex = this.ActivePreferences.FindIndexOfSavedPresetWithName(this.CurrentPresetName);
             if (currentPresetIndex < 0)
             {
                 this.CurrentPresetName = string.Empty;
@@ -886,7 +886,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             this.LoadOperationSequence(this.ActivePreferences.PreviousSequence);
-            var originPreset = this.ActivePreferences.GetSavedPresetWithName(this.ActivePreferences.LastUsedPresetName);
+            var originPreset = this.ActivePreferences.FindSavedPresetWithName(this.ActivePreferences.LastUsedPresetName);
             if (originPreset != null)
             {
                 this.CurrentPresetName = originPreset.Name;
