@@ -37,6 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         private List<RenameSequencePreset> presetsToDraw;
         private Dictionary<RenameSequencePreset, string> uniqueNames;
 
+        private Vector2 scrollPosition;
         private ReorderableList reorderableList;
 
         public void PopulateWithPresets(List<RenameSequencePreset> presets)
@@ -88,7 +89,7 @@ namespace RedBlueGames.MulliganRenamer
             var newNameRect = new Rect(rect);
             newNameRect.width = rect.width - previousNameRect.width;
             newNameRect.x = previousNameRect.xMax;
-            newNameRect.height = EditorGUIUtility.singleLineHeight;
+            newNameRect.height = previousNameRect.height;
             newNameRect.y += (rect.height - newNameRect.height) / 2.0f;
             var newName = EditorGUI.TextField(newNameRect, preset.Name);
 
@@ -121,7 +122,21 @@ namespace RedBlueGames.MulliganRenamer
         {
             if (this.reorderableList.count > 0)
             {
-                this.reorderableList.DoLayoutList();
+                var padding = 10;
+                var windowRect = this.position;
+                windowRect.x = 0;
+                windowRect.y = 0;
+                var contentsHeight =
+                    (this.reorderableList.elementHeight * this.reorderableList.count) +
+                    this.reorderableList.headerHeight +
+                    this.reorderableList.footerHeight +
+                    padding * 2;
+                var contentsRect = new Rect(windowRect);
+                contentsRect.height = contentsHeight;
+                this.scrollPosition = GUI.BeginScrollView(windowRect, this.scrollPosition, contentsRect);
+                var paddedRect = windowRect.AddPadding(padding, padding, padding, padding);
+                this.reorderableList.DoList(paddedRect);
+                GUI.EndScrollView();
             }
             else
             {
