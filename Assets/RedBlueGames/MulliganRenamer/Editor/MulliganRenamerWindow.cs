@@ -525,10 +525,9 @@ namespace RedBlueGames.MulliganRenamer
             headerRect.height = 18.0f;
             this.DrawOperationsPanelHeader(headerRect);
 
-            // The border on the header's box doesn't show, so add one to the y to reveal it
             var scrollAreaRect = new Rect(operationPanelRect);
-            scrollAreaRect.y += headerRect.height + 1.0f;
-            scrollAreaRect.height -= headerRect.height + 1;
+            scrollAreaRect.y += headerRect.height;
+            scrollAreaRect.height -= headerRect.height;
 
             var buttonSize = new Vector2(150.0f, 20.0f);
             var spaceBetweenButton = 16.0f;
