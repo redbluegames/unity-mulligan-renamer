@@ -38,7 +38,7 @@ namespace RedBlueGames.MulliganRenamer
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
-        private const string RenameOpsEditorPrefsVersionTag = "[Version = 1]";
+        private const string UserPreferencesPrefKey = "RedBlueGames.MulliganRenamer.UserPreferences";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
         private const float OperationPanelWidth = 350.0f;
@@ -49,6 +49,8 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 renameOperationsPanelScrollPosition;
         private Vector2 previewPanelScrollPosition;
         private MulliganRenamerPreviewPanel previewPanel;
+        private SavePresetWindow activeSavePresetWindow;
+        private ManagePresetsWindow activePresetManagementWindow;
 
         private int NumPreviouslyRenamedObjects { get; set; }
 
@@ -61,6 +63,10 @@ namespace RedBlueGames.MulliganRenamer
         private UniqueList<UnityEngine.Object> ObjectsToRename { get; set; }
 
         private List<RenameOperationDrawerBinding> RenameOperationsToApplyWithBindings { get; set; }
+
+        private MulliganUserPreferences ActivePreferences { get; set; }
+
+        private string CurrentPresetName { get; set; }
 
         private int NumRenameOperations
         {
@@ -130,9 +136,9 @@ namespace RedBlueGames.MulliganRenamer
         private List<UnityEngine.Object> ValidSelectedObjects { get; set; }
 
         [MenuItem(WindowMenuPath, false)]
-        private static void ShowRenameSpritesheetWindow()
+        private static void ShowWindow()
         {
-            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(true, "Mulligan Renamer", true);
+            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(false, "Mulligan Renamer", true);
 
             // When they launch via right click, we immediately load the objects in.
             bulkRenamerWindow.LoadSelectedObjects();
@@ -192,7 +198,14 @@ namespace RedBlueGames.MulliganRenamer
             this.ObjectsToRename = new UniqueList<UnityEngine.Object>();
 
             this.CacheRenameOperationPrototypes();
-            this.LoadSavedRenameOperations();
+
+            this.CurrentPresetName = string.Empty;
+            this.LoadUserPreferences();
+
+            // Intentionally forget their last preset when opening the window, because the user won't
+            // remember they previously loaded a preset. It will only confuse them if the Save As
+            // is populated with this name.
+            this.CurrentPresetName = string.Empty;
 
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
@@ -207,12 +220,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void CacheBulkRenamerPreview()
         {
-            var operationSequence = new RenameOperationSequence<IRenameOperation>();
-            foreach (var binding in this.RenameOperationsToApplyWithBindings)
-            {
-                operationSequence.Add(binding.Operation);
-            }
-
+            var operationSequence = this.GetCurrentRenameOperationSequence();
             this.BulkRenamer.SetRenameOperations(operationSequence);
             this.BulkRenamePreview = this.BulkRenamer.GetBulkRenamePreview(this.ObjectsToRename.ToList());
         }
@@ -255,7 +263,20 @@ namespace RedBlueGames.MulliganRenamer
 
         private void OnDisable()
         {
-            this.SaveRenameOperationsToPreferences();
+            this.SaveUserPreferences();
+
+            // If they've opened up the save preset window and are closing mulligan window, close the save preset
+            // window because it can cause bugs since it can still invoke callbacks.
+            // Same for presets window.
+            if (this.activeSavePresetWindow != null)
+            {
+                this.activeSavePresetWindow.Close();
+            }
+
+            if (this.activePresetManagementWindow != null)
+            {
+                this.activePresetManagementWindow.Close();
+            }
 
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
@@ -299,9 +320,6 @@ namespace RedBlueGames.MulliganRenamer
 
             var copyrightLabel = string.Concat("Mulligan Renamer v", VersionString, ", ©2018 RedBlueGames");
             this.guiContents.CopyrightLabel = new GUIContent(copyrightLabel);
-
-            var renameOpsLabel = new GUIContent("Rename Operations");
-            this.guiContents.RenameOpsLabel = renameOpsLabel;
         }
 
         private void InitializeGUIStyles()
@@ -429,7 +447,7 @@ namespace RedBlueGames.MulliganRenamer
             // The breadcrumb style spills to the left some so we need to claim extra space for it
             const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 1),
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 2),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
@@ -505,15 +523,11 @@ namespace RedBlueGames.MulliganRenamer
 
             var headerRect = new Rect(operationPanelRect);
             headerRect.height = 18.0f;
-            var operationStyle = new GUIStyle("ScriptText");
-            GUI.Box(headerRect, "", operationStyle);
-            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
-            headerStyle.alignment = TextAnchor.MiddleCenter;
-            EditorGUI.LabelField(headerRect, "Rename Operations", headerStyle);
+            this.DrawOperationsPanelHeader(headerRect);
 
             // The border on the header's box doesn't show, so add one to the y to reveal it
             var scrollAreaRect = new Rect(operationPanelRect);
-            scrollAreaRect.y += headerRect.height + 1;
+            scrollAreaRect.y += headerRect.height + 1.0f;
             scrollAreaRect.height -= headerRect.height + 1;
 
             var buttonSize = new Vector2(150.0f, 20.0f);
@@ -556,6 +570,53 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             GUI.EndScrollView();
+        }
+
+        private void DrawOperationsPanelHeader(Rect headerRect)
+        {
+            var operationStyle = new GUIStyle("ScriptText");
+            GUI.Box(headerRect, "", operationStyle);
+            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerStyle.alignment = TextAnchor.MiddleLeft;
+            var headerLabelRect = new Rect(headerRect);
+            headerLabelRect.x += 2.0f;
+            headerLabelRect.width -= 2.0f;
+
+            var headerLabel = "Rename Operations";
+            var renameOpsLabel = new GUIContent(headerLabel);
+            EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerStyle);
+
+            var presetButtonsRect = new Rect(headerRect);
+            presetButtonsRect.width = 60.0f;
+            presetButtonsRect.x = headerRect.width - presetButtonsRect.width;
+            presetButtonsRect.y += 1.0f;
+            presetButtonsRect.height -= 2.0f;
+            if (GUI.Button(presetButtonsRect, "Presets", EditorStyles.toolbarDropDown))
+            {
+                var menu = new GenericMenu();
+                var savedPresetNames = new string[this.ActivePreferences.SavedPresets.Count];
+                for (int i = 0; i < this.ActivePreferences.SavedPresets.Count; ++i)
+                {
+                    savedPresetNames[i] = this.ActivePreferences.SavedPresets[i].Name;
+                }
+
+                for (int i = 0; i < savedPresetNames.Length; ++i)
+                {
+                    var content = new GUIContent(savedPresetNames[i]);
+                    int copyI = i;
+                    menu.AddItem(content, false, () =>
+                    {
+                        var preset = this.ActivePreferences.SavedPresets[copyI];
+                        this.LoadPreset(preset);
+                    });
+                }
+
+                menu.AddSeparator(string.Empty);
+                menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
+                menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
+
+                menu.ShowAsContext();
+            }
         }
 
         private void DrawRenameOperations(Rect operationsRect)
@@ -643,7 +704,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (saveOpsToPreferences)
                 {
-                    this.SaveRenameOperationsToPreferences();
+                    this.SaveUserPreferences();
                 }
             }
         }
@@ -672,7 +733,7 @@ namespace RedBlueGames.MulliganRenamer
             var binding = new RenameOperationDrawerBinding(renameOp, drawer);
             this.RenameOperationsToApplyWithBindings.Add(binding);
 
-            this.SaveRenameOperationsToPreferences();
+            this.SaveUserPreferences();
 
             // Scroll to the bottom to focus the newly created operation.
             this.ScrollRenameOperationsToBottom();
@@ -713,92 +774,185 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
         }
 
-        private void SaveRenameOperationsToPreferences()
+        private void ShowSavePresetWindow()
+        {
+            // Don't let them have both preset management windows open at once because it gets weird.
+            if (this.activePresetManagementWindow != null)
+            {
+                this.activePresetManagementWindow.Close();
+            }
+
+            var existingWindow = this.activeSavePresetWindow;
+            var windowMinSize = new Vector2(250.0f, 48.0f);
+            var savePresetPosition = new Rect(this.position);
+            savePresetPosition.size = windowMinSize;
+            savePresetPosition.x = this.position.x + (this.position.width / 2.0f);
+            savePresetPosition.y = this.position.y + (this.position.height / 2.0f);
+            this.activeSavePresetWindow =
+                EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
+            this.activeSavePresetWindow.minSize = windowMinSize;
+            this.activeSavePresetWindow.maxSize = new Vector2(windowMinSize.x * 2.0f, windowMinSize.y);
+            this.activeSavePresetWindow.SetName(this.CurrentPresetName);
+            this.activeSavePresetWindow.SetExistingPresetNames(this.ActivePreferences.PresetNames);
+
+            // Only subscribe if it's a new, previously unopened window.
+            if (existingWindow == null)
+            {
+                this.activeSavePresetWindow.PresetSaved += this.HandlePresetSaved;
+            }
+        }
+
+        private void HandlePresetSaved(string presetName)
+        {
+            var savedPreset = this.SaveNewPresetFromCurrentOperations(presetName);
+            this.LoadPreset(savedPreset);
+        }
+
+        private void ShowManagePresetsWindow()
+        {
+            // Don't let them have both preset management windows open at once because it gets weird.
+            if (this.activeSavePresetWindow != null)
+            {
+                this.activeSavePresetWindow.Close();
+            }
+
+            var existingWindow = this.activePresetManagementWindow;
+            this.activePresetManagementWindow = EditorWindow.GetWindow<ManagePresetsWindow>(true, "Manage Presets", true);
+            this.activePresetManagementWindow.PopulateWithPresets(this.ActivePreferences.SavedPresets);
+
+            // Only subscribe if it's a new, previously unopened window.
+            if (existingWindow == null)
+            {
+                this.activePresetManagementWindow.PresetsChanged += this.HandlePresetsChanged;
+            }
+        }
+
+        private void HandlePresetsChanged(List<RenameSequencePreset> presets)
+        {
+            var presetCopies = new List<RenameSequencePreset>(presets.Count);
+            foreach (var preset in presets)
+            {
+                var copySerialized = JsonUtility.ToJson(preset);
+                var copy = JsonUtility.FromJson<RenameSequencePreset>(copySerialized);
+                presetCopies.Add(copy);
+            }
+
+            this.ActivePreferences.SavedPresets = presetCopies;
+
+            // Clear the current preset name if it no longer exists after they changed.
+            // This way we don't write to a preset that doesn't exist (if we were to auto save changes back to the preset).
+            // Also so we don't populate the Save As field with a name that's bogus.
+            var currentPresetIndex = this.ActivePreferences.FindIndexOfSavedPresetWithName(this.CurrentPresetName);
+            if (currentPresetIndex < 0)
+            {
+                this.CurrentPresetName = string.Empty;
+            }
+        }
+
+        private void SaveUserPreferences()
+        {
+            var operationSequence = this.GetCurrentRenameOperationSequence();
+            this.ActivePreferences.PreviousSequence = operationSequence;
+
+            EditorPrefs.SetString(UserPreferencesPrefKey, JsonUtility.ToJson(this.ActivePreferences));
+        }
+
+        private void LoadUserPreferences()
+        {
+            var oldSerializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
+            if (!string.IsNullOrEmpty(oldSerializedOps))
+            {
+                // Update operations to the new preferences
+                this.ActivePreferences = new MulliganUserPreferences()
+                {
+                    PreviousSequence = RenameOperationSequence<IRenameOperation>.FromString(oldSerializedOps)
+                };
+
+                EditorPrefs.DeleteKey(RenameOpsEditorPrefsKey);
+            }
+            else
+            {
+                var serializedPreferences = EditorPrefs.GetString(UserPreferencesPrefKey, string.Empty);
+
+                if (!string.IsNullOrEmpty(serializedPreferences))
+                {
+                    var loadedPreferences = JsonUtility.FromJson<MulliganUserPreferences>(serializedPreferences);
+                    this.ActivePreferences = loadedPreferences;
+                }
+                else
+                {
+                    this.ActivePreferences = new MulliganUserPreferences();
+                }
+            }
+
+            this.LoadOperationSequence(this.ActivePreferences.PreviousSequence);
+            var originPreset = this.ActivePreferences.FindSavedPresetWithName(this.ActivePreferences.LastUsedPresetName);
+            if (originPreset != null)
+            {
+                this.CurrentPresetName = originPreset.Name;
+            }
+        }
+
+        private void LoadPreset(RenameSequencePreset preset)
+        {
+            this.CurrentPresetName = preset.Name;
+            this.ActivePreferences.LastUsedPresetName = preset.Name;
+            this.LoadOperationSequence(preset.OperationSequence);
+        }
+
+        private void LoadOperationSequence(RenameOperationSequence<IRenameOperation> sequence)
+        {
+            this.RenameOperationsToApplyWithBindings = new List<RenameOperationDrawerBinding>();
+
+            foreach (var op in sequence)
+            {
+                // Find the drawer that goes with this operation's type
+                foreach (var drawerBinding in this.RenameOperationDrawerBindingPrototypes)
+                {
+                    if (drawerBinding.Operation.GetType() == op.GetType())
+                    {
+                        this.AddRenameOperation(new RenameOperationDrawerBinding(op, drawerBinding.Drawer));
+                        break;
+                    }
+                }
+            }
+
+            if (this.NumRenameOperations > 0)
+            {
+                this.FocusRenameOperationDeferred(this.RenameOperationsToApplyWithBindings.First().Operation);
+            }
+        }
+
+        private RenameSequencePreset SaveNewPresetFromCurrentOperations(string presetName)
+        {
+            var preset = this.CreatePresetFromCurrentSequence(presetName);
+            this.ActivePreferences.SavePreset(preset);
+
+            return preset;
+        }
+
+        private RenameSequencePreset CreatePresetFromCurrentSequence(string presetName)
+        {
+            var operationSequence = this.GetCurrentRenameOperationSequence();
+            var preset = new RenameSequencePreset()
+            {
+                Name = presetName,
+                OperationSequence = operationSequence
+            };
+
+            return preset;
+        }
+
+        private RenameOperationSequence<IRenameOperation> GetCurrentRenameOperationSequence()
         {
             var operationSequence = new RenameOperationSequence<IRenameOperation>();
             foreach (var binding in this.RenameOperationsToApplyWithBindings)
             {
-                operationSequence.Add(binding.Operation);
+                var clone = binding.Operation.Clone();
+                operationSequence.Add(clone);
             }
 
-            var operationsSerialized = this.CreateSerializedStringForOperationSequence(operationSequence);
-            EditorPrefs.SetString(RenameOpsEditorPrefsKey, operationsSerialized);
-        }
-
-        private string CreateSerializedStringForOperationSequence(RenameOperationSequence<IRenameOperation> sequence)
-        {
-            var sequenceWithVersion = string.Format(
-                "{0}{1}",
-                RenameOpsEditorPrefsVersionTag,
-                sequence.ToSerializableString());
-            return sequenceWithVersion;
-        }
-
-        private void LoadSavedRenameOperations()
-        {
-            var serializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
-
-            // Versioning - convert old to new
-            var isValueCircaPreVersion = string.IsNullOrEmpty(serializedOps) || serializedOps[0] != '[';
-            if (isValueCircaPreVersion)
-            {
-                var ops = serializedOps.Split(',');
-                var operations = new RenameOperationSequence<IRenameOperation>();
-                foreach (var op in ops)
-                {
-                    foreach (var binding in this.RenameOperationDrawerBindingPrototypes)
-                    {
-                        if (binding.Drawer.MenuDisplayPath == op)
-                        {
-                            operations.Add(binding.Operation);
-                            break;
-                        }
-                    }
-                }
-
-                serializedOps = this.CreateSerializedStringForOperationSequence(operations);
-            }
-
-            this.LoadSerializedOperationSequence(serializedOps);
-        }
-
-        private void LoadSerializedOperationSequence(string serializedOps)
-        {
-            // Strip the version
-            serializedOps = serializedOps.Substring(
-                RenameOpsEditorPrefsVersionTag.Length,
-                serializedOps.Length - RenameOpsEditorPrefsVersionTag.Length);
-
-            if (string.IsNullOrEmpty(serializedOps))
-            {
-                var operation = new ReplaceStringOperation();
-                var drawer = new ReplaceStringOperationDrawer();
-                drawer.SetModel(operation);
-                var binding = new RenameOperationDrawerBinding(operation, drawer);
-                this.RenameOperationsToApplyWithBindings.Add(binding);
-            }
-            else
-            {
-                var sequence = RenameOperationSequence<IRenameOperation>.FromString(serializedOps);
-                this.RenameOperationsToApplyWithBindings = new List<RenameOperationDrawerBinding>();
-                foreach (var op in sequence)
-                {
-                    // Find the drawer that goes with this operation's type
-                    foreach (var drawerBinding in this.RenameOperationDrawerBindingPrototypes)
-                    {
-                        if (drawerBinding.Operation.GetType() == op.GetType())
-                        {
-                            this.AddRenameOperation(new RenameOperationDrawerBinding(op, drawerBinding.Drawer));
-                            break;
-                        }
-                    }
-                }
-
-                if (this.NumRenameOperations > 0)
-                {
-                    this.FocusRenameOperationDeferred(this.RenameOperationsToApplyWithBindings.First().Operation);
-                }
-            }
+            return operationSequence;
         }
 
         private void FocusRenameOperationDeferred(IRenameOperation renameOperation)
@@ -966,8 +1120,6 @@ namespace RedBlueGames.MulliganRenamer
         private class GUIContents
         {
             public GUIContent CopyrightLabel { get; set; }
-
-            public GUIContent RenameOpsLabel { get; set; }
         }
     }
 }

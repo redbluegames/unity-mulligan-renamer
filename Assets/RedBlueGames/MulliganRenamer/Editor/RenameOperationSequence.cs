@@ -36,6 +36,21 @@ namespace RedBlueGames.MulliganRenamer
     /// <typeparam name="T">The type of RenameOperation contained in the sequence</typeparam>
     public class RenameOperationSequence<T> : IList<T> where T : IRenameOperation
     {
+        private const string VersionTag = "[Version = 1]";
+
+        private static Dictionary<string, System.Type> UnversionedOperationSerializedKeys = new Dictionary<string, System.Type>()
+        {
+            {"Add/Prefix or Suffix", typeof(AddStringOperation)},
+            {"Add/String Sequence", typeof(AddStringSequenceOperation)},
+            {"Modify/Change Case", typeof(ChangeCaseOperation)},
+            {"Add/Count By Letter", typeof(CountByLetterOperation)},
+            {"Add/Enumerate", typeof(EnumerateOperation)},
+            {"Delete/Remove Characters", typeof(RemoveCharactersOperation)},
+            {"Replace/Rename", typeof(ReplaceNameOperation)},
+            {"Replace/Replace String", typeof(ReplaceStringOperation)},
+            {"Delete/Trim Characters", typeof(TrimCharactersOperation)},
+        };
+
         private List<T> operationSequence;
 
         /// <summary>
@@ -183,6 +198,50 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
+        /// Gets a HashCode for the sequence
+        /// </summary>
+        /// <returns>A hash code</returns>
+        public override int GetHashCode()
+        {
+            // I'm never going to hash these so just use base
+            return base.GetHashCode();
+        }
+
+        /// <summary>
+        /// Compares this RenameOperationSequence to another and returns true if they are equal.
+        /// </summary>
+        /// <param name="obj">Object to compare to</param>
+        /// <returns>True if they are equal, false otherwise</returns>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            var otherSequence = obj as RenameOperationSequence<IRenameOperation>;
+            if (otherSequence == null)
+            {
+                return false;
+            }
+
+            if (this.operationSequence.Count != otherSequence.operationSequence.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < this.operationSequence.Count; ++i)
+            {
+                if (!this.operationSequence[i].Equals(otherSequence[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Gets a preview of how the sequence would apply to a string with a given count.
         /// </summary>
         /// <returns>The rename preview.</returns>
@@ -215,13 +274,10 @@ namespace RedBlueGames.MulliganRenamer
         public string ToSerializableString()
         {
             var stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.Append(VersionTag);
             foreach (var op in this.operationSequence)
             {
-                if (!op.Equals(this.operationSequence[0]))
-                {
-                    stringBuilder.Append('\n');
-                }
-
+                stringBuilder.Append('\n');
                 stringBuilder.Append(ConvertOperationToStringEntry(op));
             }
 
@@ -235,6 +291,15 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="str">Formerly serialized string.</param>
         public static RenameOperationSequence<IRenameOperation> FromString(string str)
         {
+            // Versioning - convert old to new
+            var isValueCircaPreVersion = string.IsNullOrEmpty(str) || str[0] != '[';
+            if (isValueCircaPreVersion)
+            {
+                return GetOpsFromPreVersionedString(str);
+            }
+
+            // Strip the version
+            str = str.Substring(VersionTag.Length, str.Length - VersionTag.Length);
             var sequence = new RenameOperationSequence<IRenameOperation>();
             var lines = str.Split('\n');
             foreach (var line in lines)
@@ -248,6 +313,23 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return sequence;
+        }
+
+        private static RenameOperationSequence<IRenameOperation> GetOpsFromPreVersionedString(string str)
+        {
+            var ops = str.Split(',');
+            var operations = new RenameOperationSequence<IRenameOperation>();
+            foreach (var op in ops)
+            {
+                if (UnversionedOperationSerializedKeys.ContainsKey(op))
+                {
+                    var operationInstance = (IRenameOperation)System.Activator.CreateInstance(
+                        UnversionedOperationSerializedKeys[op]);
+                    operations.Add(operationInstance);
+                }
+            }
+
+            return operations;
         }
 
         private static string ConvertOperationToStringEntry(IRenameOperation op)

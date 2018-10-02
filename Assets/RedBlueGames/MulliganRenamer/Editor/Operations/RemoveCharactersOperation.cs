@@ -243,6 +243,45 @@ namespace RedBlueGames.MulliganRenamer
             this.currentPresetID = preset;
         }
 
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.customOptions.GetHashCode();
+            hash = hash * 23 + this.currentPresetID.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as RemoveCharactersOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (!this.customOptions.Equals(otherAsOp.customOptions))
+            {
+                return false;
+            }
+
+            if (this.currentPresetID != otherAsOp.currentPresetID)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         [System.Serializable]
         public struct RenameOptions
         {

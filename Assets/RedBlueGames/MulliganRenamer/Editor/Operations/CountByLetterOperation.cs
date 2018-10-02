@@ -62,6 +62,9 @@ namespace RedBlueGames.MulliganRenamer
         [SerializeField]
         private StringPreset preset;
 
+        /// <summary>
+        /// Presets of possible strings to use instead of custom strings
+        /// </summary>
         public enum StringPreset
         {
             Custom = 0,
@@ -188,6 +191,9 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Gets the current Preset to use for letter counting
+        /// </summary>
         public StringPreset Preset
         {
             get
@@ -285,6 +291,77 @@ namespace RedBlueGames.MulliganRenamer
         public void SetCountSequencePreset(StringPreset countPreset)
         {
             this.preset = countPreset;
+        }
+
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.CountSequence.GetHashCode();
+            hash = hash * 23 + this.StartingCount.GetHashCode();
+            hash = hash * 23 + this.Increment.GetHashCode();
+            hash = hash * 23 + this.DoNotCarryOver.GetHashCode();
+            hash = hash * 23 + this.Prepend.GetHashCode();
+            hash = hash * 23 + this.Preset.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as CountByLetterOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.CountSequence.Length != otherAsOp.CountSequence.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < this.CountSequence.Length; ++i)
+            {
+                if (this.CountSequence[i] != otherAsOp.CountSequence[i])
+                {
+                    return false;
+                }
+            }
+
+            if (this.StartingCount != otherAsOp.StartingCount)
+            {
+                return false;
+            }
+
+            if (this.Increment != otherAsOp.Increment)
+            {
+                return false;
+            }
+
+            if (this.DoNotCarryOver != otherAsOp.DoNotCarryOver)
+            {
+                return false;
+            }
+
+            if (this.Prepend != otherAsOp.Prepend)
+            {
+                return false;
+            }
+
+            if (this.Preset != otherAsOp.Preset)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

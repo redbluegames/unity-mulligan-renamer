@@ -116,7 +116,9 @@ namespace RedBlueGames.MulliganRenamer
             deleteButtonRect.width = 16.0f;
             deleteButtonRect.height = 16.0f;
             deleteButtonRect.y += Mathf.Max(0, (rowRect.height - deleteButtonRect.height) / 2.0f);
-            if (GUI.Button(deleteButtonRect, "x", EditorStyles.miniButton))
+            var deleteButtonStyle = new GUIStyle(EditorStyles.miniButton);
+            deleteButtonStyle.padding = new RectOffset();
+            if (GUI.Button(deleteButtonRect, "X", deleteButtonStyle))
             {
                 isDeleteClicked = true;
             }

@@ -261,6 +261,57 @@ namespace RedBlueGames.MulliganRenamer
             return renameResult;
         }
 
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            // Easy hash method:
+            // https://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode
+            int hash = 17;
+            hash = hash * 23 + this.ReplacementString.GetHashCode();
+            hash = hash * 23 + this.SearchString.GetHashCode();
+            hash = hash * 23 + this.searchIsCaseSensitive.GetHashCode();
+            hash = hash * 23 + this.UseRegex.GetHashCode();
+            return hash;
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as ReplaceStringOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.UseRegex != otherAsOp.UseRegex)
+            {
+                return false;
+            }
+
+            if (this.SearchIsCaseSensitive != otherAsOp.SearchIsCaseSensitive)
+            {
+                return false;
+            }
+
+            if (this.SearchString != otherAsOp.SearchString)
+            {
+                return false;
+            }
+
+            if (this.ReplacementString != otherAsOp.ReplacementString)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private static float GetHeightForHelpBox()
         {
             return 34.0f;

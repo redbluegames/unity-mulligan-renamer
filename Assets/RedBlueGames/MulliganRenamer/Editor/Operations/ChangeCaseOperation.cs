@@ -160,5 +160,34 @@ namespace RedBlueGames.MulliganRenamer
 
             return renameResult;
         }
+
+        /// <summary>
+        /// Gets the hash code for the operation
+        /// </summary>
+        /// <returns>A unique hash code from the values</returns>
+        public override int GetHashCode()
+        {
+            return this.Casing.GetHashCode();
+        }
+
+        /// <summary>
+        /// Returns whether or not this rename operation is equal to another and returns the result.
+        /// </summary>
+        /// <returns>True if the operations are equal.true False otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            var otherAsOp = obj as ChangeCaseOperation;
+            if (otherAsOp == null)
+            {
+                return false;
+            }
+
+            if (this.Casing != otherAsOp.Casing)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
