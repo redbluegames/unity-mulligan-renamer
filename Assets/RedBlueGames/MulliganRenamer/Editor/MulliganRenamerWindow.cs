@@ -441,13 +441,13 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var operationStyle = new GUIStyle("ScriptText");
+            var operationStyle = EditorStyles.toolbar;
             GUI.Box(toolbarRect, "", operationStyle);
 
             // The breadcrumb style spills to the left some so we need to claim extra space for it
             const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 2),
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
@@ -455,7 +455,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
             var buttonText = "Preview Steps";
             var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
-            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y + 1);
+            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
             var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
             this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
             EditorGUI.EndDisabledGroup();
@@ -573,23 +573,21 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawOperationsPanelHeader(Rect headerRect)
         {
-            var operationStyle = new GUIStyle("ScriptText");
-            GUI.Box(headerRect, "", operationStyle);
-            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
-            headerStyle.alignment = TextAnchor.MiddleLeft;
+            var headerStyle = EditorStyles.toolbar;
+            GUI.Box(headerRect, "", headerStyle);
+            var headerLabelStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerLabelStyle.alignment = TextAnchor.MiddleLeft;
             var headerLabelRect = new Rect(headerRect);
             headerLabelRect.x += 2.0f;
             headerLabelRect.width -= 2.0f;
 
             var headerLabel = "Rename Operations";
             var renameOpsLabel = new GUIContent(headerLabel);
-            EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerStyle);
+            EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerLabelStyle);
 
             var presetButtonsRect = new Rect(headerRect);
             presetButtonsRect.width = 60.0f;
             presetButtonsRect.x = headerRect.width - presetButtonsRect.width;
-            presetButtonsRect.y += 1.0f;
-            presetButtonsRect.height -= 2.0f;
             if (GUI.Button(presetButtonsRect, "Presets", EditorStyles.toolbarDropDown))
             {
                 var menu = new GenericMenu();
