@@ -660,7 +660,7 @@ namespace RedBlueGames.MulliganRenamer
                 menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
                 if (useDebugPresets)
                 {
-                    menu.AddItem(new GUIContent("DEBUG - Delete Prefrences"), false, () =>
+                    menu.AddItem(new GUIContent("DEBUG - Delete UserPrefs"), false, () =>
                     {
                         this.ActivePreferences = new MulliganUserPreferences();
                         this.SaveUserPreferences();
