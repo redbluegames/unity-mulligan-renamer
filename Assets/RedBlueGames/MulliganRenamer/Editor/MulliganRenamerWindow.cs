@@ -68,6 +68,10 @@ namespace RedBlueGames.MulliganRenamer
 
         private string CurrentPresetName { get; set; }
 
+        private bool IsNewSession { get; set; }
+
+        private bool IsShowingThanksForReview { get; set; }
+
         private int NumRenameOperations
         {
             get
@@ -134,6 +138,14 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         private List<UnityEngine.Object> ValidSelectedObjects { get; set; }
+
+        private bool NeedsReview
+        {
+            get
+            {
+                return this.ActivePreferences.NeedsReview || this.IsShowingThanksForReview;
+            }
+        }
 
         [MenuItem(WindowMenuPath, false)]
         private static void ShowWindow()
@@ -206,6 +218,9 @@ namespace RedBlueGames.MulliganRenamer
             // remember they previously loaded a preset. It will only confuse them if the Save As
             // is populated with this name.
             this.CurrentPresetName = string.Empty;
+
+            this.IsNewSession = true;
+            this.IsShowingThanksForReview = false;
 
             this.BulkRenamer = new BulkRenamer();
             Selection.selectionChanged += this.Repaint;
@@ -351,7 +366,21 @@ namespace RedBlueGames.MulliganRenamer
             var toolbarRect = new Rect(0.0f, 0.0f, this.position.width, EditorGUIUtility.singleLineHeight + 3.0f);
             this.DrawToolbar(toolbarRect);
 
-            var footerHeight = 60.0f;
+            var reviewPromptHeight = 0.0f;
+            if (this.NeedsReview)
+            {
+                // Responsiveness: Expand height as the window shrinks to better fit the text
+                if (this.position.width > 800.0f)
+                {
+                    reviewPromptHeight = 38.0f;
+                }
+                else
+                {
+                    reviewPromptHeight = 48.0f;
+                }
+            }
+            var reviewPromptPaddingY = 16.0f;
+            var footerHeight = 60.0f + reviewPromptHeight + reviewPromptPaddingY;
             var operationPanelRect = new Rect(
                 0.0f,
                 0.0f,
@@ -370,6 +399,18 @@ namespace RedBlueGames.MulliganRenamer
 
             this.DrawPreviewPanel(previewPanelRect, this.BulkRenamePreview);
 
+            var rectForReviewWidth = this.position.width * 0.98f;
+            var rectForReviewPrompt = new Rect(
+                (this.position.width - rectForReviewWidth) * 0.5f,
+                previewPanelRect.y + previewPanelRect.height + reviewPromptPaddingY,
+                rectForReviewWidth,
+                reviewPromptHeight);
+
+            if (this.NeedsReview)
+            {
+                this.DrawReviewPrompt(rectForReviewPrompt);
+            }
+
             var disableRenameButton =
                 this.RenameOperatationsHaveErrors() ||
                 this.ObjectsToRename.Count == 0;
@@ -378,7 +419,7 @@ namespace RedBlueGames.MulliganRenamer
             var renameButtonSize = new Vector2(this.position.width - renameButtonPadding.x - renameButtonPadding.z, 24.0f);
             var renameButtonRect = new Rect(
                 renameButtonPadding.x,
-                previewPanelRect.y + previewPanelRect.height + renameButtonPadding.y,
+                rectForReviewPrompt.y + rectForReviewPrompt.height + renameButtonPadding.y,
                 renameButtonSize.x,
                 renameButtonSize.y);
 
@@ -394,6 +435,11 @@ namespace RedBlueGames.MulliganRenamer
                     {
                         this.NumPreviouslyRenamedObjects = this.BulkRenamer.RenameObjects(this.ObjectsToRename.ToList());
                         this.ObjectsToRename.Clear();
+                        if (this.IsNewSession)
+                        {
+                            this.ActivePreferences.NumSessionsUsed++;
+                            this.IsNewSession = false;
+                        }
                     }
                     catch (System.OperationCanceledException e)
                     {
@@ -441,13 +487,13 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var operationStyle = new GUIStyle("ScriptText");
+            var operationStyle = EditorStyles.toolbar;
             GUI.Box(toolbarRect, "", operationStyle);
 
             // The breadcrumb style spills to the left some so we need to claim extra space for it
             const float BreadcrumbLeftOffset = 7.0f;
             var breadcrumbRect = new Rect(
-                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y + 2),
+                new Vector2(BreadcrumbLeftOffset + OperationPanelWidth, toolbarRect.y),
                 new Vector2(toolbarRect.width - OperationPanelWidth - BreadcrumbLeftOffset, toolbarRect.height));
 
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
@@ -455,7 +501,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
             var buttonText = "Preview Steps";
             var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
-            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y + 1);
+            var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
             var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
             this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");
             EditorGUI.EndDisabledGroup();
@@ -573,23 +619,22 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawOperationsPanelHeader(Rect headerRect)
         {
-            var operationStyle = new GUIStyle("ScriptText");
-            GUI.Box(headerRect, "", operationStyle);
-            var headerStyle = new GUIStyle(EditorStyles.boldLabel);
-            headerStyle.alignment = TextAnchor.MiddleLeft;
+            var headerStyle = EditorStyles.toolbar;
+            GUI.Box(headerRect, "", headerStyle);
+            var headerLabelStyle = new GUIStyle(EditorStyles.boldLabel);
+            headerLabelStyle.alignment = TextAnchor.MiddleLeft;
             var headerLabelRect = new Rect(headerRect);
             headerLabelRect.x += 2.0f;
             headerLabelRect.width -= 2.0f;
 
             var headerLabel = "Rename Operations";
             var renameOpsLabel = new GUIContent(headerLabel);
-            EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerStyle);
+            EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerLabelStyle);
 
             var presetButtonsRect = new Rect(headerRect);
             presetButtonsRect.width = 60.0f;
             presetButtonsRect.x = headerRect.width - presetButtonsRect.width;
-            presetButtonsRect.y += 1.0f;
-            presetButtonsRect.height -= 2.0f;
+            var useDebugPresets = Event.current.shift;
             if (GUI.Button(presetButtonsRect, "Presets", EditorStyles.toolbarDropDown))
             {
                 var menu = new GenericMenu();
@@ -613,6 +658,14 @@ namespace RedBlueGames.MulliganRenamer
                 menu.AddSeparator(string.Empty);
                 menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
                 menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
+                if (useDebugPresets)
+                {
+                    menu.AddItem(new GUIContent("DEBUG - Delete UserPrefs"), false, () =>
+                    {
+                        this.ActivePreferences = new MulliganUserPreferences();
+                        this.SaveUserPreferences();
+                    });
+                }
 
                 menu.ShowAsContext();
             }
@@ -771,6 +824,80 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.ColumnsToShow = columnStyle;
             this.previewPanel.DisableAddSelectedObjectsButton = this.ValidSelectedObjects.Count == 0;
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
+        }
+
+        private void DrawReviewPrompt(Rect rect)
+        {
+            var reviewPrompt = string.Empty;
+            Color color = Color.blue;
+            if (ActivePreferences.HasConfirmedReviewPrompt)
+            {
+                color = new AddStringOperationDrawer().HighlightColor;
+                if (RBPackageSettings.IsGitHubRelease)
+                {
+                    reviewPrompt = "<color=FFFFFFF>Thank you very much for supporting Mulligan!</color>";
+                }
+                else
+                {
+                    reviewPrompt = "<color=FFFFFFF>Thank you for reviewing Mulligan!</color>";
+                }
+            }
+            else
+            {
+                color = new ReplaceNameOperationDrawer().HighlightColor;
+
+                if (RBPackageSettings.IsGitHubRelease)
+                {
+                    reviewPrompt = "<color=FFFFFFF>Thank you for using Mulligan! " +
+                        "If you've found it useful, please consider supporting its development by " +
+                        "purchasing it from the Asset Store. Thanks!</color>";
+                }
+                else
+                {
+                    reviewPrompt = "<color=FFFFFFF>Thank you for purchasing Mulligan! " +
+                        "If you've found it useful, please consider leaving a review on the Asset Store. " +
+                        "The store is very competitive and every review helps to stand out. Thanks!</color>";
+                }
+            }
+
+            DrawReviewBanner(rect, color, reviewPrompt, !ActivePreferences.HasConfirmedReviewPrompt);
+        }
+
+        private void DrawReviewBanner(Rect rect, Color color, string prompt, bool showButton)
+        {
+            var oldColor = GUI.color;
+            GUI.color = color;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = oldColor;
+
+            var reviewStyle = EditorStyles.largeLabel;
+            reviewStyle.fontStyle = FontStyle.Bold;
+            reviewStyle.alignment = TextAnchor.MiddleCenter;
+            reviewStyle.wordWrap = true;
+            reviewStyle.richText = true;
+
+            var buttonRect = new Rect(rect);
+            buttonRect.width = showButton ? 140.0f : 0.0f;
+            buttonRect.height = 16.0f;
+            var buttonPaddingLR = 10.0f;
+
+            buttonRect.x = rect.width - (buttonRect.width + buttonPaddingLR);
+            buttonRect.y += (rect.height * 0.5f) - (buttonRect.height * 0.5f);
+
+            var labelRect = new Rect(rect);
+            var labelPaddingL = 10.0f;
+            labelRect.x += labelPaddingL;
+            labelRect.width = (buttonRect.x - rect.x) - (buttonPaddingLR + labelPaddingL);
+
+            GUI.Label(labelRect, prompt, reviewStyle);
+            if (showButton && GUI.Button(buttonRect, "Open Asset Store"))
+            {
+                this.ActivePreferences.HasConfirmedReviewPrompt = true;
+                Application.OpenURL("https://assetstore.unity.com/packages/slug/99843");
+
+                // Set a flag to continue to show the banner for this session
+                this.IsShowingThanksForReview = true;
+            }
         }
 
         private void ShowSavePresetWindow()

@@ -35,10 +35,14 @@ public class RBPackageExporter : UnityEditor.EditorWindow
     private static string packageExtension = ".unitypackage";
     private static string testPackageSuffix = "WithTests";
 
+    private string pathToSettingsFile;
+    private string pathToSettingsOverrideFile;
+
     private List<RBAsset> redBlueAssets;
     private List<RBAsset> selectedAssets;
 
     private bool includeTestFiles;
+    private bool flagAsGithubRelease;
 
     [MenuItem("Assets/Red Blue/RBPackage Exporter")]
     private static void ExportRBScriptsWithTests()
@@ -86,6 +90,12 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
     private void OnEnable()
     {
+        this.pathToSettingsFile = System.IO.Path.Combine(Application.dataPath, "RedBlueGames/MulliganRenamer/Editor/RBPackageSettings.cs");
+        this.pathToSettingsOverrideFile =
+            Application.dataPath +
+            System.IO.Path.DirectorySeparatorChar + ".." + System.IO.Path.DirectorySeparatorChar +
+            "RBPackageSettings.cs";
+
         this.redBlueAssets = new List<RBAsset>();
         this.selectedAssets = new List<RBAsset>();
 
@@ -99,10 +109,10 @@ public class RBPackageExporter : UnityEditor.EditorWindow
             var splitSubdirectory = subdirectory.Split(System.IO.Path.DirectorySeparatorChar);
             string folderName = splitSubdirectory[splitSubdirectory.Length - 1];
             this.redBlueAssets.Add(new RBAsset()
-                {
-                    AssetName = folderName,
-                    IsSelected = false
-                });
+            {
+                AssetName = folderName,
+                IsSelected = false
+            });
         }
     }
 
@@ -138,10 +148,27 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         EditorGUILayout.LabelField("Additional Options:", EditorStyles.boldLabel);
         this.includeTestFiles = EditorGUILayout.Toggle("Include Test Files", this.includeTestFiles);
 
+        this.flagAsGithubRelease = EditorGUILayout.Toggle("Flag as GitHub relase", this.flagAsGithubRelease);
+
         EditorGUI.BeginDisabledGroup(!atLeastOnePackageSelected);
         if (GUILayout.Button("Export"))
         {
+            string oldSettings = string.Empty;
+            if (this.flagAsGithubRelease)
+            {
+                oldSettings = System.IO.File.ReadAllText(pathToSettingsFile);
+                var settingsOverride = System.IO.File.ReadAllText(pathToSettingsOverrideFile);
+                settingsOverride = string.Concat("/* THIS CLASS IS AUTO-GENERATED! DO NOT MODIFY!  */ \n", settingsOverride);
+                System.IO.File.WriteAllText(this.pathToSettingsFile, settingsOverride);
+            }
+
             this.ExportPackages(this.selectedAssets, this.includeTestFiles);
+
+            // Restore the old file so that we don't dirty the repo.
+            if (!string.IsNullOrEmpty(oldSettings))
+            {
+                System.IO.File.WriteAllText(this.pathToSettingsFile, oldSettings);
+            }
         }
 
         EditorGUI.EndDisabledGroup();
@@ -207,7 +234,7 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         foreach (var directory in directoriesToExport)
         {
             var filesInDirectory = System.IO.Directory.GetFiles(directory);
-            allAssetPaths.AddRange(filesInDirectory); 
+            allAssetPaths.AddRange(filesInDirectory);
         }
 
         if (allAssetPaths.Count == 0)
