@@ -32,6 +32,8 @@ namespace RedBlueGames.MulliganRenamer
     [System.Serializable]
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
+        private const int NumberOfSessionsBeforeReviewPrompt = 3;
+
         [SerializeField]
         private string lastUsedPresetName;
 
@@ -43,6 +45,15 @@ namespace RedBlueGames.MulliganRenamer
 
         [SerializeField]
         private List<RenameSequencePreset> savedPresets;
+
+        [SerializeField]
+        private int numSessionsUsed;
+
+        [SerializeField]
+        private bool hasClickedPrompt;
+
+        [SerializeField]
+        private bool hasShownThanks;
 
         /// <summary>
         /// Gets or Sets the previously used Sequence of Rename Operations
@@ -106,6 +117,51 @@ namespace RedBlueGames.MulliganRenamer
                 }
 
                 return names;
+            }
+        }
+
+        /// <summary>
+        /// Gets or Sets a value indicating the number of times the user has used the rename tool.
+        /// The intent is for a session to be every time the tool is opened.
+        /// </summary>
+        public int NumSessionsUsed
+        {
+            get
+            {
+                return this.numSessionsUsed;
+            }
+
+            set
+            {
+                this.numSessionsUsed = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the preferences suggest the user should be prompted to leave a review
+        /// </summary>
+        public bool HasConfirmedReviewPrompt
+        {
+            get
+            {
+                return this.hasClickedPrompt;
+            }
+
+            set
+            {
+                this.hasClickedPrompt = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the preferences suggest the user should be prompted to leave a review
+        /// </summary>
+        public bool NeedsReview
+        {
+            get
+            {
+                var hasBeenUsedEnough = this.NumSessionsUsed >= NumberOfSessionsBeforeReviewPrompt;
+                return hasBeenUsedEnough && !this.HasConfirmedReviewPrompt;
             }
         }
 
