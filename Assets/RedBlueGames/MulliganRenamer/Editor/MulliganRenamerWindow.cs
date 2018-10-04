@@ -634,6 +634,7 @@ namespace RedBlueGames.MulliganRenamer
             var presetButtonsRect = new Rect(headerRect);
             presetButtonsRect.width = 60.0f;
             presetButtonsRect.x = headerRect.width - presetButtonsRect.width;
+            var useDebugPresets = Event.current.shift;
             if (GUI.Button(presetButtonsRect, "Presets", EditorStyles.toolbarDropDown))
             {
                 var menu = new GenericMenu();
@@ -657,6 +658,14 @@ namespace RedBlueGames.MulliganRenamer
                 menu.AddSeparator(string.Empty);
                 menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
                 menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
+                if (useDebugPresets)
+                {
+                    menu.AddItem(new GUIContent("DEBUG - Delete Prefrences"), false, () =>
+                    {
+                        this.ActivePreferences = new MulliganUserPreferences();
+                        this.SaveUserPreferences();
+                    });
+                }
 
                 menu.ShowAsContext();
             }
