@@ -54,6 +54,26 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
+        /// Returns a value indicating whether or not the supplied string was created with this Prefixing class.
+        /// The expected format is #|Field
+        /// </summary>
+        /// <param name="controlName">Field name to parse for prefix format</param>
+        /// <returns>true if the control name is prefixed, false otherwise</returns>
+        public static bool IsControlNamePrefixed(string controlName)
+        {
+            var split = controlName.Split(Delimeter);
+            if (split.Length != 2)
+            {
+                return false;
+            }
+
+            int prefixValue = -1;
+            int.TryParse(split[0], out prefixValue);
+
+            return prefixValue >= 0;
+        }
+
+        /// <summary>
         /// Creates a prefixed name from a prefix and control name.
         /// Names are of the format "#|Control" where # is the prefix value.
         /// </summary>

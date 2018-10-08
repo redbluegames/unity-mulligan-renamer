@@ -92,6 +92,11 @@ namespace RedBlueGames.MulliganRenamer
                     return -1;
                 }
 
+                if (!GUIControlNameUtility.IsControlNamePrefixed(focusedControl))
+                {
+                    return -1;
+                }
+
                 return GUIControlNameUtility.GetPrefixFromName(focusedControl);
             }
         }
