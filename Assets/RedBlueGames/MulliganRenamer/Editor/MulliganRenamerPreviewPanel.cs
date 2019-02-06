@@ -192,22 +192,22 @@ namespace RedBlueGames.MulliganRenamer
             this.guiStyles = new GUIStyles();
 
             this.guiStyles.Icon = GUIStyle.none;
-            this.guiStyles.OriginalNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.OriginalNameLabelUnModified = new GUIStyle(EditorStyles.label);
             this.guiStyles.OriginalNameLabelUnModified.richText = true;
 
-            this.guiStyles.OriginalNameLabelWhenModified = EditorStyles.boldLabel;
+            this.guiStyles.OriginalNameLabelWhenModified = new GUIStyle(EditorStyles.boldLabel);
             this.guiStyles.OriginalNameLabelWhenModified.richText = true;
 
-            this.guiStyles.NewNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.NewNameLabelUnModified = new GUIStyle(EditorStyles.label);
             this.guiStyles.NewNameLabelUnModified.richText = true;
 
-            this.guiStyles.NewNameLabelModified = EditorStyles.boldLabel;
+            this.guiStyles.NewNameLabelModified = new GUIStyle(EditorStyles.boldLabel);
             this.guiStyles.NewNameLabelModified.richText = true;
 
-            this.guiStyles.FinalNameLabelUnModified = EditorStyles.label;
+            this.guiStyles.FinalNameLabelUnModified = new GUIStyle(EditorStyles.label);
             this.guiStyles.FinalNameLabelUnModified.richText = true;
 
-            this.guiStyles.FinalNameLabelWhenModified = EditorStyles.boldLabel;
+            this.guiStyles.FinalNameLabelWhenModified = new GUIStyle(EditorStyles.boldLabel);
             this.guiStyles.FinalNameLabelWhenModified.richText = true;
 
             this.guiStyles.DropPrompt = new GUIStyle(EditorStyles.label);
@@ -216,8 +216,8 @@ namespace RedBlueGames.MulliganRenamer
             this.guiStyles.DropPromptRepeat = new GUIStyle(EditorStyles.label);
             this.guiStyles.DropPromptRepeat.alignment = TextAnchor.MiddleCenter;
 
-            this.guiStyles.DropPromptHintInsideScroll = EditorStyles.centeredGreyMiniLabel;
-            this.guiStyles.DropPromptHint = EditorStyles.wordWrappedMiniLabel;
+            this.guiStyles.DropPromptHintInsideScroll = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
+            this.guiStyles.DropPromptHint = new GUIStyle(EditorStyles.wordWrappedMiniLabel);
 
             this.guiStyles.RenameSuccessPrompt = new GUIStyle(EditorStyles.label);
             this.guiStyles.RenameSuccessPrompt.alignment = TextAnchor.MiddleCenter;
@@ -250,7 +250,7 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                this.guiStyles.PreviewScroll = EditorStyles.textArea;
+                this.guiStyles.PreviewScroll = new GUIStyle(EditorStyles.textArea);
 
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.6f, 0.6f, 0.6f, 0.2f);
 
