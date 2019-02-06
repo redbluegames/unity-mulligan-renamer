@@ -39,7 +39,6 @@ namespace RedBlueGames.MulliganRenamer
         private bool textFieldNeedsFocus;
         private string enteredName;
         private List<string> existingPresetNames;
-        private Vector2 startingMinSize;
 
         /// <summary>
         /// Set the value for the name to edit.
@@ -69,7 +68,6 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.existingPresetNames = new List<string>();
             this.textFieldNeedsFocus = true;
-            this.startingMinSize = this.minSize;
         }
 
         private void OnGUI()
