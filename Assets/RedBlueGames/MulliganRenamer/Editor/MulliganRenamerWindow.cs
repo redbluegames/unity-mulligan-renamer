@@ -492,7 +492,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var operationStyle = EditorStyles.toolbar;
+            var operationStyle = new GUIStyle(EditorStyles.toolbar);
             GUI.Box(toolbarRect, "", operationStyle);
 
             // The breadcrumb style spills to the left some so we need to claim extra space for it
@@ -624,7 +624,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawOperationsPanelHeader(Rect headerRect)
         {
-            var headerStyle = EditorStyles.toolbar;
+            var headerStyle = new GUIStyle(EditorStyles.toolbar);
             GUI.Box(headerRect, "", headerStyle);
             var headerLabelStyle = new GUIStyle(EditorStyles.boldLabel);
             headerLabelStyle.alignment = TextAnchor.MiddleLeft;
@@ -875,7 +875,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             GUI.color = oldColor;
 
-            var reviewStyle = EditorStyles.largeLabel;
+            var reviewStyle = new GUIStyle(EditorStyles.largeLabel);
             reviewStyle.fontStyle = FontStyle.Bold;
             reviewStyle.alignment = TextAnchor.MiddleCenter;
             reviewStyle.wordWrap = true;
