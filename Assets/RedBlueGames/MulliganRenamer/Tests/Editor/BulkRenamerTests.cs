@@ -55,9 +55,9 @@ namespace RedBlueGames.MulliganRenamer
         [Test]
         public void RenameObjects_SingleAsset_Renames()
         {
-            var gameObjectAsset = PrefabUtility.CreatePrefab(
-                                      string.Concat(TestFixturesDirectory, "Original.prefab"),
-                                      new GameObject("Original"));
+            var gameObjectAsset = PrefabUtility.SaveAsPrefabAsset(
+                                      new GameObject("Original"),
+                                      string.Concat(TestFixturesDirectory, "Original.prefab"));
             var singleAsset = new List<Object>() { gameObjectAsset };
 
             var replaceNameOp = new ReplaceNameOperation();
@@ -76,12 +76,12 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_MultipleAssets_Renames()
         {
             // Arrange
-            var multipleObject0 = PrefabUtility.CreatePrefab(
-                                      string.Concat(TestFixturesDirectory, "Asset0.prefab"),
-                                      new GameObject("Asset0"));
-            var multipleObject1 = PrefabUtility.CreatePrefab(
-                                      string.Concat(TestFixturesDirectory, "Asset1.prefab"),
-                                      new GameObject("Asset1"));
+            var multipleObject0 = PrefabUtility.SaveAsPrefabAsset(
+                                      new GameObject("Asset0"),
+                                      string.Concat(TestFixturesDirectory, "Asset0.prefab"));
+            var multipleObject1 = PrefabUtility.SaveAsPrefabAsset(
+                                      new GameObject("Asset1"),
+                                      string.Concat(TestFixturesDirectory, "Asset1.prefab"));
             var multipleAssets = new List<Object>()
             {
                 multipleObject0,
@@ -203,15 +203,15 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_EnumeratedObjectsWithDependentChanges_Renames()
         {
             // Arrange
-            var enumeratedObject0 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject0.prefab"),
-                                        new GameObject("EnumeratedObject0"));
-            var enumeratedObject1 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject1.prefab"),
-                                        new GameObject("EnumeratedObject1"));
-            var enumeratedObject2 = PrefabUtility.CreatePrefab(
-                                        string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"),
-                                        new GameObject("EnumeratedObject2"));
+            var enumeratedObject0 = PrefabUtility.SaveAsPrefabAsset(
+                                        new GameObject("EnumeratedObject0"),
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject0.prefab"));
+            var enumeratedObject1 = PrefabUtility.SaveAsPrefabAsset(
+                                        new GameObject("EnumeratedObject1"),
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject1.prefab"));
+            var enumeratedObject2 = PrefabUtility.SaveAsPrefabAsset(
+                                        new GameObject("EnumeratedObject2"),
+                                        string.Concat(TestFixturesDirectory, "EnumeratedObject2.prefab"));
 
             var enumeratedObjects = new List<Object>()
             {
@@ -260,12 +260,12 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_ChangeObjectToExistingObjectName_SkipsRename()
         {
             // Arrange
-            var conflictingObject0 = PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
-                new GameObject("ConflictingObject0"));
-            var existingObject = PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
-                new GameObject("ExistingObject"));
+            var conflictingObject0 = PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ConflictingObject0"),
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"));
+            var existingObject = PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ExistingObject"),
+                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"));
 
             var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
             conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
@@ -289,12 +289,12 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_ChangeObjectToExistingObjectNameNotInRenameGroup_SkipsRename()
         {
             // Arrange
-            var conflictingObject0 = PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
-                new GameObject("ConflictingObject0"));
-            PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"),
-                new GameObject("ExistingObject"));
+            var conflictingObject0 = PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ConflictingObject0"),
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"));
+            PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ExistingObject"),
+                string.Concat(TestFixturesDirectory, "ExistingObject.prefab"));
 
             var conflictingObjectsWithoutAllNamesChanging = new List<Object>();
             conflictingObjectsWithoutAllNamesChanging.Add(conflictingObject0);
@@ -317,12 +317,12 @@ namespace RedBlueGames.MulliganRenamer
         public void RenameObjects_RenameObjectToExistingObjectNameButAtDifferentPath_Succeeds()
         {
             // Arrange
-            var conflictingObject0 = PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"),
-                new GameObject("ConflictingObject0"));
-            var existingObject = PrefabUtility.CreatePrefab(
-                string.Concat(TestFixturesDirectory, "SubDirectory/ExistingObject.prefab"),
-                new GameObject("ExistingObject"));
+            var conflictingObject0 = PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ConflictingObject0"),
+                string.Concat(TestFixturesDirectory, "ConflictingObject0.prefab"));
+            var existingObject = PrefabUtility.SaveAsPrefabAsset(
+                new GameObject("ExistingObject"),
+                string.Concat(TestFixturesDirectory, "SubDirectory/ExistingObject.prefab"));
 
             var replaceFirstNameOp = new ReplaceStringOperation();
             replaceFirstNameOp.SearchString = "ConflictingObject0";
