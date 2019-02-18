@@ -300,6 +300,7 @@ namespace RedBlueGames.MulliganRenamer
 
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
+            EditorApplication.update -= this.CacheValidSelectedObjects;
         }
 
         private void CacheRenameOperationPrototypes()
