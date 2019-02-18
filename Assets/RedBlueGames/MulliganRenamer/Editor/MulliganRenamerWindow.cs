@@ -163,7 +163,19 @@ namespace RedBlueGames.MulliganRenamer
 
         private static bool ObjectIsRenamable(UnityEngine.Object obj)
         {
-            if (AssetDatabase.Contains(obj))
+            // Workaround for Issue #200 where AssetDatabase call during EditorApplicationUpdate caused a Null Reference Exception
+            bool objectIsAsset = false;
+            try
+            {
+                objectIsAsset = AssetDatabase.Contains(obj);
+            }
+            catch (System.NullReferenceException)
+            {
+                // Can't access the AssetDatabase at this time.
+                return false;
+            }
+
+            if (objectIsAsset)
             {
                 // Only sub assets of sprites are currently supported, so let's just not let them be added.
                 if (AssetDatabase.IsSubAsset(obj) && !(obj is Sprite))
