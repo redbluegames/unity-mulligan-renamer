@@ -300,6 +300,7 @@ namespace RedBlueGames.MulliganRenamer
 
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
+            EditorApplication.update -= this.CacheValidSelectedObjects;
         }
 
         private void CacheRenameOperationPrototypes()
@@ -326,6 +327,9 @@ namespace RedBlueGames.MulliganRenamer
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ChangeCaseOperation(), new ChangeCaseOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new ToCamelCaseOperation(), new ToCamelCaseOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new TrimCharactersOperation(), new TrimCharactersOperationDrawer()));
