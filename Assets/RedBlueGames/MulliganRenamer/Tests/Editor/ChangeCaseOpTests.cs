@@ -138,5 +138,51 @@ namespace RedBlueGames.MulliganRenamer
             // Assert
             Assert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void RenameToLower_ValidUpperCharactersFirstOnly_OnlyFirstLowered()
+        {
+            // Arrange
+            var name = "SOME Upper";
+            var changeCaseOp = new ChangeCaseOperation();
+            changeCaseOp.ChangeFirstCharacterOnly = true;
+
+            var expected = new RenameResult()
+            {
+                new Diff("S", DiffOperation.Deletion),
+                new Diff("s", DiffOperation.Insertion),
+                new Diff("OME Upper", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = changeCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void RenameToUpper_ValidLowerCharactersFirstOnly_OnlyFirstIsUppered()
+        {
+            // Arrange
+            var name = "this is ALMOST all lower";
+            var changeCaseOp = new ChangeCaseOperation();
+            changeCaseOp.Casing = ChangeCaseOperation.CasingChange.Uppercase;
+            changeCaseOp.ChangeFirstCharacterOnly = true;
+
+            var expected = new RenameResult()
+            {
+                new Diff("t", DiffOperation.Deletion),
+                new Diff("T", DiffOperation.Insertion),
+                new Diff("his is ALMOST all lower", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = changeCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
     }
 }

@@ -36,12 +36,16 @@ namespace RedBlueGames.MulliganRenamer
         [SerializeField]
         private CasingChange casing;
 
+        [SerializeField]
+        private bool changeFirstCharacterOnly;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ChangeCaseOperation"/> class.
         /// </summary>
         public ChangeCaseOperation()
         {
             this.Casing = CasingChange.Lowercase;
+            this.changeFirstCharacterOnly = false;
         }
 
         /// <summary>
@@ -51,6 +55,7 @@ namespace RedBlueGames.MulliganRenamer
         public ChangeCaseOperation(ChangeCaseOperation operationToCopy)
         {
             this.Casing = operationToCopy.Casing;
+            this.changeFirstCharacterOnly = operationToCopy.changeFirstCharacterOnly;
         }
 
         /// <summary>
@@ -83,6 +88,22 @@ namespace RedBlueGames.MulliganRenamer
             set
             {
                 this.casing = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a flag indicating whether or not to change all characters or just the first.
+        /// </summary>
+        public bool ChangeFirstCharacterOnly
+        {
+            get
+            {
+                return this.changeFirstCharacterOnly;
+            }
+
+            set
+            {
+                this.changeFirstCharacterOnly = value;
             }
         }
 
@@ -128,6 +149,18 @@ namespace RedBlueGames.MulliganRenamer
                                       "CaseOperation received unknown CasingOption {0}",
                                       this.Casing);
                     throw new System.ArgumentOutOfRangeException(message);
+            }
+
+            if (this.ChangeFirstCharacterOnly)
+            {
+                var firstCharacter = inputCaseChanged.Substring(0, 1);
+                var remainingCharacters = string.Empty;
+                if (inputCaseChanged.Length > 1)
+                {
+                    remainingCharacters = input.Substring(1, input.Length - 1);
+                }
+
+                inputCaseChanged = string.Concat(firstCharacter, remainingCharacters);
             }
 
             var renameResult = new RenameResult();

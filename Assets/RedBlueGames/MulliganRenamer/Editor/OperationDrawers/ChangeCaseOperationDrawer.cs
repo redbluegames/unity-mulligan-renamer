@@ -83,7 +83,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            return this.CalculateGUIHeightForLines(1);
+            return this.CalculateGUIHeightForLines(2);
         }
 
         /// <summary>
@@ -92,8 +92,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
-            // Split even a single line GUI so that we properly subtract out spacing
-            var singleLineRect = operationRect.GetSplitVertical(1, 1, LineSpacing);
+            var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
             var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
@@ -101,6 +100,14 @@ namespace RedBlueGames.MulliganRenamer
                 singleLineRect,
                 casingLabel,
                 this.RenameOperation.Casing);
+
+            var firstCharOnlyRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
+            var firstCharToggleLabel = new GUIContent("Only First Character", "Change only the first character's case.");
+            this.RenameOperation.ChangeFirstCharacterOnly = EditorGUI.Toggle(
+                firstCharOnlyRect,
+                firstCharToggleLabel,
+                this.RenameOperation.ChangeFirstCharacterOnly
+            );
         }
     }
 }
