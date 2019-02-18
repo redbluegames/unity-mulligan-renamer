@@ -63,6 +63,26 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void Rename_EmptyDelimeters_RemainsUnchanged()
+        {
+            // Arrange
+            var name = "whats in a name";
+            var toCamelCaseOp = new ToCamelCaseOperation();
+            toCamelCaseOp.DelimiterCharacters = string.Empty;
+
+            var expected = new RenameResult()
+            {
+                new Diff(name, DiffOperation.Equal)
+            };
+
+            // Act
+            var result = toCamelCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void Rename_SpaceDelimeter_CapitalizesWords()
         {
             // Arrange
@@ -72,9 +92,7 @@ namespace RedBlueGames.MulliganRenamer
 
             var expected = new RenameResult()
             {
-                new Diff("t", DiffOperation.Deletion),
-                new Diff("T", DiffOperation.Insertion),
-                new Diff("his ", DiffOperation.Equal),
+                new Diff("this ", DiffOperation.Equal),
                 new Diff("i", DiffOperation.Deletion),
                 new Diff("I", DiffOperation.Insertion),
                 new Diff("s ", DiffOperation.Equal),
@@ -94,6 +112,31 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void Rename_DashDelimeterIsEscaped_OnlyMatchesSpace()
+        {
+            // Arrange
+            var name = "GameObject";
+            var toCamelCaseOp = new ToCamelCaseOperation();
+
+            // Dash is a special character in regex, would meaning to use "space' through "Underscore" if
+            // not properly escaped.
+            toCamelCaseOp.DelimiterCharacters = " -_";
+
+            var expected = new RenameResult()
+            {
+                new Diff("G", DiffOperation.Deletion),
+                new Diff("g", DiffOperation.Insertion),
+                new Diff("ameObject", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = toCamelCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
         public void Rename_RegexCharacterAsDelimeter_CapitalizesWords()
         {
             // Arrange
@@ -103,9 +146,7 @@ namespace RedBlueGames.MulliganRenamer
 
             var expected = new RenameResult()
             {
-                new Diff("t", DiffOperation.Deletion),
-                new Diff("T", DiffOperation.Insertion),
-                new Diff("his/", DiffOperation.Equal),
+                new Diff("this/", DiffOperation.Equal),
                 new Diff("i", DiffOperation.Deletion),
                 new Diff("I", DiffOperation.Insertion),
                 new Diff("s/", DiffOperation.Equal),
@@ -134,9 +175,7 @@ namespace RedBlueGames.MulliganRenamer
 
             var expected = new RenameResult()
             {
-                new Diff("t", DiffOperation.Deletion),
-                new Diff("T", DiffOperation.Insertion),
-                new Diff("his-", DiffOperation.Equal),
+                new Diff("this-", DiffOperation.Equal),
                 new Diff("i", DiffOperation.Deletion),
                 new Diff("I", DiffOperation.Insertion),
                 new Diff("s ", DiffOperation.Equal),
@@ -165,9 +204,7 @@ namespace RedBlueGames.MulliganRenamer
 
             var expected = new RenameResult()
             {
-                new Diff("t", DiffOperation.Deletion),
-                new Diff("T", DiffOperation.Insertion),
-                new Diff("hisx", DiffOperation.Equal),
+                new Diff("thisx", DiffOperation.Equal),
                 new Diff("i", DiffOperation.Deletion),
                 new Diff("I", DiffOperation.Insertion),
                 new Diff("sx", DiffOperation.Equal),
@@ -187,16 +224,51 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void Rename_EmptyDelimeters_RemainsUnchanged()
+        public void Rename_TwoDelimitersBackToBack_SkipsBoth()
         {
             // Arrange
-            var name = "whats in a name";
+            var name = "what==a=pig";
             var toCamelCaseOp = new ToCamelCaseOperation();
-            toCamelCaseOp.DelimiterCharacters = string.Empty;
+            toCamelCaseOp.DelimiterCharacters = "=";
 
             var expected = new RenameResult()
             {
-                new Diff(name, DiffOperation.Equal)
+                new Diff("what==", DiffOperation.Equal),
+                new Diff("a", DiffOperation.Deletion),
+                new Diff("A", DiffOperation.Insertion),
+                new Diff("=", DiffOperation.Equal),
+                new Diff("p", DiffOperation.Deletion),
+                new Diff("P", DiffOperation.Insertion),
+                new Diff("ig", DiffOperation.Equal),
+            };
+
+            // Act
+            var result = toCamelCaseOp.Rename(name, 0);
+
+            // Assert
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void Rename_Pascal_CapitalizesFirst()
+        {
+            // Arrange
+            var name = "what a pig";
+            var toCamelCaseOp = new ToCamelCaseOperation();
+            toCamelCaseOp.UsePascal = true;
+            toCamelCaseOp.DelimiterCharacters = " ";
+
+            var expected = new RenameResult()
+            {
+                new Diff("w", DiffOperation.Deletion),
+                new Diff("W", DiffOperation.Insertion),
+                new Diff("hat ", DiffOperation.Equal),
+                new Diff("a", DiffOperation.Deletion),
+                new Diff("A", DiffOperation.Insertion),
+                new Diff(" ", DiffOperation.Equal),
+                new Diff("p", DiffOperation.Deletion),
+                new Diff("P", DiffOperation.Insertion),
+                new Diff("ig", DiffOperation.Equal),
             };
 
             // Act

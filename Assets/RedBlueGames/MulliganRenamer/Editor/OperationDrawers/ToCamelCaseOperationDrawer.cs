@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Delimiters";
+                return "Pascal";
             }
         }
 
@@ -83,7 +83,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The preferred height for contents.</returns>
         protected override float GetPreferredHeightForContents()
         {
-            return this.CalculateGUIHeightForLines(1);
+            return this.CalculateGUIHeightForLines(2);
         }
 
         /// <summary>
@@ -92,13 +92,21 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
-            // Even split one line so that the spacing is correct
-            var singleLineRect = operationRect.GetSplitVertical(1, 1, LineSpacing);
+            var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
-            var delimitersLabel = new GUIContent("Delimiter Characters", "The characters that indicate starts of words. Defaults to Spaces. Case sensitive.");
+            var pascalLabel = new GUIContent("Use Pascal Casing", "Flag to capitalize the first letter of the name (also known as Upper Camel Casing).");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Pascal"));
+            this.RenameOperation.UsePascal = EditorGUI.Toggle(
+                singleLineRect,
+                pascalLabel,
+                this.RenameOperation.UsePascal
+            );
+
+            var delimitersRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
+            var delimitersLabel = new GUIContent("Delimiter Characters", "The case sensitive characters that indicate the start of a word.");
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delimiters"));
             this.RenameOperation.DelimiterCharacters = EditorGUI.TextField(
-                singleLineRect,
+                delimitersRect,
                 delimitersLabel,
                 this.RenameOperation.DelimiterCharacters
             );

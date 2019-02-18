@@ -36,6 +36,9 @@ namespace RedBlueGames.MulliganRenamer
     public class ToCamelCaseOperation : IRenameOperation
     {
         [SerializeField]
+        private bool usePascal;
+
+        [SerializeField]
         private string delimiterCharacters;
 
         /// <summary>
@@ -43,7 +46,8 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public ToCamelCaseOperation()
         {
-            this.delimiterCharacters = " ";
+            this.delimiterCharacters = "- _";
+            this.usePascal = false;
         }
 
         /// <summary>
@@ -53,6 +57,28 @@ namespace RedBlueGames.MulliganRenamer
         public ToCamelCaseOperation(ToCamelCaseOperation operationToCopy)
         {
             this.delimiterCharacters = operationToCopy.delimiterCharacters;
+            this.usePascal = operationToCopy.usePascal;
+        }
+
+        public bool UsePascal
+        {
+            get
+            {
+                return this.usePascal;
+            }
+
+            set
+            {
+                this.usePascal = value;
+            }
+        }
+
+        public bool UseCamel
+        {
+            get
+            {
+                return !this.UsePascal;
+            }
         }
 
         public string DelimiterCharacters
@@ -99,7 +125,24 @@ namespace RedBlueGames.MulliganRenamer
             var inputCaseChanged = string.Empty;
             if (!string.IsNullOrEmpty(this.DelimiterCharacters))
             {
-                string pattern = "([" + Regex.Escape(this.DelimiterCharacters) + "])";
+                // We use regex instead of string.Split simply because the results can include the delimiters using capture groups
+                var delimiterCharArray = this.DelimiterCharacters.ToCharArray();
+                var patternBuilder = new System.Text.StringBuilder();
+                patternBuilder.Append("([");
+                foreach (var delimiterChar in delimiterCharArray)
+                {
+                    // Dashes don't get escaped but are treated as a special character... need to escape them manually
+                    if (delimiterChar == '-')
+                    {
+                        patternBuilder.Append("\\-");
+                    }
+                    else
+                    {
+                        patternBuilder.Append(Regex.Escape(delimiterChar.ToString()));
+                    }
+                }
+                patternBuilder.Append("])");
+                string pattern = patternBuilder.ToString();
 
                 string[] words = Regex.Split(input, pattern);
                 var changedStringBuilder = new System.Text.StringBuilder();
@@ -114,7 +157,9 @@ namespace RedBlueGames.MulliganRenamer
                         }
                         else
                         {
-                            changedStringBuilder.Append(this.UpperOrLowerFirstChar(word, false));
+                            var isFirstWord = word == words[0];
+                            var useLowerCasing = isFirstWord && this.UseCamel;
+                            changedStringBuilder.Append(this.UpperOrLowerFirstChar(word, useLowerCasing));
                         }
                     }
                 }
