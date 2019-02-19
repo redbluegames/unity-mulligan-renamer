@@ -26,7 +26,7 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using UnityEditor;
 
-    public class ChangeCaseOperationDrawer : RenameOperationDrawer<ChangeCaseOperation>
+    public class ToCamelCaseOperationDrawer : RenameOperationDrawer<ToCamelCaseOperation>
     {
         /// <summary>
         /// Gets the path that's displayed when this rename op is used in the Add Op menu.
@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Modify/To Upper or Lowercase";
+                return "Modify/To Camel Case";
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "To Upper or Lowercase";
+                return "To Camel Case";
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "To Uppercase";
+                return "Pascal";
             }
         }
 
@@ -94,19 +94,21 @@ namespace RedBlueGames.MulliganRenamer
         {
             var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
-            var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
-            this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.EnumPopup(
+            var pascalLabel = new GUIContent("Use Pascal Casing", "Flag to capitalize the first letter of the name (also known as Upper Camel Casing).");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Pascal"));
+            this.RenameOperation.UsePascal = EditorGUI.Toggle(
                 singleLineRect,
-                casingLabel,
-                this.RenameOperation.Casing);
+                pascalLabel,
+                this.RenameOperation.UsePascal
+            );
 
-            var firstCharOnlyRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
-            var firstCharToggleLabel = new GUIContent("Only First Character", "Change only the first character's case.");
-            this.RenameOperation.ChangeFirstCharacterOnly = EditorGUI.Toggle(
-                firstCharOnlyRect,
-                firstCharToggleLabel,
-                this.RenameOperation.ChangeFirstCharacterOnly
+            var delimitersRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
+            var delimitersLabel = new GUIContent("Delimiter Characters", "The case sensitive characters that indicate the start of a word.");
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delimiters"));
+            this.RenameOperation.DelimiterCharacters = EditorGUI.TextField(
+                delimitersRect,
+                delimitersLabel,
+                this.RenameOperation.DelimiterCharacters
             );
         }
     }

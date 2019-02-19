@@ -40,8 +40,12 @@ namespace RedBlueGames.MulliganRenamer
         {
             if (obj is GameObject)
             {
+#if UNITY_2018_3_OR_NEWER
+                return PrefabUtility.IsPartOfPrefabAsset(obj);
+#else
                 var prefabType = PrefabUtility.GetPrefabType(obj);
                 return prefabType == PrefabType.Prefab || prefabType == PrefabType.ModelPrefab;
+#endif
             }
             else
             {

@@ -34,7 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerWindow : EditorWindow
     {
-        private const string VersionString = "1.5.0";
+        private const string VersionString = "1.6.0";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
@@ -163,7 +163,19 @@ namespace RedBlueGames.MulliganRenamer
 
         private static bool ObjectIsRenamable(UnityEngine.Object obj)
         {
-            if (AssetDatabase.Contains(obj))
+            // Workaround for Issue #200 where AssetDatabase call during EditorApplicationUpdate caused a Null Reference Exception
+            bool objectIsAsset = false;
+            try
+            {
+                objectIsAsset = AssetDatabase.Contains(obj);
+            }
+            catch (System.NullReferenceException)
+            {
+                // Can't access the AssetDatabase at this time.
+                return false;
+            }
+
+            if (objectIsAsset)
             {
                 // Only sub assets of sprites are currently supported, so let's just not let them be added.
                 if (AssetDatabase.IsSubAsset(obj) && !(obj is Sprite))
@@ -300,6 +312,7 @@ namespace RedBlueGames.MulliganRenamer
 
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
+            EditorApplication.update -= this.CacheValidSelectedObjects;
         }
 
         private void CacheRenameOperationPrototypes()
@@ -326,6 +339,9 @@ namespace RedBlueGames.MulliganRenamer
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new ChangeCaseOperation(), new ChangeCaseOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new ToCamelCaseOperation(), new ToCamelCaseOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new TrimCharactersOperation(), new TrimCharactersOperationDrawer()));
@@ -492,7 +508,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawToolbar(Rect toolbarRect)
         {
-            var operationStyle = EditorStyles.toolbar;
+            var operationStyle = new GUIStyle(EditorStyles.toolbar);
             GUI.Box(toolbarRect, "", operationStyle);
 
             // The breadcrumb style spills to the left some so we need to claim extra space for it
@@ -624,7 +640,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void DrawOperationsPanelHeader(Rect headerRect)
         {
-            var headerStyle = EditorStyles.toolbar;
+            var headerStyle = new GUIStyle(EditorStyles.toolbar);
             GUI.Box(headerRect, "", headerStyle);
             var headerLabelStyle = new GUIStyle(EditorStyles.boldLabel);
             headerLabelStyle.alignment = TextAnchor.MiddleLeft;
@@ -875,7 +891,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             GUI.color = oldColor;
 
-            var reviewStyle = EditorStyles.largeLabel;
+            var reviewStyle = new GUIStyle(EditorStyles.largeLabel);
             reviewStyle.fontStyle = FontStyle.Bold;
             reviewStyle.alignment = TextAnchor.MiddleCenter;
             reviewStyle.wordWrap = true;

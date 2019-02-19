@@ -30,6 +30,7 @@ namespace RedBlueGames.MulliganRenamer
 
     public class RenameOperationSequenceTests
     {
+        private static readonly string VersionTagToTest = "[Version = 1]\n";
         [Test]
         public void GetNewName_AllOperations_RenamesCorrectly()
         {
@@ -110,6 +111,7 @@ namespace RedBlueGames.MulliganRenamer
             operationSequence.Add(dummyOperation);
 
             string expectedSerializedString =
+                VersionTagToTest +
                 "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
                 "{\"value\":\"Test\"}";
 
@@ -130,6 +132,7 @@ namespace RedBlueGames.MulliganRenamer
             operationSequence.Add(dummyOperation2);
 
             string expectedSerializedString =
+                VersionTagToTest +
                 "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
                 "{\"value\":\"First value\"}\n" +
                 "[RedBlueGames.MulliganRenamer.RenameOperationSequenceTests+DummyOperation]" +
@@ -143,6 +146,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             // Arrange
             string serializedString =
+                VersionTagToTest +
                 "[" + typeof(DummyOperation).AssemblyQualifiedName + "]" +
                 "{\"value\":\"Serialized value\"}";
 
