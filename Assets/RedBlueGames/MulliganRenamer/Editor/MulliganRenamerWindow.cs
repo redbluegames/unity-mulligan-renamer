@@ -344,6 +344,9 @@ namespace RedBlueGames.MulliganRenamer
                 new RenameOperationDrawerBinding(new ToCamelCaseOperation(), new ToCamelCaseOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
+                new RenameOperationDrawerBinding(new AdjustNumberingOperation(), new AdjustNumberingOperationDrawer()));
+
+            this.RenameOperationDrawerBindingPrototypes.Add(
                 new RenameOperationDrawerBinding(new TrimCharactersOperation(), new TrimCharactersOperationDrawer()));
 
             this.RenameOperationDrawerBindingPrototypes.Add(
