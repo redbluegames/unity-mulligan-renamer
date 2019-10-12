@@ -1,0 +1,99 @@
+﻿/* MIT License
+
+Copyright (c) 2019 Murillo Pugliesi Lopes, https://github.com/Mukarillo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+namespace RedBlueGames.MulliganRenamer
+{
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using UnityEditor;
+    using UnityEngine;
+
+
+    public delegate void OnLanguageChanged();
+
+    public class LocaleManager
+    {
+        public static LocaleManager Instance = new LocaleManager();
+
+        private string LocaleLanguagesPath = Application.dataPath + "/RedBlueGames/MulliganRenamer/Editor/Locale/Content";
+        private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
+
+        public OnLanguageChanged OnLanguageChanged;
+
+        public LocaleLanguage CurrentLanguage
+        {
+            get
+            {
+                return currentLanguage;
+            }
+        }
+
+        public List<LocaleLanguage> AllLanguages
+        {
+            get
+            {
+                return allLanguages;
+            }
+        }
+
+        private LocaleLanguage currentLanguage;
+        private List<LocaleLanguage> allLanguages;
+
+        public LocaleManager()
+        {
+            LoadAllLanguages();
+            ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
+        }
+
+        private void LoadAllLanguages()
+        {
+            allLanguages = new List<LocaleLanguage>();
+
+            var dir = new DirectoryInfo(LocaleLanguagesPath);
+            var info = dir.GetFiles("*.json");
+            foreach (FileInfo f in info)
+            {
+                var t = f.OpenText();
+                var language = JsonUtility.FromJson<LocaleLanguage>(t.ReadToEnd());
+                allLanguages.Add(language);
+            }
+        }
+
+        public void ChangeLocale(string languageKey)
+        {
+            EditorPrefs.SetString(LocaleKey, languageKey);
+            currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
+            if (OnLanguageChanged != null)
+                OnLanguageChanged.Invoke();
+        }
+
+        public string GetTranslation(string localeKey)
+        {
+            if (currentLanguage == null)
+                throw new Exception("Current Language is not set");
+
+            return currentLanguage.GetValue(localeKey);
+        }
+    }
+}

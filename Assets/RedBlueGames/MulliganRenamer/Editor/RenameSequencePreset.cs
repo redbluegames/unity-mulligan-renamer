@@ -54,6 +54,9 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
+                if(this.operationSequence == null)
+                    this.operationSequence = RenameOperationSequence<IRenameOperation>.FromString(this.serializedOperationSequence);
+
                 return this.operationSequence;
             }
 
@@ -77,8 +80,7 @@ namespace RedBlueGames.MulliganRenamer
 
         public void OnAfterDeserialize()
         {
-            this.operationSequence = RenameOperationSequence<IRenameOperation>.FromString(
-                this.serializedOperationSequence);
+
         }
 
         public override int GetHashCode()

@@ -35,8 +35,8 @@ namespace RedBlueGames.MulliganRenamer
     [InitializeOnLoad]
     public static class AssetRenameUndoer
     {
-        private static readonly string MomentNameBeforeRename = "Before";
-        private static readonly string MomentNameAfterRename = "After";
+        private static readonly string MomentNameBeforeRename = LocaleManager.Instance.GetTranslation("before");
+        private static readonly string MomentNameAfterRename = LocaleManager.Instance.GetTranslation("after");
 
         private static List<AssetRenameUndoMoment> undoMoments;
 

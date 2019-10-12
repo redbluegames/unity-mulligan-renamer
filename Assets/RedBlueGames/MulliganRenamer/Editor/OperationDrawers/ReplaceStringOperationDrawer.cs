@@ -37,7 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Replace/Replace String";
+                return GetOperationPath("replace", "replaceString");
             }
         }
 
@@ -49,7 +49,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Replace String";
+                return LocaleManager.Instance.GetTranslation("replaceString");
             }
         }
 
@@ -73,7 +73,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Search String";
+                return LocaleManager.Instance.GetTranslation("searchString");
             }
         }
 
@@ -132,7 +132,9 @@ namespace RedBlueGames.MulliganRenamer
             var weightsArray = weights.ToArray();
 
             int currentGUIElement = 0;
-            var regexToggleContent = new GUIContent("Use Regular Expression", "Match terms using Regular Expressions, terms that allow for powerful pattern matching.");
+            var regexToggleContent = new GUIContent(
+                LocaleManager.Instance.GetTranslation("useRegex"),
+                LocaleManager.Instance.GetTranslation("matchTermsUsingRegex"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, regexToggleContent.text));
             postGUIModel.UseRegex = EditorGUI.Toggle(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
@@ -143,34 +145,36 @@ namespace RedBlueGames.MulliganRenamer
             GUIContent replacementContent;
             if (preGUIModel.UseRegex)
             {
-                searchContent = new GUIContent("Match Regex", "Regular Expression to use to match terms.");
+                searchContent = new GUIContent(
+                    LocaleManager.Instance.GetTranslation("matchRegex"),
+                    LocaleManager.Instance.GetTranslation("regexToUseToMatchTerms"));
                 replacementContent = new GUIContent("Replacement Regex", "Regular Expression to use when replacing matched patterns.");
             }
             else
             {
                 searchContent = new GUIContent(
-                    "Search for String",
-                    "Substrings to search for in the filenames. These strings will be replaced by the Replacement String.");
+                    LocaleManager.Instance.GetTranslation("searchForString"),
+                    LocaleManager.Instance.GetTranslation("substringsToSeatchInFilenames"));
                 replacementContent = new GUIContent(
-                    "Replace with",
-                    "String to replace matching instances of the Search string.");
+                    LocaleManager.Instance.GetTranslation("replaceWith"),
+                    LocaleManager.Instance.GetTranslation("stringToReplaceMatchingInstances"));
             }
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Search String"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("searchString")));
             postGUIModel.SearchString = EditorGUI.TextField(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
                 searchContent,
                 preGUIModel.SearchString);
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Replacement String"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("replacementString")));
             postGUIModel.ReplacementString = EditorGUI.TextField(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
                 replacementContent,
                 preGUIModel.ReplacementString);
 
             var caseSensitiveContent = new GUIContent(
-                                           "Case Sensitive",
-                                           "Search using case sensitivity. Only strings that match the supplied casing will be replaced.");
+                LocaleManager.Instance.GetTranslation("caseSensitive"),
+                LocaleManager.Instance.GetTranslation("searchUsingCaseSensitivity"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, caseSensitiveContent.text));
             postGUIModel.SearchIsCaseSensitive = EditorGUI.Toggle(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
@@ -184,14 +188,14 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray);
                     helpRect = helpRect.AddPadding(4, 4, 4, 4);
-                    EditorGUI.HelpBox(helpRect, "Match Expression is not a valid Regular Expression.", MessageType.Error);
+                    EditorGUI.HelpBox(helpRect, LocaleManager.Instance.GetTranslation("matchExpressNotValid"), MessageType.Error);
                 }
 
                 if (!preGUIModel.ReplacementStringIsValidRegex)
                 {
                     var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray);
                     helpRect = helpRect.AddPadding(4, 4, 4, 4);
-                    EditorGUI.HelpBox(helpRect, "Replacement Expression is not a valid Regular Expression.", MessageType.Error);
+                    EditorGUI.HelpBox(helpRect, LocaleManager.Instance.GetTranslation("replacementExpressionNotValid"), MessageType.Error);
                 }
             }
 

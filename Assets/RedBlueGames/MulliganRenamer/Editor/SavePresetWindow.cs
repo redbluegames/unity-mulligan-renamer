@@ -93,17 +93,20 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             EditorGUI.BeginDisabledGroup(!IsNameValid(this.enteredName));
-            if (GUILayout.Button("Save") || (hitEnter && IsNameValid(this.enteredName)))
+            if (GUILayout.Button(LocaleManager.Instance.GetTranslation("save")) || (hitEnter && IsNameValid(this.enteredName)))
             {
                 var saveAndClose = false;
                 if (this.existingPresetNames.Contains(this.enteredName))
                 {
                     var popupMessage = string.Format(
-                        "A preset named \"{0}\" already exists. Do you want to replace it?",
+                        LocaleManager.Instance.GetTranslation("errorPresetNameAlreadyExists"),
                         this.enteredName
                     );
 
-                    saveAndClose = EditorUtility.DisplayDialog("Warning", popupMessage, "Replace", "No");
+                    saveAndClose = EditorUtility.DisplayDialog(LocaleManager.Instance.GetTranslation("warning"),
+                                                                popupMessage,
+                                                                LocaleManager.Instance.GetTranslation("replace"),
+                                                                LocaleManager.Instance.GetTranslation("no"));
                 }
                 else
                 {

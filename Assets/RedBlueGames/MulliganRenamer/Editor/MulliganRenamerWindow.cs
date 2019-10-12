@@ -218,6 +218,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private void OnEnable()
         {
+
             AssetPreview.SetPreviewTextureCacheSize(100);
             this.minSize = new Vector2(600.0f, 300.0f);
 
@@ -444,12 +445,15 @@ namespace RedBlueGames.MulliganRenamer
                 renameButtonSize.x,
                 renameButtonSize.y);
 
-            if (GUI.Button(renameButtonRect, "Rename"))
+            if (GUI.Button(renameButtonRect, LocaleManager.Instance.GetTranslation("rename")))
             {
                 var popupMessage = string.Concat(
-                    "Some objects have warnings and will not be renamed. Do you want to rename the other objects in the group?");
+                    LocaleManager.Instance.GetTranslation("renameWarningNotRenamed"));
                 var renamesHaveNoWarnings = !BulkRenamePreview.HasWarnings;
-                if (renamesHaveNoWarnings || EditorUtility.DisplayDialog("Warning", popupMessage, "Rename", "Cancel"))
+                if (renamesHaveNoWarnings || EditorUtility.DisplayDialog(LocaleManager.Instance.GetTranslation("warning"),
+                                                                            popupMessage,
+                                                                            LocaleManager.Instance.GetTranslation("rename"),
+                                                                            LocaleManager.Instance.GetTranslation("cancel")))
                 {
                     var undoGroupBeforeRename = Undo.GetCurrentGroup();
                     try
@@ -465,11 +469,9 @@ namespace RedBlueGames.MulliganRenamer
                     catch (System.OperationCanceledException e)
                     {
                         var errorMessage = string.Concat(
-                            "Sorry, some objects failed to rename. Something went wrong with Mulligan." +
-                            "Please report a bug (see UserManual for details). This rename operation will be automatically undone",
-                            "\n\nException: ",
-                            e.Message);
-                        if (EditorUtility.DisplayDialog("Error", errorMessage, "Ok"))
+                            LocaleManager.Instance.GetTranslation("failToRenameMulligan"),
+                            e.Message) ;
+                        if (EditorUtility.DisplayDialog(LocaleManager.Instance.GetTranslation("error"), errorMessage, "Ok"))
                         {
                             Undo.RevertAllDownToGroup(undoGroupBeforeRename);
                         }
@@ -520,7 +522,7 @@ namespace RedBlueGames.MulliganRenamer
             this.DrawBreadcrumbs(this.IsShowingPreviewSteps, breadcrumbRect);
 
             EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
-            var buttonText = "Preview Steps";
+            var buttonText = LocaleManager.Instance.GetTranslation("previewSteps");
             var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
             var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
             var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
@@ -571,7 +573,7 @@ namespace RedBlueGames.MulliganRenamer
                 else
                 {
                     var breadcrumbeOptions =
-                        new PreviewBreadcrumbOptions() { Heading = "Result", HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true };
+                        new PreviewBreadcrumbOptions() { Heading = LocaleManager.Instance.GetTranslation("result"), HighlightColor = Color.clear, Enabled = true, UseLeftStyle = true };
                     var breadcrumbSize = breadcrumbeOptions.SizeForContent;
                     breadcrumbSize.y = rect.height;
                     DrawPreviewBreadcrumb(new Rect(rect.position, breadcrumbSize), breadcrumbeOptions);
@@ -622,7 +624,7 @@ namespace RedBlueGames.MulliganRenamer
             buttonRect.height = buttonSize.y;
             buttonRect.width = buttonSize.x;
 
-            if (GUI.Button(buttonRect, "Add Operation"))
+            if (GUI.Button(buttonRect, LocaleManager.Instance.GetTranslation("addOperation")))
             {
                 // Add enums to the menu
                 var menu = new GenericMenu();
@@ -648,15 +650,33 @@ namespace RedBlueGames.MulliganRenamer
             headerLabelRect.x += 2.0f;
             headerLabelRect.width -= 2.0f;
 
-            var headerLabel = "Rename Operations";
+            var headerLabel = LocaleManager.Instance.GetTranslation("renameOperation");
             var renameOpsLabel = new GUIContent(headerLabel);
             EditorGUI.LabelField(headerLabelRect, renameOpsLabel, headerLabelStyle);
 
+            var localeButtonsRect = new Rect(headerRect);
+            localeButtonsRect.width = 80.0f;
+            localeButtonsRect.x = headerRect.width - localeButtonsRect.width;
+
+            if(GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
+            {
+                var localeMenu = new GenericMenu();
+                foreach (var l in LocaleManager.Instance.AllLanguages)
+                {
+                    localeMenu.AddItem(new GUIContent(l.LanguageName), l.IsActive, () =>
+                    {
+                        LocaleManager.Instance.ChangeLocale(l.LanguageKey);
+                    });
+                }
+
+                localeMenu.ShowAsContext();
+            }
+
             var presetButtonsRect = new Rect(headerRect);
-            presetButtonsRect.width = 60.0f;
-            presetButtonsRect.x = headerRect.width - presetButtonsRect.width;
+            presetButtonsRect.width = 80.0f;
+            presetButtonsRect.x = headerRect.width - presetButtonsRect.width - localeButtonsRect.width;
             var useDebugPresets = Event.current.shift;
-            if (GUI.Button(presetButtonsRect, "Presets", EditorStyles.toolbarDropDown))
+            if (GUI.Button(presetButtonsRect, LocaleManager.Instance.GetTranslation("presets"), EditorStyles.toolbarDropDown))
             {
                 var menu = new GenericMenu();
                 var savedPresetNames = new string[this.ActivePreferences.SavedPresets.Count];
@@ -677,8 +697,8 @@ namespace RedBlueGames.MulliganRenamer
                 }
 
                 menu.AddSeparator(string.Empty);
-                menu.AddItem(new GUIContent("Save As..."), false, () => this.ShowSavePresetWindow());
-                menu.AddItem(new GUIContent("Manage Presets..."), false, () => this.ShowManagePresetsWindow());
+                menu.AddItem(new GUIContent(LocaleManager.Instance.GetTranslation("saveAs")), false, () => this.ShowSavePresetWindow());
+                menu.AddItem(new GUIContent(LocaleManager.Instance.GetTranslation("managePresets")), false, () => this.ShowManagePresetsWindow());
                 if (useDebugPresets)
                 {
                     menu.AddItem(new GUIContent("DEBUG - Delete UserPrefs"), false, () =>
@@ -763,9 +783,7 @@ namespace RedBlueGames.MulliganRenamer
 
                     default:
                         {
-                            Debug.LogError(string.Format(
-                                    "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event.",
-                                    buttonClickEvent));
+                            Debug.LogError(string.Format(LocaleManager.Instance.GetTranslation("errorUnrecognizedListButton"),buttonClickEvent));
                             return;
                         }
                 }
@@ -787,10 +805,7 @@ namespace RedBlueGames.MulliganRenamer
             var operationDrawerBinding = operation as RenameOperationDrawerBinding;
             if (operationDrawerBinding == null)
             {
-                throw new System.ArgumentException(
-                    "MulliganRenamerWindow tried to add a new RenameOperation using a type that is not a subclass of RenameOperationDrawerBinding." +
-                " Operation type: " +
-                operation.GetType().ToString());
+                throw new System.ArgumentException(LocaleManager.Instance.GetTranslation("errorAddNewOpNotSub"), operation.GetType().ToString());
             }
 
             this.AddRenameOperation(operationDrawerBinding);
@@ -856,11 +871,11 @@ namespace RedBlueGames.MulliganRenamer
                 color = new AddStringOperationDrawer().HighlightColor;
                 if (RBPackageSettings.IsGitHubRelease)
                 {
-                    reviewPrompt = "<color=FFFFFFF>Thank you very much for supporting Mulligan!</color>";
+                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocaleManager.Instance.GetTranslation("thankYouForSupport"));
                 }
                 else
                 {
-                    reviewPrompt = "<color=FFFFFFF>Thank you for reviewing Mulligan!</color>";
+                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocaleManager.Instance.GetTranslation("thankYouForReview"));
                 }
             }
             else
@@ -869,15 +884,11 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (RBPackageSettings.IsGitHubRelease)
                 {
-                    reviewPrompt = "<color=FFFFFFF>Thank you for using Mulligan! " +
-                        "If you've found it useful, please consider supporting its development by " +
-                        "purchasing it from the Asset Store. Thanks!</color>";
+                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocaleManager.Instance.GetTranslation("thankYouForUsing"));
                 }
                 else
                 {
-                    reviewPrompt = "<color=FFFFFFF>Thank you for purchasing Mulligan! " +
-                        "If you've found it useful, please consider leaving a review on the Asset Store. " +
-                        "The store is very competitive and every review helps to stand out. Thanks!</color>";
+                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocaleManager.Instance.GetTranslation("thankYouForPurchasing"));
                 }
             }
 
@@ -911,7 +922,7 @@ namespace RedBlueGames.MulliganRenamer
             labelRect.width = (buttonRect.x - rect.x) - (buttonPaddingLR + labelPaddingL);
 
             GUI.Label(labelRect, prompt, reviewStyle);
-            if (showButton && GUI.Button(buttonRect, "Open Asset Store"))
+            if (showButton && GUI.Button(buttonRect, LocaleManager.Instance.GetTranslation("openAssetStore")))
             {
                 this.ActivePreferences.HasConfirmedReviewPrompt = true;
                 Application.OpenURL("https://assetstore.unity.com/packages/slug/99843");
@@ -936,7 +947,7 @@ namespace RedBlueGames.MulliganRenamer
             savePresetPosition.x = this.position.x + (this.position.width / 2.0f);
             savePresetPosition.y = this.position.y + (this.position.height / 2.0f);
             this.activeSavePresetWindow =
-                EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, "Save Preset", true);
+                EditorWindow.GetWindowWithRect<SavePresetWindow>(savePresetPosition, true, LocaleManager.Instance.GetTranslation("savePreset"), true);
             this.activeSavePresetWindow.minSize = windowMinSize;
             this.activeSavePresetWindow.maxSize = new Vector2(windowMinSize.x * 2.0f, windowMinSize.y);
             this.activeSavePresetWindow.SetName(this.CurrentPresetName);
@@ -964,7 +975,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var existingWindow = this.activePresetManagementWindow;
-            this.activePresetManagementWindow = EditorWindow.GetWindow<ManagePresetsWindow>(true, "Manage Presets", true);
+            this.activePresetManagementWindow = EditorWindow.GetWindow<ManagePresetsWindow>(true, LocaleManager.Instance.GetTranslation("managePresets"), true);
             this.activePresetManagementWindow.PopulateWithPresets(this.ActivePreferences.SavedPresets);
 
             // Only subscribe if it's a new, previously unopened window.
