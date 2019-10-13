@@ -23,6 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEditor;
@@ -33,6 +34,8 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerPreviewPanel
     {
+        const string BigUpArrowUnicode = "\u25B2";
+        const string BigDownArrowUnicode = "\u25BC";
         private const float PreviewPanelFirstColumnMinSize = 50.0f;
         private const float PreviewRowHeight = 18.0f;
 
@@ -55,6 +58,11 @@ namespace RedBlueGames.MulliganRenamer
         /// Event fired when an Object is removed
         /// </summary>
         public event System.Action<int> ObjectRemovedAtIndex;
+
+        /// <summary>
+        /// Event fired when an Object wants to change order
+        /// </summary>
+        public event System.Action<int, int> ChangeObjectOrder;
 
         /// <summary>
         /// The validate object function, used to determine if objects should be
@@ -95,15 +103,23 @@ namespace RedBlueGames.MulliganRenamer
             StepwiseHideFinal
         }
 
+        public enum PreviewRowResult
+        {
+            None,
+            Delete,
+            MoveUp,
+            MoveDown
+        }
+
         public MulliganRenamerPreviewPanel()
         {
             this.InitializeGUIStyles();
             this.InitializeGUIContents();
         }
 
-        private static bool DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
+        private static PreviewRowResult DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
         {
-            bool isDeleteClicked = false;
+            PreviewRowResult result = PreviewRowResult.None;
 
             var oldColor = GUI.color;
             GUI.color = style.BackgroundColor;
@@ -120,8 +136,23 @@ namespace RedBlueGames.MulliganRenamer
             deleteButtonStyle.padding = new RectOffset();
             if (GUI.Button(deleteButtonRect, "X", deleteButtonStyle))
             {
-                isDeleteClicked = true;
+                result = PreviewRowResult.Delete;
             }
+
+            deleteButtonRect.x += 16.0f;
+            GUI.enabled = !info.FirstElement;
+            if (GUI.Button(deleteButtonRect, BigUpArrowUnicode, deleteButtonStyle))
+            {
+                result = PreviewRowResult.MoveUp;
+            }
+
+            deleteButtonRect.x += 16.0f;
+            GUI.enabled = !info.LastElement;
+            if (GUI.Button(deleteButtonRect, BigDownArrowUnicode, deleteButtonStyle))
+            {
+                result = PreviewRowResult.MoveDown;
+            }
+            GUI.enabled = true;
 
             var warningRect = new Rect(deleteButtonRect);
             warningRect.y = rowRect.y;
@@ -167,7 +198,12 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
-            return isDeleteClicked;
+            if (GUI.Button(rowRect, "", GUIStyle.none))
+            {
+                EditorGUIUtility.PingObject(info.Object);
+            }
+
+            return result;
         }
 
         private void InitializeGUIContents()
@@ -539,15 +575,31 @@ namespace RedBlueGames.MulliganRenamer
                 var rowRect = new Rect(previewRowsRect);
                 rowRect.height = PreviewRowHeight;
                 rowRect.y = previewRowsRect.y + (content.IndexInPreview * rowRect.height);
-                if (DrawPreviewRow(rowRect, content, previewRowStyle))
+                switch (DrawPreviewRow(rowRect, content, previewRowStyle))
                 {
-                    if (this.ObjectRemovedAtIndex != null)
-                    {
-                        this.ObjectRemovedAtIndex.Invoke(i);
-                    }
-
-                    break;
+                    case PreviewRowResult.Delete:
+                        if (this.ObjectRemovedAtIndex != null)
+                        {
+                            this.ObjectRemovedAtIndex.Invoke(i);
+                        }
+                        break;
+                    case PreviewRowResult.MoveUp:
+                        if (this.ChangeObjectOrder != null)
+                        {
+                            this.ChangeObjectOrder.Invoke(i, i - 1);
+                        }
+                        break;
+                    case PreviewRowResult.MoveDown:
+                        if (this.ChangeObjectOrder != null)
+                        {
+                            this.ChangeObjectOrder.Invoke(i, i + 1);
+                        }
+                        break;
+                    default:
+                        continue;
                 }
+
+                break;
             }
         }
 
@@ -714,7 +766,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
                 this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
-                this.ThirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
+                this.ThirdColumnWidth = shouldShowThirdColumn ? Mathf.Max(previewContents.LongestFinalNameWidth, 80.0f) : 0.0f;
 
                 var totalColumnWidth = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth;
 
@@ -793,6 +845,7 @@ namespace RedBlueGames.MulliganRenamer
                     info.FinalName = previewForIndex.RenameResultSequence.NewName;
 
                     info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
+                    info.Object = previewForIndex.ObjectToRename;
 
                     if (previewForIndex.HasWarnings || preview.WillRenameCollideWithExistingAsset(previewForIndex))
                     {
@@ -813,6 +866,8 @@ namespace RedBlueGames.MulliganRenamer
                     }
 
                     info.IndexInPreview = indexOfVisibleObject;
+                    info.FirstElement = j == 0;
+                    info.LastElement = j == (numVisibleObjects - 1);
                     previewPanelContents.PreviewRowInfos[j] = info;
                 }
 
@@ -876,6 +931,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private struct PreviewRowModel
         {
+            public UnityEngine.Object Object { get; set; }
+
             public Texture Icon { get; set; }
 
             public Texture WarningIcon { get; set; }
@@ -889,6 +946,10 @@ namespace RedBlueGames.MulliganRenamer
             public string FinalName { get; set; }
 
             public int IndexInPreview { get; set; }
+
+            public bool LastElement { get; set; }
+
+            public bool FirstElement { get; set; }
 
             public bool NameChangedThisStep
             {
