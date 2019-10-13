@@ -523,7 +523,7 @@ namespace RedBlueGames.MulliganRenamer
 
             EditorGUI.BeginDisabledGroup(this.NumRenameOperations <= 1);
             var buttonText = LocaleManager.Instance.GetTranslation("previewSteps");
-            var previewButtonSize = new Vector2(100.0f, toolbarRect.height);
+            var previewButtonSize = new Vector2(150.0f, toolbarRect.height);
             var previewButtonPosition = new Vector2(toolbarRect.xMax - previewButtonSize.x, toolbarRect.y);
             var toggleRect = new Rect(previewButtonPosition, previewButtonSize);
             this.IsPreviewStepModePreference = GUI.Toggle(toggleRect, this.IsPreviewStepModePreference, buttonText, "toolbarbutton");

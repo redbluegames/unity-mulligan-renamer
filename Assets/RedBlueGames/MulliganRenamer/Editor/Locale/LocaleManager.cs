@@ -28,9 +28,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.IO;
     using UnityEditor;
     using UnityEngine;
-
-
-    public delegate void OnLanguageChanged();
+    using UnityEngine.Events;
 
     public class LocaleManager
     {
@@ -39,7 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         private string LocaleLanguagesPath = Application.dataPath + "/RedBlueGames/MulliganRenamer/Editor/Locale/Content";
         private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
 
-        public OnLanguageChanged OnLanguageChanged;
+        public UnityEvent OnLanguageChanged = new UnityEvent();
 
         public LocaleLanguage CurrentLanguage
         {

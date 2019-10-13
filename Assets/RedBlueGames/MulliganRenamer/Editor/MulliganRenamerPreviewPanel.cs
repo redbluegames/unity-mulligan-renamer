@@ -99,6 +99,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.InitializeGUIStyles();
             this.InitializeGUIContents();
+
+            LocaleManager.Instance.OnLanguageChanged.AddListener(this.InitializeGUIContents);
         }
 
         private static bool DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
@@ -140,12 +142,18 @@ namespace RedBlueGames.MulliganRenamer
             iconRect.height = 16.0f;
             GUI.Box(iconRect, info.Icon, style.IconStyle);
 
+            Texture2D tex = new Texture2D(2, 2);
+            var c = new Color32(254, 230, 151, 255);
+            tex.SetPixels(new Color[] { c, c, c, c });
+
             var firstColumnRect = new Rect(iconRect);
             firstColumnRect.x += iconRect.width;
             firstColumnRect.width = style.FirstColumnWidth;
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
+                var size = style.FirstColumnStyle.CalcSize(new GUIContent(info.NameBeforeStep));
+                GUI.DrawTexture(new Rect(firstColumnRect.x, firstColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
                 EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
             }
 
@@ -155,6 +163,8 @@ namespace RedBlueGames.MulliganRenamer
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
+                var size = style.SecondColumnStyle.CalcSize(new GUIContent(info.NameAtStep));
+                GUI.DrawTexture(new Rect(secondColumnRect.x, secondColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
                 EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
             }
 
@@ -164,6 +174,8 @@ namespace RedBlueGames.MulliganRenamer
             thirdColumnRect.height = rowRect.height;
             if (style.ThirdColumnWidth > 0)
             {
+                var size = style.ThirdColumnStyle.CalcSize(new GUIContent(info.FinalName));
+                GUI.DrawTexture(new Rect(thirdColumnRect.x, thirdColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
@@ -316,7 +328,7 @@ namespace RedBlueGames.MulliganRenamer
                 var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
-                addSelectedObjectsButtonRect.width = 150.0f;
+                addSelectedObjectsButtonRect.width = 200.0f;
                 addSelectedObjectsButtonRect.x = panelFooterToolbar.xMax - rightPadding - addSelectedObjectsButtonRect.width;
 
                 var removeAllButtonRect = new Rect(addSelectedObjectsButtonRect);
