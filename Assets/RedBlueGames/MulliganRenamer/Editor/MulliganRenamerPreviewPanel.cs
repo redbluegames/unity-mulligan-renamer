@@ -179,10 +179,10 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
         {
-            if (!content.Contains("<color=#"))
+            if (content == null || !content.Contains("<color=#"))
                 return;
 
-            var htmlColor = content.Split(new string[] {"<color="}, StringSplitOptions.None)[1].Split('>')[0];
+            var htmlColor = content.Split(new [] {"<color="}, StringSplitOptions.None)[1].Split('>')[0];
             Color color;
             ColorUtility.TryParseHtmlString(htmlColor, out color);
 
