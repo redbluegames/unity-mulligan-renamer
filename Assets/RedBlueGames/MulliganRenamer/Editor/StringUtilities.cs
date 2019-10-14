@@ -21,11 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
+    using System.Text.RegularExpressions;
 
     public static class StringUtilities
     {
@@ -48,6 +47,12 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return fullString;
+        }
+
+        const string HTML_TAG_PATTERN = "<.*?>";
+        public static string StripHTML(string inputString, string replaceWith = "")
+        {
+            return Regex.Replace(inputString, HTML_TAG_PATTERN, replaceWith);
         }
     }
 }

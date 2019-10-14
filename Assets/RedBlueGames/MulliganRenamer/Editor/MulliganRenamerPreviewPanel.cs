@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+
 namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
@@ -142,18 +144,13 @@ namespace RedBlueGames.MulliganRenamer
             iconRect.height = 16.0f;
             GUI.Box(iconRect, info.Icon, style.IconStyle);
 
-            Texture2D tex = new Texture2D(2, 2);
-            var c = new Color32(254, 230, 151, 255);
-            tex.SetPixels(new Color[] { c, c, c, c });
-
             var firstColumnRect = new Rect(iconRect);
             firstColumnRect.x += iconRect.width;
             firstColumnRect.width = style.FirstColumnWidth;
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
-                var size = style.FirstColumnStyle.CalcSize(new GUIContent(info.NameBeforeStep));
-                GUI.DrawTexture(new Rect(firstColumnRect.x, firstColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
+                ApplyBackgroundColorToWhitespaces(firstColumnRect, style.FirstColumnStyle, info.NameBeforeStep);
                 EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
             }
 
@@ -163,8 +160,7 @@ namespace RedBlueGames.MulliganRenamer
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
-                var size = style.SecondColumnStyle.CalcSize(new GUIContent(info.NameAtStep));
-                GUI.DrawTexture(new Rect(secondColumnRect.x, secondColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
+                ApplyBackgroundColorToWhitespaces(secondColumnRect, style.SecondColumnStyle, info.NameAtStep);
                 EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
             }
 
@@ -174,12 +170,40 @@ namespace RedBlueGames.MulliganRenamer
             thirdColumnRect.height = rowRect.height;
             if (style.ThirdColumnWidth > 0)
             {
-                var size = style.ThirdColumnStyle.CalcSize(new GUIContent(info.FinalName));
-                GUI.DrawTexture(new Rect(thirdColumnRect.x, thirdColumnRect.y, size.x, size.y), tex, ScaleMode.StretchToFill);
+                ApplyBackgroundColorToWhitespaces(thirdColumnRect, style.ThirdColumnStyle, info.FinalName);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
             return isDeleteClicked;
+        }
+
+        private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
+        {
+            if (!content.Contains("<color=#"))
+                return;
+
+            var htmlColor = content.Split(new string[] {"<color="}, StringSplitOptions.None)[1].Split('>')[0];
+            Color color;
+            ColorUtility.TryParseHtmlString(htmlColor, out color);
+
+            const float X_OFFSET = 2f;
+            var texture = new Texture2D(2, 2);
+            texture.SetPixels(new [] { color, color, color, color });
+            var position = rect.position;
+
+            var whitespaceSize = style.CalcSize(new GUIContent(""));
+
+            content = StringUtilities.StripHTML(content);
+            var splitContent = content.Split(' ');
+            for (var i = 0; i < splitContent.Length; i++)
+            {
+                var splitTextSize = style.CalcSize(new GUIContent(splitContent[i]));
+                position.x += splitTextSize.x;
+                if (i < (splitContent.Length - 1))
+                {
+                    GUI.DrawTexture(new Rect(position.x - X_OFFSET, position.y, whitespaceSize.x, whitespaceSize.y), texture, ScaleMode.StretchToFill);
+                }
+            }
         }
 
         private void InitializeGUIContents()
