@@ -272,6 +272,7 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.AddSelectedObjectsClicked += this.HandleAddSelectedObjectsClicked;
             this.previewPanel.ObjectRemovedAtIndex += this.HandleObjectRemoved;
             this.previewPanel.ChangeObjectOrder += this.HandleChangeObjectOrder;
+            this.previewPanel.Repaint += this.Repaint;
         }
 
         private void HandleObjectsDroppedOverPreviewArea(UnityEngine.Object[] objects)
@@ -432,7 +433,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
 
             this.DrawPreviewPanel(previewPanelRect, this.BulkRenamePreview);
-
+            
             var rectForReviewWidth = this.position.width * 0.98f;
             var rectForReviewPrompt = new Rect(
                 (this.position.width - rectForReviewWidth) * 0.5f,
