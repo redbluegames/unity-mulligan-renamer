@@ -30,6 +30,12 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using UnityEngine.Events;
 
+    /// <summary>
+    /// At the constructor we load the the previous language that the user used
+    /// using english as the default. This will cache the language and it's translations
+    /// also we load all the languages by accesing the JSON files inside LocaleLanguagesPath path
+    /// this is used to show the available languages to the user
+    /// </summary>
     public class LocaleManager
     {
         public static LocaleManager Instance = new LocaleManager();

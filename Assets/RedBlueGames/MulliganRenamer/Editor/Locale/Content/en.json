@@ -273,7 +273,7 @@
 		},
 		{
 			"key" : "errorAssetNotBulkRenamed",
-			"value" : "Asset [{0}] not renamed when trying to RenameAsset in BulkRenamer. It may have been canceled because the new name was already taken by an object at the same path. The new name may also have contained special characters.\nOriginalPath: {1}, New Name: {1}"
+			"value" : "Asset [{0}] not renamed when trying to RenameAsset in BulkRenamer. It may have been canceled because the new name was already taken by an object at the same path. The new name may also have contained special characters.\nOriginalPath: {1}, New Name: {2}"
 		},
 		{
 			"key" : "deleteFromFront",

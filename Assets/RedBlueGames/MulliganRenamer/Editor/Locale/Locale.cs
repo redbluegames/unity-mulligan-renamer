@@ -25,6 +25,9 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Class responsible for holding the data for localized text
+    /// </summary>
     [System.Serializable]
     public class Locale
     {
