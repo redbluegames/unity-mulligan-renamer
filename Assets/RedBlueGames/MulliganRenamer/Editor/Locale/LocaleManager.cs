@@ -40,7 +40,6 @@ namespace RedBlueGames.MulliganRenamer
     {
         public static LocaleManager Instance = new LocaleManager();
 
-        private string LocaleLanguagesPath = Application.dataPath + "/RedBlueGames/MulliganRenamer/Editor/Locale/Content";
         private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
 
         public UnityEvent OnLanguageChanged = new UnityEvent();
@@ -74,13 +73,12 @@ namespace RedBlueGames.MulliganRenamer
         {
             allLanguages = new List<LocaleLanguage>();
 
-            var dir = new DirectoryInfo(LocaleLanguagesPath);
-            var info = dir.GetFiles("*.json");
-            foreach (FileInfo f in info)
+            var jsons = Resources.LoadAll<TextAsset>("Content");
+            foreach (var json in jsons)
             {
-                var t = f.OpenText();
-                var language = JsonUtility.FromJson<LocaleLanguage>(t.ReadToEnd());
-                allLanguages.Add(language);
+                var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
+                if(!string.IsNullOrEmpty(language.LanguageKey))
+                    allLanguages.Add(language);
             }
         }
 
