@@ -38,11 +38,24 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class LocaleManager
     {
-        public static LocaleManager Instance = new LocaleManager();
+        private static LocaleManager _Instance;
 
         private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
 
         public UnityEvent OnLanguageChanged = new UnityEvent();
+
+        public static LocaleManager Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = new LocaleManager();
+                }
+
+                return _Instance;
+            }
+        }
 
         public LocaleLanguage CurrentLanguage
         {
@@ -77,7 +90,7 @@ namespace RedBlueGames.MulliganRenamer
             foreach (var json in jsons)
             {
                 var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
-                if(!string.IsNullOrEmpty(language.LanguageKey))
+                if (!string.IsNullOrEmpty(language.LanguageKey))
                     allLanguages.Add(language);
             }
         }
