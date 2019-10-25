@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Modify/To Upper or Lowercase";
+                return GetOperationPath("modify", "toUpperOrLowercase");
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "To Upper or Lowercase";
+                return LocaleManager.Instance.GetTranslation("toUpperOrLowercase");
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "To Uppercase";
+                return LocaleManager.Instance.GetTranslation("toUppercase");
             }
         }
 
@@ -94,15 +94,19 @@ namespace RedBlueGames.MulliganRenamer
         {
             var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
-            var casingLabel = new GUIContent("New Casing", "The desired casing for the new name.");
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "To Uppercase"));
+            var casingLabel = new GUIContent(
+                LocaleManager.Instance.GetTranslation("newCasing"),
+                LocaleManager.Instance.GetTranslation("theDesiredCasingForName"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("toUppercase")));
             this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.EnumPopup(
                 singleLineRect,
                 casingLabel,
                 this.RenameOperation.Casing);
 
             var firstCharOnlyRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
-            var firstCharToggleLabel = new GUIContent("Only First Character", "Change only the first character's case.");
+            var firstCharToggleLabel = new GUIContent(
+                LocaleManager.Instance.GetTranslation("onlyFirstCharacter"),
+                LocaleManager.Instance.GetTranslation("changeOnlyTheFirstCharacterCase"));
             this.RenameOperation.ChangeFirstCharacterOnly = EditorGUI.Toggle(
                 firstCharOnlyRect,
                 firstCharToggleLabel,

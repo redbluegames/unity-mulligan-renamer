@@ -99,6 +99,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.InitializeGUIStyles();
             this.InitializeGUIContents();
+
+            LocaleManager.Instance.OnLanguageChanged.AddListener(this.InitializeGUIContents);
         }
 
         private static bool DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
@@ -139,7 +141,7 @@ namespace RedBlueGames.MulliganRenamer
             iconRect.width = 16.0f;
             iconRect.height = 16.0f;
             GUI.Box(iconRect, info.Icon, style.IconStyle);
-
+            
             var firstColumnRect = new Rect(iconRect);
             firstColumnRect.x += iconRect.width;
             firstColumnRect.width = style.FirstColumnWidth;
@@ -174,17 +176,10 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.guiContents = new GUIContents();
 
-            this.guiContents.DropPrompt = new GUIContent(
-                "No objects specified for rename. Drag objects here to rename them, or");
-
-            this.guiContents.DropPromptHintInsideScroll = new GUIContent(
-                "Add more objects by dragging them here");
-
-            this.guiContents.DropPromptHint = new GUIContent(
-                "Add more objects by dragging them into the above panel");
-
-            this.guiContents.DropPromptRepeat = new GUIContent(
-                "To rename more objects, drag them here, or");
+            this.guiContents.DropPrompt = new GUIContent(LocaleManager.Instance.GetTranslation("noObjectsSpecified"));
+            this.guiContents.DropPromptHintInsideScroll = new GUIContent(LocaleManager.Instance.GetTranslation("addMoreObjectsDragHere"));
+            this.guiContents.DropPromptHint = new GUIContent(LocaleManager.Instance.GetTranslation("addMoreObjectsDragPanel"));
+            this.guiContents.DropPromptRepeat = new GUIContent(LocaleManager.Instance.GetTranslation("toRenameMoreObjects"));
         }
 
         private void InitializeGUIStyles()
@@ -323,13 +318,13 @@ namespace RedBlueGames.MulliganRenamer
                 var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
                 var addSelectedObjectsButtonRect = new Rect(panelFooterToolbar);
-                addSelectedObjectsButtonRect.width = 150.0f;
+                addSelectedObjectsButtonRect.width = 200.0f;
                 addSelectedObjectsButtonRect.x = panelFooterToolbar.xMax - rightPadding - addSelectedObjectsButtonRect.width;
 
                 var removeAllButtonRect = new Rect(addSelectedObjectsButtonRect);
                 removeAllButtonRect.width = 100.0f;
                 removeAllButtonRect.x -= (removeAllButtonRect.width + buttonSpacing);
-                if (GUI.Button(removeAllButtonRect, "Remove All"))
+                if (GUI.Button(removeAllButtonRect, LocaleManager.Instance.GetTranslation("removeAll")))
                 {
                     if (this.RemoveAllClicked != null)
                     {
@@ -388,14 +383,14 @@ namespace RedBlueGames.MulliganRenamer
                 string noun;
                 if (this.NumPreviouslyRenamedObjects == 1)
                 {
-                    noun = "Object";
+                    noun = LocaleManager.Instance.GetTranslation("object");
                 }
                 else
                 {
-                    noun = "Objects";
+                    noun = LocaleManager.Instance.GetTranslation("objects");
                 }
 
-                var renameSuccessContent = new GUIContent(string.Format("{0} {1} Renamed", this.NumPreviouslyRenamedObjects, noun));
+                var renameSuccessContent = new GUIContent(string.Format("{0} {1} {2}", this.NumPreviouslyRenamedObjects, noun, LocaleManager.Instance.GetTranslation("renamed")));
                 EditorGUI.LabelField(labelRect, renameSuccessContent, this.guiStyles.RenameSuccessPrompt);
                 GUI.contentColor = oldColor;
 
@@ -426,8 +421,8 @@ namespace RedBlueGames.MulliganRenamer
                 previewPanelScrollPosition.x = 0;
             }
 
-            string originalNameColumnHeader = renameStep < 1 ? "Original" : "Before";
-            string newNameColumnHeader = "After";
+            string originalNameColumnHeader = LocaleManager.Instance.GetTranslation(renameStep < 1 ? "original" : "before");
+            string newNameColumnHeader = LocaleManager.Instance.GetTranslation("after");
             this.DrawPreviewHeader(
                 scrollLayout.HeaderRect,
                 -previewPanelScrollPosition.x,
@@ -510,7 +505,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (thirdColumnWidth > 0.0f)
             {
-                EditorGUI.LabelField(thirdColumnRect, "Final Name", EditorStyles.boldLabel);
+                EditorGUI.LabelField(thirdColumnRect, LocaleManager.Instance.GetTranslation("finalName"), EditorStyles.boldLabel);
             }
 
             GUI.EndGroup();
@@ -609,7 +604,7 @@ namespace RedBlueGames.MulliganRenamer
         private void DrawAddSelectedObjectsButton(Rect buttonRect)
         {
             EditorGUI.BeginDisabledGroup(DisableAddSelectedObjectsButton);
-            if (GUI.Button(buttonRect, "Add Selected Objects"))
+            if (GUI.Button(buttonRect, LocaleManager.Instance.GetTranslation("addSelectedObjects")))
             {
                 if (this.AddSelectedObjectsClicked != null)
                 {
@@ -765,7 +760,7 @@ namespace RedBlueGames.MulliganRenamer
                     else
                     {
                         throw new System.IndexOutOfRangeException(
-                            "Trying to access PreviewRowModel at index that is out of bounds. Index: " + index);
+                            LocaleManager.Instance.GetTranslation("errorTryingToAccessModel") + index);
                     }
                 }
             }
@@ -810,7 +805,7 @@ namespace RedBlueGames.MulliganRenamer
                         }
                         else
                         {
-                            info.WarningMessage = "New name matches an existing file or another renamed object.";
+                            info.WarningMessage = LocaleManager.Instance.GetTranslation("warningNewNameMatchesExisting");
                         }
                     }
                     else
@@ -868,11 +863,11 @@ namespace RedBlueGames.MulliganRenamer
             {
                 if (preview.HasInvalidEmptyFinalName)
                 {
-                    return "Asset has blank name.";
+                    return LocaleManager.Instance.GetTranslation("assetBlankName");
                 }
                 else if (preview.FinalNameContainsInvalidCharacters)
                 {
-                    return "Name includes invalid characters (usually symbols such as ?.,).";
+                    return LocaleManager.Instance.GetTranslation("nameIncludeInvalidCharacter");
                 }
                 else
                 {

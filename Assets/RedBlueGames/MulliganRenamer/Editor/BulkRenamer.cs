@@ -84,9 +84,9 @@ namespace RedBlueGames.MulliganRenamer
                     gameObjectsToRenameAsGameObjects.Add((GameObject)gameObjectToRename.NamedObject);
                 }
 
-                Undo.RecordObjects(gameObjectsToRenameAsGameObjects.ToArray(), "Bulk Rename");
+                Undo.RecordObjects(gameObjectsToRenameAsGameObjects.ToArray(), LocaleManager.Instance.GetTranslation("bulkRename"));
 
-                AssetRenameUndoer.RecordAssetRenames("Bulk Rename", objectsAndNewNames);
+                AssetRenameUndoer.RecordAssetRenames(LocaleManager.Instance.GetTranslation("bulkRename"), objectsAndNewNames);
             }
 
             // Rename the objects and show a progress bar
@@ -268,8 +268,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void UpdateProgressBar(int currentStep, int totalNumSteps)
         {
-            var infoString = string.Format("Renaming Object {0} of {1}", currentStep++, totalNumSteps);
-            EditorUtility.DisplayProgressBar("Renaming...", infoString, currentStep / (float)totalNumSteps);
+            var infoString = string.Format(LocaleManager.Instance.GetTranslation("renamingObjectXofY"), currentStep++, totalNumSteps);
+            EditorUtility.DisplayProgressBar(LocaleManager.Instance.GetTranslation("renaming")+ "...", infoString, currentStep / (float)totalNumSteps);
         }
 
         private static void SplitObjectsIntoCategories(
@@ -331,11 +331,7 @@ namespace RedBlueGames.MulliganRenamer
             if (asset.name != newName)
             {
                 var message = string.Format(
-                                  "Asset [{0}] not renamed when trying to RenameAsset in BulkRenamer. " +
-                                  "It may have been canceled because the new name was already taken by" +
-                                  " an object at the same path. The new name may also have contained " +
-                                  "special characters.\n" +
-                                  "OriginalPath: {1}, New Name: {1}",
+                                  LocaleManager.Instance.GetTranslation("errorAssetNotBulkRenamed"),
                                   asset.name,
                                   pathToAsset,
                                   newName);

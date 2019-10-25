@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Add/Prefix or Suffix";
+                return GetOperationPath("add", "prefixOrSuffix");
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Add Prefix or Suffix";
+                return LocaleManager.Instance.GetTranslation("addPrefixOrSuffix");
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Prefix";
+                return LocaleManager.Instance.GetTranslation("prefix");
             }
         }
 
@@ -92,16 +92,16 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Prefix"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("prefix")));
             this.RenameOperation.Prefix = EditorGUI.TextField(
                 operationRect.GetSplitVertical(1, 2, LineSpacing),
-                "Prefix",
+                LocaleManager.Instance.GetTranslation("prefix"),
                 this.RenameOperation.Prefix);
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Suffix"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("suffix")));
             this.RenameOperation.Suffix = EditorGUI.TextField(
                 operationRect.GetSplitVertical(2, 2, LineSpacing),
-                "Suffix",
+                LocaleManager.Instance.GetTranslation("suffix"),
                 this.RenameOperation.Suffix);
         }
     }

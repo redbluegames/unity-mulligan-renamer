@@ -194,6 +194,17 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
+		// <summary>
+		/// Returns the path for the operation localized;
+		/// </summary>
+		/// <returns>The path for the operation localized</returns>
+		/// <param name="folder">The folder of the operation.</param>
+		/// <param name="name">The name of the operation</param>
+		protected string GetOperationPath(string folder, string name)
+		{
+			return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(name);
+		}
+
         private RenameOperationSortingButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
         {
             const string BigUpArrowUnicode = "\u25B2";

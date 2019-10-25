@@ -38,18 +38,34 @@ namespace RedBlueGames.MulliganRenamer
     {
         private const string VersionTag = "[Version = 1]";
 
-        private static Dictionary<string, System.Type> UnversionedOperationSerializedKeys = new Dictionary<string, System.Type>()
+        private static bool Initialized = false;
+        private static Dictionary<string, System.Type> UnversionedOperationSerializedKeys;
+
+
+        private static void Initialize()
         {
-            {"Add/Prefix or Suffix", typeof(AddStringOperation)},
-            {"Add/String Sequence", typeof(AddStringSequenceOperation)},
-            {"Modify/Change Case", typeof(ChangeCaseOperation)},
-            {"Add/Count By Letter", typeof(CountByLetterOperation)},
-            {"Add/Enumerate", typeof(EnumerateOperation)},
-            {"Delete/Remove Characters", typeof(RemoveCharactersOperation)},
-            {"Replace/Rename", typeof(ReplaceNameOperation)},
-            {"Replace/Replace String", typeof(ReplaceStringOperation)},
-            {"Delete/Trim Characters", typeof(TrimCharactersOperation)},
-        };
+            if (Initialized) return;
+
+            UnversionedOperationSerializedKeys = new Dictionary<string, System.Type>()
+            {
+                {GetOperationPath("add", "prefixOrSuffix"), typeof(AddStringOperation)},
+                {GetOperationPath("add", "stringSequence"), typeof(AddStringSequenceOperation)},
+                {GetOperationPath("modify", "changeCase"), typeof(ChangeCaseOperation)},
+                {GetOperationPath("add", "countByLetter"), typeof(CountByLetterOperation)},
+                {GetOperationPath("add", "enumerate"), typeof(EnumerateOperation)},
+                {GetOperationPath("delete", "removeCharacters"), typeof(RemoveCharactersOperation)},
+                {GetOperationPath("replace", "rename"), typeof(ReplaceNameOperation)},
+                {GetOperationPath("replace", "replaceString"), typeof(ReplaceStringOperation)},
+                {GetOperationPath("delete", "trimCharacters"), typeof(TrimCharactersOperation)},
+            };
+
+            Initialized = true;
+        }
+
+        private static string GetOperationPath(string folder, string operationTitle)
+        {
+            return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(operationTitle);
+        }
 
         private List<T> operationSequence;
 
@@ -317,6 +333,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private static RenameOperationSequence<IRenameOperation> GetOpsFromPreVersionedString(string str)
         {
+            if (!Initialized) Initialize();
+
             var ops = str.Split(',');
             var operations = new RenameOperationSequence<IRenameOperation>();
             foreach (var op in ops)

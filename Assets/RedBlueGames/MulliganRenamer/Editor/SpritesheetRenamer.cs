@@ -62,8 +62,7 @@ namespace RedBlueGames.MulliganRenamer
             if (!string.IsNullOrEmpty(existingPathToTexture) && pathToSprite != existingPathToTexture)
             {
                 var exception = string.Format(
-                                    "Trying to add Sprite {0} to SpriteRenamer that has a different path to texture " +
-                                    "than the other sprites. Received path {1}, expected {2}",
+                                    LocaleManager.Instance.GetTranslation("tryingToAddSpriteToRenamer"),
                                     sprite.name,
                                     pathToSprite,
                                     existingPathToTexture);
@@ -74,8 +73,7 @@ namespace RedBlueGames.MulliganRenamer
             if (!System.IO.File.Exists(pathToMeta))
             {
                 var exception = string.Format(
-                                    "Trying to add Sprite to SpriteRenamer at path {0}, but " +
-                                    "no meta file exists at the specified path.",
+                                    LocaleManager.Instance.GetTranslation("errorTryingToAddSpriteToRenamer"),
                                     pathToMeta);
                 throw new System.ArgumentException(exception);
             }
