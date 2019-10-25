@@ -78,8 +78,8 @@ namespace RedBlueGames.MulliganRenamer
 
         public LocaleManager()
         {
-            LoadAllLanguages();
-            ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
+            this.LoadAllLanguages();
+            this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
         }
 
         private void LoadAllLanguages()
@@ -98,17 +98,17 @@ namespace RedBlueGames.MulliganRenamer
         public void ChangeLocale(string languageKey)
         {
             EditorPrefs.SetString(LocaleKey, languageKey);
-            currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
+            this.currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
             if (OnLanguageChanged != null)
                 OnLanguageChanged.Invoke();
         }
 
         public string GetTranslation(string localeKey)
         {
-            if (currentLanguage == null)
+            if (this.currentLanguage == null)
                 throw new Exception("Current Language is not set");
 
-            return currentLanguage.GetValue(localeKey);
+            return this.currentLanguage.GetValue(localeKey);
         }
     }
 }
