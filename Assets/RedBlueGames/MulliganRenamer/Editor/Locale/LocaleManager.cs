@@ -86,7 +86,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             allLanguages = new List<LocaleLanguage>();
 
-            var jsons = Resources.LoadAll<TextAsset>("Content");
+            var jsons = Resources.LoadAll<TextAsset>("MulliganLanguages");
             foreach (var json in jsons)
             {
                 var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
