@@ -190,6 +190,7 @@ public class RBPackageExporter : UnityEditor.EditorWindow
         UnityEditor.EditorUtility.DisplayDialog(dialogTitle, exportErrorMsg, confirmButtonText);
     }
 
+    #region Export Methods
     private void ExportPackages(List<RBAsset> packages, bool includeTests)
     {
         // We can only select the exported package (runInterative) if there's one (Unity crashes otherwise).
@@ -256,6 +257,8 @@ public class RBPackageExporter : UnityEditor.EditorWindow
 
         AssetDatabase.ExportPackage(allAssetPaths.ToArray(), filename, exportOptions);
     }
+    
+    #endregion
 
     private class RBAsset
     {
