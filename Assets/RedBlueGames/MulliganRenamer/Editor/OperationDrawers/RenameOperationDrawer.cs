@@ -28,7 +28,7 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using UnityEditor;
 
-    public abstract class RenameOperationDrawer<T> : IRenameOperationDrawer where T: IRenameOperation
+    public abstract class RenameOperationDrawer<T> : IRenameOperationDrawer where T : IRenameOperation
     {
         protected readonly Color32 ReplaceColor = new Color32(17, 138, 178, 255);
         protected readonly Color32 AddColor = new Color32(6, 214, 160, 255);
@@ -88,7 +88,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             // This cast is a *bit* of an assumption, that the passed instance can be
             // downcasted to a more derived type (T : IRenameOperation) than IRenameOperation.
-            this.renameOperation = (T) renameOperationInstance;
+            this.renameOperation = (T)renameOperationInstance;
         }
 
         /// <summary>
@@ -194,16 +194,16 @@ namespace RedBlueGames.MulliganRenamer
             return buttonEvent;
         }
 
-		// <summary>
-		/// Returns the path for the operation localized;
-		/// </summary>
-		/// <returns>The path for the operation localized</returns>
-		/// <param name="folder">The folder of the operation.</param>
-		/// <param name="name">The name of the operation</param>
-		protected string GetOperationPath(string folder, string name)
-		{
-			return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(name);
-		}
+        // <summary>
+        /// Returns the path for the operation localized;
+        /// </summary>
+        /// <returns>The path for the operation localized</returns>
+        /// <param name="folder">The folder of the operation.</param>
+        /// <param name="name">The name of the operation</param>
+        protected string GetOperationPath(string folder, string name)
+        {
+            return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(name);
+        }
 
         private RenameOperationSortingButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
         {

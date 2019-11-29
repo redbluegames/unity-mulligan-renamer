@@ -271,6 +271,8 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.RemoveAllClicked += this.HandleRemoveAllObjectsClicked;
             this.previewPanel.AddSelectedObjectsClicked += this.HandleAddSelectedObjectsClicked;
             this.previewPanel.ObjectRemovedAtIndex += this.HandleObjectRemoved;
+            this.previewPanel.ChangeObjectOrder += this.HandleChangeObjectOrder;
+            this.previewPanel.Repaint += this.Repaint;
         }
 
         private void HandleObjectsDroppedOverPreviewArea(UnityEngine.Object[] objects)
@@ -292,6 +294,17 @@ namespace RedBlueGames.MulliganRenamer
         private void HandleObjectRemoved(int index)
         {
             this.ObjectsToRename.RemoveAt(index);
+        }
+
+        private void HandleChangeObjectOrder(int currentIndex, int newIndex)
+        {
+            var objects = new List<Object>(this.ObjectsToRename);
+            var holder = objects[currentIndex];
+            objects[currentIndex] = objects[newIndex];
+            objects[newIndex] = holder;
+
+            this.ObjectsToRename.Clear();
+            this.ObjectsToRename.AddRange(objects);
         }
 
         private void OnDisable()
@@ -423,7 +436,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
 
             this.DrawPreviewPanel(previewPanelRect, this.BulkRenamePreview);
-
+            
             var rectForReviewWidth = this.position.width * 0.98f;
             var rectForReviewPrompt = new Rect(
                 (this.position.width - rectForReviewWidth) * 0.5f,
@@ -473,7 +486,7 @@ namespace RedBlueGames.MulliganRenamer
                     {
                         var errorMessage = string.Concat(
                             LocaleManager.Instance.GetTranslation("failToRenameMulligan"),
-                            e.Message) ;
+                            e.Message);
                         if (EditorUtility.DisplayDialog(LocaleManager.Instance.GetTranslation("error"), errorMessage, "Ok"))
                         {
                             Undo.RevertAllDownToGroup(undoGroupBeforeRename);
@@ -661,7 +674,7 @@ namespace RedBlueGames.MulliganRenamer
             localeButtonsRect.width = 80.0f;
             localeButtonsRect.x = headerRect.width - localeButtonsRect.width;
 
-            if(GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
+            if (GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
             {
                 var localeMenu = new GenericMenu();
                 foreach (var l in LocaleManager.Instance.AllLanguages)
@@ -786,7 +799,7 @@ namespace RedBlueGames.MulliganRenamer
 
                     default:
                         {
-                            Debug.LogError(string.Format(LocaleManager.Instance.GetTranslation("errorUnrecognizedListButton"),buttonClickEvent));
+                            Debug.LogError(string.Format(LocaleManager.Instance.GetTranslation("errorUnrecognizedListButton"), buttonClickEvent));
                             return;
                         }
                 }
@@ -1193,9 +1206,9 @@ namespace RedBlueGames.MulliganRenamer
             gameObjects.Sort((x, y) => ((GameObject)x).GetHierarchySorting().CompareTo(((GameObject)y).GetHierarchySorting()));
 
             assets.Sort((x, y) =>
-                {
-                    return EditorUtility.NaturalCompare(x.name, y.name);
-                });
+            {
+                return EditorUtility.NaturalCompare(x.name, y.name);
+            });
 
             this.ObjectsToRename.AddRange(assets);
             this.ObjectsToRename.AddRange(gameObjects);
