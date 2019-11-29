@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+
 namespace RedBlueGames.MulliganRenamer
 {
     using System;
@@ -183,13 +185,14 @@ namespace RedBlueGames.MulliganRenamer
             iconRect.width = RowButtonsSize;
             iconRect.height = RowButtonsSize;
             GUI.Box(iconRect, info.Icon, style.IconStyle);
-            
+
             var firstColumnRect = new Rect(iconRect);
             firstColumnRect.x += iconRect.width;
             firstColumnRect.width = style.FirstColumnWidth - widthOffset;
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
+                ApplyBackgroundColorToWhitespaces(firstColumnRect, style.FirstColumnStyle, info.NameBeforeStep);
                 EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
             }
             
@@ -199,6 +202,7 @@ namespace RedBlueGames.MulliganRenamer
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
+                ApplyBackgroundColorToWhitespaces(secondColumnRect, style.SecondColumnStyle, info.NameAtStep);
                 EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
             }
             
@@ -209,6 +213,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (style.ThirdColumnWidth > 0)
             {
+                ApplyBackgroundColorToWhitespaces(thirdColumnRect, style.ThirdColumnStyle, info.FinalName);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
@@ -218,6 +223,35 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return result;
+        }
+
+        private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
+        {
+            if (content == null || !content.Contains("<color=#"))
+                return;
+
+            var htmlColor = content.Split(new [] {"<color="}, StringSplitOptions.None)[1].Split('>')[0];
+            Color color;
+            ColorUtility.TryParseHtmlString(htmlColor, out color);
+
+            const float X_OFFSET = 2f;
+            var texture = new Texture2D(2, 2);
+            texture.SetPixels(new [] { color, color, color, color });
+            var position = rect.position;
+
+            var whitespaceSize = style.CalcSize(new GUIContent(""));
+
+            content = StringUtilities.StripHTML(content);
+            var splitContent = content.Split(' ');
+            for (var i = 0; i < splitContent.Length; i++)
+            {
+                var splitTextSize = style.CalcSize(new GUIContent(splitContent[i]));
+                position.x += splitTextSize.x;
+                if (i < (splitContent.Length - 1))
+                {
+                    GUI.DrawTexture(new Rect(position.x - X_OFFSET, position.y, whitespaceSize.x, whitespaceSize.y), texture, ScaleMode.StretchToFill);
+                }
+            }
         }
 
         private void InitializeGUIContents()
