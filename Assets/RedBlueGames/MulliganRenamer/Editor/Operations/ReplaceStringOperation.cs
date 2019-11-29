@@ -257,8 +257,13 @@ namespace RedBlueGames.MulliganRenamer
                 return renameResult;
             }
 
-            renameResult = this.CreateDiffFromMatches(input, this.ReplacementString, matches);
+            renameResult = RenameResultUtilities.CreateDiffFromReplacedMatches(input, this.ReplaceMatch, matches);
             return renameResult;
+        }
+
+        private string ReplaceMatch(Match match)
+        {
+            return match.Result(this.ReplacementString);
         }
 
         /// <summary>
@@ -335,41 +340,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return true;
-        }
-
-        private RenameResult CreateDiffFromMatches(string originalName, string replacementRegex, MatchCollection matches)
-        {
-            var renameResult = new RenameResult();
-            var nextMatchStartingIndex = 0;
-            foreach (System.Text.RegularExpressions.Match match in matches)
-            {
-                // Grab the substring before the match
-                if (nextMatchStartingIndex < match.Index)
-                {
-                    string before = originalName.Substring(nextMatchStartingIndex, match.Index - nextMatchStartingIndex);
-                    renameResult.Add(new Diff(before, DiffOperation.Equal));
-                }
-
-                // Add the match as a deletion
-                renameResult.Add(new Diff(match.Value, DiffOperation.Deletion));
-
-                // Add the result as an insertion
-                var result = match.Result(replacementRegex);
-                if (!string.IsNullOrEmpty(result))
-                {
-                    renameResult.Add(new Diff(result, DiffOperation.Insertion));
-                }
-
-                nextMatchStartingIndex = match.Index + match.Length;
-            }
-
-            if (nextMatchStartingIndex < originalName.Length)
-            {
-                var lastSubstring = originalName.Substring(nextMatchStartingIndex, originalName.Length - nextMatchStartingIndex);
-                renameResult.Add(new Diff(lastSubstring, DiffOperation.Equal));
-            }
-
-            return renameResult;
         }
     }
 }

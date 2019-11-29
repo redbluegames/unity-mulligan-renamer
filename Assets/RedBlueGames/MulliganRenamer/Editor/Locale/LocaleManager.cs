@@ -30,14 +30,32 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
     using UnityEngine.Events;
 
+    /// <summary>
+    /// At the constructor we load the the previous language that the user used
+    /// using english as the default. This will cache the language and it's translations
+    /// also we load all the languages by accesing the JSON files inside LocaleLanguagesPath path
+    /// this is used to show the available languages to the user
+    /// </summary>
     public class LocaleManager
     {
-        public static LocaleManager Instance = new LocaleManager();
+        private static LocaleManager _Instance;
 
-        private string LocaleLanguagesPath = Application.dataPath + "/RedBlueGames/MulliganRenamer/Editor/Locale/Content";
         private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
 
         public UnityEvent OnLanguageChanged = new UnityEvent();
+
+        public static LocaleManager Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = new LocaleManager();
+                }
+
+                return _Instance;
+            }
+        }
 
         public LocaleLanguage CurrentLanguage
         {
@@ -60,38 +78,37 @@ namespace RedBlueGames.MulliganRenamer
 
         public LocaleManager()
         {
-            LoadAllLanguages();
-            ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
+            this.LoadAllLanguages();
+            this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
         }
 
         private void LoadAllLanguages()
         {
             allLanguages = new List<LocaleLanguage>();
 
-            var dir = new DirectoryInfo(LocaleLanguagesPath);
-            var info = dir.GetFiles("*.json");
-            foreach (FileInfo f in info)
+            var jsons = Resources.LoadAll<TextAsset>("MulliganLanguages");
+            foreach (var json in jsons)
             {
-                var t = f.OpenText();
-                var language = JsonUtility.FromJson<LocaleLanguage>(t.ReadToEnd());
-                allLanguages.Add(language);
+                var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
+                if (!string.IsNullOrEmpty(language.LanguageKey))
+                    allLanguages.Add(language);
             }
         }
 
         public void ChangeLocale(string languageKey)
         {
             EditorPrefs.SetString(LocaleKey, languageKey);
-            currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
+            this.currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
             if (OnLanguageChanged != null)
                 OnLanguageChanged.Invoke();
         }
 
         public string GetTranslation(string localeKey)
         {
-            if (currentLanguage == null)
+            if (this.currentLanguage == null)
                 throw new Exception("Current Language is not set");
 
-            return currentLanguage.GetValue(localeKey);
+            return this.currentLanguage.GetValue(localeKey);
         }
     }
 }

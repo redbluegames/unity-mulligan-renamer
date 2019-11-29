@@ -269,7 +269,7 @@
 		},
 		{
 			"key" : "errorAssetNotBulkRenamed",
-			"value" : "Asset [{0}] não renomeado quando tentando renomear em massa. Pode ser sido cancelado porque um nove nome já foi pego por um objeto no mesmo caminho. O nome nome pode conter caracteres especiais.\n Caminho original: {0}, Novo caminho: {1}"
+			"value" : "Asset [{0}] não renomeado quando tentando renomear em massa. Pode ser sido cancelado porque um nove nome já foi pego por um objeto no mesmo caminho. O nome nome pode conter caracteres especiais.\n Caminho original: {1}, Novo caminho: {2}"
 		},
 		{
 			"key" : "deleteFromFront",

@@ -118,6 +118,19 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public Diff this[int key]
+        {
+            get
+            {
+                return this.diffs[key];
+            }
+            
+            set
+            {
+                this.diffs[key] = value;
+            }
+        }
+
         /// <summary>
         /// Clear the RenameResult.
         /// </summary>

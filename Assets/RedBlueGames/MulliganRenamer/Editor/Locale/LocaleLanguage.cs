@@ -26,6 +26,10 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections.Generic;
     using UnityEngine;
 
+    /// <summary>
+    /// Class responsible for holding all the translated elements
+    /// you can get a translated content by its key calling Get method
+    /// </summary>
 	[System.Serializable]
 	public class LocaleLanguage
 	{
