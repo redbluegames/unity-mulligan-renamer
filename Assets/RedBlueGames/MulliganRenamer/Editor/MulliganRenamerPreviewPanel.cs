@@ -38,8 +38,9 @@ namespace RedBlueGames.MulliganRenamer
     {
         const string BigUpArrowUnicode = "\u25B2";
         const string BigDownArrowUnicode = "\u25BC";
-        private const float PreviewPanelFirstColumnMinSize = 50.0f;
+        private const float MinColumnWidth = 200f;
         private const float PreviewRowHeight = 18.0f;
+        private const float DividerWidth = 3f;
 
         /// <summary>
         /// Event fired when the AddSelectedObjects button is clicked
@@ -151,29 +152,48 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             deleteButtonRect.x += RowButtonsSize;
-            GUI.enabled = !info.FirstElement;
+            var upEnabled = !info.FirstElement;
+            GUI.enabled = upEnabled;
             if (GUI.Button(deleteButtonRect, BigUpArrowUnicode, deleteButtonStyle))
             {
                 result = PreviewRowResult.MoveUp;
             }
 
+            if (!upEnabled)
+            {
+                GUI.enabled = true;
+                if (GUI.Button(deleteButtonRect, "", GUIStyle.none))
+                {
+                    EditorGUIUtility.PingObject(info.Object);
+                }
+            }
+
             deleteButtonRect.x += RowButtonsSize;
-            GUI.enabled = !info.LastElement;
+            var downEnabled = !info.LastElement;
+            GUI.enabled = downEnabled;
             if (GUI.Button(deleteButtonRect, BigDownArrowUnicode, deleteButtonStyle))
             {
                 result = PreviewRowResult.MoveDown;
             }
             GUI.enabled = true;
 
+            if (!downEnabled)
+            {
+                if (GUI.Button(deleteButtonRect, "", GUIStyle.none))
+                {
+                    EditorGUIUtility.PingObject(info.Object);
+                }
+            }
+
             var widthOffset = RowButtonsSize + InitialXOffset;
             var warningRect = new Rect(deleteButtonRect);
-            if(info.WarningIcon != null)
+            if (info.WarningIcon != null)
             {
                 warningRect.y = rowRect.y;
                 warningRect.x += deleteButtonRect.width;
                 warningRect.width = RowButtonsSize;
                 warningRect.height = RowButtonsSize;
-            
+
                 var content = new GUIContent(info.WarningIcon, info.WarningMessage);
                 GUI.Box(warningRect, content, style.IconStyle);
 
@@ -195,9 +215,9 @@ namespace RedBlueGames.MulliganRenamer
                 ApplyBackgroundColorToWhitespaces(firstColumnRect, style.FirstColumnStyle, info.NameBeforeStep);
                 EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
             }
-            
+
             var secondColumnRect = new Rect(firstColumnRect);
-            secondColumnRect.x += firstColumnRect.width;
+            secondColumnRect.x += firstColumnRect.width + DividerWidth * 2;
             secondColumnRect.width = style.SecondColumnWidth;
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
@@ -205,7 +225,7 @@ namespace RedBlueGames.MulliganRenamer
                 ApplyBackgroundColorToWhitespaces(secondColumnRect, style.SecondColumnStyle, info.NameAtStep);
                 EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
             }
-            
+
             var thirdColumnRect = new Rect(secondColumnRect);
             thirdColumnRect.x += secondColumnRect.width;
             thirdColumnRect.width = rowRect.width;
@@ -217,9 +237,21 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
-            if (GUI.Button(rowRect, "", GUIStyle.none))
+            var rects = new Rect[]
             {
-                EditorGUIUtility.PingObject(info.Object);
+                firstColumnRect,
+                secondColumnRect,
+                thirdColumnRect
+            };
+            foreach (var rect in rects)
+            {
+                var fixedRect = new Rect(rect);
+                fixedRect.x += DividerWidth;
+                fixedRect.width -= DividerWidth * 3;
+                if (GUI.Button(fixedRect, "", GUIStyle.none))
+                {
+                    EditorGUIUtility.PingObject(info.Object);
+                }
             }
 
             return result;
@@ -230,13 +262,13 @@ namespace RedBlueGames.MulliganRenamer
             if (content == null || !content.Contains("<color=#"))
                 return;
 
-            var htmlColor = content.Split(new [] {"<color="}, StringSplitOptions.None)[1].Split('>')[0];
+            var htmlColor = content.Split(new[] { "<color=" }, StringSplitOptions.None)[1].Split('>')[0];
             Color color;
             ColorUtility.TryParseHtmlString(htmlColor, out color);
 
             const float X_OFFSET = 2f;
             var texture = new Texture2D(2, 2);
-            texture.SetPixels(new [] { color, color, color, color });
+            texture.SetPixels(new[] { color, color, color, color });
             var position = rect.position;
 
             var whitespaceSize = style.CalcSize(new GUIContent(""));
@@ -249,7 +281,11 @@ namespace RedBlueGames.MulliganRenamer
                 position.x += splitTextSize.x;
                 if (i < (splitContent.Length - 1))
                 {
-                    GUI.DrawTexture(new Rect(position.x - X_OFFSET, position.y, whitespaceSize.x, whitespaceSize.y), texture, ScaleMode.StretchToFill);
+                    var textureRect = new Rect(position.x - X_OFFSET, position.y, whitespaceSize.x, whitespaceSize.y);
+                    if (textureRect.x + textureRect.width < rect.x + rect.width)
+                    {
+                        GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
+                    }
                 }
             }
         }
@@ -692,29 +728,42 @@ namespace RedBlueGames.MulliganRenamer
             var firstDividerRect = new Rect(
                 -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
                 0.0f,
-                2.0f,
+                DividerWidth,
                 dividerHeight - 1.0f);
 
-            if (DrawDividerAndCheckResize(firstDividerRect))
+            var doubleClickedInDivider = false;
+            if (DrawDividerAndCheckResize(firstDividerRect, out doubleClickedInDivider))
                 resizeFirstDivider = true;
 
-            if (resizeFirstDivider)
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth,Event.current.mousePosition.x - contentsLayout.IconSize);
+            if (doubleClickedInDivider)
+            {
+                ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, int.MaxValue);
+                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, int.MinValue);
+                blockDivisorClick = true;
+            }
+            else if (resizeFirstDivider && !blockDivisorClick)
+                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, Event.current.mousePosition.x - contentsLayout.IconSize);
 
             if (shouldShowThirdColumn)
             {
                 var secondDividerRect = new Rect(firstDividerRect);
                 secondDividerRect.x += contentsLayout.SecondColumnWidth;
 
-                if (DrawDividerAndCheckResize(secondDividerRect))
+                if (DrawDividerAndCheckResize(secondDividerRect, out doubleClickedInDivider))
                     resizeSecondDivider = true;
 
-                if (resizeSecondDivider)
+                if (doubleClickedInDivider)
+                {
+                    ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, int.MinValue);
+                    blockDivisorClick = true;
+                }
+                else if (resizeSecondDivider && !blockDivisorClick)
                     ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.IconSize);
             }
 
             if (Event.current.rawType == EventType.MouseUp)
             {
+                blockDivisorClick = false;
                 resizeFirstDivider = false;
                 resizeSecondDivider = false;
             }
@@ -728,12 +777,16 @@ namespace RedBlueGames.MulliganRenamer
             Repaint.Invoke();
         }
 
+        private bool blockDivisorClick;
         private bool resizeFirstDivider;
         private bool resizeSecondDivider;
-        private bool DrawDividerAndCheckResize(Rect rect)
+        private bool DrawDividerAndCheckResize(Rect rect, out bool doubleClicked)
         {
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            rect.width += DividerWidth;
             EditorGUIUtility.AddCursorRect(rect, MouseCursor.ResizeHorizontal);
+            doubleClicked = Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition) && Event.current.clickCount == 2;
+
             return Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition);
         }
 
@@ -831,8 +884,6 @@ namespace RedBlueGames.MulliganRenamer
 
         private class PreviewPanelContentsLayout
         {
-            private const float MinColumnWidth = 100f;
-
             public float IconSize
             {
                 get
@@ -862,78 +913,90 @@ namespace RedBlueGames.MulliganRenamer
 
             public PreviewPanelContentsLayout(Rect scrollRect, PreviewPanelContents previewContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
-                this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
-                this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
-                this.ThirdColumnWidth = shouldShowThirdColumn ? Mathf.Max(previewContents.LongestFinalNameWidth, 80.0f) : 0.0f;
-                
                 var rect = new Rect(scrollRect);
                 rect.height = PreviewRowHeight * previewContents.TotalNumRows;
                 this.Rect = rect;
+
+                this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
+                this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
+                this.ThirdColumnWidth = shouldShowThirdColumn ? (this.Rect.width - (this.FirstColumnWidth + this.SecondColumnWidth)) : 0.0f;
             }
 
             public void UpdateContentsLayout(Rect scrollRect, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
                 this.Rect = new Rect(scrollRect);
 
-                ToggleSecondColumn(shouldShowSecondColumn);
-                ToggleThirdColumn(shouldShowThirdColumn);
+                SetSecondColumn(shouldShowSecondColumn);
+                SetThirdColumn(shouldShowThirdColumn);
             }
 
-            private void ToggleSecondColumn(bool active)
+            private void SetSecondColumn(bool active)
             {
                 if (active == IsShowingSecondColumn)
                     return;
 
                 if (!active)
                 {
-                    FirstColumnWidth = Rect.width;
-                    SecondColumnWidth = 0f;
-                    ThirdColumnWidth = 0f;
+                    this.FirstColumnWidth = Rect.width;
+                    this.SecondColumnWidth = 0f;
+                    this.ThirdColumnWidth = 0f;
                 }
                 else
                 {
                     var remainingSize = Rect.width - FirstColumnWidth;
-                    SecondColumnWidth = remainingSize;
+                    this.SecondColumnWidth = remainingSize;
                 }
             }
 
-            private void ToggleThirdColumn(bool active)
+            private void SetThirdColumn(bool active)
             {
                 if (active == IsShowingThirdColumn)
                     return;
 
                 if (!active)
                 {
-                    SecondColumnWidth = Rect.width - FirstColumnWidth;
-                    ThirdColumnWidth = 0;
+                    this.SecondColumnWidth = Rect.width - FirstColumnWidth;
+                    this.ThirdColumnWidth = 0;
                 }
                 else
                 {
                     var dividedSize = (Rect.width - FirstColumnWidth) / 2f;
-                    SecondColumnWidth = dividedSize;
-                    ThirdColumnWidth = dividedSize;
+                    this.SecondColumnWidth = dividedSize;
+                    this.ThirdColumnWidth = dividedSize;
                 }
             }
 
             public void ChangeFirstColumnWidth(float width)
             {
-                var maxWidth = Rect.width - ThirdColumnWidth - MinColumnWidth - IconSize; 
-                FirstColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
-                SecondColumnWidth = Rect.width - (FirstColumnWidth + ThirdColumnWidth);
+                var maxWidth = Rect.width - (MinColumnWidth * 2);
+                this.FirstColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
+                this.SecondColumnWidth = Rect.width - (this.FirstColumnWidth + this.ThirdColumnWidth);
+
+                if (this.SecondColumnWidth < MinColumnWidth)
+                {
+                    this.SecondColumnWidth = MinColumnWidth;
+                    this.ThirdColumnWidth = Rect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
+                }
             }
 
             public void ChangeSecondColumnWidth(float width)
             {
-                var maxWidth = Rect.width - MinColumnWidth - FirstColumnWidth - IconSize;
-                SecondColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
-                ThirdColumnWidth = Rect.width - (FirstColumnWidth + SecondColumnWidth);
+                var maxWidth = Mathf.Max(Rect.width - MinColumnWidth - this.FirstColumnWidth - IconSize, MinColumnWidth);
+                this.SecondColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
+                this.ThirdColumnWidth = Rect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
+
+                if (width < MinColumnWidth)
+                {
+                    var diff = MinColumnWidth - width;
+                    this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - diff, MinColumnWidth);
+                    this.SecondColumnWidth = MinColumnWidth;
+                    this.ThirdColumnWidth = Rect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
+                }
             }
         }
 
         private class PreviewPanelContents
         {
-            private const float MinColumnWidth = 150.0f;
-
             public float LongestOriginalNameWidth { get; private set; }
 
             public float LongestNewNameWidth { get; private set; }
