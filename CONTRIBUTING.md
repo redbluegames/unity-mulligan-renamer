@@ -30,6 +30,8 @@ Frequent Contributors:
 2. If the issue is in a Project, move it to To Do.
 3. When complete, submit a Pull Request into the development branch. A repository admin will move it to Done when it's approved and merged into the developoment branch.
 
+Issues are "Closed" only once they are merged into master and released.
+
 If you'd like to be added to the Frequent Contributors team here: https://github.com/orgs/redbluegames/teams/frequent-collaborators
 
 ### Branching Strategy / Pull Requests ###
