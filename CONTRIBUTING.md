@@ -17,3 +17,19 @@ This way you can reference the issue in your commits.
 1. All contributions should be licensed to match the base repository and include the standard boilerplate.
 1. Please use [well-formed git commit messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
 1. Submit a [pull request](https://help.github.com/articles/creating-a-pull-request) for your change.
+
+### Issue Management ###
+When starting work on an issue, follow these steps:
+1. Assign the issue to yourself so others will know it's claimed
+2. If the issue is in a Project, move the issue to To Do
+3. When complete, Submit a pull request into the development branch. A repository admin will move it to Done when it's approved and merged into the developoment branch.
+
+### Branching Strategy / Pull Requests ###
+
+There are two branches to know about:
+* master
+* develop-v1.X
+
+Master should reflect live code, which is pushed to the Releases and also Unity Asset store. The develop branch is where we  stage changes before merging them into master and creating a release. Pull requests should be made into the develop branch.
+
+Current Development branch: https://github.com/redbluegames/unity-mulligan-renamer/tree/develop-1.7.0
