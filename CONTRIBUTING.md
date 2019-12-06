@@ -20,9 +20,17 @@ This way you can reference the issue in your commits.
 
 ### Issue Management ###
 When starting work on an issue, follow these steps:
-1. Assign the issue to yourself so others will know it's claimed
-2. If the issue is in a Project, move the issue to To Do
-3. When complete, Submit a pull request into the development branch. A repository admin will move it to Done when it's approved and merged into the developoment branch.
+
+New Contributors:
+1. Claim the issue: Comment on the issue that you are investigating it, so others will know it's claimed.
+2. When complete, submit a Pull Request into the development branch.
+
+Frequent Contributors:
+1. Assign the issue to yourself.
+2. If the issue is in a Project, move it to To Do.
+3. When complete, submit a Pull Request into the development branch. A repository admin will move it to Done when it's approved and merged into the developoment branch.
+
+If you'd like to be added to the Frequent Contributors team here: https://github.com/orgs/redbluegames/teams/frequent-collaborators
 
 ### Branching Strategy / Pull Requests ###
 
