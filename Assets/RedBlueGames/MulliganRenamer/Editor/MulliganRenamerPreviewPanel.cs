@@ -732,7 +732,7 @@ namespace RedBlueGames.MulliganRenamer
                 dividerHeight - 1.0f);
 
             var doubleClickedInDivider = false;
-            if (DrawDividerAndCheckResize(firstDividerRect, out doubleClickedInDivider))
+            if (DrawDividerAndCheckResize(firstDividerRect, resizeFirstDivider, out doubleClickedInDivider))
                 resizeFirstDivider = true;
 
             if (doubleClickedInDivider)
@@ -749,7 +749,7 @@ namespace RedBlueGames.MulliganRenamer
                 var secondDividerRect = new Rect(firstDividerRect);
                 secondDividerRect.x += contentsLayout.SecondColumnWidth;
 
-                if (DrawDividerAndCheckResize(secondDividerRect, out doubleClickedInDivider))
+                if (DrawDividerAndCheckResize(secondDividerRect, resizeSecondDivider, out doubleClickedInDivider))
                     resizeSecondDivider = true;
 
                 if (doubleClickedInDivider)
@@ -780,10 +780,16 @@ namespace RedBlueGames.MulliganRenamer
         private bool blockDivisorClick;
         private bool resizeFirstDivider;
         private bool resizeSecondDivider;
-        private bool DrawDividerAndCheckResize(Rect rect, out bool doubleClicked)
+        private bool DrawDividerAndCheckResize(Rect rect, bool alreadyDragging, out bool doubleClicked)
         {
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
             rect.width += DividerWidth;
+            if (alreadyDragging)
+            {
+                rect.width += 2000;
+                rect.x -= rect.width / 2f;
+            }
+
             EditorGUIUtility.AddCursorRect(rect, MouseCursor.ResizeHorizontal);
             doubleClicked = Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition) && Event.current.clickCount == 2;
 
