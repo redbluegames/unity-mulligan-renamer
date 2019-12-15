@@ -262,7 +262,11 @@ namespace RedBlueGames.MulliganRenamer
             if (content == null || !content.Contains("<color=#"))
                 return;
 
-            var htmlColor = content.Split(new[] { "<color=" }, StringSplitOptions.None)[1].Split('>')[0];
+            var splitColor = content.Split(new[] { "<color=" }, StringSplitOptions.None)[1].Split('>');
+            if (!splitColor[1].Split('<')[0].Equals(" "))
+                return;
+
+            var htmlColor = splitColor[0];
             Color color;
             ColorUtility.TryParseHtmlString(htmlColor, out color);
 
