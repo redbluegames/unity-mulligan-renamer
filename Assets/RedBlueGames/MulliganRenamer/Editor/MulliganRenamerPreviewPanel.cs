@@ -256,29 +256,103 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
         {
-            var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, rect.position, style);
+            if (string.IsNullOrEmpty(content))
+            {
+                return;
+            }
+
+            var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, style);
             var texture = new Texture2D(2, 2);
 
-            const float X_OFFSET = 2f;
-            var incrementalXOffset = 0f;
+            const float X_OFFSET = -2.0f;
 
+            var position = rect;
+            var allTextSoFar = string.Empty;
             foreach (var coloredText in coloredTexts)
             {
-                if (!coloredText.HasColor)
-                    continue;
-
-                foreach (var position in coloredText.Positions)
+                var totalRect = style.CalcSize(new GUIContent(allTextSoFar));
+                if (coloredText.HasColor)
                 {
-                    var textureRect = new Rect(position.x - X_OFFSET - incrementalXOffset, position.y, position.width, position.height);
-                    if (textureRect.x + textureRect.width < rect.x + rect.width)
+                    var blockRect = new Rect(position.x + totalRect.x, position.y, 0, totalRect.y);
+                    var spaceBlocks = GetConsecutiveBlocksOfToken(coloredText.Text, ' ');
+                    foreach (var block in spaceBlocks)
                     {
-                        texture.SetPixels(new[] { coloredText.Color, coloredText.Color, coloredText.Color, coloredText.Color });
-                        GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
-                    }
+                        var blockSize = style.CalcSize(new GUIContent(block));
+                        if (block.Contains(" "))
+                        {
+                            // Apparently Unity doesn't give us a good answer for measuring whitespace
+                            // so we overwrite it with our own
+                            blockSize.x = block.Length > 1 ? 3.0f * block.Length : 1.5f;
 
-                    incrementalXOffset += 0.5f;
+                            blockRect.width = blockSize.x;
+                            var textureRect = new Rect(
+                                blockRect.x + X_OFFSET,
+                                blockRect.y,
+                                blockRect.width - X_OFFSET,
+                                blockRect.height);
+                            texture.SetPixels(new[] { coloredText.Color, coloredText.Color, coloredText.Color, coloredText.Color });
+                            GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
+                        }
+
+                        blockRect.x += blockSize.x;
+                    }
+                }
+
+                allTextSoFar += coloredText.Text;
+            }
+        }
+
+        private static List<string> GetConsecutiveBlocksOfToken(string str, char token)
+        {
+            var spaceBlocks = new List<string>();
+            var characterStreak = new System.Text.StringBuilder();
+            var isTokenBlock = false;
+            if (str.Length > 0)
+            {
+                characterStreak.Append(str[0]);
+                isTokenBlock = str[0] == token;
+            }
+
+            for (int i = 1; i < str.Length; ++i)
+            {
+                if (isTokenBlock)
+                {
+                    if (str[i] == token)
+                    {
+                        characterStreak.Append(str[i]);
+                    }
+                    else
+                    {
+                        spaceBlocks.Add(characterStreak.ToString());
+                        characterStreak = new System.Text.StringBuilder();
+                        characterStreak.Append(str[i]);
+
+                        isTokenBlock = false;
+                    }
+                }
+                else
+                {
+                    if (str[i] == token)
+                    {
+                        spaceBlocks.Add(characterStreak.ToString());
+                        characterStreak = new System.Text.StringBuilder();
+                        characterStreak.Append(str[i]);
+
+                        isTokenBlock = true;
+                    }
+                    else
+                    {
+                        characterStreak.Append(str[i]);
+                    }
                 }
             }
+
+            if (characterStreak.Length > 0)
+            {
+                spaceBlocks.Add(characterStreak.ToString());
+            }
+
+            return spaceBlocks;
         }
 
         private void InitializeGUIContents()
@@ -1145,24 +1219,33 @@ namespace RedBlueGames.MulliganRenamer
         private class ColoredWhiteSpaceText
         {
             public Color Color { get; private set; }
-            public bool HasColor { get; private set; }
-            public string Text { get; private set; }
-            public List<Rect> Positions { get; private set; }
 
-            public ColoredWhiteSpaceText(string text, Color color, bool hasColor, List<Rect> positions)
+            public string Text { get; private set; }
+
+            public bool HasColor
+            {
+                get
+                {
+                    return this.Color != Color.clear;
+                }
+            }
+
+            public ColoredWhiteSpaceText(string text)
+            {
+                this.Text = text;
+                this.Color = Color.clear;
+            }
+
+            public ColoredWhiteSpaceText(string text, Color color)
             {
                 this.Text = text;
                 this.Color = color;
-                this.Positions = positions;
-                this.HasColor = hasColor;
             }
 
-            public static List<ColoredWhiteSpaceText> GetColoredTextsFromString(string text, Vector2 position, GUIStyle style)
+            public static List<ColoredWhiteSpaceText> GetColoredTextsFromString(string text, GUIStyle style)
             {
                 var result = new List<ColoredWhiteSpaceText>();
                 var textSplitResult = text.Split(new[] { "<color=" }, StringSplitOptions.None);
-                var initialSpace = true;
-                var emptySpaceSize = style.CalcSize(new GUIContent(""));
 
                 foreach (var r in textSplitResult)
                 {
@@ -1171,8 +1254,8 @@ namespace RedBlueGames.MulliganRenamer
 
                     if (!r.Contains(">"))
                     {
-                        initialSpace = false;
-                        result.Add(GetTextWithColor(r, "", ref position, style));
+                        var coloredText = new ColoredWhiteSpaceText(r);
+                        result.Add(coloredText);
                     }
                     else
                     {
@@ -1180,57 +1263,20 @@ namespace RedBlueGames.MulliganRenamer
                         var htmlColor = elements[0];
                         var realText = elements[1].Split('<')[0];
 
-                        initialSpace = initialSpace && realText[0].Equals(' ');
-                        if (initialSpace)
-                            position.x += emptySpaceSize.x;
-
-                        result.Add(GetTextWithColor(realText, htmlColor, ref position, style));
+                        Color color = Color.clear;
+                        ColorUtility.TryParseHtmlString(htmlColor, out color);
+                        var coloredText = new ColoredWhiteSpaceText(realText, color);
+                        result.Add(coloredText);
 
                         if (elements.Length > 2 && !string.IsNullOrEmpty(elements[2]))
                         {
-                            initialSpace = false;
-                            var rest = elements[2];
-                            result.Add(GetTextWithColor(rest, "", ref position, style));
+                            var remainder = new ColoredWhiteSpaceText(elements[2]);
+                            result.Add(remainder);
                         }
                     }
                 }
 
                 return result;
-            }
-
-            private static ColoredWhiteSpaceText GetTextWithColor(string text, string htmlColor, ref Vector2 position, GUIStyle style)
-            {
-                var emptySpaceSize = style.CalcSize(new GUIContent(""));
-                var currentText = "";
-                var colorPositions = new List<Rect>();
-
-                for (int i = 0; i < text.Length; i++)
-                {
-                    var c = text[i];
-                    if (c.Equals(' '))
-                    {
-                        if (!string.IsNullOrEmpty(currentText))
-                            position.x += style.CalcSize(new GUIContent(currentText)).x;
-
-                        colorPositions.Add(new Rect(position.x, position.y, emptySpaceSize.x, emptySpaceSize.y));
-                        currentText = "";
-
-                        if (i != text.Length - 1)
-                            position.x += emptySpaceSize.x;
-                    }
-                    else
-                    {
-                        currentText += c;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(currentText))
-                    position.x += style.CalcSize(new GUIContent(currentText)).x;
-
-                Color color;
-                var hasColor = ColorUtility.TryParseHtmlString(htmlColor, out color) && colorPositions.Count > 0;
-
-                return new ColoredWhiteSpaceText(text, color, hasColor, colorPositions);
             }
         }
 
