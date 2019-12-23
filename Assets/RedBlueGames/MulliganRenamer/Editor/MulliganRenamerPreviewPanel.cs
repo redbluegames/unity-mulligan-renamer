@@ -21,12 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
-
 namespace RedBlueGames.MulliganRenamer
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
@@ -259,33 +256,27 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
         {
-            if (content == null || !content.Contains("<color=#"))
-                return;
-
-            var htmlColor = content.Split(new[] { "<color=" }, StringSplitOptions.None)[1].Split('>')[0];
-            Color color;
-            ColorUtility.TryParseHtmlString(htmlColor, out color);
+            var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, rect.position, style);
+            var texture = new Texture2D(2, 2);
 
             const float X_OFFSET = 2f;
-            var texture = new Texture2D(2, 2);
-            texture.SetPixels(new[] { color, color, color, color });
-            var position = rect.position;
+            var incrementalXOffset = 0f;
 
-            var whitespaceSize = style.CalcSize(new GUIContent(""));
-
-            content = StringUtilities.StripHTML(content);
-            var splitContent = content.Split(' ');
-            for (var i = 0; i < splitContent.Length; i++)
+            foreach (var coloredText in coloredTexts)
             {
-                var splitTextSize = style.CalcSize(new GUIContent(splitContent[i]));
-                position.x += splitTextSize.x;
-                if (i < (splitContent.Length - 1))
+                if (!coloredText.HasColor)
+                    continue;
+
+                foreach (var position in coloredText.Positions)
                 {
-                    var textureRect = new Rect(position.x - X_OFFSET, position.y, whitespaceSize.x, whitespaceSize.y);
+                    var textureRect = new Rect(position.x - X_OFFSET - incrementalXOffset, position.y, position.width, position.height);
                     if (textureRect.x + textureRect.width < rect.x + rect.width)
                     {
+                        texture.SetPixels(new[] { coloredText.Color, coloredText.Color, coloredText.Color, coloredText.Color });
                         GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
                     }
+
+                    incrementalXOffset += 0.5f;
                 }
             }
         }
@@ -1148,6 +1139,98 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     return string.Empty;
                 }
+            }
+        }
+
+        private class ColoredWhiteSpaceText
+        {
+            public Color Color { get; private set; }
+            public bool HasColor { get; private set; }
+            public string Text { get; private set; }
+            public List<Rect> Positions { get; private set; }
+
+            public ColoredWhiteSpaceText(string text, Color color, bool hasColor, List<Rect> positions)
+            {
+                this.Text = text;
+                this.Color = color;
+                this.Positions = positions;
+                this.HasColor = hasColor;
+            }
+
+            public static List<ColoredWhiteSpaceText> GetColoredTextsFromString(string text, Vector2 position, GUIStyle style)
+            {
+                var result = new List<ColoredWhiteSpaceText>();
+                var textSplitResult = text.Split(new[] { "<color=" }, StringSplitOptions.None);
+                var initialSpace = true;
+                var emptySpaceSize = style.CalcSize(new GUIContent(""));
+
+                foreach (var r in textSplitResult)
+                {
+                    if (string.IsNullOrEmpty(r))
+                        continue;
+
+                    if (!r.Contains(">"))
+                    {
+                        initialSpace = false;
+                        result.Add(GetTextWithColor(r, "", ref position, style));
+                    }
+                    else
+                    {
+                        var elements = r.Split('>');
+                        var htmlColor = elements[0];
+                        var realText = elements[1].Split('<')[0];
+
+                        initialSpace = initialSpace && realText[0].Equals(' ');
+                        if (initialSpace)
+                            position.x += emptySpaceSize.x;
+
+                        result.Add(GetTextWithColor(realText, htmlColor, ref position, style));
+
+                        if (elements.Length > 2 && !string.IsNullOrEmpty(elements[2]))
+                        {
+                            initialSpace = false;
+                            var rest = elements[2];
+                            result.Add(GetTextWithColor(rest, "", ref position, style));
+                        }
+                    }
+                }
+
+                return result;
+            }
+
+            private static ColoredWhiteSpaceText GetTextWithColor(string text, string htmlColor, ref Vector2 position, GUIStyle style)
+            {
+                var emptySpaceSize = style.CalcSize(new GUIContent(""));
+                var currentText = "";
+                var colorPositions = new List<Rect>();
+
+                for (int i = 0; i < text.Length; i++)
+                {
+                    var c = text[i];
+                    if (c.Equals(' '))
+                    {
+                        if (!string.IsNullOrEmpty(currentText))
+                            position.x += style.CalcSize(new GUIContent(currentText)).x;
+
+                        colorPositions.Add(new Rect(position.x, position.y, emptySpaceSize.x, emptySpaceSize.y));
+                        currentText = "";
+
+                        if (i != text.Length - 1)
+                            position.x += emptySpaceSize.x;
+                    }
+                    else
+                    {
+                        currentText += c;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(currentText))
+                    position.x += style.CalcSize(new GUIContent(currentText)).x;
+
+                Color color;
+                var hasColor = ColorUtility.TryParseHtmlString(htmlColor, out color) && colorPositions.Count > 0;
+
+                return new ColoredWhiteSpaceText(text, color, hasColor, colorPositions);
             }
         }
 
