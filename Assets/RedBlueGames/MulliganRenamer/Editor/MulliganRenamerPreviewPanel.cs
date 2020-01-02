@@ -262,7 +262,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, style);
-            var texture = new Texture2D(2, 2);
 
             // Blocks don't need padding or margin because it's accounted for
             // when we measure the total. We only want to know the size of each content block .
@@ -292,8 +291,11 @@ namespace RedBlueGames.MulliganRenamer
                             blockRect.height);
                         var textColorTransparent = coloredText.Color;
                         textColorTransparent.a = 0.2f;
-                        texture.SetPixels(new[] { textColorTransparent, textColorTransparent, textColorTransparent, textColorTransparent });
-                        GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
+
+                        var oldColor = GUI.color;
+                        GUI.color = textColorTransparent;
+                        GUI.DrawTexture(textureRect, Texture2D.whiteTexture);
+                        GUI.color = oldColor;
 
                         blockRect.x += blockSize.x;
                     }
