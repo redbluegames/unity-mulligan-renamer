@@ -264,35 +264,36 @@ namespace RedBlueGames.MulliganRenamer
             var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, style);
             var texture = new Texture2D(2, 2);
 
-            const float X_OFFSET = -2.0f;
+            // Blocks don't need padding or margin because it's accounted for
+            // when we measure the total. We only want to know the size of each content block .
+            var blockStyle = new GUIStyle(style);
+            blockStyle.margin = new RectOffset();
+            blockStyle.padding = new RectOffset();
 
             var position = rect;
             var allTextSoFar = string.Empty;
             foreach (var coloredText in coloredTexts)
             {
                 var totalRect = style.CalcSize(new GUIContent(allTextSoFar));
+
                 if (coloredText.HasColor)
                 {
-                    var blockRect = new Rect(position.x + totalRect.x, position.y, 0, totalRect.y);
+                    var blockRect = new Rect(position.x + totalRect.x - style.padding.left, position.y, 0, totalRect.y);
                     var spaceBlocks = GetConsecutiveBlocksOfToken(coloredText.Text, ' ');
                     foreach (var block in spaceBlocks)
                     {
-                        var blockSize = style.CalcSize(new GUIContent(block));
-                        if (block.Contains(" "))
-                        {
-                            // Apparently Unity doesn't give us a good answer for measuring whitespace
-                            // so we overwrite it with our own
-                            blockSize.x = block.Length > 1 ? 3.0f * block.Length : 1.5f;
+                        var blockSize = blockStyle.CalcSize(new GUIContent(block));
 
-                            blockRect.width = blockSize.x;
-                            var textureRect = new Rect(
-                                blockRect.x + X_OFFSET,
-                                blockRect.y,
-                                blockRect.width - X_OFFSET,
-                                blockRect.height);
-                            texture.SetPixels(new[] { coloredText.Color, coloredText.Color, coloredText.Color, coloredText.Color });
-                            GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
-                        }
+                        blockRect.width = blockSize.x;
+                        var textureRect = new Rect(
+                            blockRect.x,
+                            blockRect.y,
+                            blockRect.width,
+                            blockRect.height);
+                        var textColorTransparent = coloredText.Color;
+                        textColorTransparent.a = 0.2f;
+                        texture.SetPixels(new[] { textColorTransparent, textColorTransparent, textColorTransparent, textColorTransparent });
+                        GUI.DrawTexture(textureRect, texture, ScaleMode.StretchToFill);
 
                         blockRect.x += blockSize.x;
                     }
