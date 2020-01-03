@@ -493,6 +493,9 @@ namespace RedBlueGames.MulliganRenamer
                         previewContents,
                         shouldShowSecondColumn,
                         shouldShowThirdColumn);
+
+                    // Width for Buttons could be calculated from shared value with a bit of code cleanup.
+                    previewLayout.WidthForButtons = 48.0f;
                 }
                 else
                 {
@@ -794,7 +797,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var firstDividerRect = new Rect(
-                -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.IconSize,
+                -newScrollPosition.x + contentsLayout.FirstColumnWidth + contentsLayout.WidthForButtons,
                 0.0f,
                 DividerWidth,
                 dividerHeight - 1.0f);
@@ -810,7 +813,7 @@ namespace RedBlueGames.MulliganRenamer
                 blockDivisorClick = true;
             }
             else if (resizeFirstDivider && !blockDivisorClick)
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, Event.current.mousePosition.x - contentsLayout.IconSize);
+                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, Event.current.mousePosition.x - contentsLayout.WidthForButtons);
 
             if (shouldShowThirdColumn)
             {
@@ -826,7 +829,7 @@ namespace RedBlueGames.MulliganRenamer
                     blockDivisorClick = true;
                 }
                 else if (resizeSecondDivider && !blockDivisorClick)
-                    ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.IconSize);
+                    ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons);
             }
 
             if (Event.current.rawType == EventType.MouseUp)
@@ -958,14 +961,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private class PreviewPanelContentsLayout
         {
-            public float IconSize
-            {
-                get
-                {
-                    // For now we just use a flat 48 icon size.
-                    return 48.0f;
-                }
-            }
+            public float WidthForButtons { get; set; }
 
             public Rect ContentsRect { get; private set; }
 
@@ -992,13 +988,6 @@ namespace RedBlueGames.MulliganRenamer
 
             public void UpdateContentsLayout(Rect scrollRect, PreviewPanelContents previewContents, bool initialize, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
-                var rect = new Rect(scrollRect);
-
-                // Stretch the height of the scroll contents to extend past the containing scroll rect (so that it scrolls if it needs to),
-                // or be within it if it doesn't (so that it won't scroll)
-                rect.height = PreviewRowHeight * previewContents.TotalNumRows;
-                this.ContentsRect = rect;
-
                 if (initialize)
                 {
                     this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
@@ -1009,37 +998,40 @@ namespace RedBlueGames.MulliganRenamer
                     this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
                 }
 
-                if (this.IsShowingThirdColumn != shouldShowThirdColumn || initialize)
-                {
-                    this.ThirdColumnWidth = shouldShowThirdColumn ? (scrollRect.width - (this.FirstColumnWidth + this.SecondColumnWidth)) : 0.0f;
-                }
+                this.ThirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
+
+                var rect = new Rect(scrollRect);
+
+                // Stretch the height of the scroll contents to extend past the containing scroll rect (so that it scrolls if it needs to),
+                // or be within it if it doesn't (so that it won't scroll)
+                rect.height = PreviewRowHeight * previewContents.TotalNumRows;
+                rect.width = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth + this.WidthForButtons;
+                this.ContentsRect = rect;
             }
 
             public void ChangeFirstColumnWidth(float width)
             {
-                var maxWidth = ContentsRect.width - (MinColumnWidth * 2);
-                this.FirstColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
-                this.SecondColumnWidth = ContentsRect.width - (this.FirstColumnWidth + this.ThirdColumnWidth);
+                var delta = this.FirstColumnWidth;
+                this.FirstColumnWidth = Mathf.Max(width, MinColumnWidth);
+                delta -= this.FirstColumnWidth;
+
+                this.SecondColumnWidth += delta;
 
                 if (this.SecondColumnWidth < MinColumnWidth)
                 {
                     this.SecondColumnWidth = MinColumnWidth;
-                    this.ThirdColumnWidth = ContentsRect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
                 }
             }
 
             public void ChangeSecondColumnWidth(float width)
             {
-                var maxWidth = Mathf.Max(ContentsRect.width - MinColumnWidth - this.FirstColumnWidth - IconSize, MinColumnWidth);
-                this.SecondColumnWidth = Mathf.Clamp(width, MinColumnWidth, maxWidth);
-                this.ThirdColumnWidth = ContentsRect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
+                this.SecondColumnWidth = Mathf.Max(width, MinColumnWidth);
 
                 if (width < MinColumnWidth)
                 {
-                    var diff = MinColumnWidth - width;
-                    this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - diff, MinColumnWidth);
+                    var desiredShrinkWidth = MinColumnWidth - width;
+                    this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - desiredShrinkWidth, MinColumnWidth);
                     this.SecondColumnWidth = MinColumnWidth;
-                    this.ThirdColumnWidth = ContentsRect.width - (this.FirstColumnWidth + this.SecondColumnWidth);
                 }
             }
         }
