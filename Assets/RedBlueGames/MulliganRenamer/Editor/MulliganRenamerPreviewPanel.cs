@@ -77,6 +77,10 @@ namespace RedBlueGames.MulliganRenamer
         private GUIContents guiContents;
         private GUIStyles guiStyles;
 
+        private PreviewPanelContentsLayout contentsLayout;
+
+        private bool drewEmptyLastFrame;
+
         /// <summary>
         /// Gets or sets a value indicating whether this /// <see cref="T:RedBlueGames.MulliganRenamer.MulliganRenamerPreviewPanel"/>
         /// should disable its AddSelectedObjects button.
@@ -113,12 +117,15 @@ namespace RedBlueGames.MulliganRenamer
             MoveDown
         }
 
-        private PreviewPanelContentsLayout previewLayout;
-
         public MulliganRenamerPreviewPanel()
         {
             this.InitializeGUIStyles();
             this.InitializeGUIContents();
+
+            this.contentsLayout = new PreviewPanelContentsLayout();
+
+            // Width for Buttons could be calculated from shared value with a bit of code cleanup.
+            this.contentsLayout.WidthForButtons = 48.0f;
 
             LocaleManager.Instance.OnLanguageChanged.AddListener(this.InitializeGUIContents);
         }
@@ -465,6 +472,7 @@ namespace RedBlueGames.MulliganRenamer
             if (preview.NumObjects == 0)
             {
                 this.DrawPreviewPanelContentsEmpty(scrollViewRect);
+                this.drewEmptyLastFrame = true;
             }
             else
             {
@@ -472,6 +480,8 @@ namespace RedBlueGames.MulliganRenamer
 
                 // Show the one that doesn't quite fit by subtracting one
                 var firstItemIndex = Mathf.Max(Mathf.FloorToInt(previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
+
+                firstItemIndex = Mathf.Min(firstItemIndex, preview.NumObjects - 1);
 
                 // Add one for the one that's off screen above, and one for the one below. I think?
                 var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 2;
@@ -486,25 +496,18 @@ namespace RedBlueGames.MulliganRenamer
 
                 bool shouldShowSecondColumn = this.ColumnsToShow != ColumnStyle.OriginalAndFinalOnly;
                 bool shouldShowThirdColumn = this.ColumnsToShow != ColumnStyle.StepwiseHideFinal;
-                if (previewLayout == null)
-                {
-                    previewLayout = new PreviewPanelContentsLayout(
-                        scrollLayout.ScrollRect,
-                        previewContents,
-                        shouldShowSecondColumn,
-                        shouldShowThirdColumn);
 
-                    // Width for Buttons could be calculated from shared value with a bit of code cleanup.
-                    previewLayout.WidthForButtons = 48.0f;
-                }
-                else
-                {
-                    previewLayout.UpdateContentsLayout(scrollLayout.ScrollRect, previewContents, false, shouldShowSecondColumn, shouldShowThirdColumn);
-                }
+                var forceFitContents = this.drewEmptyLastFrame;
+                this.contentsLayout.ResizeForContents(
+                    scrollLayout.ScrollRect,
+                    previewContents,
+                    forceFitContents,
+                    shouldShowSecondColumn,
+                    shouldShowThirdColumn);
 
                 newScrollPosition = this.DrawPreviewPanelContentsWithItems(
                     scrollLayout,
-                    previewLayout,
+                    contentsLayout,
                     previewPanelScrollPosition,
                     previewContents,
                     this.PreviewStepIndexToShow,
@@ -530,7 +533,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.DrawAddSelectedObjectsButton(addSelectedObjectsButtonRect);
 
-                if (!scrollLayout.ContentsFitWithoutAnyScrolling(previewLayout))
+                if (!scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
                 {
                     var hintRect = new Rect(scrollViewRect);
                     hintRect.height = EditorGUIUtility.singleLineHeight * 2.0f;
@@ -538,6 +541,8 @@ namespace RedBlueGames.MulliganRenamer
                     hintRect.width = scrollViewRect.width - addSelectedObjectsButtonRect.width - removeAllButtonRect.width - buttonSpacing;
                     EditorGUI.LabelField(hintRect, this.guiContents.DropPromptHint, this.guiStyles.DropPromptHint);
                 }
+
+                this.drewEmptyLastFrame = false;
             }
 
             var draggedObjects = this.GetDraggedObjectsOverRect(scrollViewRect);
@@ -961,44 +966,70 @@ namespace RedBlueGames.MulliganRenamer
 
         private class PreviewPanelContentsLayout
         {
+            private float secondColumnWidth;
+
+            private float thirdColumnWidth;
+
             public float WidthForButtons { get; set; }
 
             public Rect ContentsRect { get; private set; }
 
             public float FirstColumnWidth { get; private set; }
 
-            public float SecondColumnWidth { get; private set; }
-
-            public float ThirdColumnWidth { get; private set; }
-
-            private bool IsShowingSecondColumn
+            public float SecondColumnWidth
             {
-                get { return SecondColumnWidth > 0f; }
+                get
+                {
+                    if (!this.IsShowingSecondColumn)
+                    {
+                        return 0;
+                    }
+
+                    return this.secondColumnWidth;
+                }
             }
 
-            private bool IsShowingThirdColumn
+            public float ThirdColumnWidth
             {
-                get { return ThirdColumnWidth > 0f; }
+                get
+                {
+                    if (!this.IsShowingThirdColumn)
+                    {
+                        return 0;
+                    }
+
+                    return this.thirdColumnWidth;
+                }
             }
 
-            public PreviewPanelContentsLayout(Rect scrollRect, PreviewPanelContents previewContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
-            {
-                this.UpdateContentsLayout(scrollRect, previewContents, true, shouldShowSecondColumn, shouldShowThirdColumn);
-            }
+            private bool IsShowingSecondColumn { get; set; }
 
-            public void UpdateContentsLayout(Rect scrollRect, PreviewPanelContents previewContents, bool initialize, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
+            private bool IsShowingThirdColumn { get; set; }
+
+            public void ResizeForContents(Rect scrollRect, PreviewPanelContents previewContents, bool forceResizeToFitContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
-                if (initialize)
+                if (forceResizeToFitContents)
                 {
                     this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
                 }
 
-                if (this.IsShowingSecondColumn != shouldShowSecondColumn || initialize)
+                if (!shouldShowThirdColumn || forceResizeToFitContents)
                 {
-                    this.SecondColumnWidth = shouldShowSecondColumn ? previewContents.LongestNewNameWidth : 0.0f;
+                    this.secondColumnWidth = previewContents.LongestNewNameWidth;
+                }
+                else
+                {
+                    // Leave second column alone since its size is being managed by the user
                 }
 
-                this.ThirdColumnWidth = shouldShowThirdColumn ? previewContents.LongestFinalNameWidth : 0.0f;
+                this.IsShowingSecondColumn = shouldShowSecondColumn;
+
+                if (shouldShowThirdColumn)
+                {
+                    this.thirdColumnWidth = previewContents.LongestFinalNameWidth;
+                }
+
+                this.IsShowingThirdColumn = shouldShowThirdColumn;
 
                 var rect = new Rect(scrollRect);
 
@@ -1015,23 +1046,23 @@ namespace RedBlueGames.MulliganRenamer
                 this.FirstColumnWidth = Mathf.Max(width, MinColumnWidth);
                 delta -= this.FirstColumnWidth;
 
-                this.SecondColumnWidth += delta;
+                this.secondColumnWidth += delta;
 
                 if (this.SecondColumnWidth < MinColumnWidth)
                 {
-                    this.SecondColumnWidth = MinColumnWidth;
+                    this.secondColumnWidth = MinColumnWidth;
                 }
             }
 
             public void ChangeSecondColumnWidth(float width)
             {
-                this.SecondColumnWidth = Mathf.Max(width, MinColumnWidth);
+                this.secondColumnWidth = Mathf.Max(width, MinColumnWidth);
 
                 if (width < MinColumnWidth)
                 {
                     var desiredShrinkWidth = MinColumnWidth - width;
                     this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - desiredShrinkWidth, MinColumnWidth);
-                    this.SecondColumnWidth = MinColumnWidth;
+                    this.secondColumnWidth = MinColumnWidth;
                 }
             }
         }
