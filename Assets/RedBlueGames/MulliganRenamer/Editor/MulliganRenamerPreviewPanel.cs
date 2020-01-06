@@ -809,7 +809,9 @@ namespace RedBlueGames.MulliganRenamer
 
             var doubleClickedInDivider = false;
             if (DrawDividerAndCheckResize(firstDividerRect, resizeFirstDivider, out doubleClickedInDivider))
+            {
                 resizeFirstDivider = true;
+            }
 
             if (doubleClickedInDivider)
             {
@@ -818,7 +820,9 @@ namespace RedBlueGames.MulliganRenamer
                 blockDivisorClick = true;
             }
             else if (resizeFirstDivider && !blockDivisorClick)
+            {
                 ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, Event.current.mousePosition.x - contentsLayout.WidthForButtons);
+            }
 
             if (shouldShowThirdColumn)
             {
@@ -826,7 +830,9 @@ namespace RedBlueGames.MulliganRenamer
                 secondDividerRect.x += contentsLayout.SecondColumnWidth;
 
                 if (DrawDividerAndCheckResize(secondDividerRect, resizeSecondDivider, out doubleClickedInDivider))
+                {
                     resizeSecondDivider = true;
+                }
 
                 if (doubleClickedInDivider)
                 {
@@ -834,7 +840,9 @@ namespace RedBlueGames.MulliganRenamer
                     blockDivisorClick = true;
                 }
                 else if (resizeSecondDivider && !blockDivisorClick)
+                {
                     ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons);
+                }
             }
 
             if (Event.current.rawType == EventType.MouseUp)
