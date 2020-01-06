@@ -230,8 +230,8 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
-            secondColumnRect.x += firstColumnRect.width + DividerWidth * 2;
-            secondColumnRect.width = style.SecondColumnWidth;
+            secondColumnRect.x += firstColumnRect.width + DividerWidth;
+            secondColumnRect.width = style.SecondColumnWidth - DividerWidth;
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
@@ -240,7 +240,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var thirdColumnRect = new Rect(secondColumnRect);
-            thirdColumnRect.x += secondColumnRect.width;
+            thirdColumnRect.x += secondColumnRect.width + DividerWidth;
             thirdColumnRect.width = rowRect.width;
             thirdColumnRect.height = rowRect.height;
 
@@ -249,7 +249,7 @@ namespace RedBlueGames.MulliganRenamer
                 ApplyBackgroundColorToWhitespaces(thirdColumnRect, style.ThirdColumnStyle, info.FinalName);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
-            
+
             if (GUI.Button(iconRect, "", GUIStyle.none))
             {
                 EditorGUIUtility.PingObject(info.Object);
@@ -292,7 +292,7 @@ namespace RedBlueGames.MulliganRenamer
                         var textureWidth = ((blockRect.x + blockRect.width) < (rect.x + rect.width))
                             ? blockRect.width
                             : Mathf.Max(0f, (rect.x + rect.width) - (blockRect.x));
-                        
+
                         var textureRect = new Rect(
                             blockRect.x,
                             blockRect.y,
