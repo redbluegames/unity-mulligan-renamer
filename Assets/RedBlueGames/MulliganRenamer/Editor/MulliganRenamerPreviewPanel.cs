@@ -35,7 +35,7 @@ namespace RedBlueGames.MulliganRenamer
     {
         const string BigUpArrowUnicode = "\u25B2";
         const string BigDownArrowUnicode = "\u25BC";
-        private const float MinColumnWidth = 200f;
+        private const float MinColumnWidth = 125f;
         private const float PreviewRowHeight = 18.0f;
         private const float DividerWidth = 3f;
 
@@ -78,6 +78,12 @@ namespace RedBlueGames.MulliganRenamer
         private GUIStyles guiStyles;
 
         private PreviewPanelContentsLayout contentsLayout;
+
+        private bool blockDivisorClick;
+
+        private bool isResizingFirstDivider;
+
+        private bool isResizingSecondDivider;
 
         private bool drewEmptyLastFrame;
 
@@ -807,10 +813,14 @@ namespace RedBlueGames.MulliganRenamer
                 DividerWidth,
                 dividerHeight - 1.0f);
 
+            // Reset minimum width - we only want it enforced while resizing columns, so that 
+            // it doesn't affect scroll position when downsizing columns.
+            contentsLayout.MinimumContentWidth = 0;
+
             var doubleClickedInDivider = false;
-            if (DrawDividerAndCheckResize(firstDividerRect, resizeFirstDivider, out doubleClickedInDivider))
+            if (DrawDividerAndCheckResize(firstDividerRect, this.isResizingFirstDivider, out doubleClickedInDivider))
             {
-                resizeFirstDivider = true;
+                this.isResizingFirstDivider = true;
             }
 
             if (doubleClickedInDivider)
@@ -819,9 +829,12 @@ namespace RedBlueGames.MulliganRenamer
                 ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, int.MinValue);
                 blockDivisorClick = true;
             }
-            else if (resizeFirstDivider && !blockDivisorClick)
+            else if (this.isResizingFirstDivider && !blockDivisorClick)
             {
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, Event.current.mousePosition.x - contentsLayout.WidthForButtons);
+                contentsLayout.MinimumContentWidth = contentsLayout.ContentsRect.width;
+
+                var newWidth = (Event.current.mousePosition.x - contentsLayout.WidthForButtons) + newScrollPosition.x;
+                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, newWidth);
             }
 
             if (shouldShowThirdColumn)
@@ -829,9 +842,9 @@ namespace RedBlueGames.MulliganRenamer
                 var secondDividerRect = new Rect(firstDividerRect);
                 secondDividerRect.x += contentsLayout.SecondColumnWidth;
 
-                if (DrawDividerAndCheckResize(secondDividerRect, resizeSecondDivider, out doubleClickedInDivider))
+                if (DrawDividerAndCheckResize(secondDividerRect, this.isResizingSecondDivider, out doubleClickedInDivider))
                 {
-                    resizeSecondDivider = true;
+                    this.isResizingSecondDivider = true;
                 }
 
                 if (doubleClickedInDivider)
@@ -839,17 +852,19 @@ namespace RedBlueGames.MulliganRenamer
                     ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, int.MinValue);
                     blockDivisorClick = true;
                 }
-                else if (resizeSecondDivider && !blockDivisorClick)
+                else if (this.isResizingSecondDivider && !blockDivisorClick)
                 {
+                    contentsLayout.MinimumContentWidth = contentsLayout.ContentsRect.width;
+
                     // When the second column is hidden, the second divider separates the 1st and 3rd columns, so resize first column
                     if (contentsLayout.IsShowingSecondColumn)
                     {
-                        var newWidth = Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons;
+                        var newWidth = Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons + newScrollPosition.x;
                         ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, newWidth);
                     }
                     else
                     {
-                        var newWidth = Event.current.mousePosition.x - contentsLayout.WidthForButtons;
+                        var newWidth = Event.current.mousePosition.x - contentsLayout.WidthForButtons + newScrollPosition.x;
                         ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, newWidth);
                     }
                 }
@@ -858,8 +873,8 @@ namespace RedBlueGames.MulliganRenamer
             if (Event.current.rawType == EventType.MouseUp)
             {
                 blockDivisorClick = false;
-                resizeFirstDivider = false;
-                resizeSecondDivider = false;
+                this.isResizingFirstDivider = false;
+                this.isResizingSecondDivider = false;
             }
 
             GUI.color = oldColor;
@@ -871,9 +886,6 @@ namespace RedBlueGames.MulliganRenamer
             Repaint.Invoke();
         }
 
-        private bool blockDivisorClick;
-        private bool resizeFirstDivider;
-        private bool resizeSecondDivider;
         private bool DrawDividerAndCheckResize(Rect rect, bool alreadyDragging, out bool doubleClicked)
         {
             GUI.DrawTexture(rect, Texture2D.whiteTexture);
@@ -994,6 +1006,8 @@ namespace RedBlueGames.MulliganRenamer
 
             public float FirstColumnWidth { get; private set; }
 
+            public float MinimumContentWidth { get; set; }
+
             public float SecondColumnWidth
             {
                 get
@@ -1042,6 +1056,8 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.IsShowingSecondColumn = shouldShowSecondColumn;
 
+                // We always size the last column (whether it's the second or third) to fit contents, so that the window 
+                // gets a scrollbar. Otherwise they have to expand the window to see the contents.
                 if (shouldShowThirdColumn)
                 {
                     this.thirdColumnWidth = previewContents.LongestFinalNameWidth;
@@ -1054,20 +1070,31 @@ namespace RedBlueGames.MulliganRenamer
                 // Stretch the height of the scroll contents to extend past the containing scroll rect (so that it scrolls if it needs to),
                 // or be within it if it doesn't (so that it won't scroll)
                 rect.height = PreviewRowHeight * previewContents.TotalNumRows;
-                rect.width = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth + this.WidthForButtons;
+
+                var contentWidth = this.FirstColumnWidth + this.SecondColumnWidth + this.ThirdColumnWidth + this.WidthForButtons;
+
+                if (forceResizeToFitContents)
+                {
+                    this.MinimumContentWidth = contentWidth;
+                }
+
+                var clampedWidth = Mathf.Max(contentWidth, this.MinimumContentWidth);
+                rect.width = clampedWidth;
+
+
                 this.ContentsRect = rect;
             }
 
             public void ChangeFirstColumnWidth(float width)
             {
-                var delta = this.FirstColumnWidth;
+                var startingWidth = this.FirstColumnWidth;
                 this.FirstColumnWidth = Mathf.Max(width, MinColumnWidth);
-                delta -= this.FirstColumnWidth;
+                var delta = this.FirstColumnWidth - startingWidth;
 
                 // When we resize the first column and the second column is hidden, we can't push its width cause it's hidden.
                 if (this.IsShowingSecondColumn)
                 {
-                    this.secondColumnWidth += delta;
+                    this.secondColumnWidth -= delta;
 
                     if (this.SecondColumnWidth < MinColumnWidth)
                     {
