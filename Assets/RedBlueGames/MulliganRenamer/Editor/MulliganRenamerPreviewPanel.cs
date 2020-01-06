@@ -37,7 +37,9 @@ namespace RedBlueGames.MulliganRenamer
         const string BigDownArrowUnicode = "\u25BC";
         private const float MinColumnWidth = 125f;
         private const float PreviewRowHeight = 18.0f;
-        private const float DividerWidth = 3f;
+        private const float DividerWidth = 2f;
+
+        private const float DividerHotSpotPadding = 3f;
 
         /// <summary>
         /// Event fired when the AddSelectedObjects button is clicked
@@ -896,10 +898,15 @@ namespace RedBlueGames.MulliganRenamer
                 rect.x -= rect.width / 2f;
             }
 
-            EditorGUIUtility.AddCursorRect(rect, MouseCursor.ResizeHorizontal);
-            doubleClicked = Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition) && Event.current.clickCount == 2;
+            // Expand hot spot so that it's easier to click than how it looks (line is too fat if we don't have a hot spot)
+            var hotSpot = new Rect(rect);
+            hotSpot.width += DividerHotSpotPadding * 2;
+            hotSpot.x -= DividerHotSpotPadding;
+            EditorGUIUtility.AddCursorRect(hotSpot, MouseCursor.ResizeHorizontal);
 
-            return Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition);
+            doubleClicked = Event.current.type == EventType.MouseDown && hotSpot.Contains(Event.current.mousePosition) && Event.current.clickCount == 2;
+
+            return Event.current.type == EventType.MouseDown && hotSpot.Contains(Event.current.mousePosition);
         }
 
         private void DrawAddSelectedObjectsButton(Rect buttonRect)
