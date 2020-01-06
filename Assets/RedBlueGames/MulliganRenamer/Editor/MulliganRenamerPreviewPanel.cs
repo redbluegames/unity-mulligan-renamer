@@ -841,7 +841,17 @@ namespace RedBlueGames.MulliganRenamer
                 }
                 else if (resizeSecondDivider && !blockDivisorClick)
                 {
-                    ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons);
+                    // When the second column is hidden, the second divider separates the 1st and 3rd columns, so resize first column
+                    if (contentsLayout.IsShowingSecondColumn)
+                    {
+                        var newWidth = Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons;
+                        ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, newWidth);
+                    }
+                    else
+                    {
+                        var newWidth = Event.current.mousePosition.x - contentsLayout.WidthForButtons;
+                        ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, newWidth);
+                    }
                 }
             }
 
@@ -1010,7 +1020,7 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            private bool IsShowingSecondColumn { get; set; }
+            public bool IsShowingSecondColumn { get; private set; }
 
             private bool IsShowingThirdColumn { get; set; }
 
@@ -1054,11 +1064,15 @@ namespace RedBlueGames.MulliganRenamer
                 this.FirstColumnWidth = Mathf.Max(width, MinColumnWidth);
                 delta -= this.FirstColumnWidth;
 
-                this.secondColumnWidth += delta;
-
-                if (this.SecondColumnWidth < MinColumnWidth)
+                // When we resize the first column and the second column is hidden, we can't push its width cause it's hidden.
+                if (this.IsShowingSecondColumn)
                 {
-                    this.secondColumnWidth = MinColumnWidth;
+                    this.secondColumnWidth += delta;
+
+                    if (this.SecondColumnWidth < MinColumnWidth)
+                    {
+                        this.secondColumnWidth = MinColumnWidth;
+                    }
                 }
             }
 
