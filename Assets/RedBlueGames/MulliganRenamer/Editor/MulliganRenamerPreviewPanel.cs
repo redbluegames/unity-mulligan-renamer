@@ -236,22 +236,10 @@ namespace RedBlueGames.MulliganRenamer
                 ApplyBackgroundColorToWhitespaces(thirdColumnRect, style.ThirdColumnStyle, info.FinalName);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
-
-            var rects = new Rect[]
+            
+            if (GUI.Button(iconRect, "", GUIStyle.none))
             {
-                firstColumnRect,
-                secondColumnRect,
-                thirdColumnRect
-            };
-            foreach (var rect in rects)
-            {
-                var fixedRect = new Rect(rect);
-                fixedRect.x += DividerWidth;
-                fixedRect.width -= DividerWidth * 3;
-                if (GUI.Button(fixedRect, "", GUIStyle.none))
-                {
-                    EditorGUIUtility.PingObject(info.Object);
-                }
+                EditorGUIUtility.PingObject(info.Object);
             }
 
             return result;
