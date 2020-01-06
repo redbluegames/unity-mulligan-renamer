@@ -134,6 +134,7 @@ namespace RedBlueGames.MulliganRenamer
 
             // Width for Buttons could be calculated from shared value with a bit of code cleanup.
             this.contentsLayout.WidthForButtons = 48.0f;
+            this.contentsLayout.MinimumColumnWidth = MinColumnWidth;
 
             LocaleManager.Instance.OnLanguageChanged.AddListener(this.InitializeGUIContents);
         }
@@ -827,8 +828,8 @@ namespace RedBlueGames.MulliganRenamer
 
             if (doubleClickedInDivider)
             {
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, int.MaxValue);
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, int.MinValue);
+                contentsLayout.ChangeSecondColumnWidth(int.MaxValue);
+                this.ResizeFirstColumnAndRepaint(contentsLayout, int.MinValue);
                 blockDivisorClick = true;
             }
             else if (this.isResizingFirstDivider && !blockDivisorClick)
@@ -836,7 +837,7 @@ namespace RedBlueGames.MulliganRenamer
                 contentsLayout.MinimumContentWidth = contentsLayout.ContentsRect.width;
 
                 var newWidth = (Event.current.mousePosition.x - contentsLayout.WidthForButtons) + newScrollPosition.x;
-                ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, newWidth);
+                this.ResizeFirstColumnAndRepaint(contentsLayout, newWidth);
             }
 
             if (shouldShowThirdColumn)
@@ -851,7 +852,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (doubleClickedInDivider)
                 {
-                    ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, int.MinValue);
+                    this.ResizeSecondColumnAndRepaint(contentsLayout, int.MinValue);
                     blockDivisorClick = true;
                 }
                 else if (this.isResizingSecondDivider && !blockDivisorClick)
@@ -862,12 +863,12 @@ namespace RedBlueGames.MulliganRenamer
                     if (contentsLayout.IsShowingSecondColumn)
                     {
                         var newWidth = Event.current.mousePosition.x - contentsLayout.FirstColumnWidth - contentsLayout.WidthForButtons + newScrollPosition.x;
-                        ChangeColumnSizeAndRepaint(contentsLayout.ChangeSecondColumnWidth, newWidth);
+                        this.ResizeSecondColumnAndRepaint(contentsLayout, newWidth);
                     }
                     else
                     {
                         var newWidth = Event.current.mousePosition.x - contentsLayout.WidthForButtons + newScrollPosition.x;
-                        ChangeColumnSizeAndRepaint(contentsLayout.ChangeFirstColumnWidth, newWidth);
+                        this.ResizeFirstColumnAndRepaint(contentsLayout, newWidth);
                     }
                 }
             }
@@ -882,9 +883,15 @@ namespace RedBlueGames.MulliganRenamer
             GUI.color = oldColor;
         }
 
-        private void ChangeColumnSizeAndRepaint(Action<float> method, float value)
+        private void ResizeFirstColumnAndRepaint(PreviewPanelContentsLayout contentsLayout, float newSize)
         {
-            method(value);
+            contentsLayout.ChangeFirstColumnWidth(newSize);
+            Repaint.Invoke();
+        }
+
+        private void ResizeSecondColumnAndRepaint(PreviewPanelContentsLayout contentsLayout, float newSize)
+        {
+            contentsLayout.ChangeSecondColumnWidth(newSize);
             Repaint.Invoke();
         }
 
@@ -1007,6 +1014,8 @@ namespace RedBlueGames.MulliganRenamer
 
             private float thirdColumnWidth;
 
+            public float MinimumColumnWidth { get; set; }
+
             public float WidthForButtons { get; set; }
 
             public Rect ContentsRect { get; private set; }
@@ -1049,12 +1058,12 @@ namespace RedBlueGames.MulliganRenamer
             {
                 if (forceResizeToFitContents)
                 {
-                    this.FirstColumnWidth = previewContents.LongestOriginalNameWidth;
+                    this.FirstColumnWidth = Mathf.Max(previewContents.LongestOriginalNameWidth, this.MinimumColumnWidth);
                 }
 
                 if (!shouldShowThirdColumn || forceResizeToFitContents)
                 {
-                    this.secondColumnWidth = previewContents.LongestNewNameWidth;
+                    this.secondColumnWidth = Mathf.Max(previewContents.LongestNewNameWidth, this.MinimumColumnWidth);
                 }
                 else
                 {
@@ -1067,7 +1076,7 @@ namespace RedBlueGames.MulliganRenamer
                 // gets a scrollbar. Otherwise they have to expand the window to see the contents.
                 if (shouldShowThirdColumn)
                 {
-                    this.thirdColumnWidth = previewContents.LongestFinalNameWidth;
+                    this.thirdColumnWidth = Mathf.Max(previewContents.LongestFinalNameWidth, this.MinimumColumnWidth);
                 }
 
                 this.IsShowingThirdColumn = shouldShowThirdColumn;
@@ -1095,7 +1104,7 @@ namespace RedBlueGames.MulliganRenamer
             public void ChangeFirstColumnWidth(float width)
             {
                 var startingWidth = this.FirstColumnWidth;
-                this.FirstColumnWidth = Mathf.Max(width, MinColumnWidth);
+                this.FirstColumnWidth = Mathf.Max(width, this.MinimumColumnWidth);
                 var delta = this.FirstColumnWidth - startingWidth;
 
                 // When we resize the first column and the second column is hidden, we can't push its width cause it's hidden.
@@ -1103,22 +1112,22 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     this.secondColumnWidth -= delta;
 
-                    if (this.SecondColumnWidth < MinColumnWidth)
+                    if (this.SecondColumnWidth < this.MinimumColumnWidth)
                     {
-                        this.secondColumnWidth = MinColumnWidth;
+                        this.secondColumnWidth = this.MinimumColumnWidth;
                     }
                 }
             }
 
             public void ChangeSecondColumnWidth(float width)
             {
-                this.secondColumnWidth = Mathf.Max(width, MinColumnWidth);
+                this.secondColumnWidth = Mathf.Max(width, MinimumColumnWidth);
 
-                if (width < MinColumnWidth)
+                if (width < MinimumColumnWidth)
                 {
-                    var desiredShrinkWidth = MinColumnWidth - width;
-                    this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - desiredShrinkWidth, MinColumnWidth);
-                    this.secondColumnWidth = MinColumnWidth;
+                    var desiredShrinkWidth = MinimumColumnWidth - width;
+                    this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - desiredShrinkWidth, MinimumColumnWidth);
+                    this.secondColumnWidth = MinimumColumnWidth;
                 }
             }
         }
