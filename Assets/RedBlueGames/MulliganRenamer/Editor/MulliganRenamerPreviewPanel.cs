@@ -295,16 +295,22 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var blockRect = new Rect(position.x + totalRect.x - style.padding.left, position.y, 0, totalRect.y);
                     var spaceBlocks = GetConsecutiveBlocksOfToken(coloredText.Text, ' ');
+
                     foreach (var block in spaceBlocks)
                     {
                         var blockSize = blockStyle.CalcSize(new GUIContent(block));
 
                         blockRect.width = blockSize.x;
+                        var textureWidth = ((blockRect.x + blockRect.width) < (rect.x + rect.width))
+                            ? blockRect.width
+                            : Mathf.Max(0f, (rect.x + rect.width) - (blockRect.x));
+                        
                         var textureRect = new Rect(
                             blockRect.x,
                             blockRect.y,
-                            blockRect.width,
+                            textureWidth,
                             blockRect.height);
+
                         var textColorTransparent = coloredText.Color;
                         textColorTransparent.a = 0.2f;
 
