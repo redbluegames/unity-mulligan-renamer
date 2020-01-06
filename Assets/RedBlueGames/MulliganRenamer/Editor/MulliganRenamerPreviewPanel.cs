@@ -66,7 +66,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public event System.Action<int, int> ChangeObjectOrder;
 
-        public event System.Action Repaint;
+        public event System.Action ColumnsResized;
 
         /// <summary>
         /// The validate object function, used to determine if objects should be
@@ -828,8 +828,8 @@ namespace RedBlueGames.MulliganRenamer
 
             if (doubleClickedInDivider)
             {
-                contentsLayout.ChangeSecondColumnWidth(int.MaxValue);
-                this.ResizeFirstColumnAndRepaint(contentsLayout, int.MinValue);
+                contentsLayout.ResizeFirstColumnToFitContent();
+                this.ColumnsResized.Invoke();
                 blockDivisorClick = true;
             }
             else if (this.isResizingFirstDivider && !blockDivisorClick)
@@ -852,7 +852,8 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (doubleClickedInDivider)
                 {
-                    this.ResizeSecondColumnAndRepaint(contentsLayout, int.MinValue);
+                    contentsLayout.ResizeSecondColumnToFitContent();
+                    this.ColumnsResized.Invoke();
                     blockDivisorClick = true;
                 }
                 else if (this.isResizingSecondDivider && !blockDivisorClick)
@@ -886,13 +887,13 @@ namespace RedBlueGames.MulliganRenamer
         private void ResizeFirstColumnAndRepaint(PreviewPanelContentsLayout contentsLayout, float newSize)
         {
             contentsLayout.ChangeFirstColumnWidth(newSize);
-            Repaint.Invoke();
+            this.ColumnsResized.Invoke();
         }
 
         private void ResizeSecondColumnAndRepaint(PreviewPanelContentsLayout contentsLayout, float newSize)
         {
             contentsLayout.ChangeSecondColumnWidth(newSize);
-            Repaint.Invoke();
+            this.ColumnsResized.Invoke();
         }
 
         private bool DrawDividerAndCheckResize(Rect rect, bool alreadyDragging, out bool doubleClicked)
@@ -1014,6 +1015,10 @@ namespace RedBlueGames.MulliganRenamer
 
             private float thirdColumnWidth;
 
+            private float firstColumnContentWidth;
+
+            private float secondColumnContentWidth;
+
             public float MinimumColumnWidth { get; set; }
 
             public float WidthForButtons { get; set; }
@@ -1056,6 +1061,10 @@ namespace RedBlueGames.MulliganRenamer
 
             public void ResizeForContents(Rect scrollRect, PreviewPanelContents previewContents, bool forceResizeToFitContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
+                // Store off First and Second column content width for divider double clicking
+                this.firstColumnContentWidth = previewContents.LongestOriginalNameWidth;
+                this.secondColumnContentWidth = previewContents.LongestNewNameWidth;
+
                 if (forceResizeToFitContents)
                 {
                     this.FirstColumnWidth = Mathf.Max(previewContents.LongestOriginalNameWidth, this.MinimumColumnWidth);
@@ -1129,6 +1138,16 @@ namespace RedBlueGames.MulliganRenamer
                     this.FirstColumnWidth = Mathf.Max(this.FirstColumnWidth - desiredShrinkWidth, MinimumColumnWidth);
                     this.secondColumnWidth = MinimumColumnWidth;
                 }
+            }
+
+            public void ResizeFirstColumnToFitContent()
+            {
+                this.ChangeFirstColumnWidth(this.firstColumnContentWidth);
+            }
+
+            public void ResizeSecondColumnToFitContent()
+            {
+                this.ChangeSecondColumnWidth(this.secondColumnContentWidth);
             }
         }
 

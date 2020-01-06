@@ -272,7 +272,7 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.AddSelectedObjectsClicked += this.HandleAddSelectedObjectsClicked;
             this.previewPanel.ObjectRemovedAtIndex += this.HandleObjectRemoved;
             this.previewPanel.ChangeObjectOrder += this.HandleChangeObjectOrder;
-            this.previewPanel.Repaint += this.Repaint;
+            this.previewPanel.ColumnsResized += this.Repaint;
         }
 
         private void HandleObjectsDroppedOverPreviewArea(UnityEngine.Object[] objects)
