@@ -150,6 +150,7 @@ namespace RedBlueGames.MulliganRenamer
 
             const float RowButtonsSize = 16f;
             const float InitialXOffset = 4f;
+            const float ColumnContentPadding = 2.0f;
 
             // Space gives us a bit of padding or else we're just too bunched up to the side
             var deleteButtonRect = new Rect(rowRect);
@@ -230,8 +231,8 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
-            secondColumnRect.x += firstColumnRect.width + DividerWidth;
-            secondColumnRect.width = style.SecondColumnWidth - DividerWidth;
+            secondColumnRect.x += firstColumnRect.width + DividerWidth + ColumnContentPadding;
+            secondColumnRect.width = style.SecondColumnWidth - DividerWidth - ColumnContentPadding;
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
@@ -240,7 +241,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var thirdColumnRect = new Rect(secondColumnRect);
-            thirdColumnRect.x += secondColumnRect.width + DividerWidth;
+            thirdColumnRect.x += secondColumnRect.width + DividerWidth + ColumnContentPadding;
             thirdColumnRect.width = rowRect.width;
             thirdColumnRect.height = rowRect.height;
 
