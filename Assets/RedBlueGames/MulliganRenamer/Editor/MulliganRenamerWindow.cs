@@ -52,6 +52,8 @@ namespace RedBlueGames.MulliganRenamer
         private SavePresetWindow activeSavePresetWindow;
         private ManagePresetsWindow activePresetManagementWindow;
 
+        private string lastFocusedGUIControl = string.Empty;
+
         private int NumPreviouslyRenamedObjects { get; set; }
 
         private BulkRenamer BulkRenamer { get; set; }
@@ -426,6 +428,9 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.height - toolbarRect.height - footerHeight);
             this.DrawOperationsPanel(operationPanelRect);
 
+            // Workaround for Issue #214 - pressing down on (but not releasing) breadcrumbs would unfocus text fields, 
+            // causing column modes to change. We always want *something* focused.
+            this.FocusPreviousControlIfNothingIsFocused();
             this.FocusForcedFocusControl();
 
             var previewPanelPadding = new RectOffset(1, 1, -1, 0);
@@ -436,7 +441,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.height - toolbarRect.height - footerHeight - previewPanelPadding.top - previewPanelPadding.bottom);
 
             this.DrawPreviewPanel(previewPanelRect, this.BulkRenamePreview);
-            
+
             var rectForReviewWidth = this.position.width * 0.98f;
             var rectForReviewPrompt = new Rect(
                 (this.position.width - rectForReviewWidth) * 0.5f,
@@ -813,6 +818,20 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     this.SaveUserPreferences();
                 }
+            }
+        }
+
+        private void FocusPreviousControlIfNothingIsFocused()
+        {
+            var focused = GUI.GetNameOfFocusedControl();
+            if (string.IsNullOrEmpty(focused) && !string.IsNullOrEmpty(this.lastFocusedGUIControl))
+            {
+                GUI.FocusControl(this.lastFocusedGUIControl);
+                EditorGUI.FocusTextInControl(this.lastFocusedGUIControl);
+            }
+            else
+            {
+                this.lastFocusedGUIControl = focused;
             }
         }
 
