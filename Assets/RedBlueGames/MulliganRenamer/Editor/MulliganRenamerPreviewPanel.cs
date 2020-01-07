@@ -1060,14 +1060,20 @@ namespace RedBlueGames.MulliganRenamer
                 this.firstColumnContentWidth = previewContents.LongestOriginalNameWidth;
                 this.secondColumnContentWidth = previewContents.LongestNewNameWidth;
 
+                const float maxStartingWidth = 400.0f;
+
                 if (forceResizeToFitContents)
                 {
-                    this.FirstColumnWidth = Mathf.Max(previewContents.LongestOriginalNameWidth, this.MinimumColumnWidth);
+                    // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
+                    var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestOriginalNameWidth + 5);
+                    this.FirstColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
                 }
 
                 if (!shouldShowThirdColumn || forceResizeToFitContents)
                 {
-                    this.secondColumnWidth = Mathf.Max(previewContents.LongestNewNameWidth, this.MinimumColumnWidth);
+                    // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
+                    var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestNewNameWidth + 5);
+                    this.secondColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
                 }
                 else
                 {
