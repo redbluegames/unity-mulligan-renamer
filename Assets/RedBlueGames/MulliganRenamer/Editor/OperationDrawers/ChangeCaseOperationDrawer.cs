@@ -107,6 +107,7 @@ namespace RedBlueGames.MulliganRenamer
             var firstCharToggleLabel = new GUIContent(
                 LocaleManager.Instance.GetTranslation("onlyFirstCharacter"),
                 LocaleManager.Instance.GetTranslation("changeOnlyTheFirstCharacterCase"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("firstCharOnly")));
             this.RenameOperation.ChangeFirstCharacterOnly = EditorGUI.Toggle(
                 firstCharOnlyRect,
                 firstCharToggleLabel,
