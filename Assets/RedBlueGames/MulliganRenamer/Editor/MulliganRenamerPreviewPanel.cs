@@ -1071,9 +1071,17 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (!shouldShowThirdColumn || forceResizeToFitContents)
                 {
-                    // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
-                    var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestNewNameWidth + 5);
-                    this.secondColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
+                    if (shouldShowThirdColumn)
+                    {
+                        // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
+                        var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestNewNameWidth + 5);
+                        this.secondColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
+                    }
+                    else
+                    {
+                        // When there's no third column, we should expand the second column to fill the window
+                        this.secondColumnWidth = Mathf.Max(this.secondColumnContentWidth, this.MinimumColumnWidth);
+                    }
                 }
                 else
                 {
