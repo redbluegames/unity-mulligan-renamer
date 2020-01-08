@@ -52,8 +52,6 @@ namespace RedBlueGames.MulliganRenamer
         private SavePresetWindow activeSavePresetWindow;
         private ManagePresetsWindow activePresetManagementWindow;
 
-        private string lastFocusedGUIControl = string.Empty;
-
         private int NumPreviouslyRenamedObjects { get; set; }
 
         private BulkRenamer BulkRenamer { get; set; }
@@ -428,11 +426,6 @@ namespace RedBlueGames.MulliganRenamer
                 this.position.height - toolbarRect.height - footerHeight);
             this.DrawOperationsPanel(operationPanelRect);
 
-            // Workaround for Issue #214 - pressing down on (but not releasing) breadcrumbs would unfocus text fields, 
-            // causing column modes to change. We always want *something* focused.
-            this.FocusPreviousControlIfNothingIsFocused();
-            this.FocusForcedFocusControl();
-
             var previewPanelPadding = new RectOffset(1, 1, -1, 0);
             var previewPanelRect = new Rect(
                 operationPanelRect.width + previewPanelPadding.left,
@@ -516,17 +509,7 @@ namespace RedBlueGames.MulliganRenamer
                 EditorGUIUtility.singleLineHeight);
             EditorGUI.LabelField(copyrightRect, this.guiContents.CopyrightLabel, this.guiStyles.CopyrightLabel);
 
-            // Issue #115 - Workaround to force focus to stay with whatever widget it was previously on...
-            var focusedControl = GUI.GetNameOfFocusedControl();
-            if (string.IsNullOrEmpty(focusedControl))
-            {
-                GUI.FocusControl(this.LastFocusedControlName);
-                EditorGUI.FocusTextInControl(this.LastFocusedControlName);
-            }
-            else
-            {
-                this.LastFocusedControlName = GUI.GetNameOfFocusedControl();
-            }
+            this.FocusForcedFocusControl();
         }
 
         private void DrawToolbar(Rect toolbarRect)
@@ -777,7 +760,7 @@ namespace RedBlueGames.MulliganRenamer
 
                     case RenameOperationSortingButtonEvent.Delete:
                         {
-                            var removingFocusedOperation = focusedOpBeforeButtonPresses == currentElement;
+                            var removingFocusedOperation = focusedOpBeforeButtonPresses == currentElement.Operation;
 
                             this.RenameOperationsToApplyWithBindings.RemoveAt(i);
                             saveOpsToPreferences = true;
@@ -818,20 +801,6 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     this.SaveUserPreferences();
                 }
-            }
-        }
-
-        private void FocusPreviousControlIfNothingIsFocused()
-        {
-            var focused = GUI.GetNameOfFocusedControl();
-            if (string.IsNullOrEmpty(focused) && !string.IsNullOrEmpty(this.lastFocusedGUIControl))
-            {
-                GUI.FocusControl(this.lastFocusedGUIControl);
-                EditorGUI.FocusTextInControl(this.lastFocusedGUIControl);
-            }
-            else
-            {
-                this.lastFocusedGUIControl = focused;
             }
         }
 
