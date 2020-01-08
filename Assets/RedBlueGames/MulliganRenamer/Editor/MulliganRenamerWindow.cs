@@ -153,11 +153,14 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [MenuItem(WindowMenuPath, false)]
-        private static void ShowWindow()
+        public static MulliganRenamerWindow ShowWindow()
         {
-            var bulkRenamerWindow = EditorWindow.GetWindow<MulliganRenamerWindow>(false, "Mulligan Renamer", true);
+            return EditorWindow.GetWindow<MulliganRenamerWindow>(false, "Mulligan Renamer", true);
+        }
 
-            // When they launch via right click, we immediately load the objects in.
+        public static void ShowWindowWithSelectedObjects()
+        {
+            var bulkRenamerWindow = ShowWindow();
             bulkRenamerWindow.LoadSelectedObjects();
         }
 
@@ -218,7 +221,6 @@ namespace RedBlueGames.MulliganRenamer
 
         private void OnEnable()
         {
-
             AssetPreview.SetPreviewTextureCacheSize(100);
             this.minSize = new Vector2(600.0f, 300.0f);
 

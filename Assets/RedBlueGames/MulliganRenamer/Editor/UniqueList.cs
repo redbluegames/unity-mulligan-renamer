@@ -181,7 +181,10 @@ namespace RedBlueGames.MulliganRenamer
         {
             foreach (var obj in collection)
             {
-                this.Add(obj);
+                if (!this.Contains(obj))
+                {
+                    this.Add(obj);
+                }
             }
         }
     }
