@@ -21,14 +21,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using UnityEditor;
-
-public static class MulliganRightClickItems
+namespace RedBlueGames.MulliganRenamer
 {
-    [MenuItem("GameObject/Rename in Bulk", false, 49)]
-    [MenuItem("Assets/Rename in Bulk")]
-    private static void OpenMulliganWindow()
+
+    using UnityEditor;
+
+    public static class MulliganRightClickItems
     {
-        RedBlueGames.MulliganRenamer.MulliganRenamerWindow.ShowWindowWithSelectedObjects();
+        [MenuItem("GameObject/Rename in Bulk", false, 49)]
+        [MenuItem("Assets/Rename in Bulk")]
+        private static void OpenMulliganWindow()
+        {
+            RedBlueGames.MulliganRenamer.MulliganRenamerWindow.ShowWindowWithSelectedObjects();
+        }
     }
 }
