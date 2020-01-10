@@ -226,8 +226,23 @@ namespace RedBlueGames.MulliganRenamer
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
-                ApplyBackgroundColorToWhitespaces(firstColumnRect, style.FirstColumnStyle, info.NameBeforeStep);
-                EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
+                var labelText = string.Empty;
+                if (info.IsPreviewingSteps)
+                {
+                    ApplyBackgroundColorToDiff(
+                        firstColumnRect,
+                        style.FirstColumnStyle,
+                        info.RenameResultBefore,
+                        DiffOperation.Deletion,
+                        style.FirstColumnDiffBackgroundColor);
+                    labelText = info.RenameResultBefore.GetOriginalColored(style.FirstColumnDiffTextColor);
+                }
+                else
+                {
+                    labelText = info.NameBeforeStep;
+                }
+
+                EditorGUI.LabelField(firstColumnRect, labelText, style.FirstColumnStyle);
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
@@ -236,8 +251,23 @@ namespace RedBlueGames.MulliganRenamer
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
-                ApplyBackgroundColorToWhitespaces(secondColumnRect, style.SecondColumnStyle, info.NameAtStep);
-                EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
+                var labelText = string.Empty;
+                if (info.IsPreviewingSteps)
+                {
+                    ApplyBackgroundColorToDiff(
+                        secondColumnRect,
+                        style.SecondColumnStyle,
+                        info.RenameResultAfter,
+                        DiffOperation.Insertion,
+                        style.SecondColumnDiffBackgroundColor);
+                    labelText = info.RenameResultAfter.GetResultColored(style.SecondColumnDiffTextColor);
+                }
+                else
+                {
+                    labelText = info.NameAtStep;
+                }
+
+                EditorGUI.LabelField(secondColumnRect, labelText, style.SecondColumnStyle);
             }
 
             var thirdColumnRect = new Rect(secondColumnRect);
@@ -247,7 +277,6 @@ namespace RedBlueGames.MulliganRenamer
 
             if (style.ThirdColumnWidth > 0)
             {
-                ApplyBackgroundColorToWhitespaces(thirdColumnRect, style.ThirdColumnStyle, info.FinalName);
                 EditorGUI.LabelField(thirdColumnRect, info.FinalName, style.ThirdColumnStyle);
             }
 
@@ -259,14 +288,17 @@ namespace RedBlueGames.MulliganRenamer
             return result;
         }
 
-        private static void ApplyBackgroundColorToWhitespaces(Rect rect, GUIStyle style, string content)
+        private static void ApplyBackgroundColorToDiff(
+            Rect rect,
+            GUIStyle style,
+            RenameResult renameContent,
+            DiffOperation operationToColor,
+            Color backgroundColor)
         {
-            if (string.IsNullOrEmpty(content))
+            if (string.IsNullOrEmpty(renameContent.Original))
             {
                 return;
             }
-
-            var coloredTexts = ColoredWhiteSpaceText.GetColoredTextsFromString(content, style);
 
             // Blocks don't need padding or margin because it's accounted for
             // when we measure the total. We only want to know the size of each content block .
@@ -276,14 +308,20 @@ namespace RedBlueGames.MulliganRenamer
 
             var position = rect;
             var allTextSoFar = string.Empty;
-            foreach (var coloredText in coloredTexts)
+            foreach (var diff in renameContent)
             {
-                var totalRect = style.CalcSize(new GUIContent(allTextSoFar));
-
-                if (coloredText.HasColor)
+                // We want to skip whatever diff we aren't rendering on this column
+                // (Column 1 shows deletions, Column 2 shows insertions)
+                if (diff.Operation != operationToColor && diff.Operation != DiffOperation.Equal)
                 {
+                    continue;
+                }
+
+                if (diff.Operation == operationToColor)
+                {
+                    var totalRect = style.CalcSize(new GUIContent(allTextSoFar));
                     var blockRect = new Rect(position.x + totalRect.x - style.padding.left, position.y, 0, totalRect.y);
-                    var spaceBlocks = GetConsecutiveBlocksOfToken(coloredText.Text, ' ');
+                    var spaceBlocks = GetConsecutiveBlocksOfToken(diff.Result, ' ');
 
                     foreach (var block in spaceBlocks)
                     {
@@ -300,8 +338,7 @@ namespace RedBlueGames.MulliganRenamer
                             textureWidth,
                             blockRect.height);
 
-                        var textColorTransparent = coloredText.Color;
-                        textColorTransparent.a = 0.2f;
+                        var textColorTransparent = backgroundColor;
 
                         var oldColor = GUI.color;
                         GUI.color = textColorTransparent;
@@ -312,7 +349,7 @@ namespace RedBlueGames.MulliganRenamer
                     }
                 }
 
-                allTextSoFar += coloredText.Text;
+                allTextSoFar += diff.Result;
             }
         }
 
@@ -482,21 +519,32 @@ namespace RedBlueGames.MulliganRenamer
             {
                 var scrollLayout = new PreviewPanelLayout(scrollViewRect);
 
-                // Show the one that doesn't quite fit by subtracting one
-                var firstItemIndex = Mathf.Max(Mathf.FloorToInt(previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
-
-                firstItemIndex = Mathf.Min(firstItemIndex, preview.NumObjects - 1);
-
                 // Add one for the one that's off screen above, and one for the one below. I think?
-                var numItems = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 2;
+                var numItemsVisibleInScrollRect = Mathf.CeilToInt(scrollLayout.ScrollRect.height / PreviewRowHeight) + 2;
+
+                var firstItemIndex = 0;
+
+                // If all the items will fit on screen, just use the 0th elemnt as the first in the list,
+                // or else we won't generate the correct models for each element
+                if (preview.NumObjects < numItemsVisibleInScrollRect)
+                {
+                    firstItemIndex = 0;
+                }
+                else
+                {
+                    // Show the one that doesn't quite fit by subtracting one
+                    firstItemIndex = Mathf.Max(Mathf.FloorToInt(previewPanelScrollPosition.y / PreviewRowHeight) - 1, 0);
+
+                    // If they supply a scroll position way below the bottom, clamp to the first element visible on the list
+                    // when scrolled to the bottom
+                    firstItemIndex = Mathf.Min(firstItemIndex, preview.NumObjects - numItemsVisibleInScrollRect);
+                }
 
                 var previewContents = PreviewPanelContents.CreatePreviewContentsForObjects(
                     preview,
                     firstItemIndex,
-                    numItems,
-                    this.PreviewStepIndexToShow,
-                    this.guiStyles.DeletionTextColor,
-                    this.guiStyles.InsertionTextColor);
+                    numItemsVisibleInScrollRect,
+                    this.PreviewStepIndexToShow);
 
                 bool shouldShowSecondColumn = this.ColumnsToShow != ColumnStyle.OriginalAndFinalOnly;
                 bool shouldShowThirdColumn = this.ColumnsToShow != ColumnStyle.StepwiseHideFinal;
@@ -509,14 +557,16 @@ namespace RedBlueGames.MulliganRenamer
                     shouldShowSecondColumn,
                     shouldShowThirdColumn);
 
+                var panelStyle = new PreviewPanelStyle();
+                panelStyle.InsertionColor = this.guiStyles.InsertionTextColor;
+                panelStyle.DeletionColor = this.guiStyles.DeletionTextColor;
+
                 newScrollPosition = this.DrawPreviewPanelContentsWithItems(
                     scrollLayout,
                     contentsLayout,
+                    panelStyle,
                     previewPanelScrollPosition,
-                    previewContents,
-                    this.PreviewStepIndexToShow,
-                    shouldShowSecondColumn,
-                    shouldShowThirdColumn);
+                    previewContents);
 
                 var buttonSpacing = 2.0f;
                 var rightPadding = 2.0f;
@@ -612,11 +662,9 @@ namespace RedBlueGames.MulliganRenamer
         private Vector2 DrawPreviewPanelContentsWithItems(
             PreviewPanelLayout scrollLayout,
             PreviewPanelContentsLayout contentsLayout,
+            PreviewPanelStyle panelStyle,
             Vector2 previewPanelScrollPosition,
-            PreviewPanelContents previewContents,
-            int renameStep,
-            bool shouldShowSecondColumn,
-            bool shouldShowThirdColumn)
+            PreviewPanelContents previewContents)
         {
             // WORKAROUND FOR 5.5.5: Somehow you could "scroll" the preview area, even
             // when there was nothing to scroll. Force it to not think it's scrolled because
@@ -626,7 +674,7 @@ namespace RedBlueGames.MulliganRenamer
                 previewPanelScrollPosition.x = 0;
             }
 
-            string originalNameColumnHeader = LocaleManager.Instance.GetTranslation(renameStep < 1 ? "original" : "before");
+            string originalNameColumnHeader = LocaleManager.Instance.GetTranslation(previewContents.RenameStepIndex < 1 ? "original" : "before");
             string newNameColumnHeader = LocaleManager.Instance.GetTranslation("after");
             this.DrawPreviewHeader(
                 scrollLayout.HeaderRect,
@@ -644,7 +692,7 @@ namespace RedBlueGames.MulliganRenamer
 
             var rowRect = new Rect(scrollLayout.ScrollRect);
             rowRect.width = Mathf.Max(contentsLayout.ContentsRect.width, scrollLayout.ScrollRect.width);
-            this.DrawPreviewRows(rowRect, previewContents, contentsLayout, shouldShowSecondColumn, shouldShowThirdColumn);
+            this.DrawPreviewRows(rowRect, previewContents, contentsLayout, panelStyle);
 
             // Add the hint into the scroll view if there's room
             if (scrollLayout.ContentsFitWithoutAnyScrolling(contentsLayout))
@@ -654,7 +702,7 @@ namespace RedBlueGames.MulliganRenamer
 
             GUI.EndScrollView();
 
-            this.DrawDividers(newScrollPosition, scrollLayout, contentsLayout, shouldShowThirdColumn);
+            this.DrawDividers(newScrollPosition, scrollLayout, contentsLayout);
 
             GUI.EndGroup();
 
@@ -716,7 +764,11 @@ namespace RedBlueGames.MulliganRenamer
             GUI.EndGroup();
         }
 
-        private void DrawPreviewRows(Rect previewRowsRect, PreviewPanelContents previewContents, PreviewPanelContentsLayout layout, bool showSecondColumn, bool showThirdColumn)
+        private void DrawPreviewRows(
+            Rect previewRowsRect,
+            PreviewPanelContents previewContents,
+            PreviewPanelContentsLayout layout,
+            PreviewPanelStyle panelStyle)
         {
             for (int i = 0; i < previewContents.NumVisibleRows; ++i)
             {
@@ -742,6 +794,11 @@ namespace RedBlueGames.MulliganRenamer
                 previewRowStyle.ThirdColumnWidth = layout.ThirdColumnWidth;
 
                 previewRowStyle.BackgroundColor = i % 2 == 0 ? this.guiStyles.PreviewRowBackgroundEven : this.guiStyles.PreviewRowBackgroundOdd;
+
+                previewRowStyle.FirstColumnDiffTextColor = panelStyle.DeletionColor;
+                previewRowStyle.FirstColumnDiffBackgroundColor = panelStyle.DeletionBackgroundColor;
+                previewRowStyle.SecondColumnDiffBackgroundColor = panelStyle.InsertionBackgroundColor;
+                previewRowStyle.SecondColumnDiffTextColor = panelStyle.InsertionColor;
 
                 var rowRect = new Rect(previewRowsRect);
                 rowRect.height = PreviewRowHeight;
@@ -777,8 +834,7 @@ namespace RedBlueGames.MulliganRenamer
         private void DrawDividers(
             Vector2 newScrollPosition,
             PreviewPanelLayout scrollLayout,
-            PreviewPanelContentsLayout contentsLayout,
-            bool shouldShowThirdColumn)
+            PreviewPanelContentsLayout contentsLayout)
         {
             // Put dividers in group so that they scroll (horizontally)
             var dividerGroup = new Rect(scrollLayout.ScrollRect);
@@ -835,7 +891,7 @@ namespace RedBlueGames.MulliganRenamer
                 this.ResizeFirstColumnAndRepaint(contentsLayout, newWidth);
             }
 
-            if (shouldShowThirdColumn)
+            if (contentsLayout.IsShowingThirdColumn)
             {
                 var secondDividerRect = new Rect(firstDividerRect);
                 secondDividerRect.x += contentsLayout.SecondColumnWidth;
@@ -1052,7 +1108,7 @@ namespace RedBlueGames.MulliganRenamer
 
             public bool IsShowingSecondColumn { get; private set; }
 
-            private bool IsShowingThirdColumn { get; set; }
+            public bool IsShowingThirdColumn { get; private set; }
 
             public void ResizeForContents(Rect scrollRect, PreviewPanelContents previewContents, bool forceResizeToFitContents, bool shouldShowSecondColumn, bool shouldShowThirdColumn)
             {
@@ -1160,6 +1216,40 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Aesthetic options for the entire preview panel itself
+        /// </summary>
+        private class PreviewPanelStyle
+        {
+            public Color DeletionColor { get; set; }
+            public Color InsertionColor { get; set; }
+            public Color DeletionBackgroundColor
+            {
+                get
+                {
+                    var colorWithTransparency = new UnityEngine.Color(
+                        this.DeletionColor.r,
+                        this.DeletionColor.g,
+                        this.DeletionColor.b,
+                        this.DeletionColor.a * 0.2f);
+                    return colorWithTransparency;
+                }
+            }
+
+            public Color InsertionBackgroundColor
+            {
+                get
+                {
+                    var colorWithTransparency = new UnityEngine.Color(
+                        this.InsertionColor.r,
+                        this.InsertionColor.g,
+                        this.InsertionColor.b,
+                        this.InsertionColor.a * 0.2f);
+                    return colorWithTransparency;
+                }
+            }
+        }
+
         private class PreviewPanelContents
         {
             public float LongestOriginalNameWidth { get; private set; }
@@ -1179,6 +1269,8 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             private PreviewRowModel[] PreviewRowInfos { get; set; }
+
+            public int RenameStepIndex { get; set; }
 
             public PreviewRowModel this[int index]
             {
@@ -1200,11 +1292,11 @@ namespace RedBlueGames.MulliganRenamer
                 BulkRenamePreview preview,
                 int firstPreviewIndex,
                 int numObjectsToShow,
-                int stepIndex,
-                Color deletionColor,
-                Color insertionColor)
+                int stepIndex)
             {
                 var previewPanelContents = new PreviewPanelContents();
+                previewPanelContents.RenameStepIndex = stepIndex;
+
                 var numVisibleObjects = Mathf.Min(numObjectsToShow, preview.NumObjects);
                 previewPanelContents.PreviewRowInfos = new PreviewRowModel[numVisibleObjects];
 
@@ -1213,17 +1305,8 @@ namespace RedBlueGames.MulliganRenamer
                     var info = new PreviewRowModel();
                     var indexOfVisibleObject = firstPreviewIndex + j;
                     var previewForIndex = preview.GetPreviewAtIndex(indexOfVisibleObject);
-                    var originalName = stepIndex >= 0 && stepIndex < preview.NumSteps ?
-                        previewForIndex.RenameResultSequence.GetNameBeforeAtStep(stepIndex, deletionColor) :
-                        previewForIndex.RenameResultSequence.OriginalName;
-                    info.NameBeforeStep = originalName;
-
-                    var nameAtStep = stepIndex >= 0 && stepIndex < preview.NumSteps ?
-                        previewForIndex.RenameResultSequence.GetNewNameAtStep(stepIndex, insertionColor) :
-                        previewForIndex.RenameResultSequence.NewName;
-                    info.NameAtStep = nameAtStep;
-
-                    info.FinalName = previewForIndex.RenameResultSequence.NewName;
+                    info.RenameResultSequence = previewForIndex.RenameResultSequence;
+                    info.RenameStepIndex = stepIndex;
 
                     info.Icon = previewForIndex.ObjectToRename.GetEditorIcon();
                     info.Object = previewForIndex.ObjectToRename;
@@ -1310,70 +1393,6 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private class ColoredWhiteSpaceText
-        {
-            public Color Color { get; private set; }
-
-            public string Text { get; private set; }
-
-            public bool HasColor
-            {
-                get
-                {
-                    return this.Color != Color.clear;
-                }
-            }
-
-            public ColoredWhiteSpaceText(string text)
-            {
-                this.Text = text;
-                this.Color = Color.clear;
-            }
-
-            public ColoredWhiteSpaceText(string text, Color color)
-            {
-                this.Text = text;
-                this.Color = color;
-            }
-
-            public static List<ColoredWhiteSpaceText> GetColoredTextsFromString(string text, GUIStyle style)
-            {
-                var result = new List<ColoredWhiteSpaceText>();
-                var textSplitResult = text.Split(new[] { "<color=" }, StringSplitOptions.None);
-
-                foreach (var r in textSplitResult)
-                {
-                    if (string.IsNullOrEmpty(r))
-                        continue;
-
-                    if (!r.Contains(">"))
-                    {
-                        var coloredText = new ColoredWhiteSpaceText(r);
-                        result.Add(coloredText);
-                    }
-                    else
-                    {
-                        var elements = r.Split('>');
-                        var htmlColor = elements[0];
-                        var realText = elements[1].Split('<')[0];
-
-                        Color color = Color.clear;
-                        ColorUtility.TryParseHtmlString(htmlColor, out color);
-                        var coloredText = new ColoredWhiteSpaceText(realText, color);
-                        result.Add(coloredText);
-
-                        if (elements.Length > 2 && !string.IsNullOrEmpty(elements[2]))
-                        {
-                            var remainder = new ColoredWhiteSpaceText(elements[2]);
-                            result.Add(remainder);
-                        }
-                    }
-                }
-
-                return result;
-            }
-        }
-
         private struct PreviewRowModel
         {
             public UnityEngine.Object Object { get; set; }
@@ -1384,17 +1403,90 @@ namespace RedBlueGames.MulliganRenamer
 
             public string WarningMessage { get; set; }
 
-            public string NameBeforeStep { get; set; }
-
-            public string NameAtStep { get; set; }
-
-            public string FinalName { get; set; }
+            public string FinalName
+            {
+                get
+                {
+                    return this.RenameResultSequence.NewName;
+                }
+            }
 
             public int IndexInPreview { get; set; }
 
             public bool LastElement { get; set; }
 
             public bool FirstElement { get; set; }
+
+            public RenameResultSequence RenameResultSequence { get; set; }
+            public int RenameStepIndex { get; set; }
+
+            public bool IsPreviewingSteps
+            {
+                get
+                {
+                    return this.RenameStepIndex >= 0 && this.RenameStepIndex < this.RenameResultSequence.NumSteps;
+                }
+            }
+
+            public string NameBeforeStep
+            {
+                get
+                {
+                    if (this.RenameStepIndex >= 0 && this.RenameStepIndex < this.RenameResultSequence.NumSteps)
+                    {
+                        return this.RenameResultSequence.GetRenameResultBeforeStep(this.RenameStepIndex).Original;
+                    }
+                    else
+                    {
+                        return this.RenameResultSequence.OriginalName;
+                    }
+                }
+            }
+
+            public string NameAtStep
+            {
+                get
+                {
+                    if (this.RenameStepIndex >= 0 && this.RenameStepIndex < this.RenameResultSequence.NumSteps)
+                    {
+                        return this.RenameResultSequence.GetRenameResultForStep(this.RenameStepIndex).Result;
+                    }
+                    else
+                    {
+                        return this.RenameResultSequence.NewName;
+                    }
+                }
+            }
+
+            public RenameResult RenameResultBefore
+            {
+                get
+                {
+                    if (this.RenameStepIndex >= 0 && this.RenameStepIndex < this.RenameResultSequence.NumSteps)
+                    {
+                        return this.RenameResultSequence.GetRenameResultBeforeStep(this.RenameStepIndex);
+                    }
+                    else
+                    {
+                        return RenameResult.Empty;
+                    }
+                }
+            }
+
+            public RenameResult RenameResultAfter
+            {
+                get
+                {
+                    if (this.RenameStepIndex >= 0 && this.RenameStepIndex < this.RenameResultSequence.NumSteps)
+                    {
+                        return this.RenameResultSequence.GetRenameResultForStep(this.RenameStepIndex);
+                    }
+                    else
+                    {
+                        return RenameResult.Empty;
+                    }
+                }
+            }
 
             public bool NameChangedThisStep
             {
@@ -1422,6 +1514,14 @@ namespace RedBlueGames.MulliganRenamer
             public float ThirdColumnWidth { get; set; }
 
             public Color BackgroundColor { get; set; }
+
+            public Color FirstColumnDiffTextColor { get; set; }
+
+            public Color SecondColumnDiffTextColor { get; set; }
+
+            public Color FirstColumnDiffBackgroundColor { get; set; }
+
+            public Color SecondColumnDiffBackgroundColor { get; set; }
         }
 
         private class GUIStyles

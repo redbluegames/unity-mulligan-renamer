@@ -84,8 +84,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <returns>The original name at the rename step.</returns>
         /// <param name="stepIndex">Rename step index.</param>
-        /// <param name="deletionTagColor">Color for deletions</param>
-        public string GetNameBeforeAtStep(int stepIndex, Color deletionTagColor)
+        public RenameResult GetRenameResultBeforeStep(int stepIndex)
         {
             if (stepIndex < 0 || stepIndex >= this.NumSteps)
             {
@@ -95,7 +94,7 @@ namespace RedBlueGames.MulliganRenamer
                 throw new System.ArgumentException(exception, "stepIndex");
             }
 
-            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetOriginalColored(deletionTagColor);
+            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex);
         }
 
         /// <summary>
@@ -103,8 +102,7 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         /// <returns>The new name at step.</returns>
         /// <param name="stepIndex">Rename step index.</param>
-        /// <param name="insertionTagColor">Color for insertions</param>
-        public string GetNewNameAtStep(int stepIndex, Color insertionTagColor)
+        public RenameResult GetRenameResultForStep(int stepIndex)
         {
             if (stepIndex < 0 || stepIndex >= this.NumSteps)
             {
@@ -114,7 +112,7 @@ namespace RedBlueGames.MulliganRenamer
                 throw new System.ArgumentException(exception, "stepIndex");
             }
 
-            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex).GetResultColored(insertionTagColor);
+            return this.OperationResults.DefaultIfEmpty(RenameResult.Empty).ElementAtOrDefault(stepIndex);
         }
     }
 }
