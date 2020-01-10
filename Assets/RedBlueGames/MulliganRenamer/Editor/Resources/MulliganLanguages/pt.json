@@ -184,6 +184,10 @@
 			"value" : "Salvar"
 		},
 		{
+			"key" : "errorTryintToGetOriginalName",
+			"value" : "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
+		},
+		{
 			"key" : "errorTryingToGetOriginalNameOutOfBounds",
 			"value" : "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
 		},
@@ -462,10 +466,6 @@
 		{
 			"key" : "theStringsOfLettersToAdd",
 			"value" : "As seqüências de letras a serem adicionadas, separadas por vírgula. Ex: \"A, B, C\" anexará A, B e C aos três primeiros objetos, respectivamente. Depois disso, ele adicionará outra sequência, começando com AA, AB, AC, etc."
-		},
-		{
-			"key" : "countByLetter",
-			"value" : "Contar por letra"
 		},
 		{
 			"key" : "formatForTheAddedLetters",

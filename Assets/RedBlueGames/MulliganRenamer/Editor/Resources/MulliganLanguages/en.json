@@ -184,7 +184,7 @@
 			"value" : "Save"
 		},
 		{
-			"key" : "addSelectedObjects",
+			"key" : "errorTryintToGetOriginalName",
 			"value" : "Trying to get original name for RenameResultSequence at index that's out of bounds. Index: {0}"
 		},
 		{
@@ -468,10 +468,6 @@
 			"value" : "The strings of letters to add, comma separated. Ex: \"A,B,C\" will append A, B, and C to the first three objects respectively. After that it will add another sequence, starting with AA, then AB, then AC, etc."
 		},
 		{
-			"key" : "countByLetter",
-			"value" : "Count By Letter"
-		},
-		{
 			"key" : "formatForTheAddedLetters",
 			"value" : "Format for the added letters."
 		},
@@ -505,7 +501,7 @@
 		},
 		{
 			"key" : "toUppercase",
-			"value" : "To uppercase"
+			"value" : "To Uppercase"
 		},
 		{
 			"key" : "newCasing",
