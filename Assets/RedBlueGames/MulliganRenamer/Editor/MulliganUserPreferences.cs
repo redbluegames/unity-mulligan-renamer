@@ -24,6 +24,7 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
+    using UnityEditor;
     using UnityEngine;
 
     /// <summary>
@@ -32,6 +33,8 @@ namespace RedBlueGames.MulliganRenamer
     [System.Serializable]
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
+        private const string UserPreferencesPrefKey = "RedBlueGames.MulliganRenamer.UserPreferences";
+
         private const int NumberOfSessionsBeforeReviewPrompt = 3;
 
         [SerializeField]
@@ -176,6 +179,36 @@ namespace RedBlueGames.MulliganRenamer
             this.previousSequence.Add(new ReplaceStringOperation());
 
             this.savedPresets = new List<RenameSequencePreset>();
+        }
+
+        /// <summary>
+        /// Loads the user's previous preferences (User specific savedata), or creates a new default one
+        /// </summary>
+        /// <returns>Loaded or newly created Preferences</returns>
+        public static MulliganUserPreferences LoadOrCreatePreferences()
+        {
+            var serializedPreferences = EditorPrefs.GetString(UserPreferencesPrefKey, string.Empty);
+            MulliganUserPreferences prefs = null;
+
+            if (!string.IsNullOrEmpty(serializedPreferences))
+            {
+                var loadedPreferences = JsonUtility.FromJson<MulliganUserPreferences>(serializedPreferences);
+                prefs = loadedPreferences;
+            }
+            else
+            {
+                prefs = new MulliganUserPreferences();
+            }
+
+            return prefs;
+        }
+
+        /// <summary>
+        /// Save the Preferences to EditorPrefs for loading at another time
+        /// </summary>
+        public void SaveToEditorPrefs()
+        {
+            EditorPrefs.SetString(UserPreferencesPrefKey, JsonUtility.ToJson(this));
         }
 
         /// <summary>

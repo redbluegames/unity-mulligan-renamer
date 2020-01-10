@@ -38,7 +38,6 @@ namespace RedBlueGames.MulliganRenamer
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
 
         private const string RenameOpsEditorPrefsKey = "RedBlueGames.MulliganRenamer.RenameOperationsToApply";
-        private const string UserPreferencesPrefKey = "RedBlueGames.MulliganRenamer.UserPreferences";
         private const string PreviewModePrefixKey = "RedBlueGames.MulliganRenamer.IsPreviewStepModePreference";
 
         private const float OperationPanelWidth = 350.0f;
@@ -1018,7 +1017,7 @@ namespace RedBlueGames.MulliganRenamer
             var operationSequence = this.GetCurrentRenameOperationSequence();
             this.ActivePreferences.PreviousSequence = operationSequence;
 
-            EditorPrefs.SetString(UserPreferencesPrefKey, JsonUtility.ToJson(this.ActivePreferences));
+            this.ActivePreferences.SaveToEditorPrefs();
         }
 
         private void LoadUserPreferences()
@@ -1036,17 +1035,7 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                var serializedPreferences = EditorPrefs.GetString(UserPreferencesPrefKey, string.Empty);
-
-                if (!string.IsNullOrEmpty(serializedPreferences))
-                {
-                    var loadedPreferences = JsonUtility.FromJson<MulliganUserPreferences>(serializedPreferences);
-                    this.ActivePreferences = loadedPreferences;
-                }
-                else
-                {
-                    this.ActivePreferences = new MulliganUserPreferences();
-                }
+                this.ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
             }
 
             this.LoadOperationSequence(this.ActivePreferences.PreviousSequence);
