@@ -64,10 +64,10 @@ namespace RedBlueGames.MulliganRenamer
             var prefsChanged = false;
             GUILayout.Label("Diff Colors", EditorStyles.boldLabel);
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.ColorField("Insertion Background", Color.green);
-            EditorGUILayout.ColorField("Insertion Text", Color.green);
-            EditorGUILayout.ColorField("Deletion Background", Color.red);
-            EditorGUILayout.ColorField("Deletion Text", Color.red);
+            ActivePreferences.InsertionBackgroundColor = EditorGUILayout.ColorField("Insertion Background", ActivePreferences.InsertionBackgroundColor);
+            ActivePreferences.InsertionTextColor = EditorGUILayout.ColorField("Insertion Text", ActivePreferences.InsertionTextColor);
+            ActivePreferences.DeletionBackgroundColor = EditorGUILayout.ColorField("Deletion Background", ActivePreferences.DeletionBackgroundColor);
+            ActivePreferences.DeletionTextColor = EditorGUILayout.ColorField("Deletion Text", ActivePreferences.DeletionTextColor);
             if (EditorGUI.EndChangeCheck())
             {
                 prefsChanged = true;
@@ -75,12 +75,12 @@ namespace RedBlueGames.MulliganRenamer
 
             if (GUILayout.Button("Reset to Default", GUILayout.Width(120)))
             {
+                ActivePreferences.ResetColorsToDefault(EditorGUIUtility.isProSkin);
                 prefsChanged = true;
             }
 
             if (prefsChanged)
             {
-                Debug.Log("Changed!");
                 ActivePreferences.SaveToEditorPrefs();
             }
         }

@@ -708,7 +708,7 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     menu.AddItem(new GUIContent("DEBUG - Delete UserPrefs"), false, () =>
                     {
-                        this.ActivePreferences = new MulliganUserPreferences();
+                        this.ActivePreferences.ResetToDefaults();
                         this.SaveUserPreferences();
                     });
                 }
@@ -864,6 +864,10 @@ namespace RedBlueGames.MulliganRenamer
 
             this.previewPanel.ColumnsToShow = columnStyle;
             this.previewPanel.DisableAddSelectedObjectsButton = this.ValidSelectedObjects.Count == 0;
+            this.previewPanel.InsertionTextColor = this.ActivePreferences.InsertionTextColor;
+            this.previewPanel.InsertionBackgroundColor = this.ActivePreferences.InsertionBackgroundColor;
+            this.previewPanel.DeletionTextColor = this.ActivePreferences.DeletionTextColor;
+            this.previewPanel.DeletionBackgroundColor = this.ActivePreferences.DeletionBackgroundColor;
             this.previewPanelScrollPosition = this.previewPanel.Draw(previewPanelRect, this.previewPanelScrollPosition, bulkRenamePreview);
         }
 
@@ -1023,19 +1027,16 @@ namespace RedBlueGames.MulliganRenamer
         private void LoadUserPreferences()
         {
             var oldSerializedOps = EditorPrefs.GetString(RenameOpsEditorPrefsKey, string.Empty);
+            this.ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+
             if (!string.IsNullOrEmpty(oldSerializedOps))
             {
+                this.ActivePreferences.ResetColorsToDefault(EditorGUIUtility.isProSkin);
+
                 // Update operations to the new preferences
-                this.ActivePreferences = new MulliganUserPreferences()
-                {
-                    PreviousSequence = RenameOperationSequence<IRenameOperation>.FromString(oldSerializedOps)
-                };
+                this.ActivePreferences.PreviousSequence = RenameOperationSequence<IRenameOperation>.FromString(oldSerializedOps);
 
                 EditorPrefs.DeleteKey(RenameOpsEditorPrefsKey);
-            }
-            else
-            {
-                this.ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
             }
 
             this.LoadOperationSequence(this.ActivePreferences.PreviousSequence);

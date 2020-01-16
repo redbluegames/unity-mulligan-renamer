@@ -37,7 +37,7 @@ namespace RedBlueGames.MulliganRenamer
         const string BigDownArrowUnicode = "\u25BC";
         private const float MinColumnWidth = 125f;
         private const float PreviewRowHeight = 18.0f;
-        private const float DividerWidth = 2f;
+        private const float DividerWidth = 1f;
 
         private const float DividerHotSpotPadding = 3f;
 
@@ -110,6 +110,26 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public int NumPreviouslyRenamedObjects { get; set; }
 
+        /// <summary>
+        /// Gets or sets the color to use for Text on diff Insertions
+        /// </summary>
+        public Color InsertionTextColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color to use for Text on diff Deletions
+        /// </summary>
+        public Color DeletionTextColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color to use for the background of Text on diff Insertions
+        /// </summary>
+        public Color InsertionBackgroundColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color to use for the background of Text on diff Deletions
+        /// </summary>
+        public Color DeletionBackgroundColor { get; set; }
+
         public enum ColumnStyle
         {
             OriginalAndFinalOnly,
@@ -127,6 +147,13 @@ namespace RedBlueGames.MulliganRenamer
 
         public MulliganRenamerPreviewPanel()
         {
+            // Set colors to obnoxious defaults so that we can tell when defaults are improperly being used
+            // (Users shouldn't ever see these)
+            this.InsertionTextColor = Color.green;
+            this.InsertionBackgroundColor = this.InsertionTextColor.CreateCopyWithNewAlpha(this.InsertionTextColor.a * 0.2f);
+            this.DeletionTextColor = Color.red;
+            this.DeletionBackgroundColor = this.DeletionTextColor.CreateCopyWithNewAlpha(this.DeletionTextColor.a * 0.2f);
+
             this.InitializeGUIStyles();
             this.InitializeGUIContents();
 
@@ -473,18 +500,14 @@ namespace RedBlueGames.MulliganRenamer
                 this.guiStyles.PreviewScroll = new GUIStyle(styleName);
 
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.3f, 0.3f, 0.3f, 0.2f);
-
-                this.guiStyles.InsertionTextColor = new Color32(6, 214, 160, 255);
-                this.guiStyles.DeletionTextColor = new Color32(239, 71, 111, 255);
+                this.guiStyles.RenameCompleteTextColor = new Color32(6, 214, 160, 255);
             }
             else
             {
                 this.guiStyles.PreviewScroll = new GUIStyle(EditorStyles.textArea);
 
+                this.guiStyles.RenameCompleteTextColor = new Color32(0, 140, 104, 255);
                 this.guiStyles.PreviewRowBackgroundEven = new Color(0.6f, 0.6f, 0.6f, 0.2f);
-
-                this.guiStyles.InsertionTextColor = new Color32(0, 140, 104, 255);
-                this.guiStyles.DeletionTextColor = new Color32(189, 47, 79, 255);
             }
 
             this.guiStyles.PreviewRowBackgroundOdd = Color.clear;
@@ -558,8 +581,10 @@ namespace RedBlueGames.MulliganRenamer
                     shouldShowThirdColumn);
 
                 var panelStyle = new PreviewPanelStyle();
-                panelStyle.InsertionColor = this.guiStyles.InsertionTextColor;
-                panelStyle.DeletionColor = this.guiStyles.DeletionTextColor;
+                panelStyle.InsertionColor = this.InsertionTextColor;
+                panelStyle.InsertionBackgroundColor = this.InsertionBackgroundColor;
+                panelStyle.DeletionColor = this.DeletionTextColor;
+                panelStyle.DeletionBackgroundColor = this.DeletionBackgroundColor;
 
                 newScrollPosition = this.DrawPreviewPanelContentsWithItems(
                     scrollLayout,
@@ -634,7 +659,7 @@ namespace RedBlueGames.MulliganRenamer
             if (showSuccessfulRenameLabels)
             {
                 var oldColor = GUI.contentColor;
-                GUI.contentColor = this.guiStyles.InsertionTextColor;
+                GUI.contentColor = this.guiStyles.RenameCompleteTextColor;
                 string noun;
                 if (this.NumPreviouslyRenamedObjects == 1)
                 {
@@ -1223,31 +1248,8 @@ namespace RedBlueGames.MulliganRenamer
         {
             public Color DeletionColor { get; set; }
             public Color InsertionColor { get; set; }
-            public Color DeletionBackgroundColor
-            {
-                get
-                {
-                    var colorWithTransparency = new UnityEngine.Color(
-                        this.DeletionColor.r,
-                        this.DeletionColor.g,
-                        this.DeletionColor.b,
-                        this.DeletionColor.a * 0.2f);
-                    return colorWithTransparency;
-                }
-            }
-
-            public Color InsertionBackgroundColor
-            {
-                get
-                {
-                    var colorWithTransparency = new UnityEngine.Color(
-                        this.InsertionColor.r,
-                        this.InsertionColor.g,
-                        this.InsertionColor.b,
-                        this.InsertionColor.a * 0.2f);
-                    return colorWithTransparency;
-                }
-            }
+            public Color DeletionBackgroundColor { get; set; }
+            public Color InsertionBackgroundColor { get; set; }
         }
 
         private class PreviewPanelContents
@@ -1558,9 +1560,7 @@ namespace RedBlueGames.MulliganRenamer
 
             public Color PreviewRowBackgroundEven { get; set; }
 
-            public Color InsertionTextColor { get; set; }
-
-            public Color DeletionTextColor { get; set; }
+            public Color RenameCompleteTextColor { get; set; }
         }
 
         private class GUIContents

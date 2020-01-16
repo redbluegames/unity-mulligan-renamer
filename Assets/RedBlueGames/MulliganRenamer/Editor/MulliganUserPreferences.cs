@@ -33,6 +33,8 @@ namespace RedBlueGames.MulliganRenamer
     [System.Serializable]
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
+        private static MulliganUserPreferences LoadedPreferenceInstance;
+
         private const string UserPreferencesPrefKey = "RedBlueGames.MulliganRenamer.UserPreferences";
 
         private const int NumberOfSessionsBeforeReviewPrompt = 3;
@@ -57,6 +59,21 @@ namespace RedBlueGames.MulliganRenamer
 
         [SerializeField]
         private bool hasShownThanks;
+
+        [SerializeField]
+        private Color insertionTextColor;
+
+        [SerializeField]
+        private Color deletionTextColor;
+
+        [SerializeField]
+        private Color insertionBackgroundColor;
+
+        [SerializeField]
+        private Color deletionBackgroundColor;
+
+        [SerializeField]
+        private bool hasInitializedColors;
 
         /// <summary>
         /// Gets or Sets the previously used Sequence of Rename Operations
@@ -168,17 +185,62 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public Color InsertionTextColor
+        {
+            get
+            {
+                return this.insertionTextColor;
+            }
+
+            set
+            {
+                this.insertionTextColor = value;
+            }
+        }
+        public Color DeletionTextColor
+        {
+            get
+            {
+                return this.deletionTextColor;
+            }
+
+            set
+            {
+                this.deletionTextColor = value;
+            }
+        }
+
+        public Color InsertionBackgroundColor
+        {
+            get
+            {
+                return this.insertionBackgroundColor;
+            }
+
+            set
+            {
+                this.insertionBackgroundColor = value;
+            }
+        }
+        public Color DeletionBackgroundColor
+        {
+            get
+            {
+                return this.deletionBackgroundColor;
+            }
+
+            set
+            {
+                this.deletionBackgroundColor = value;
+            }
+        }
+
         /// <summary>
         /// Create a new Instance of MulliganUserPreferences
         /// </summary>
-        public MulliganUserPreferences()
+        private MulliganUserPreferences()
         {
-            // Default previous sequence to a replace string op just because it's
-            // most user friendly
-            this.previousSequence = new RenameOperationSequence<IRenameOperation>();
-            this.previousSequence.Add(new ReplaceStringOperation());
-
-            this.savedPresets = new List<RenameSequencePreset>();
+            this.ResetAllValuesToDefault();
         }
 
         /// <summary>
@@ -187,6 +249,14 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>Loaded or newly created Preferences</returns>
         public static MulliganUserPreferences LoadOrCreatePreferences()
         {
+            // When Preferences got into the mix, we needed to make sure the Mulligan Window and the
+            // Preferences window referenced the same deserialized preferences, or else they'd compete
+            // and could stomp eachother's values. So we made it a singleton.
+            if (LoadedPreferenceInstance != null)
+            {
+                return LoadedPreferenceInstance;
+            }
+
             var serializedPreferences = EditorPrefs.GetString(UserPreferencesPrefKey, string.Empty);
             MulliganUserPreferences prefs = null;
 
@@ -200,7 +270,15 @@ namespace RedBlueGames.MulliganRenamer
                 prefs = new MulliganUserPreferences();
             }
 
+            prefs.UpgradePreferences();
+
+            LoadedPreferenceInstance = prefs;
             return prefs;
+        }
+
+        public void ResetToDefaults()
+        {
+            this.ResetAllValuesToDefault();
         }
 
         /// <summary>
@@ -281,6 +359,53 @@ namespace RedBlueGames.MulliganRenamer
         {
             this.PreviousSequence = RenameOperationSequence<IRenameOperation>.FromString(
                 this.serializedPreviousSequence);
+        }
+
+        public void ResetColorsToDefault(bool useProSkinValues = true)
+        {
+            if (useProSkinValues)
+            {
+                this.InsertionTextColor = new Color32(6, 214, 160, 255);
+                this.DeletionTextColor = new Color32(239, 71, 111, 255);
+            }
+            else
+            {
+                this.InsertionTextColor = new Color32(0, 140, 104, 255);
+                this.DeletionTextColor = new Color32(189, 47, 79, 255);
+            }
+
+            this.InsertionBackgroundColor =
+                this.InsertionTextColor.CreateCopyWithNewAlpha(this.InsertionTextColor.a * 0.2f);
+            this.DeletionBackgroundColor =
+                this.DeletionTextColor.CreateCopyWithNewAlpha(this.DeletionTextColor.a * 0.2f);
+        }
+
+        private void ResetAllValuesToDefault()
+        {
+            // Reset all values to default as if this is a new instance
+            this.lastUsedPresetName = string.Empty;
+            this.serializedPreviousSequence = string.Empty;
+            this.numSessionsUsed = 0;
+            this.hasClickedPrompt = false;
+            this.hasShownThanks = false;
+            this.ResetColorsToDefault();
+
+            // Default the previous sequence to a replace string op just because it's
+            // most user friendly
+            this.previousSequence = new RenameOperationSequence<IRenameOperation>();
+            this.previousSequence.Add(new ReplaceStringOperation());
+
+            this.savedPresets = new List<RenameSequencePreset>();
+
+        }
+
+        private void UpgradePreferences()
+        {
+            if (!this.hasInitializedColors)
+            {
+                this.ResetColorsToDefault();
+                this.hasInitializedColors = true;
+            }
         }
     }
 }
