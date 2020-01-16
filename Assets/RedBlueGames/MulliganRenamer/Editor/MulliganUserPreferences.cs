@@ -58,9 +58,6 @@ namespace RedBlueGames.MulliganRenamer
         private bool hasClickedPrompt;
 
         [SerializeField]
-        private bool hasShownThanks;
-
-        [SerializeField]
         private Color insertionTextColor;
 
         [SerializeField]
@@ -387,7 +384,6 @@ namespace RedBlueGames.MulliganRenamer
             this.serializedPreviousSequence = string.Empty;
             this.numSessionsUsed = 0;
             this.hasClickedPrompt = false;
-            this.hasShownThanks = false;
             this.ResetColorsToDefault();
 
             // Default the previous sequence to a replace string op just because it's
