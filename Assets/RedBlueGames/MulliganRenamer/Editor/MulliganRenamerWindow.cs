@@ -663,18 +663,30 @@ namespace RedBlueGames.MulliganRenamer
             localeButtonsRect.width = 80.0f;
             localeButtonsRect.x = headerRect.width - localeButtonsRect.width;
 
-            if (GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
+            // I used an API for preferences that was introduced in 2018.3. Versions
+            // before that will still show Languages here.
+            if (MulliganSettingsProvider.ArePreferencesImplemented)
             {
-                var localeMenu = new GenericMenu();
-                foreach (var l in LocaleManager.Instance.AllLanguages)
+                if (GUI.Button(localeButtonsRect, "Preferences", EditorStyles.toolbarButton))
                 {
-                    localeMenu.AddItem(new GUIContent(l.LanguageName), l.IsActive, () =>
-                    {
-                        LocaleManager.Instance.ChangeLocale(l.LanguageKey);
-                    });
+                    SettingsService.OpenUserPreferences(MulliganSettingsProvider.Path);
                 }
+            }
+            else
+            {
+                if (GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
+                {
+                    var localeMenu = new GenericMenu();
+                    foreach (var l in LocaleManager.Instance.AllLanguages)
+                    {
+                        localeMenu.AddItem(new GUIContent(l.LanguageName), l.IsActive, () =>
+                        {
+                            LocaleManager.Instance.ChangeLocale(l.LanguageKey);
+                        });
+                    }
 
-                localeMenu.ShowAsContext();
+                    localeMenu.ShowAsContext();
+                }
             }
 
             var presetButtonsRect = new Rect(headerRect);

@@ -1,4 +1,7 @@
-﻿/* MIT License
+﻿#if UNITY_2018_3_OR_NEWER
+#define MULLIGAN_INCLUDE_PREFS
+#endif
+/* MIT License
 
 Copyright (c) 2020 Edward Rowe, RedBlueGames
 
@@ -30,9 +33,32 @@ namespace RedBlueGames.MulliganRenamer
 
     static class MulliganSettingsProvider
     {
+        public static bool ArePreferencesImplemented
+        {
+            get
+            {
+#if MULLIGAN_INCLUDE_PREFS
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
+        public static string Path
+        {
+            get
+            {
+#if MULLIGAN_INCLUDE_PREFS
+                return "Red Blue Games/Mulligan Renamer";
+#else
+                return string.Empty;
+#endif
+            }
+        }
 
         // Settings providers were added in 2018.3. No support for older versions for now.
-#if UNITY_2018_3_OR_NEWER
+#if MULLIGAN_INCLUDE_PREFS
 
         private const float LabelWidth = 200.0f;
         private const float MaxWidth = 550.0f;
@@ -59,7 +85,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             // First parameter is the path in the Settings window.
             // Second parameter is the scope of this setting: it only appears in the Project Settings window.
-            var provider = new SettingsProvider("Red Blue Games/Mulligan Renamer", SettingsScope.User)
+            var provider = new SettingsProvider(Path, SettingsScope.User)
             {
                 // By default the last token of the path is used as display name if no label is provided.
                 label = "Mulligan Renamer",
@@ -212,6 +238,6 @@ namespace RedBlueGames.MulliganRenamer
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }
-    }
 #endif
+    }
 }
