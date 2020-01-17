@@ -33,6 +33,10 @@ namespace RedBlueGames.MulliganRenamer
 
         // Settings providers were added in 2018.3. No support for older versions for now.
 #if UNITY_2018_3_OR_NEWER
+
+        private const float LabelWidth = 200.0f;
+        private const float MaxWidth = 550.0f;
+
         private static MulliganUserPreferences ActivePreferences;
 
         private static GUIStyle sampleDiffLabelStyle;
@@ -58,7 +62,7 @@ namespace RedBlueGames.MulliganRenamer
             var provider = new SettingsProvider("Red Blue Games/Mulligan Renamer", SettingsScope.User)
             {
                 // By default the last token of the path is used as display name if no label is provided.
-                label = "Mulligan",
+                label = "Mulligan Renamer",
                 activateHandler = (searchContext, rootElement) =>
                 {
                     ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
@@ -76,23 +80,24 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void DrawPreferences(string searchContext)
         {
+            // I override LabelWidth (and MaxWidth) just to look more like Unity's native preferences
+            EditorGUIUtility.labelWidth = LabelWidth;
+
             var prefsChanged = false;
             GUILayout.Label("Diff Colors", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            ActivePreferences.InsertionTextColor = EditorGUILayout.ColorField("Insertion Text", ActivePreferences.InsertionTextColor);
-            ActivePreferences.InsertionBackgroundColor = EditorGUILayout.ColorField("Insertion Background", ActivePreferences.InsertionBackgroundColor);
+            ActivePreferences.InsertionTextColor = EditorGUILayout.ColorField("Insertion Text", ActivePreferences.InsertionTextColor, GUILayout.MaxWidth(MaxWidth));
+            ActivePreferences.InsertionBackgroundColor = EditorGUILayout.ColorField("Insertion Background", ActivePreferences.InsertionBackgroundColor, GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
             DrawSampleDiffLabel(true);
             EditorGUILayout.Space();
 
             EditorGUILayout.Space();
-            ActivePreferences.DeletionTextColor = EditorGUILayout.ColorField("Deletion Text", ActivePreferences.DeletionTextColor);
-            ActivePreferences.DeletionBackgroundColor = EditorGUILayout.ColorField("Deletion Background", ActivePreferences.DeletionBackgroundColor);
+            ActivePreferences.DeletionTextColor = EditorGUILayout.ColorField("Deletion Text", ActivePreferences.DeletionTextColor, GUILayout.MaxWidth(MaxWidth));
+            ActivePreferences.DeletionBackgroundColor = EditorGUILayout.ColorField("Deletion Background", ActivePreferences.DeletionBackgroundColor, GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
             DrawSampleDiffLabel(false);
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -115,7 +120,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             EditorGUILayout.BeginHorizontal();
 
-            EditorGUILayout.LabelField(string.Empty, GUILayout.MaxWidth(145.0f));
+            EditorGUILayout.LabelField(string.Empty, GUILayout.MaxWidth(LabelWidth));
             var rect = EditorGUILayout.GetControlRect();
             if (insertion)
             {
