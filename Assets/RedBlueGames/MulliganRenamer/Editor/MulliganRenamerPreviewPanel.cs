@@ -253,23 +253,27 @@ namespace RedBlueGames.MulliganRenamer
             firstColumnRect.height = rowRect.height;
             if (style.FirstColumnWidth > 0)
             {
-                var labelText = string.Empty;
+                var renameResultStyle = new MulliganEditorGUIUtilities.DiffLabelStyle()
+                {
+                    HideDiff = !info.IsPreviewingSteps,
+                    OperationToShow = DiffOperation.Deletion,
+                    DiffTextColor = style.FirstColumnDiffTextColor,
+                    DiffBackgroundColor = style.FirstColumnDiffBackgroundColor,
+                };
+
                 if (info.IsPreviewingSteps)
                 {
-                    ApplyBackgroundColorToDiff(
+                    MulliganEditorGUIUtilities.DrawDiffLabel(
                         firstColumnRect,
-                        style.FirstColumnStyle,
                         info.RenameResultBefore,
-                        DiffOperation.Deletion,
-                        style.FirstColumnDiffBackgroundColor);
-                    labelText = info.RenameResultBefore.GetOriginalColored(style.FirstColumnDiffTextColor);
+                        true,
+                        renameResultStyle,
+                        style.FirstColumnStyle);
                 }
                 else
                 {
-                    labelText = info.NameBeforeStep;
+                    EditorGUI.LabelField(firstColumnRect, info.NameBeforeStep, style.FirstColumnStyle);
                 }
-
-                EditorGUI.LabelField(firstColumnRect, labelText, style.FirstColumnStyle);
             }
 
             var secondColumnRect = new Rect(firstColumnRect);
@@ -278,23 +282,27 @@ namespace RedBlueGames.MulliganRenamer
             secondColumnRect.height = rowRect.height;
             if (style.SecondColumnWidth > 0)
             {
-                var labelText = string.Empty;
+                var renameResultStyle = new MulliganEditorGUIUtilities.DiffLabelStyle()
+                {
+                    HideDiff = !info.IsPreviewingSteps,
+                    OperationToShow = DiffOperation.Insertion,
+                    DiffTextColor = style.SecondColumnDiffTextColor,
+                    DiffBackgroundColor = style.SecondColumnDiffBackgroundColor,
+                };
+
                 if (info.IsPreviewingSteps)
                 {
-                    ApplyBackgroundColorToDiff(
+                    MulliganEditorGUIUtilities.DrawDiffLabel(
                         secondColumnRect,
-                        style.SecondColumnStyle,
                         info.RenameResultAfter,
-                        DiffOperation.Insertion,
-                        style.SecondColumnDiffBackgroundColor);
-                    labelText = info.RenameResultAfter.GetResultColored(style.SecondColumnDiffTextColor);
+                        false,
+                        renameResultStyle,
+                        style.SecondColumnStyle);
                 }
                 else
                 {
-                    labelText = info.NameAtStep;
+                    EditorGUI.LabelField(secondColumnRect, info.NameAtStep, style.SecondColumnStyle);
                 }
-
-                EditorGUI.LabelField(secondColumnRect, labelText, style.SecondColumnStyle);
             }
 
             var thirdColumnRect = new Rect(secondColumnRect);
@@ -313,124 +321,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return result;
-        }
-
-        private static void ApplyBackgroundColorToDiff(
-            Rect rect,
-            GUIStyle style,
-            RenameResult renameContent,
-            DiffOperation operationToColor,
-            Color backgroundColor)
-        {
-            if (string.IsNullOrEmpty(renameContent.Original))
-            {
-                return;
-            }
-
-            // Blocks don't need padding or margin because it's accounted for
-            // when we measure the total. We only want to know the size of each content block .
-            var blockStyle = new GUIStyle(style);
-            blockStyle.margin = new RectOffset();
-            blockStyle.padding = new RectOffset();
-
-            var position = rect;
-            var allTextSoFar = string.Empty;
-            foreach (var diff in renameContent)
-            {
-                // We want to skip whatever diff we aren't rendering on this column
-                // (Column 1 shows deletions, Column 2 shows insertions)
-                if (diff.Operation != operationToColor && diff.Operation != DiffOperation.Equal)
-                {
-                    continue;
-                }
-
-                if (diff.Operation == operationToColor)
-                {
-                    var totalRect = style.CalcSize(new GUIContent(allTextSoFar));
-                    var blockRect = new Rect(position.x + totalRect.x - style.padding.left, position.y, 0, totalRect.y);
-                    var spaceBlocks = GetConsecutiveBlocksOfToken(diff.Result, ' ');
-
-                    foreach (var block in spaceBlocks)
-                    {
-                        var blockSize = blockStyle.CalcSize(new GUIContent(block));
-
-                        blockRect.width = blockSize.x;
-                        var textureWidth = ((blockRect.x + blockRect.width) < (rect.x + rect.width))
-                            ? blockRect.width
-                            : Mathf.Max(0f, (rect.x + rect.width) - (blockRect.x));
-
-                        var textureRect = new Rect(
-                            blockRect.x,
-                            blockRect.y,
-                            textureWidth,
-                            blockRect.height);
-
-                        var textColorTransparent = backgroundColor;
-
-                        var oldColor = GUI.color;
-                        GUI.color = textColorTransparent;
-                        GUI.DrawTexture(textureRect, Texture2D.whiteTexture);
-                        GUI.color = oldColor;
-
-                        blockRect.x += blockSize.x;
-                    }
-                }
-
-                allTextSoFar += diff.Result;
-            }
-        }
-
-        private static List<string> GetConsecutiveBlocksOfToken(string str, char token)
-        {
-            var spaceBlocks = new List<string>();
-            var characterStreak = new System.Text.StringBuilder();
-            var isTokenBlock = false;
-            if (str.Length > 0)
-            {
-                characterStreak.Append(str[0]);
-                isTokenBlock = str[0] == token;
-            }
-
-            for (int i = 1; i < str.Length; ++i)
-            {
-                if (isTokenBlock)
-                {
-                    if (str[i] == token)
-                    {
-                        characterStreak.Append(str[i]);
-                    }
-                    else
-                    {
-                        spaceBlocks.Add(characterStreak.ToString());
-                        characterStreak = new System.Text.StringBuilder();
-                        characterStreak.Append(str[i]);
-
-                        isTokenBlock = false;
-                    }
-                }
-                else
-                {
-                    if (str[i] == token)
-                    {
-                        spaceBlocks.Add(characterStreak.ToString());
-                        characterStreak = new System.Text.StringBuilder();
-                        characterStreak.Append(str[i]);
-
-                        isTokenBlock = true;
-                    }
-                    else
-                    {
-                        characterStreak.Append(str[i]);
-                    }
-                }
-            }
-
-            if (characterStreak.Length > 0)
-            {
-                spaceBlocks.Add(characterStreak.ToString());
-            }
-
-            return spaceBlocks;
         }
 
         private void InitializeGUIContents()
