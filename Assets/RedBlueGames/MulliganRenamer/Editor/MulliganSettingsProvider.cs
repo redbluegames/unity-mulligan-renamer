@@ -84,6 +84,15 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUIUtility.labelWidth = LabelWidth;
 
             var prefsChanged = false;
+            var newLanguage = DrawLanguageDropdown(LocaleManager.Instance.CurrentLanguage);
+            if (newLanguage != LocaleManager.Instance.CurrentLanguage)
+            {
+                LocaleManager.Instance.ChangeLocale(newLanguage.LanguageKey);
+            }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
             GUILayout.Label("Diff Colors", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
@@ -114,6 +123,38 @@ namespace RedBlueGames.MulliganRenamer
             {
                 ActivePreferences.SaveToEditorPrefs();
             }
+        }
+
+        private static LocaleLanguage DrawLanguageDropdown(LocaleLanguage currentLanguage)
+        {
+            var content = new GUIContent(
+                LocaleManager.Instance.GetTranslation("language"),
+                "Specifies the language for all text used in Mulligan.");
+            var languages = new string[LocaleManager.Instance.AllLanguages.Count];
+            for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
+            {
+                var language = LocaleManager.Instance.AllLanguages[i];
+                languages[i] = language.LanguageName;
+            }
+
+            var currentLanguageIndex = GetLanguageIndex(currentLanguage);
+            var newIndex = EditorGUILayout.Popup(content, currentLanguageIndex, languages, GUILayout.MaxWidth(MaxWidth));
+            return LocaleManager.Instance.AllLanguages[newIndex];
+        }
+
+        private static int GetLanguageIndex(LocaleLanguage language)
+        {
+            var currentLanguageIndex = -1;
+            for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
+            {
+                if (LocaleManager.Instance.AllLanguages[i] == language)
+                {
+                    currentLanguageIndex = i;
+                    break;
+                }
+            }
+
+            return currentLanguageIndex;
         }
 
         private static void DrawSampleDiffLabel(bool insertion)
