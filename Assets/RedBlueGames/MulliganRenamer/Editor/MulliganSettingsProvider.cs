@@ -35,6 +35,21 @@ namespace RedBlueGames.MulliganRenamer
 #if UNITY_2018_3_OR_NEWER
         private static MulliganUserPreferences ActivePreferences;
 
+        private static GUIStyle sampleDiffLabelStyle;
+
+        private static GUIStyle SampleDiffLabelStyle
+        {
+            get
+            {
+                if (sampleDiffLabelStyle == null)
+                {
+                    sampleDiffLabelStyle = new GUIStyle(EditorStyles.boldLabel) { richText = true };
+                }
+
+                return sampleDiffLabelStyle;
+            }
+        }
+
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
@@ -63,11 +78,22 @@ namespace RedBlueGames.MulliganRenamer
         {
             var prefsChanged = false;
             GUILayout.Label("Diff Colors", EditorStyles.boldLabel);
+
             EditorGUI.BeginChangeCheck();
             ActivePreferences.InsertionTextColor = EditorGUILayout.ColorField("Insertion Text", ActivePreferences.InsertionTextColor);
             ActivePreferences.InsertionBackgroundColor = EditorGUILayout.ColorField("Insertion Background", ActivePreferences.InsertionBackgroundColor);
+            EditorGUILayout.Space();
+            DrawSampleDiffLabel(true);
+            EditorGUILayout.Space();
+
+            EditorGUILayout.Space();
             ActivePreferences.DeletionTextColor = EditorGUILayout.ColorField("Deletion Text", ActivePreferences.DeletionTextColor);
             ActivePreferences.DeletionBackgroundColor = EditorGUILayout.ColorField("Deletion Background", ActivePreferences.DeletionBackgroundColor);
+            EditorGUILayout.Space();
+            DrawSampleDiffLabel(false);
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
             if (EditorGUI.EndChangeCheck())
             {
                 prefsChanged = true;
@@ -83,6 +109,62 @@ namespace RedBlueGames.MulliganRenamer
             {
                 ActivePreferences.SaveToEditorPrefs();
             }
+        }
+
+        private static void DrawSampleDiffLabel(bool insertion)
+        {
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.LabelField(string.Empty, GUILayout.MaxWidth(145.0f));
+            var rect = EditorGUILayout.GetControlRect();
+            if (insertion)
+            {
+                DrawSampleInsertionLabel(rect);
+            }
+            else
+            {
+                DrawSampleDeletionLabel(rect);
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private static void DrawSampleInsertionLabel(Rect rect)
+        {
+            var diffLabelStyle = new MulliganEditorGUIUtilities.DiffLabelStyle()
+            {
+                HideDiff = false,
+                OperationToShow = DiffOperation.Insertion,
+                DiffBackgroundColor = ActivePreferences.InsertionBackgroundColor,
+                DiffTextColor = ActivePreferences.InsertionTextColor,
+            };
+
+            var renameResult = new RenameResult();
+            renameResult.Add(new Diff("This is ", DiffOperation.Equal));
+            renameResult.Add(new Diff("sample text", DiffOperation.Insertion));
+            renameResult.Add(new Diff(" with words ", DiffOperation.Equal));
+            renameResult.Add(new Diff("Inserted", DiffOperation.Insertion));
+
+            MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
+        }
+
+        private static void DrawSampleDeletionLabel(Rect rect)
+        {
+            var diffLabelStyle = new MulliganEditorGUIUtilities.DiffLabelStyle()
+            {
+                HideDiff = false,
+                OperationToShow = DiffOperation.Deletion,
+                DiffBackgroundColor = ActivePreferences.DeletionBackgroundColor,
+                DiffTextColor = ActivePreferences.DeletionTextColor,
+            };
+
+            var renameResult = new RenameResult();
+            renameResult.Add(new Diff("This is ", DiffOperation.Equal));
+            renameResult.Add(new Diff("sample text", DiffOperation.Deletion));
+            renameResult.Add(new Diff(" with words ", DiffOperation.Equal));
+            renameResult.Add(new Diff("Deleted", DiffOperation.Deletion));
+
+            MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }
     }
 #endif
