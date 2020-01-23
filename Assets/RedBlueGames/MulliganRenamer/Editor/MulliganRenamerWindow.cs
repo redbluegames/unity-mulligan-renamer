@@ -32,7 +32,7 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// Tool that tries to allow renaming mulitple selections by parsing similar substrings
     /// </summary>
-    public class MulliganRenamerWindow : EditorWindow
+    public class MulliganRenamerWindow : EditorWindow, IHasCustomMenu
     {
         private const string VersionString = "1.7.0";
         private const string WindowMenuPath = "Window/Red Blue/Mulligan Renamer";
@@ -216,6 +216,15 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return selected;
+        }
+
+        /// <summary>
+        /// Add the menu items for the generic Context Menu
+        /// </summary>
+        /// <param name="menu"></param>
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent("Preferences"), false, () => this.ShowPreferencesWindowForCurrentUnityVersion());
         }
 
         private void OnEnable()
@@ -663,30 +672,9 @@ namespace RedBlueGames.MulliganRenamer
             localeButtonsRect.width = 80.0f;
             localeButtonsRect.x = headerRect.width - localeButtonsRect.width;
 
-            // I used an API for preferences that was introduced in 2018.3. Versions
-            // before that will still show Languages here.
-            if (MulliganSettingsProvider.ArePreferencesImplemented)
+            if (GUI.Button(localeButtonsRect, "Preferences", EditorStyles.toolbarButton))
             {
-                if (GUI.Button(localeButtonsRect, "Preferences", EditorStyles.toolbarButton))
-                {
-                    SettingsService.OpenUserPreferences(MulliganSettingsProvider.Path);
-                }
-            }
-            else
-            {
-                if (GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("language"), EditorStyles.toolbarDropDown))
-                {
-                    var localeMenu = new GenericMenu();
-                    foreach (var l in LocaleManager.Instance.AllLanguages)
-                    {
-                        localeMenu.AddItem(new GUIContent(l.LanguageName), l.IsActive, () =>
-                        {
-                            LocaleManager.Instance.ChangeLocale(l.LanguageKey);
-                        });
-                    }
-
-                    localeMenu.ShowAsContext();
-                }
+                this.ShowPreferencesWindowForCurrentUnityVersion();
             }
 
             var presetButtonsRect = new Rect(headerRect);
@@ -727,6 +715,17 @@ namespace RedBlueGames.MulliganRenamer
 
                 menu.ShowAsContext();
             }
+        }
+
+        private void ShowPreferencesWindowForCurrentUnityVersion()
+        {
+            // I used an API for preferences that was introduced in 2018.3 (SettingsProvider).
+            // Draw a custom window for older versions
+#if UNITY_2018_3_OR_NEWER
+            SettingsService.OpenUserPreferences(MulliganSettingsProvider.Path);
+#else
+            MulliganUserPreferencesWindow.ShowWindow();
+#endif
         }
 
         private void DrawRenameOperations(Rect operationsRect)
