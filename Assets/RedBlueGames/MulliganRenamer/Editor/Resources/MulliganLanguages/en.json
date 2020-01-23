@@ -48,6 +48,10 @@
 			"value" : "Language"
 		},
 		{
+			"key" : "languageTooltip",
+			"value" : "Specifies the language for all text used in Mulligan."
+		},
+		{
 			"key" : "prefix",
 			"value" : "Prefix"
 		},
@@ -546,6 +550,42 @@
 		{
 			"key" : "replacementString",
 			"value" : "Replacement String"
+		},
+		{
+			"key" : "preferenceWindowTitle",
+			"value" : "Mulligan Renamer Preferences"
+		},
+		{
+			"key" : "preferencesMenuItem",
+			"value" : "Mulligan Renamer"
+		},
+		{
+			"key" : "preferencesDiffLabel",
+			"value" : "Diff Colors"
+		},
+		{
+			"key" : "preferencesInsertionText",
+			"value" : "Insertion Text"
+		},
+		{
+			"key" : "preferencesInsertionBackground",
+			"value" : "Insertion Background"
+		},
+		{
+			"key" : "preferencesDeletionText",
+			"value" : "Deletion Text"
+		},
+		{
+			"key" : "preferencesDeletionBackground",
+			"value" : "Deletion Background"
+		},
+		{
+			"key" : "preferencesReset",
+			"value" : "Reset to Default"
+		},
+		{
+			"key" : "preferences",
+			"value" : "Preferences"
 		}
 	]
 }

@@ -52,7 +52,7 @@ namespace RedBlueGames.MulliganRenamer
             var provider = new SettingsProvider(Path, SettingsScope.User)
             {
                 // By default the last token of the path is used as display name if no label is provided.
-                label = "Mulligan Renamer",
+                label = LocaleManager.Instance.GetTranslation("preferencesMenuItem"),
                 activateHandler = (searchContext, rootElement) =>
                 {
                     ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();

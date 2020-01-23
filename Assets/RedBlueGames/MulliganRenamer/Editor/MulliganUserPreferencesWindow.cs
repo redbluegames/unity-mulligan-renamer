@@ -57,7 +57,10 @@ namespace RedBlueGames.MulliganRenamer
 
         public static MulliganUserPreferencesWindow ShowWindow()
         {
-            return EditorWindow.GetWindow<MulliganUserPreferencesWindow>(true, "Mulligan Renamer Preferences", true);
+            return EditorWindow.GetWindow<MulliganUserPreferencesWindow>(
+                true,
+                LocaleManager.Instance.GetTranslation("preferenceWindowTitle"),
+                true);
         }
 
         private void OnEnable()
@@ -89,18 +92,30 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUILayout.Space();
             EditorGUILayout.Space();
 
-            GUILayout.Label("Diff Colors", EditorStyles.boldLabel);
+            GUILayout.Label(LocaleManager.Instance.GetTranslation("preferencesDiffLabel"), EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            preferences.InsertionTextColor = EditorGUILayout.ColorField("Insertion Text", preferences.InsertionTextColor, GUILayout.MaxWidth(MaxWidth));
-            preferences.InsertionBackgroundColor = EditorGUILayout.ColorField("Insertion Background", preferences.InsertionBackgroundColor, GUILayout.MaxWidth(MaxWidth));
+            preferences.InsertionTextColor = EditorGUILayout.ColorField(
+                LocaleManager.Instance.GetTranslation("preferencesInsertionText"),
+                preferences.InsertionTextColor,
+                GUILayout.MaxWidth(MaxWidth));
+            preferences.InsertionBackgroundColor = EditorGUILayout.ColorField(
+                LocaleManager.Instance.GetTranslation("preferencesInsertionBackground"),
+                preferences.InsertionBackgroundColor,
+                GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
             DrawSampleDiffLabel(true, preferences);
             EditorGUILayout.Space();
 
             EditorGUILayout.Space();
-            preferences.DeletionTextColor = EditorGUILayout.ColorField("Deletion Text", preferences.DeletionTextColor, GUILayout.MaxWidth(MaxWidth));
-            preferences.DeletionBackgroundColor = EditorGUILayout.ColorField("Deletion Background", preferences.DeletionBackgroundColor, GUILayout.MaxWidth(MaxWidth));
+            preferences.DeletionTextColor = EditorGUILayout.ColorField(
+                LocaleManager.Instance.GetTranslation("preferencesDeletionText"),
+                preferences.DeletionTextColor,
+                GUILayout.MaxWidth(MaxWidth));
+            preferences.DeletionBackgroundColor = EditorGUILayout.ColorField(
+                LocaleManager.Instance.GetTranslation("preferencesDeletionBackground"),
+                preferences.DeletionBackgroundColor,
+                GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
             DrawSampleDiffLabel(false, preferences);
 
@@ -109,7 +124,7 @@ namespace RedBlueGames.MulliganRenamer
                 prefsChanged = true;
             }
 
-            if (GUILayout.Button("Reset to Default", GUILayout.Width(120)))
+            if (GUILayout.Button(LocaleManager.Instance.GetTranslation("preferencesReset"), GUILayout.Width(120)))
             {
                 preferences.ResetColorsToDefault(EditorGUIUtility.isProSkin);
                 prefsChanged = true;
@@ -125,7 +140,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             var content = new GUIContent(
                 LocaleManager.Instance.GetTranslation("language"),
-                "Specifies the language for all text used in Mulligan.");
+                LocaleManager.Instance.GetTranslation("languageTooltip"));
             var languages = new GUIContent[LocaleManager.Instance.AllLanguages.Count];
             for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
             {

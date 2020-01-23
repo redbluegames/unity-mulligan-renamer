@@ -78,20 +78,25 @@ namespace RedBlueGames.MulliganRenamer
 
         public LocaleManager()
         {
+            this.ReloadLanguages();
+        }
+
+        public void ReloadLanguages()
+        {
             this.LoadAllLanguages();
             this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
         }
 
         private void LoadAllLanguages()
         {
-            allLanguages = new List<LocaleLanguage>();
+            this.allLanguages = new List<LocaleLanguage>();
 
             var jsons = Resources.LoadAll<TextAsset>("MulliganLanguages");
             foreach (var json in jsons)
             {
                 var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
                 if (!string.IsNullOrEmpty(language.LanguageKey))
-                    allLanguages.Add(language);
+                    this.allLanguages.Add(language);
             }
         }
 

@@ -224,7 +224,11 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="menu"></param>
         public void AddItemsToMenu(GenericMenu menu)
         {
-            menu.AddItem(new GUIContent("Preferences"), false, () => this.ShowPreferencesWindowForCurrentUnityVersion());
+            menu.AddItem(
+                new GUIContent(
+                    LocaleManager.Instance.GetTranslation("preferences")),
+                    false,
+                    () => this.ShowPreferencesWindowForCurrentUnityVersion());
         }
 
         private void OnEnable()
@@ -672,7 +676,7 @@ namespace RedBlueGames.MulliganRenamer
             localeButtonsRect.width = 80.0f;
             localeButtonsRect.x = headerRect.width - localeButtonsRect.width;
 
-            if (GUI.Button(localeButtonsRect, "Preferences", EditorStyles.toolbarButton))
+            if (GUI.Button(localeButtonsRect, LocaleManager.Instance.GetTranslation("preferences"), EditorStyles.toolbarButton))
             {
                 this.ShowPreferencesWindowForCurrentUnityVersion();
             }
@@ -710,6 +714,10 @@ namespace RedBlueGames.MulliganRenamer
                     {
                         this.ActivePreferences.ResetToDefaults();
                         this.SaveUserPreferences();
+                    });
+                    menu.AddItem(new GUIContent("DEBUG - Reload Languages"), false, () =>
+                    {
+                        LocaleManager.Instance.ReloadLanguages();
                     });
                 }
 
