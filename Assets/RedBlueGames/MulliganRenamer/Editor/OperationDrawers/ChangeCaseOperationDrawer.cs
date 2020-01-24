@@ -98,10 +98,12 @@ namespace RedBlueGames.MulliganRenamer
                 LocaleManager.Instance.GetTranslation("newCasing"),
                 LocaleManager.Instance.GetTranslation("theDesiredCasingForName"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("toUppercase")));
-            this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.EnumPopup(
+            var options = new GUIContent[] {new GUIContent(LocaleManager.Instance.GetTranslation("Lowercase")), new GUIContent(LocaleManager.Instance.GetTranslation("Uppercase"))};
+            this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.Popup(
                 singleLineRect,
                 casingLabel,
-                this.RenameOperation.Casing);
+                (int)RenameOperation.Casing,
+                options);
 
             var firstCharOnlyRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
             var firstCharToggleLabel = new GUIContent(
