@@ -69,7 +69,7 @@
 		},
 		{
 			"key" : "errorAddNewOpNotSub",
-			"value" : "MulliganRenamerWindow tentou Adicionar uma nova RenameOperation usando um tipo que não é uma subclasse de RenameOperationDrawerBinding. Tipo: "
+			"value" : "MulliganRenamerWindow tentou adicionar uma nova RenameOperation usando um tipo que não é uma subclasse de RenameOperationDrawerBinding. Tipo: "
 		},
 		{
 			"key" : "thankYouForSupport",
@@ -349,11 +349,11 @@
 		},
 		{
 			"key" : "caseSensitive",
-			"value" : "Case Sensitive"
+			"value" : "Sensível a maiúsculas e minúscula"
 		},
 		{
 			"key" : "searchUsingCaseSensitivity",
-			"value" : "Pesquise usando distinção entre maiúsculas e minúsculas. Somente as cordas que correspondem à caixa fornecida serão substituídas."
+			"value" : "Pesquise usando distinção entre maiúsculas e minúsculas. Somente as strings que correspondem à caixa fornecida serão substituídas."
 		},
 		{
 			"key" : "matchExpressNotValid",
@@ -393,7 +393,7 @@
 		},
 		{
 			"key" : "removeSpecialCharacters",
-			"value" : "Remove caracteres especiais (ie. !@#$%^&*)"
+			"value" : "Remove caracteres especiais (ex. !@#$%^&*)"
 		},
 		{
 			"key" : "numbers",
@@ -509,11 +509,11 @@
 		},
 		{
 			"key" : "newCasing",
-			"value" : "Nova Casing"
+			"value" : "Nova Caixa"
 		},
 		{
 			"key" : "theDesiredCasingForName",
-			"value" : "A Casing desejada para o novo nome."
+			"value" : "A Caixa desejada para o novo nome."
 		},
 		{
 			"key" : "onlyFirstCharacter",
@@ -553,7 +553,7 @@
 		},
 		{
 			"key" : "preferenceWindowTitle",
-			"value" : "Mulligan Renamer Preferences"
+			"value" : "Preferências do Mulligan Renamer"
 		},
 		{
 			"key" : "preferencesMenuItem",
@@ -561,31 +561,67 @@
 		},
 		{
 			"key" : "preferencesDiffLabel",
-			"value" : "Diff Colors"
+			"value" : "Cores de Diff"
 		},
 		{
 			"key" : "preferencesInsertionText",
-			"value" : "Insertion Text"
+			"value" : "Inserção de texto"
 		},
 		{
 			"key" : "preferencesInsertionBackground",
-			"value" : "Insertion Background"
+			"value" : "Inserção de fundo"
 		},
 		{
 			"key" : "preferencesDeletionText",
-			"value" : "Deletion Text"
+			"value" : "Eliminação de texto"
 		},
 		{
 			"key" : "preferencesDeletionBackground",
-			"value" : "Deletion Background"
+			"value" : "Elimninação de fundo"
 		},
 		{
 			"key" : "preferencesReset",
-			"value" : "Reset to Default"
+			"value" : "Restaurar ao padrão"
 		},
 		{
 			"key" : "preferences",
-			"value" : "Preferences"
+			"value" : "Preferências"
+		},
+		{
+			"key" : "exampleThisIs",
+			"value" : "Esse é"
+		},
+		{
+			"key" : "exampleSampleText",
+			"value" : "um texto exemplo"
+		},
+		{
+			"key" : "exampleWithWords",
+			"value" : "com palavras"
+		},
+		{
+			"key" : "exampleInserted",
+			"value" : "inseridas"
+		},
+		{
+			"key" : "exampleDeleted",
+			"value" : "eliminadas"
+		},
+		{
+			"key" : "adjustNumbers",
+			"value" : "Ajustar números"
+		},
+		{
+			"key" : "Lowercase",
+			"value" : "Caixa baixa"
+		},
+		{
+			"key" : "Uppercase",
+			"value" : "Caixa alta"
+		},
+		{
+			"key" : "offset",
+			"value" : "Compensar"
 		}
 	]
 }

@@ -586,6 +586,42 @@
 		{
 			"key" : "preferences",
 			"value" : "Preferences"
+		},
+		{
+			"key" : "exampleThisIs",
+			"value" : "This is"
+		},
+		{
+			"key" : "exampleSampleText",
+			"value" : "sample text"
+		},
+		{
+			"key" : "exampleWithWords",
+			"value" : "with words"
+		},
+		{
+			"key" : "exampleInserted",
+			"value" : "inserted"
+		},
+		{
+			"key" : "exampleDeleted",
+			"value" : "deleted"
+		},
+		{
+			"key" : "adjustNumbers",
+			"value" : "Adjust Numbers"
+		},
+		{
+			"key" : "Lowercase",
+			"value" : "Lowercase"
+		},
+		{
+			"key" : "Uppercase",
+			"value" : "Uppercase"
+		},
+		{
+			"key" : "offset",
+			"value" : "Offset"
 		}
 	]
 }

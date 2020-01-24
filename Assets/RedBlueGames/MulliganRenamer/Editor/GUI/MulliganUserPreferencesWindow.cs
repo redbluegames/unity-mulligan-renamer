@@ -124,7 +124,7 @@ namespace RedBlueGames.MulliganRenamer
                 prefsChanged = true;
             }
 
-            if (GUILayout.Button(LocaleManager.Instance.GetTranslation("preferencesReset"), GUILayout.Width(120)))
+            if (GUILayout.Button(LocaleManager.Instance.GetTranslation("preferencesReset"), GUILayout.Width(150)))
             {
                 preferences.ResetColorsToDefault(EditorGUIUtility.isProSkin);
                 prefsChanged = true;
@@ -140,7 +140,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             var content = new GUIContent(
                 LocaleManager.Instance.GetTranslation("language"),
-                LocaleManager.Instance.GetTranslation("languageTooltip"));
+                LocaleManager.Instance.GetTranslation(" languageTooltip"));
             var languages = new GUIContent[LocaleManager.Instance.AllLanguages.Count];
             for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
             {
@@ -197,10 +197,10 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff("This is ", DiffOperation.Equal));
-            renameResult.Add(new Diff("sample text", DiffOperation.Insertion));
-            renameResult.Add(new Diff(" with words ", DiffOperation.Equal));
-            renameResult.Add(new Diff("Inserted", DiffOperation.Insertion));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Insertion));
+            renameResult.Add(new Diff($" {LocaleManager.Instance.GetTranslation("exampleWithWords")} ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleInserted"), DiffOperation.Insertion));
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
         }
@@ -216,10 +216,10 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff("This is ", DiffOperation.Equal));
-            renameResult.Add(new Diff("sample text", DiffOperation.Deletion));
-            renameResult.Add(new Diff(" with words ", DiffOperation.Equal));
-            renameResult.Add(new Diff("Deleted", DiffOperation.Deletion));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Deletion));
+            renameResult.Add(new Diff($" {LocaleManager.Instance.GetTranslation("exampleWithWords")} ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleDeleted"), DiffOperation.Deletion));
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }
