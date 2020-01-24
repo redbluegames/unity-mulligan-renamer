@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return $"{LocaleManager.Instance.GetTranslation("modify")}/{LocaleManager.Instance.GetTranslation("adjustNumbers")}";
+                return LocaleManager.Instance.GetTranslation("modify") + "/" + LocaleManager.Instance.GetTranslation("adjustNumbers");
             }
         }
 
