@@ -260,6 +260,8 @@ namespace RedBlueGames.MulliganRenamer
             EditorApplication.update += this.CacheBulkRenamerPreview;
             EditorApplication.update += this.CacheValidSelectedObjects;
 
+            LocaleManager.Instance.LanguageChanged += this.HandleLanguageChanged;
+
             // Sometimes, GUI happens before Editor Update, so also cache a preview now.
             this.CacheBulkRenamerPreview();
             this.CacheValidSelectedObjects();
@@ -321,6 +323,14 @@ namespace RedBlueGames.MulliganRenamer
             this.ObjectsToRename.AddRange(objects);
         }
 
+        private void HandleLanguageChanged()
+        {
+            if (this.previewPanel != null)
+            {
+                this.previewPanel.RefreshGUIContent();
+            }
+        }
+
         private void OnDisable()
         {
             this.SaveUserPreferences();
@@ -341,6 +351,8 @@ namespace RedBlueGames.MulliganRenamer
             Selection.selectionChanged -= this.Repaint;
             EditorApplication.update -= this.CacheBulkRenamerPreview;
             EditorApplication.update -= this.CacheValidSelectedObjects;
+
+            LocaleManager.Instance.LanguageChanged -= this.HandleLanguageChanged;
         }
 
         private void CacheRenameOperationPrototypes()

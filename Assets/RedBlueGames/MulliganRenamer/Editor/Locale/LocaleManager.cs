@@ -42,7 +42,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
 
-        public UnityEvent OnLanguageChanged = new UnityEvent();
+        public event System.Action LanguageChanged;
 
         public static LocaleManager Instance
         {
@@ -104,8 +104,10 @@ namespace RedBlueGames.MulliganRenamer
         {
             EditorPrefs.SetString(LocaleKey, languageKey);
             this.currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
-            if (OnLanguageChanged != null)
-                OnLanguageChanged.Invoke();
+            if (this.LanguageChanged != null)
+            {
+                this.LanguageChanged.Invoke();
+            }
         }
 
         public string GetTranslation(string localeKey)

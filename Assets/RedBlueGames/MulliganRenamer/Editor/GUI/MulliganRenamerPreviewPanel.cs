@@ -162,8 +162,14 @@ namespace RedBlueGames.MulliganRenamer
             // Width for Buttons could be calculated from shared value with a bit of code cleanup.
             this.contentsLayout.WidthForButtons = 48.0f;
             this.contentsLayout.MinimumColumnWidth = MinColumnWidth;
+        }
 
-            LocaleManager.Instance.OnLanguageChanged.AddListener(this.InitializeGUIContents);
+        /// <summary>
+        /// Refresh the GUIContents of this window. Use this if the language changes, for example
+        /// </summary>
+        public void RefreshGUIContent()
+        {
+            this.InitializeGUIContents();
         }
 
         private static PreviewRowResult DrawPreviewRow(Rect rowRect, PreviewRowModel info, PreviewRowStyle style)
