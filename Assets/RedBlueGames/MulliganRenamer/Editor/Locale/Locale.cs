@@ -31,11 +31,15 @@ namespace RedBlueGames.MulliganRenamer
     [System.Serializable]
     public class Locale
     {
+        // These are assigned through Unity's serialization / deserialization.
+        // So we Ignore warning about Unassigned field.
+        #pragma warning disable 0649
         [SerializeField]
         private string key;
 
         [SerializeField]
         private string value;
+        #pragma warning restore 0649
 
         public string Key
         {
