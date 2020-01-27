@@ -87,7 +87,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private bool isResizingSecondDivider;
 
-        private bool drewEmptyLastFrame;
+        private bool drewEmptyLastFrame = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether this /// <see cref="T:RedBlueGames.MulliganRenamer.MulliganRenamerPreviewPanel"/>
@@ -468,6 +468,9 @@ namespace RedBlueGames.MulliganRenamer
                 bool shouldShowSecondColumn = this.ColumnsToShow != ColumnStyle.OriginalAndFinalOnly;
                 bool shouldShowThirdColumn = this.ColumnsToShow != ColumnStyle.StepwiseHideFinal;
 
+                // Force Fit on the first draw draw so that the columns get properly sized initially.
+                // This is to fix the bug where some of the columns would be collapsed until
+                // we messed with the preview window.
                 var forceFitContents = this.drewEmptyLastFrame;
                 this.contentsLayout.ResizeForContents(
                     scrollLayout.ScrollRect,

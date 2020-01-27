@@ -161,6 +161,12 @@ namespace RedBlueGames.MulliganRenamer
         {
             var bulkRenamerWindow = ShowWindow();
             bulkRenamerWindow.LoadSelectedObjects();
+
+            // Fix Issue #235. RenamePreview is cached OnEnable and Application Update,
+            // so when GUI draws this frame there's actually no preview, yet, so the 
+            // "Add Selected Objects" (Empty) preview panel flickers for a frame.
+            bulkRenamerWindow.CacheBulkRenamerPreview();
+            bulkRenamerWindow.CacheValidSelectedObjects();
         }
 
         private static bool ObjectIsRenamable(UnityEngine.Object obj)
