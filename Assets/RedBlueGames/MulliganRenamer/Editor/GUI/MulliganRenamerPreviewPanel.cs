@@ -33,13 +33,13 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganRenamerPreviewPanel
     {
-        const string BigUpArrowUnicode = "\u25B2";
-        const string BigDownArrowUnicode = "\u25BC";
         private const float MinColumnWidth = 125f;
         private const float PreviewRowHeight = 18.0f;
         private const float DividerWidth = 1f;
 
         private const float DividerHotSpotPadding = 3f;
+
+        private const float DeleteButtonWidth = 16.0f;
 
         /// <summary>
         /// Event fired when the AddSelectedObjects button is clicked
@@ -141,8 +141,6 @@ namespace RedBlueGames.MulliganRenamer
         {
             None,
             Delete,
-            MoveUp,
-            MoveDown
         }
 
         public MulliganRenamerPreviewPanel()
@@ -159,8 +157,7 @@ namespace RedBlueGames.MulliganRenamer
 
             this.contentsLayout = new PreviewPanelContentsLayout();
 
-            // Width for Buttons could be calculated from shared value with a bit of code cleanup.
-            this.contentsLayout.WidthForButtons = 48.0f;
+            this.contentsLayout.WidthForButtons = DeleteButtonWidth;
             this.contentsLayout.MinimumColumnWidth = MinColumnWidth;
         }
 
@@ -181,7 +178,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.DrawTexture(rowRect, Texture2D.whiteTexture);
             GUI.color = oldColor;
 
-            const float RowButtonsSize = 16f;
+            const float RowButtonsSize = DeleteButtonWidth;
             const float InitialXOffset = 4f;
             const float ColumnContentPadding = 2.0f;
 
@@ -196,40 +193,6 @@ namespace RedBlueGames.MulliganRenamer
             if (GUI.Button(deleteButtonRect, "X", deleteButtonStyle))
             {
                 result = PreviewRowResult.Delete;
-            }
-
-            deleteButtonRect.x += RowButtonsSize;
-            var upEnabled = !info.FirstElement;
-            GUI.enabled = upEnabled;
-            if (GUI.Button(deleteButtonRect, BigUpArrowUnicode, deleteButtonStyle))
-            {
-                result = PreviewRowResult.MoveUp;
-            }
-
-            if (!upEnabled)
-            {
-                GUI.enabled = true;
-                if (GUI.Button(deleteButtonRect, "", GUIStyle.none))
-                {
-                    EditorGUIUtility.PingObject(info.Object);
-                }
-            }
-
-            deleteButtonRect.x += RowButtonsSize;
-            var downEnabled = !info.LastElement;
-            GUI.enabled = downEnabled;
-            if (GUI.Button(deleteButtonRect, BigDownArrowUnicode, deleteButtonStyle))
-            {
-                result = PreviewRowResult.MoveDown;
-            }
-            GUI.enabled = true;
-
-            if (!downEnabled)
-            {
-                if (GUI.Button(deleteButtonRect, "", GUIStyle.none))
-                {
-                    EditorGUIUtility.PingObject(info.Object);
-                }
             }
 
             var widthOffset = RowButtonsSize + InitialXOffset;
@@ -733,18 +696,6 @@ namespace RedBlueGames.MulliganRenamer
                         if (this.ObjectRemovedAtIndex != null)
                         {
                             this.ObjectRemovedAtIndex.Invoke(i);
-                        }
-                        break;
-                    case PreviewRowResult.MoveUp:
-                        if (this.ChangeObjectOrder != null)
-                        {
-                            this.ChangeObjectOrder.Invoke(i, i - 1);
-                        }
-                        break;
-                    case PreviewRowResult.MoveDown:
-                        if (this.ChangeObjectOrder != null)
-                        {
-                            this.ChangeObjectOrder.Invoke(i, i + 1);
                         }
                         break;
                     default:
