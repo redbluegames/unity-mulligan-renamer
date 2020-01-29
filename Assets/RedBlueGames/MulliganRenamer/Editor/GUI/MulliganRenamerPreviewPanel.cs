@@ -1095,18 +1095,17 @@ namespace RedBlueGames.MulliganRenamer
                 var clampedWidth = Mathf.Max(contentWidth, this.MinimumContentWidth);
                 rect.width = clampedWidth;
 
-
                 this.ContentsRect = rect;
             }
 
-            public void ChangeFirstColumnWidth(float width)
+            public void ChangeFirstColumnWidth(float width, bool keepSecondColumnWidthFixed = false)
             {
                 var startingWidth = this.FirstColumnWidth;
                 this.FirstColumnWidth = Mathf.Max(width, this.MinimumColumnWidth);
                 var delta = this.FirstColumnWidth - startingWidth;
 
                 // When we resize the first column and the second column is hidden, we can't push its width cause it's hidden.
-                if (this.IsShowingSecondColumn)
+                if (this.IsShowingSecondColumn && !keepSecondColumnWidthFixed)
                 {
                     this.secondColumnWidth -= delta;
 
@@ -1131,12 +1130,13 @@ namespace RedBlueGames.MulliganRenamer
 
             public void ResizeFirstColumnToFitContent()
             {
-                this.ChangeFirstColumnWidth(this.firstColumnContentWidth);
+                var desiredWidth = this.firstColumnContentWidth + this.WidthForButtons;
+                this.ChangeFirstColumnWidth(desiredWidth, true);
             }
 
             public void ResizeSecondColumnToFitContent()
             {
-                this.ChangeSecondColumnWidth(this.secondColumnContentWidth);
+                this.ChangeSecondColumnWidth(this.secondColumnContentWidth - this.WidthForButtons);
             }
         }
 
