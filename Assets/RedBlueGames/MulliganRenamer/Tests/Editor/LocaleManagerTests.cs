@@ -28,22 +28,31 @@ namespace RedBlueGames.MulliganRenamer
 
     public class LocaleManagerTests
     {
+        private LocaleLanguage languageBeforeTest;
+
+        [SetUp]
+        public void Init()
+        {
+            this.languageBeforeTest = LocaleManager.Instance.CurrentLanguage;
+        }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            LocaleManager.Instance.ChangeLocale(this.languageBeforeTest.LanguageKey);
+        }
+
         [Test]
         public void ChangeLanguage()
         {
-            var savedLanguage = LocaleManager.Instance.CurrentLanguage;
             foreach (var language in LocaleManager.Instance.AllLanguages)
             {
                 LocaleManager.Instance.ChangeLocale(language.LanguageKey);
 
-                if (!language.LanguageKey.Equals(LocaleManager.Instance.CurrentLanguage.LanguageKey))
-                {
-                    LocaleManager.Instance.ChangeLocale(savedLanguage.LanguageKey);
-                    throw new Exception();
-                }
+                Assert.That(
+                    language.LanguageKey.Equals(LocaleManager.Instance.CurrentLanguage.LanguageKey),
+                    "LocaleManager did not change language to specified language, " + language.LanguageName + ".");
             }
-
-            LocaleManager.Instance.ChangeLocale(savedLanguage.LanguageKey);
         }
     }
 }
