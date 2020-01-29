@@ -69,5 +69,43 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
         }
+
+        [Test]
+        public void AllKeysInProject_ExistInAllLanguages()
+        {
+            var allScriptsGUIDs = UnityEditor.AssetDatabase.FindAssets("t:script");
+            var keysInUse = new List<ScriptKeyPair>();
+            var regex = new System.Text.RegularExpressions.Regex("LocaleManager.Instance.GetTranslation\\(\"([^\\)]*)\"\\)[,;]");
+            foreach (var guid in allScriptsGUIDs)
+            {
+                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                var script = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEditor.MonoScript>(path);
+                var matches = regex.Matches(script.text);
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    var key = match.Groups[1];
+                    keysInUse.Add(new ScriptKeyPair() { ScriptName = script.name, Key = key.Value });
+                }
+            }
+
+            foreach (var language in this.allResourceLanguages)
+            {
+                foreach (var scriptKeyPair in keysInUse)
+                {
+                    Assert.That(
+                        language.Elements.Exists(x => x.Key == scriptKeyPair.Key),
+                        "Script \"" + scriptKeyPair.ScriptName + "\" tries to access key \"" + scriptKeyPair.Key +
+                        "\" from Language " + language.LanguageName + " but it could not be found." +
+                        "Please add an element with this key to the language, or remove the GetTranslation call.");
+                }
+            }
+        }
+
+        private class ScriptKeyPair
+        {
+            public string ScriptName { get; set; }
+
+            public string Key { get; set; }
+        }
     }
 }
