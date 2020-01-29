@@ -26,7 +26,7 @@ namespace RedBlueGames.MulliganRenamer
     using NUnit.Framework;
     using System;
 
-    public class LocaleTests
+    public class LocaleLanguageTests
     {
         [Test]
         public void CheckAllLanguageKeys_WithEnglish()
@@ -60,24 +60,6 @@ namespace RedBlueGames.MulliganRenamer
                         ". Please add a value to the language.");
                 }
             }
-        }
-
-        [Test]
-        public void ChangeLanguage()
-        {
-            var savedLanguage = LocaleManager.Instance.CurrentLanguage;
-            foreach (var language in LocaleManager.Instance.AllLanguages)
-            {
-                LocaleManager.Instance.ChangeLocale(language.LanguageKey);
-
-                if (!language.LanguageKey.Equals(LocaleManager.Instance.CurrentLanguage.LanguageKey))
-                {
-                    LocaleManager.Instance.ChangeLocale(savedLanguage.LanguageKey);
-                    throw new Exception();
-                }
-            }
-
-            LocaleManager.Instance.ChangeLocale(savedLanguage.LanguageKey);
         }
     }
 }
