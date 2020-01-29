@@ -35,13 +35,15 @@ namespace RedBlueGames.MulliganRenamer
 
             foreach (var language in LocaleManager.Instance.AllLanguages)
             {
-                if(language.LanguageKey == "en")
+                if (language.LanguageKey == "en")
                     continue;
 
                 foreach (var englishElement in englishLanguage.Elements)
                 {
-                    if(!language.Elements.Exists(x => x.Key == englishElement.Key))
-                        throw new Exception($"Language {language.LanguageName} does not contains key {englishElement.Key}.");
+                    Assert.That(
+                        language.Elements.Exists(x => x.Key == englishElement.Key),
+                        "Language" + language.LanguageName + " does not contain key " + englishElement.Key +
+                        ". Please add an element with this key to the language.");
                 }
             }
         }
@@ -53,8 +55,9 @@ namespace RedBlueGames.MulliganRenamer
             {
                 foreach (var element in language.Elements)
                 {
-                    if (string.IsNullOrEmpty(element.Value))
-                        throw new Exception($"Language {language.LanguageName} does not contains value in key {element.Key}.");
+                    Assert.That(!string.IsNullOrEmpty(element.Value),
+                        "Language" + language.LanguageName + " does not contain a value in key " + element.Key +
+                        ". Please add a value to the language.");
                 }
             }
         }
