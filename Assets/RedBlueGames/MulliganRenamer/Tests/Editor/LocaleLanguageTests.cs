@@ -23,17 +23,25 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
     using NUnit.Framework;
-    using System;
 
     public class LocaleLanguageTests
     {
+        private List<LocaleLanguage> allResourceLanguages;
+
+        [SetUp]
+        public void Init()
+        {
+            this.allResourceLanguages = LocaleManager.LoadAllLanguages();
+        }
+
         [Test]
         public void CheckAllLanguageKeys_WithEnglish()
         {
-            var englishLanguage = LocaleManager.Instance.AllLanguages.Find(x => x.LanguageKey == "en");
+            var englishLanguage = this.allResourceLanguages.Find(x => x.LanguageKey == "en");
 
-            foreach (var language in LocaleManager.Instance.AllLanguages)
+            foreach (var language in this.allResourceLanguages)
             {
                 if (language.LanguageKey == "en")
                     continue;
@@ -42,8 +50,8 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     Assert.That(
                         language.Elements.Exists(x => x.Key == englishElement.Key),
-                        "Language" + language.LanguageName + " does not contain key " + englishElement.Key +
-                        ". Please add an element with this key to the language.");
+                        "Language " + language.LanguageName + " does not contain key \"" + englishElement.Key +
+                        "\". Please add an element with this key to the language.");
                 }
             }
         }
@@ -51,13 +59,13 @@ namespace RedBlueGames.MulliganRenamer
         [Test]
         public void CheckAllLanguages_HasValue()
         {
-            foreach (var language in LocaleManager.Instance.AllLanguages)
+            foreach (var language in this.allResourceLanguages)
             {
                 foreach (var element in language.Elements)
                 {
                     Assert.That(!string.IsNullOrEmpty(element.Value),
-                        "Language" + language.LanguageName + " does not contain a value in key " + element.Key +
-                        ". Please add a value to the language.");
+                        "Language " + language.LanguageName + " does not contain a value for key \"" + element.Key +
+                        "\". Please add a value to the language.");
                 }
             }
         }

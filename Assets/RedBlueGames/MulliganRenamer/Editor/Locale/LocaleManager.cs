@@ -27,7 +27,6 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
-    using UnityEngine.Events;
 
     /// <summary>
     /// At the constructor we load the the previous language that the user used
@@ -75,30 +74,49 @@ namespace RedBlueGames.MulliganRenamer
         private LocaleLanguage currentLanguage;
         private List<LocaleLanguage> allLanguages;
 
-        public LocaleManager()
+        private LocaleManager()
         {
-            this.ReloadLanguages();
+            this.Initialize();
         }
 
-        public void ReloadLanguages()
+        /// <summary>
+        /// Gets all the languages stored in the project for Mulligan
+        /// </summary>
+        /// <returns>A List of LocaleLanguages, loaded from disk.</returns>
+        public static List<LocaleLanguage> LoadAllLanguages()
         {
-            this.LoadAllLanguages();
-            this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
-        }
-
-        private void LoadAllLanguages()
-        {
-            this.allLanguages = new List<LocaleLanguage>();
-
+            var loadedLanguages = new List<LocaleLanguage>();
             var jsons = Resources.LoadAll<TextAsset>("MulliganLanguages");
             foreach (var json in jsons)
             {
                 var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
                 if (!string.IsNullOrEmpty(language.LanguageKey))
-                    this.allLanguages.Add(language);
+                {
+                    loadedLanguages.Add(language);
+                }
             }
+
+            return loadedLanguages;
         }
 
+        /// <summary>
+        /// (Re)Initialize the LocaleManager. This loads the languages and sets the language to English, if unset.
+        /// </summary>
+        public void Initialize()
+        {
+            this.CacheAllLanguages();
+            this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
+        }
+
+        private void CacheAllLanguages()
+        {
+            this.allLanguages = LoadAllLanguages();
+        }
+
+        /// <summary>
+        /// Change the current Locale so that Translations are of the new, specified languages
+        /// </summary>
+        /// <param name="languageKey">LanguageKey to change to</param>
         public void ChangeLocale(string languageKey)
         {
             EditorPrefs.SetString(LocaleKey, languageKey);
@@ -109,10 +127,17 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        /// <summary>
+        /// Get the translated string for the specified key in the current language.
+        /// </summary>
+        /// <param name="localeKey">Key whose value we will retrieve</param>
+        /// <returns>The value stored at the key in the current language</returns>
         public string GetTranslation(string localeKey)
         {
             if (this.currentLanguage == null)
+            {
                 throw new Exception("Current Language is not set");
+            }
 
             return this.currentLanguage.GetValue(localeKey);
         }

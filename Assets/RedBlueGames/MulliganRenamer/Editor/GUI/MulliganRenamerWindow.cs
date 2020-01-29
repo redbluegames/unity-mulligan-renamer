@@ -735,7 +735,7 @@ namespace RedBlueGames.MulliganRenamer
                     });
                     menu.AddItem(new GUIContent("DEBUG - Reload Languages"), false, () =>
                     {
-                        LocaleManager.Instance.ReloadLanguages();
+                        LocaleManager.Instance.Initialize();
                     });
                 }
 
