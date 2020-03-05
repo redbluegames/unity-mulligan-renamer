@@ -45,3 +45,7 @@ sysinfo.txt
 !.vscode/launch.json
 !.vscode/extensions.json
 # End of https://www.gitignore.io/api/visualstudiocode
+
+# Ignore unencrypted license files
+*.alf
+*.ulf
