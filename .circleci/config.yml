@@ -1,0 +1,18 @@
+version: 2.1
+executors:
+  unity:
+    docker:
+      # https://hub.docker.com/r/gableroux/unity3d/tags
+      - image: gableroux/unity3d:2018.4.2f1-unity
+jobs:
+  build-test:
+    executor: unity
+    steps:
+      - checkout
+      - run: openssl aes-256-cbc -d -in .circleci/Unity_v2018.x.ulf-cipher -k ${CIPHER_KEY} >> .circleci/Unity_v2018.x.ulf
+      - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .circleci/Unity_v2018.x.ulf || exit 0
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build-test
