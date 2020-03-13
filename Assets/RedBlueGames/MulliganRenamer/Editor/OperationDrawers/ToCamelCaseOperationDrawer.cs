@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("toCamelCase");
+                return LocalizationManager.Instance.GetTranslation("toCamelCase");
             }
         }
 
@@ -95,8 +95,8 @@ namespace RedBlueGames.MulliganRenamer
             var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
             var pascalLabel = new GUIContent(
-                LocaleManager.Instance.GetTranslation("usePascalCasing"),
-                LocaleManager.Instance.GetTranslation("flagToCapitalizeTheFirstLetterOfname"));
+                LocalizationManager.Instance.GetTranslation("usePascalCasing"),
+                LocalizationManager.Instance.GetTranslation("flagToCapitalizeTheFirstLetterOfname"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Pascal"));
             this.RenameOperation.UsePascal = EditorGUI.Toggle(
                 singleLineRect,
@@ -106,9 +106,9 @@ namespace RedBlueGames.MulliganRenamer
 
             var delimitersRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
             var delimitersLabel = new GUIContent(
-                LocaleManager.Instance.GetTranslation("delimiterCharacters"),
-                LocaleManager.Instance.GetTranslation("caseSensitiveCharactersIndicateStart"));
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("delimiters")));
+                LocalizationManager.Instance.GetTranslation("delimiterCharacters"),
+                LocalizationManager.Instance.GetTranslation("caseSensitiveCharactersIndicateStart"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("delimiters")));
             this.RenameOperation.DelimiterCharacters = EditorGUI.TextField(
                 delimitersRect,
                 delimitersLabel,

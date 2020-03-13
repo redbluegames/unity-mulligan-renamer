@@ -23,23 +23,52 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Linq;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
-    /// Class responsible for holding the data for localized text
+    /// Class responsible for holding all the translated elements
+    /// you can get a translated content by its key calling Get method
     /// </summary>
-    [System.Serializable]
-    public class Locale
+	[System.Serializable]
+    public class Language
     {
         // These are assigned through Unity's serialization / deserialization.
         // So we Ignore warning about Unassigned field.
-        #pragma warning disable 0649
+#pragma warning disable 0649
+        [SerializeField]
+        private string name;
+
         [SerializeField]
         private string key;
 
         [SerializeField]
-        private string value;
-        #pragma warning restore 0649
+        private int version;
+
+        [SerializeField]
+        private List<LocalizedString> elements;
+#pragma warning restore 0649
+
+        /// <summary>
+        /// The Version of the language, used to determine whether or not data has been updated.
+        /// This should be incremented when changes are made.
+        /// </summary>
+        public int Version
+        {
+            get
+            {
+                return this.version;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
 
         public string Key
         {
@@ -49,12 +78,18 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        public string Value
+        public List<LocalizedString> Elements
         {
             get
             {
-                return value;
+                return elements;
             }
+        }
+
+        public string GetValue(string key)
+        {
+            var language = elements.Find(x => x.Key.Equals(key));
+            return language != null ? language.Value : "A0";
         }
     }
 }

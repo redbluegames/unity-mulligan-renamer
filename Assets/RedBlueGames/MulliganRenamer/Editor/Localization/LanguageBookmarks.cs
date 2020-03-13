@@ -1,6 +1,6 @@
 ﻿/* MIT License
 
-Copyright (c) 2019 Murillo Pugliesi Lopes, https://github.com/Mukarillo
+Copyright (c) 2016 Edward Rowe, RedBlueGames
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,65 +21,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections.Generic;
-    using UnityEngine;
-
-    /// <summary>
-    /// Class responsible for holding all the translated elements
-    /// you can get a translated content by its key calling Get method
-    /// </summary>
-	[System.Serializable]
-	public class LocaleLanguage
-	{
+    public class LanguageBookmarks
+    {
         // These are assigned through Unity's serialization / deserialization.
         // So we Ignore warning about Unassigned field.
-        #pragma warning disable 0649
-		[SerializeField]
-		private string languageName;
-		[SerializeField]
-		private string languageKey;
-		[SerializeField]
-		private List<Locale> elements;
-		#pragma warning restore 0649
+#pragma warning disable 0649
+        [SerializeField]
+        private List<string> languageUrls;
+#pragma warning restore 0649
 
-		public string LanguageName
-		{
-			get
-			{
-				return languageName;
-			}
-		}
-
-		public string LanguageKey
-		{
-			get
-			{
-				return languageKey;
-			}
-		}
-
-		public List<Locale> Elements
-		{
-			get
-			{
-				return elements;
-			}
-		}
-
-		public bool IsActive
-		{
-			get
-			{
-				return LocaleManager.Instance.CurrentLanguage == this;
-			}
-		}
-
-		public string GetValue(string key)
-		{
-			var locale = elements.Find(x => x.Key.Equals(key));
-			return locale != null ? locale.Value : "A0";
-		}
-	}
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<string> LanguageUrls
+        {
+            get
+            {
+                return this.languageUrls;
+            }
+        }
+    }
 }

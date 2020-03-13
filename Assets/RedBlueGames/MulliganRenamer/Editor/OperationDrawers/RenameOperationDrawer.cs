@@ -202,7 +202,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="name">The name of the operation</param>
         protected string GetOperationPath(string folder, string name)
         {
-            return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(name);
+            return LocalizationManager.Instance.GetTranslation(folder) + "/" + LocalizationManager.Instance.GetTranslation(name);
         }
 
         private RenameOperationSortingButtonEvent DrawReorderingButtons(Rect containingRect, bool disableUpButton, bool disableDownButton)
