@@ -88,3 +88,70 @@ namespace RedBlueGames.MulliganRenamer
         }
     }
 }
+/*
+
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace RedBlueGames.MulliganRenamer
+{
+    public class JSONRetrieverWeb<T> : IJSONRetriever<T>
+    {
+        private IWebRequest requester;
+
+        private AsyncOp<T> outstandingOp;
+
+        public JSONRetrieverWeb(string url) : this(url, UnityWebRequestFacade.Get(url))
+        {
+        }
+
+        private JSONRetrieverWeb(string url, IWebRequest requester)
+        {
+            this.requester = requester;
+        }
+
+        public AsyncOp<T> GetJSON()
+        {
+            this.outstandingOp = new AsyncOp<T>();
+            EditorCoroutineUtility.StartBackgroundTask(this.Post(requester));
+            return this.outstandingOp;
+        }
+
+        private IEnumerator Post(IWebRequest requester)
+        {
+            using (this.requester)
+            {
+                var startTime = Time.realtimeSinceStartup;
+                requester.Timeout = 2;
+
+                var webOp = requester.SendWebRequest();
+                while (webOp.Status == AsyncStatus.Pending)
+                {
+                    if (Time.realtimeSinceStartup - startTime > requester.Timeout)
+                    {
+                        this.outstandingOp.Status = AsyncStatus.Failed;
+                        yield break;
+                    }
+
+                    if (requester.IsNetworkError)
+                    {
+                        this.outstandingOp.Status = AsyncStatus.Failed;
+                        yield break;
+                    }
+
+                    yield return null;
+                }
+
+                this.outstandingOp.Status = AsyncStatus.Success;
+
+                var json = JsonUtility.FromJson<T>(requester.DownloadedText);
+                this.outstandingOp.ResultData = json;
+
+                System.IO.File.WriteAllText("test.txt", requester.DownloadedText);
+                Debug.Log(requester.DownloadedText);
+            }
+        }
+    }
+}
+*/
