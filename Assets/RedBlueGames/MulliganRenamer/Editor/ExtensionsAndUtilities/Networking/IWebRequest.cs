@@ -28,8 +28,14 @@ namespace RedBlueGames.MulliganRenamer
 
     public interface IWebRequest : IDisposable
     {
-        UnityWebRequestAsyncOperation SendWebRequest();
+        void SendWebRequest();
+
+        int Timeout { get; set; }
 
         bool IsDone { get; }
+
+        bool IsNetworkError { get; }
+
+        string DownloadedText {get;}
     }
 }

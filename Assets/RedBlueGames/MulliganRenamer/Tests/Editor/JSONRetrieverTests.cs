@@ -58,6 +58,34 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
         }
 
+        [UnityTest]
+        public IEnumerator GetJSONNoWeb_ValidURLValidJSON_ReturnsExpected()
+        {
+            // Assemble
+            var simpleJson = new SimpleJson();
+            simpleJson.AnInt = 5;
+
+            // Act
+            var mockWebRequest = new MockWebRequest("{ \"anInt\": 5}");
+            var getter = new JSONRetrieverWeb<SimpleJson>(mockWebRequest);
+            var op = getter.GetJSON();
+
+            var startTime = Time.realtimeSinceStartup;
+            var timeout = 3.0f;
+            while (op.Status.Equals(AsyncStatus.Pending))
+            {
+                if (Time.realtimeSinceStartup - startTime > timeout)
+                {
+                    Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending");
+                    yield break;
+                }
+
+                yield return null;
+            }
+
+            Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
+        }
+
         [Test]
         public void GetJSON_InvalidURL_ThrowsBadURL()
         {

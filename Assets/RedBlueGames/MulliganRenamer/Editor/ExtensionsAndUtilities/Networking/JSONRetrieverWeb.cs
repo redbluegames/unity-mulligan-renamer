@@ -29,84 +29,15 @@ namespace RedBlueGames.MulliganRenamer
 {
     public class JSONRetrieverWeb<T> : IJSONRetriever<T>
     {
-        private string url;
-
-        private AsyncOp<T> outstandingOp;
-
-        public JSONRetrieverWeb(string url)
-        {
-            this.url = url;
-        }
-
-        public AsyncOp<T> GetJSON()
-        {
-            this.outstandingOp = new AsyncOp<T>();
-            EditorCoroutineUtility.StartBackgroundTask(this.Post(this.url));
-            return this.outstandingOp;
-        }
-
-        private IEnumerator Post(string uri)
-        {
-            var startTime = Time.realtimeSinceStartup;
-            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
-            {
-                webRequest.timeout = 2;
-
-                var webOp = webRequest.SendWebRequest();
-
-                while (!webOp.isDone)
-                {
-                    if (Time.realtimeSinceStartup - startTime > webRequest.timeout)
-                    {
-                        this.outstandingOp.Status = AsyncStatus.Failed;
-                        yield break;
-                    }
-
-                    if (webRequest.isNetworkError)
-                    {
-                        this.outstandingOp.Status = AsyncStatus.Failed;
-                        yield break;
-                    }
-
-                    yield return null;
-                }
-
-                this.outstandingOp.Status = AsyncStatus.Success;
-
-                // Strip the Byte Order Mark from the JSON file
-                var jsonString = System.Text.Encoding.UTF8.GetString(
-                    webRequest.downloadHandler.data,
-                    3,
-                    webRequest.downloadHandler.data.Length - 3);
-
-                System.IO.File.WriteAllText("test.txt", jsonString);
-                Debug.Log(jsonString);
-
-                var json = JsonUtility.FromJson<T>(jsonString);
-                this.outstandingOp.ResultData = json;
-            }
-        }
-    }
-}
-/*
-
-using System.Collections;
-using UnityEngine;
-using UnityEngine.Networking;
-
-namespace RedBlueGames.MulliganRenamer
-{
-    public class JSONRetrieverWeb<T> : IJSONRetriever<T>
-    {
         private IWebRequest requester;
 
         private AsyncOp<T> outstandingOp;
 
-        public JSONRetrieverWeb(string url) : this(url, UnityWebRequestFacade.Get(url))
+        public JSONRetrieverWeb(string url) : this(UnityWebRequestWrapper.Get(url))
         {
         }
 
-        private JSONRetrieverWeb(string url, IWebRequest requester)
+        public JSONRetrieverWeb(IWebRequest requester)
         {
             this.requester = requester;
         }
@@ -125,8 +56,8 @@ namespace RedBlueGames.MulliganRenamer
                 var startTime = Time.realtimeSinceStartup;
                 requester.Timeout = 2;
 
-                var webOp = requester.SendWebRequest();
-                while (webOp.Status == AsyncStatus.Pending)
+                requester.SendWebRequest();
+                while (!requester.IsDone)
                 {
                     if (Time.realtimeSinceStartup - startTime > requester.Timeout)
                     {
@@ -154,4 +85,3 @@ namespace RedBlueGames.MulliganRenamer
         }
     }
 }
-*/
