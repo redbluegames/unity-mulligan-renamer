@@ -25,6 +25,6 @@ namespace RedBlueGames.MulliganRenamer
 {
     public interface IJSONRetriever<T>
     {
-        AsyncOp<T> GetJSON(string source);
+        AsyncOp<T> GetJSON();
     }
 }

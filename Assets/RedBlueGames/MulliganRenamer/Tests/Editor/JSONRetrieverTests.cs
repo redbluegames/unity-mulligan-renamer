@@ -35,11 +35,12 @@ namespace RedBlueGames.MulliganRenamer
         public IEnumerator GetJSON_ValidURLValidJSON_ReturnsExpected()
         {
             // Assemble
-            var english = LocaleManager.Instance.CurrentLanguage;
+            var simpleJson = new SimpleJson();
+            simpleJson.AnInt = 5;
 
             // Act
-            var getter = new JSONRetrieverWeb<LocaleLanguage>();
-            var op = getter.GetJSON("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json");
+            var getter = new JSONRetrieverWeb<SimpleJson>("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web/Assets/RedBlueGames/MulliganRenamer/Tests/Editor/SimpleJson.json");
+            var op = getter.GetJSON();
 
             var startTime = Time.realtimeSinceStartup;
             var timeout = 3.0f;
@@ -54,7 +55,7 @@ namespace RedBlueGames.MulliganRenamer
                 yield return null;
             }
 
-            Assert.AreEqual(english, op.ResultData);
+            Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
         }
 
         [Test]
@@ -73,6 +74,26 @@ namespace RedBlueGames.MulliganRenamer
         public void GetJSON_InvalidUrl_Timeout()
         {
             Assert.Fail();
+        }
+
+        [System.Serializable]
+        public class SimpleJson
+        {
+            [SerializeField]
+            private int anInt;
+
+            public int AnInt
+            {
+                get
+                {
+                    return this.anInt;
+                }
+
+                set
+                {
+                    this.anInt = value;
+                }
+            }
         }
     }
 }

@@ -29,34 +29,40 @@ namespace RedBlueGames.MulliganRenamer
 {
     public class JSONRetrieverWeb<T> : IJSONRetriever<T>
     {
+        private string url;
 
         private AsyncOp<T> outstandingOp;
 
-        public AsyncOp<T> GetJSON(string url)
+        public JSONRetrieverWeb(string url)
+        {
+            this.url = url;
+        }
+
+        public AsyncOp<T> GetJSON()
         {
             this.outstandingOp = new AsyncOp<T>();
-            EditorCoroutineUtility.StartBackgroundTask(this.Post(url));
+            EditorCoroutineUtility.StartBackgroundTask(this.Post(this.url));
             return this.outstandingOp;
         }
 
         private IEnumerator Post(string uri)
         {
             var startTime = Time.realtimeSinceStartup;
-            using (UnityWebRequest w = UnityWebRequest.Get(uri))
+            using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
             {
-                w.timeout = 2;
+                webRequest.timeout = 2;
 
-                var webOp = w.SendWebRequest();
+                var webOp = webRequest.SendWebRequest();
 
                 while (!webOp.isDone)
                 {
-                    if (Time.realtimeSinceStartup - startTime > w.timeout)
+                    if (Time.realtimeSinceStartup - startTime > webRequest.timeout)
                     {
                         this.outstandingOp.Status = AsyncStatus.Failed;
                         yield break;
                     }
 
-                    if (w.isNetworkError)
+                    if (webRequest.isNetworkError)
                     {
                         this.outstandingOp.Status = AsyncStatus.Failed;
                         yield break;
@@ -67,11 +73,17 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.outstandingOp.Status = AsyncStatus.Success;
 
-                var json = JsonUtility.FromJson<T>(w.downloadHandler.text);
-                this.outstandingOp.ResultData = json;
+                // Strip the Byte Order Mark from the JSON file
+                var jsonString = System.Text.Encoding.UTF8.GetString(
+                    webRequest.downloadHandler.data,
+                    3,
+                    webRequest.downloadHandler.data.Length - 3);
 
-                System.IO.File.WriteAllText("test.txt", w.downloadHandler.text);
-                Debug.Log(w.downloadHandler.text);
+                System.IO.File.WriteAllText("test.txt", jsonString);
+                Debug.Log(jsonString);
+
+                var json = JsonUtility.FromJson<T>(jsonString);
+                this.outstandingOp.ResultData = json;
             }
         }
     }
