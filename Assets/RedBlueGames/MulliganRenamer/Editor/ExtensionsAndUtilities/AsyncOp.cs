@@ -29,6 +29,9 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections;
+    using UnityEngine;
+
     /// <summary>
     /// AsyncOperation provides a way to query when an asynchronous operation has completed
     /// and what the result was.
@@ -81,6 +84,21 @@ namespace RedBlueGames.MulliganRenamer
             set
             {
                 this.status = value;
+            }
+        }
+
+        public IEnumerator WaitForResult(float timeout)
+        {
+            var startTime = Time.realtimeSinceStartup;
+            while (this.Status == AsyncStatus.Pending)
+            {
+                if (Time.realtimeSinceStartup - startTime > timeout)
+                {
+                    this.Status = AsyncStatus.Timeout;
+                    break;
+                }
+
+                yield return null;
             }
         }
     }

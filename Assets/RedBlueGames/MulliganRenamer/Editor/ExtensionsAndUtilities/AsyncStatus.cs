@@ -53,6 +53,11 @@ namespace RedBlueGames.MulliganRenamer
         public static readonly AsyncStatus Canceled = new AsyncStatus("Canceled");
 
         /// <summary>
+        /// Status result for a timedout async operations.
+        /// </summary>
+        public static readonly AsyncStatus Timeout = new AsyncStatus("Timeout");
+
+        /// <summary>
         /// Status result for a failed async operations. Note that other custom failure
         /// types may be created, so *avoid* (op == AsyncOp.Failed) style checks.
         /// </summary>

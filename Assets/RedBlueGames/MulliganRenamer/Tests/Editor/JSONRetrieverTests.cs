@@ -70,17 +70,10 @@ namespace RedBlueGames.MulliganRenamer
             var getter = new JSONRetrieverWeb<SimpleJson>(mockWebRequest);
             var op = getter.GetJSON();
 
-            var startTime = Time.realtimeSinceStartup;
-            var timeout = 3.0f;
-            while (op.Status.Equals(AsyncStatus.Pending))
+            yield return op.WaitForResult(3.0f);
+            if (op.Status == AsyncStatus.Timeout)
             {
-                if (Time.realtimeSinceStartup - startTime > timeout)
-                {
-                    Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending");
-                    yield break;
-                }
-
-                yield return null;
+                Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending");
             }
 
             Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
@@ -99,7 +92,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void GetJSON_InvalidUrl_Timeout()
+        public void GetJSON_NoServerEndpoint_Timeout()
         {
             Assert.Fail();
         }
