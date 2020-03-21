@@ -70,12 +70,6 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(JSONRetrieverWeb<SimpleJson>.ErrorCodeInvalidJsonFormat, op.FailureCode);
         }
 
-        [Test]
-        public void GetJSON_NoInternet_Fails()
-        {
-            Assert.Fail();
-        }
-
         [UnityTest]
         public IEnumerator GetJSON_NoServerEndpoint_Timesout()
         {
@@ -89,12 +83,40 @@ namespace RedBlueGames.MulliganRenamer
             Assert.AreEqual(AsyncStatus.Timeout, op.Status);
         }
 
-        [Test]
-        public void GetJSON_BackToBackGet_ReturnsSameResult()
+        [UnityTest]
+        public IEnumerator GetJSON_NetworkError_Fails()
         {
             // Assemble
             // Act
-            Assert.Fail();
+            var mockError = new MockWebRequestNetworkError();
+            var getter = new JSONRetrieverWeb<SimpleJson>(mockError);
+            var op = getter.GetJSON(1);
+            yield return op.WaitForResult(1.5f, () => Assert.Fail("Unexpected timeout. JsonRetrieverWeb should have sent a failure, but did not."));
+
+            Assert.AreEqual(AsyncStatus.Failed, op.Status);
+        }
+
+        [UnityTest]
+        public IEnumerator GetJSON_ReuseRetriever_ReturnsSameResultTwice()
+        {
+            // Assemble
+            var simpleJson = new SimpleJson();
+            simpleJson.AnInt = 3;
+
+            // Act
+            var mockWebRequest = new MockWebRequest("{ \"anInt\": 3}");
+            var getter = new JSONRetrieverWeb<SimpleJson>(mockWebRequest);
+            var op = getter.GetJSON(1);
+            yield return op.WaitForResult(1.5f, () => Assert.Fail("Test timed out on first Get. AsyncOp never returned a Status besides Pending."));
+
+            Assert.AreEqual(AsyncStatus.Success, op.Status);
+            Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
+
+            var op2 = getter.GetJSON(1);
+            yield return op2.WaitForResult(1.5f, () => Assert.Fail("Test timed out on second Get. AsyncOp never returned a Status besides Pending."));
+
+            Assert.AreEqual(AsyncStatus.Success, op.Status);
+            Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
         }
 
         [System.Serializable]

@@ -2,7 +2,7 @@
 {
     using System;
 
-    public class MockWebRequestTimeout : IWebRequest, IDisposable
+    public class MockWebRequestNetworkError : IWebRequest, IDisposable
     {
         public int Timeout { get; set; }
 
@@ -14,19 +14,13 @@
             }
         }
 
-        public bool IsNetworkError
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool IsNetworkError { get; private set; }
 
         public bool IsTimeout
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -38,12 +32,14 @@
             }
         }
 
-        public MockWebRequestTimeout()
+        public MockWebRequestNetworkError()
         {
+            this.IsNetworkError = false;
         }
 
         public void SendWebRequest()
         {
+            this.IsNetworkError = true;
         }
 
         public void Dispose()

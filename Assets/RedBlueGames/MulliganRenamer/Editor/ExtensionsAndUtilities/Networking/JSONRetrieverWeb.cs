@@ -89,7 +89,6 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var json = JsonUtility.FromJson<T>(requester.DownloadedText);
                     this.outstandingOp.ResultData = json;
-                    Debug.Log(requester.DownloadedText);
                 }
                 catch (System.ArgumentException e)
                 {
