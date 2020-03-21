@@ -48,9 +48,9 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void GetJSON_InvalidURL_ThrowsBadURL()
+        public void GetJSON_InvalidURI_ThrowsBadURI()
         {
-            Assert.Fail();
+            Assert.Throws<System.ArgumentException>(() => new JSONRetrieverWeb<SimpleJson>("InvalidUri"));
         }
 
         [UnityTest]

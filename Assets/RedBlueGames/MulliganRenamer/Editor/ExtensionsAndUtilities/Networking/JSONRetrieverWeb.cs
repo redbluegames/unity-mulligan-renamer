@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -35,8 +36,15 @@ namespace RedBlueGames.MulliganRenamer
 
         private AsyncOp<T> outstandingOp;
 
-        public JSONRetrieverWeb(string url) : this(UnityWebRequestWrapper.Get(url))
+        public JSONRetrieverWeb(string uri) : this(UnityWebRequestWrapper.Get(uri))
         {
+            Uri uriResult;
+            bool result = Uri.TryCreate(uri, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            if (!result)
+            {
+                throw new System.ArgumentException("Invalid URI Format.");
+            }
         }
 
         public JSONRetrieverWeb(IWebRequest requester)
