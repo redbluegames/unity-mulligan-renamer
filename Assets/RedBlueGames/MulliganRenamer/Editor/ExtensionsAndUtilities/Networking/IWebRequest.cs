@@ -36,6 +36,8 @@ namespace RedBlueGames.MulliganRenamer
 
         bool IsNetworkError { get; }
 
+        bool IsTimeout { get; }
+
         string DownloadedText {get;}
     }
 }

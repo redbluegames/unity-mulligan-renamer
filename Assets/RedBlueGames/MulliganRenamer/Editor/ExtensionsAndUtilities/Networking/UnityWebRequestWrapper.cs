@@ -7,7 +7,26 @@
     {
         private UnityWebRequest webRequest;
 
-        public int Timeout { get; set; }
+        public int Timeout
+        {
+            get
+            {
+                return this.webRequest.timeout;
+            }
+
+            set
+            {
+                this.webRequest.timeout = value;
+            }
+        }
+
+        public bool IsTimeout
+        {
+            get
+            {
+                return this.webRequest.isNetworkError && this.webRequest.error == "Request timeout";
+            }
+        }
 
         public bool IsDone
         {

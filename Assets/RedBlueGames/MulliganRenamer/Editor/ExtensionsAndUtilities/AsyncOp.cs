@@ -87,14 +87,18 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        public IEnumerator WaitForResult(float timeout)
+        public IEnumerator WaitForResult(float timeout, System.Action timeoutCallback)
         {
             var startTime = Time.realtimeSinceStartup;
             while (this.Status == AsyncStatus.Pending)
             {
                 if (Time.realtimeSinceStartup - startTime > timeout)
                 {
-                    this.Status = AsyncStatus.Timeout;
+                    if (timeoutCallback != null)
+                    {
+                        timeoutCallback.Invoke();
+                    }
+
                     break;
                 }
 

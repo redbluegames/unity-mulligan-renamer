@@ -23,6 +23,14 @@
             }
         }
 
+        public bool IsTimeout
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public string DownloadedText { get; private set; }
 
         public MockWebRequest(string outputText)

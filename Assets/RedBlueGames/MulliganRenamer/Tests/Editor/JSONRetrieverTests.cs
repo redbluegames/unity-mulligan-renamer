@@ -24,7 +24,6 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
-    using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.TestTools;
     using NUnit.Framework;
@@ -39,42 +38,10 @@ namespace RedBlueGames.MulliganRenamer
             simpleJson.AnInt = 5;
 
             // Act
-            var getter = new JSONRetrieverWeb<SimpleJson>("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web/Assets/RedBlueGames/MulliganRenamer/Tests/Editor/SimpleJson.json");
-            var op = getter.GetJSON();
-
-            var startTime = Time.realtimeSinceStartup;
-            var timeout = 3.0f;
-            while (op.Status.Equals(AsyncStatus.Pending))
-            {
-                if (Time.realtimeSinceStartup - startTime > timeout)
-                {
-                    Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending");
-                    yield break;
-                }
-
-                yield return null;
-            }
-
-            Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
-        }
-
-        [UnityTest]
-        public IEnumerator GetJSONNoWeb_ValidURLValidJSON_ReturnsExpected()
-        {
-            // Assemble
-            var simpleJson = new SimpleJson();
-            simpleJson.AnInt = 5;
-
-            // Act
             var mockWebRequest = new MockWebRequest("{ \"anInt\": 5}");
             var getter = new JSONRetrieverWeb<SimpleJson>(mockWebRequest);
-            var op = getter.GetJSON();
-
-            yield return op.WaitForResult(3.0f);
-            if (op.Status == AsyncStatus.Timeout)
-            {
-                Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending");
-            }
+            var op = getter.GetJSON(1);
+            yield return op.WaitForResult(1.5f, () => Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending."));
 
             Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
         }
@@ -92,9 +59,22 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void GetJSON_NoServerEndpoint_Timeout()
+        public void GetJSON_NoInternet_Fails()
         {
             Assert.Fail();
+        }
+
+        [UnityTest]
+        public IEnumerator GetJSON_NoServerEndpoint_Timeout()
+        {
+            // Assemble
+            // Act
+            var mockTimeout = new MockWebRequestTimeout();
+            var getter = new JSONRetrieverWeb<SimpleJson>(mockTimeout);
+            var op = getter.GetJSON(1);
+            yield return op.WaitForResult(1.5f, () => Assert.Fail("Unexpected timeout. JsonRetrieverWeb should have sent a timeout, but did not."));
+
+            Assert.AreEqual(AsyncStatus.Timeout, op.Status);
         }
 
         [System.Serializable]

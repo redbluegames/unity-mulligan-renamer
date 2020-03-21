@@ -42,26 +42,25 @@ namespace RedBlueGames.MulliganRenamer
             this.requester = requester;
         }
 
-        public AsyncOp<T> GetJSON()
+        public AsyncOp<T> GetJSON(int timeout)
         {
             this.outstandingOp = new AsyncOp<T>();
-            EditorCoroutineUtility.StartBackgroundTask(this.Post(requester));
+            EditorCoroutineUtility.StartBackgroundTask(this.Post(requester, timeout));
             return this.outstandingOp;
         }
 
-        private IEnumerator Post(IWebRequest requester)
+        private IEnumerator Post(IWebRequest requester, int timeout)
         {
             using (this.requester)
             {
-                var startTime = Time.realtimeSinceStartup;
-                requester.Timeout = 2;
+                requester.Timeout = timeout;
 
                 requester.SendWebRequest();
                 while (!requester.IsDone)
                 {
-                    if (Time.realtimeSinceStartup - startTime > requester.Timeout)
+                    if (requester.IsTimeout)
                     {
-                        this.outstandingOp.Status = AsyncStatus.Failed;
+                        this.outstandingOp.Status = AsyncStatus.Timeout;
                         yield break;
                     }
 

@@ -62,5 +62,10 @@ namespace RedBlueGames.MulliganRenamer
         /// types may be created, so *avoid* (op == AsyncOp.Failed) style checks.
         /// </summary>
         public static readonly AsyncStatus Failed = new AsyncStatus("Failed");
+
+        public override string ToString()
+        {
+            return this.Description;
+        }
     }
 }
