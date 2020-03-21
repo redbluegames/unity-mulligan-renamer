@@ -29,6 +29,8 @@ namespace RedBlueGames.MulliganRenamer
 {
     public class JSONRetrieverWeb<T> : IJSONRetriever<T>
     {
+        public static readonly string ErrorCodeInvalidJsonFormat = "Invalid JSON format";
+
         private IWebRequest requester;
 
         private AsyncOp<T> outstandingOp;
@@ -75,11 +77,18 @@ namespace RedBlueGames.MulliganRenamer
 
                 this.outstandingOp.Status = AsyncStatus.Success;
 
-                var json = JsonUtility.FromJson<T>(requester.DownloadedText);
-                this.outstandingOp.ResultData = json;
-
-                System.IO.File.WriteAllText("test.txt", requester.DownloadedText);
-                Debug.Log(requester.DownloadedText);
+                try
+                {
+                    var json = JsonUtility.FromJson<T>(requester.DownloadedText);
+                    this.outstandingOp.ResultData = json;
+                    Debug.Log(requester.DownloadedText);
+                }
+                catch (System.ArgumentException e)
+                {
+                    this.outstandingOp.Status = AsyncStatus.Failed;
+                    this.outstandingOp.FailureCode = ErrorCodeInvalidJsonFormat;
+                    this.outstandingOp.FailureMessage = e.Message;
+                }
             }
         }
     }

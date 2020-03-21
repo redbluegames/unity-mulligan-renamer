@@ -87,6 +87,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public string FailureCode { get; set; }
+
+        public string FailureMessage { get; set; }
+
         public IEnumerator WaitForResult(float timeout, System.Action timeoutCallback)
         {
             var startTime = Time.realtimeSinceStartup;

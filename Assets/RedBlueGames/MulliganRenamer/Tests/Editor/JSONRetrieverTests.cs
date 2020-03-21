@@ -43,6 +43,7 @@ namespace RedBlueGames.MulliganRenamer
             var op = getter.GetJSON(1);
             yield return op.WaitForResult(1.5f, () => Assert.Fail("Test timed out. AsyncOp never returned a Status besides Pending."));
 
+            Assert.AreEqual(AsyncStatus.Success, op.Status);
             Assert.AreEqual(simpleJson.AnInt, op.ResultData.AnInt);
         }
 
@@ -52,10 +53,21 @@ namespace RedBlueGames.MulliganRenamer
             Assert.Fail();
         }
 
-        [Test]
-        public void GetJSON_InvalidJSON_ThrowsBadJSON()
+        [UnityTest]
+        public IEnumerator GetJSON_InvalidJSON_ThrowsBadJSON()
         {
-            Assert.Fail();
+            // Assemble
+            var badJson = "{ \"anIntWithNoValue\" } ";
+
+            // Act
+            var mockWebRequest = new MockWebRequest(badJson);
+            var getter = new JSONRetrieverWeb<SimpleJson>(mockWebRequest);
+            //Assert.Throws<System.ArgumentException>(() => getter.GetJSON(1), "Expected ArgumentException due to invalid Json format.");
+            var op = getter.GetJSON(1);
+            yield return op.WaitForResult(1.5f, () => Assert.Fail("Unexpected timeout. Test timed out, expected InvalidJSON exception"));
+
+            Assert.AreEqual(AsyncStatus.Failed, op.Status);
+            Assert.AreEqual(JSONRetrieverWeb<SimpleJson>.ErrorCodeInvalidJsonFormat, op.FailureCode);
         }
 
         [Test]
@@ -65,7 +77,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [UnityTest]
-        public IEnumerator GetJSON_NoServerEndpoint_Timeout()
+        public IEnumerator GetJSON_NoServerEndpoint_Timesout()
         {
             // Assemble
             // Act
@@ -75,6 +87,14 @@ namespace RedBlueGames.MulliganRenamer
             yield return op.WaitForResult(1.5f, () => Assert.Fail("Unexpected timeout. JsonRetrieverWeb should have sent a timeout, but did not."));
 
             Assert.AreEqual(AsyncStatus.Timeout, op.Status);
+        }
+
+        [Test]
+        public void GetJSON_BackToBackGet_ReturnsSameResult()
+        {
+            // Assemble
+            // Act
+            Assert.Fail();
         }
 
         [System.Serializable]
