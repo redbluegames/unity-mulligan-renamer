@@ -23,18 +23,51 @@
         {
             this.IsDoneUpdating = false;
 
-            var timeStarted = Time.realtimeSinceStartup;
-            while (Time.realtimeSinceStartup - timeStarted < 3.0f)
+            LanguageBookmarks bookmarks = null;
             {
-                yield return null;
+                var bookmarkRetriever = new JSONRetrieverWeb<LanguageBookmarks>
+                    ("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/LanguageBookmarks.json");
+                var bookmarkFetchOp = bookmarkRetriever.GetJSON(3);
+                while (bookmarkFetchOp.Status == AsyncStatus.Pending)
+                {
+                    yield return null;
+                }
+
+                if (bookmarkFetchOp.Status != AsyncStatus.Success)
+                {
+                    Debug.Log("Whoops. Status:" + bookmarkFetchOp.Status + ". FailCode:" + bookmarkFetchOp.FailureCode + ". Message" + bookmarkFetchOp.FailureMessage);
+                    yield break;
+                }
+
+                bookmarks = bookmarkFetchOp.ResultData;
             }
 
-            // Fetch Languages
-            // . Foreach valid language
-            // .    Update it in the project
-            // .       If the fetched one is newer, Update it. If it's older, do nothing.
-            // . Foreach removed Language
-            // .    Delete it
+            var languages = new List<LocaleLanguage>();
+            {
+                foreach (var url in bookmarks.LanguageUrls)
+                {
+                    var languageRetriever = new JSONRetrieverWeb<LocaleLanguage>(url);
+                    var languageFetchOp = languageRetriever.GetJSON(3);
+                    while (languageFetchOp.Status == AsyncStatus.Pending)
+                    {
+                        yield return null;
+                    }
+
+                    if (languageFetchOp.Status != AsyncStatus.Success)
+                    {
+                        Debug.Log("Whoops. Status:" + languageFetchOp.Status + ". FailCode:" + languageFetchOp.FailureCode + ". Message" + languageFetchOp.FailureMessage);
+                        continue;
+                    }
+
+                    languages.Add(languageFetchOp.ResultData);
+                }
+            }
+
+            foreach (var language in languages)
+            {
+                this.UpdateLanguage(language);
+                Debug.Log("Language: " + language.LanguageName);
+            }
         }
 
         private void HandleUpdateComplete()
@@ -43,24 +76,14 @@
             this.IsDoneUpdating = true;
         }
 
-        private List<Locale> FetchLanguages()
-        {
-            Debug.Log("Fetching Languages");
-            // Get Bookmarks
-            // If Bookmarks is valid
-            //   Foreach Bookmark
-            // .    Download Language at Bookmark
-            return null;
-        }
-
-        private void UpdateLanguage(Locale localeA)
+        private void UpdateLanguage(LocaleLanguage language)
         {
             // find the corresponding language on disk
             // LocaleManager.Instance.AllLanguages;
             // If it doesn't, add this one.
-            // .  LocaleManager.Instance.SaveLanguageToDisk(Locale language)
+            // .  LocaleManager.Instance.SaveLanguageToDisk(Locale language) (needs to load it immediately)
             // compare the two
-
+            // If new one is newer version, stomp old one. Otherwise nothing.
         }
     }
 }
