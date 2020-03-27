@@ -29,7 +29,7 @@ namespace RedBlueGames.MulliganRenamer
     /// Class responsible for holding the data for localized text
     /// </summary>
     [System.Serializable]
-    public class Locale
+    public class LocalizedString
     {
         // These are assigned through Unity's serialization / deserialization.
         // So we Ignore warning about Unassigned field.

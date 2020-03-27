@@ -1,6 +1,7 @@
 ﻿/* MIT License
 
-Copyright (c) 2019 Murillo Pugliesi Lopes, https://github.com/Mukarillo
+Copyright (c) 2019 Murillo Pugliesi Lopes, https://github.com/Mukarillo,
+and Edward Rowe.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,33 +30,31 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEngine;
 
     /// <summary>
-    /// At the constructor we load the the previous language that the user used
-    /// using english as the default. This will cache the language and it's translations
-    /// also we load all the languages by accesing the JSON files inside LocaleLanguagesPath path
-    /// this is used to show the available languages to the user
+    /// Manages the loading and serving of languages. Use this to get translated strings
+    /// for the user's current language.
     /// </summary>
-    public class LocaleManager
+    public class LocalizationManager
     {
-        private static LocaleManager _Instance;
+        private static LocalizationManager _Instance;
 
-        private const string LocaleKey = "RedBlueGames.MulliganRenamer.Locale";
+        private const string LanguagePrefKey = "RedBlueGames.MulliganRenamer.Locale";
 
         public event System.Action LanguageChanged;
 
-        public static LocaleManager Instance
+        public static LocalizationManager Instance
         {
             get
             {
                 if (_Instance == null)
                 {
-                    _Instance = new LocaleManager();
+                    _Instance = new LocalizationManager();
                 }
 
                 return _Instance;
             }
         }
 
-        public LocaleLanguage CurrentLanguage
+        public Language CurrentLanguage
         {
             get
             {
@@ -63,7 +62,7 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        public List<LocaleLanguage> AllLanguages
+        public List<Language> AllLanguages
         {
             get
             {
@@ -71,10 +70,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private LocaleLanguage currentLanguage;
-        private List<LocaleLanguage> allLanguages;
+        private Language currentLanguage;
+        private List<Language> allLanguages;
 
-        private LocaleManager()
+        private LocalizationManager()
         {
             this.Initialize();
         }
@@ -83,14 +82,14 @@ namespace RedBlueGames.MulliganRenamer
         /// Gets all the languages stored in the project for Mulligan
         /// </summary>
         /// <returns>A List of LocaleLanguages, loaded from disk.</returns>
-        public static List<LocaleLanguage> LoadAllLanguages()
+        public static List<Language> LoadAllLanguages()
         {
-            var loadedLanguages = new List<LocaleLanguage>();
+            var loadedLanguages = new List<Language>();
             var jsons = Resources.LoadAll<TextAsset>("MulliganLanguages");
             foreach (var json in jsons)
             {
-                var language = JsonUtility.FromJson<LocaleLanguage>(json.text);
-                if (!string.IsNullOrEmpty(language.LanguageKey))
+                var language = JsonUtility.FromJson<Language>(json.text);
+                if (!string.IsNullOrEmpty(language.Key))
                 {
                     loadedLanguages.Add(language);
                 }
@@ -105,7 +104,7 @@ namespace RedBlueGames.MulliganRenamer
         public void Initialize()
         {
             this.CacheAllLanguages();
-            this.ChangeLocale(EditorPrefs.GetString(LocaleKey, "en"));
+            this.ChangeLanguage(EditorPrefs.GetString(LanguagePrefKey, "en"));
         }
 
         private void CacheAllLanguages()
@@ -117,10 +116,10 @@ namespace RedBlueGames.MulliganRenamer
         /// Change the current Locale so that Translations are of the new, specified languages
         /// </summary>
         /// <param name="languageKey">LanguageKey to change to</param>
-        public void ChangeLocale(string languageKey)
+        public void ChangeLanguage(string languageKey)
         {
-            EditorPrefs.SetString(LocaleKey, languageKey);
-            this.currentLanguage = allLanguages.Find(x => x.LanguageKey == languageKey);
+            EditorPrefs.SetString(LanguagePrefKey, languageKey);
+            this.currentLanguage = allLanguages.Find(x => x.Key == languageKey);
             if (this.LanguageChanged != null)
             {
                 this.LanguageChanged.Invoke();
@@ -130,16 +129,16 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Get the translated string for the specified key in the current language.
         /// </summary>
-        /// <param name="localeKey">Key whose value we will retrieve</param>
+        /// <param name="languageKey">Key whose value we will retrieve</param>
         /// <returns>The value stored at the key in the current language</returns>
-        public string GetTranslation(string localeKey)
+        public string GetTranslation(string languageKey)
         {
             if (this.currentLanguage == null)
             {
                 throw new Exception("Current Language is not set");
             }
 
-            return this.currentLanguage.GetValue(localeKey);
+            return this.currentLanguage.GetValue(languageKey);
         }
     }
 }

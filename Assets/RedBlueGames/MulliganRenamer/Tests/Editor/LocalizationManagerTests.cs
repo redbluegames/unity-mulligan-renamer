@@ -26,32 +26,32 @@ namespace RedBlueGames.MulliganRenamer
     using NUnit.Framework;
     using System;
 
-    public class LocaleManagerTests
+    public class LocalizationManagerTests
     {
-        private LocaleLanguage languageBeforeTest;
+        private Language languageBeforeTest;
 
         [SetUp]
         public void Init()
         {
-            this.languageBeforeTest = LocaleManager.Instance.CurrentLanguage;
+            this.languageBeforeTest = LocalizationManager.Instance.CurrentLanguage;
         }
 
         [TearDown]
         public void Cleanup()
         {
-            LocaleManager.Instance.ChangeLocale(this.languageBeforeTest.LanguageKey);
+            LocalizationManager.Instance.ChangeLanguage(this.languageBeforeTest.Key);
         }
 
         [Test]
         public void ChangeLanguage()
         {
-            foreach (var language in LocaleManager.Instance.AllLanguages)
+            foreach (var language in LocalizationManager.Instance.AllLanguages)
             {
-                LocaleManager.Instance.ChangeLocale(language.LanguageKey);
+                LocalizationManager.Instance.ChangeLanguage(language.Key);
 
                 Assert.That(
-                    language.LanguageKey.Equals(LocaleManager.Instance.CurrentLanguage.LanguageKey),
-                    "LocaleManager did not change language to specified language, " + language.LanguageName + ".");
+                    language.Key.Equals(LocalizationManager.Instance.CurrentLanguage.Key),
+                    "LocaleManager did not change language to specified language, " + language.Name + ".");
             }
         }
     }

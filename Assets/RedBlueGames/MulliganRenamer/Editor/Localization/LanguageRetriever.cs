@@ -42,11 +42,11 @@
                 bookmarks = bookmarkFetchOp.ResultData;
             }
 
-            var languages = new List<LocaleLanguage>();
+            var languages = new List<Language>();
             {
                 foreach (var url in bookmarks.LanguageUrls)
                 {
-                    var languageRetriever = new JSONRetrieverWeb<LocaleLanguage>(url);
+                    var languageRetriever = new JSONRetrieverWeb<Language>(url);
                     var languageFetchOp = languageRetriever.GetJSON(3);
                     while (languageFetchOp.Status == AsyncStatus.Pending)
                     {
@@ -66,7 +66,7 @@
             foreach (var language in languages)
             {
                 this.UpdateLanguage(language);
-                Debug.Log("Language: " + language.LanguageName);
+                Debug.Log("Language: " + language.Name);
             }
         }
 
@@ -76,7 +76,7 @@
             this.IsDoneUpdating = true;
         }
 
-        private void UpdateLanguage(LocaleLanguage language)
+        private void UpdateLanguage(Language language)
         {
             // find the corresponding language on disk
             // LocaleManager.Instance.AllLanguages;

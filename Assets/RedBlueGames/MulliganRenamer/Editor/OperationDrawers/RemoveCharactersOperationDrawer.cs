@@ -54,7 +54,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("removeCharacters");
+                return LocalizationManager.Instance.GetTranslation("removeCharacters");
             }
         }
 
@@ -78,7 +78,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("preset");
+                return LocalizationManager.Instance.GetTranslation("preset");
             }
         }
 
@@ -153,8 +153,8 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var presetsContent = new GUIContent(
-                LocaleManager.Instance.GetTranslation("preset"),
-                LocaleManager.Instance.GetTranslation("selectPresetOrSpecifyCharacters"));
+                LocalizationManager.Instance.GetTranslation("preset"),
+                LocalizationManager.Instance.GetTranslation("selectPresetOrSpecifyCharacters"));
             var names = new List<GUIContent>(this.GUIPresets.Count);
             foreach (var preset in this.GUIPresets)
             {
@@ -203,8 +203,8 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 var charactersFieldContent = new GUIContent(
-                    LocaleManager.Instance.GetTranslation("charactersToRemove"),
-                    LocaleManager.Instance.GetTranslation("allCharactersThatWillBeRemoved"));
+                    LocalizationManager.Instance.GetTranslation("charactersToRemove"),
+                    LocalizationManager.Instance.GetTranslation("allCharactersThatWillBeRemoved"));
                 GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, charactersFieldContent.text));
                 workingOptions.CharactersToRemove = EditorGUI.TextField(
                     operationRect.GetSplitVertical(++currentSplit, numSplits, LineSpacing),
@@ -212,8 +212,8 @@ namespace RedBlueGames.MulliganRenamer
                     this.RenameOperation.CharactersToRemove);
 
                 var caseSensitiveToggleContent = new GUIContent(
-                    LocaleManager.Instance.GetTranslation("caseSensitive"),
-                    LocaleManager.Instance.GetTranslation("flagTheSearchToMatchCase"));
+                    LocalizationManager.Instance.GetTranslation("caseSensitive"),
+                    LocalizationManager.Instance.GetTranslation("flagTheSearchToMatchCase"));
                 workingOptions.IsCaseSensitive = EditorGUI.Toggle(
                     operationRect.GetSplitVertical(++currentSplit, numSplits, LineSpacing),
                     caseSensitiveToggleContent,
@@ -234,31 +234,31 @@ namespace RedBlueGames.MulliganRenamer
         {
             var symbolsPreset = new CharacterPresetGUI()
             {
-                DisplayName = LocaleManager.Instance.GetTranslation("symbols"),
-                ReadOnlyLabel = LocaleManager.Instance.GetTranslation("removeSpecialCharacters"),
+                DisplayName = LocalizationManager.Instance.GetTranslation("symbols"),
+                ReadOnlyLabel = LocalizationManager.Instance.GetTranslation("removeSpecialCharacters"),
                 PresetID = RemoveCharactersOperation.PresetID.Symbols,
                 IsReadOnly = true
             };
 
             var numbersPreset = new CharacterPresetGUI()
             {
-                DisplayName = LocaleManager.Instance.GetTranslation("numbers"),
-                ReadOnlyLabel = LocaleManager.Instance.GetTranslation("removeDigits"),
+                DisplayName = LocalizationManager.Instance.GetTranslation("numbers"),
+                ReadOnlyLabel = LocalizationManager.Instance.GetTranslation("removeDigits"),
                 PresetID = RemoveCharactersOperation.PresetID.Numbers,
                 IsReadOnly = true
             };
 
             var whitespacePreset = new CharacterPresetGUI()
             {
-                DisplayName = LocaleManager.Instance.GetTranslation("whitespace"),
-                ReadOnlyLabel = LocaleManager.Instance.GetTranslation("removesWhitespace"),
+                DisplayName = LocalizationManager.Instance.GetTranslation("whitespace"),
+                ReadOnlyLabel = LocalizationManager.Instance.GetTranslation("removesWhitespace"),
                 PresetID = RemoveCharactersOperation.PresetID.Whitespace,
                 IsReadOnly = true
             };
 
             var customPreset = new CharacterPresetGUI()
             {
-                DisplayName = LocaleManager.Instance.GetTranslation("custom"),
+                DisplayName = LocalizationManager.Instance.GetTranslation("custom"),
                 PresetID = RemoveCharactersOperation.PresetID.Custom,
                 IsReadOnly = false,
                 ReadOnlyLabel = string.Empty

@@ -64,7 +64,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string GetOperationPath(string folder, string operationTitle)
         {
-            return LocaleManager.Instance.GetTranslation(folder) + "/" + LocaleManager.Instance.GetTranslation(operationTitle);
+            return LocalizationManager.Instance.GetTranslation(folder) + "/" + LocalizationManager.Instance.GetTranslation(operationTitle);
         }
 
         private List<T> operationSequence;

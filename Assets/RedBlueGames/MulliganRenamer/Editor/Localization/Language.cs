@@ -32,36 +32,38 @@ namespace RedBlueGames.MulliganRenamer
     /// you can get a translated content by its key calling Get method
     /// </summary>
 	[System.Serializable]
-    public class LocaleLanguage
+    public class Language
     {
         // These are assigned through Unity's serialization / deserialization.
         // So we Ignore warning about Unassigned field.
 #pragma warning disable 0649
         [SerializeField]
-        private string languageName;
+        private string name;
+
         [SerializeField]
-        private string languageKey;
+        private string key;
+
         [SerializeField]
-        private List<Locale> elements;
+        private List<LocalizedString> elements;
 #pragma warning restore 0649
 
-        public string LanguageName
+        public string Name
         {
             get
             {
-                return languageName;
+                return name;
             }
         }
 
-        public string LanguageKey
+        public string Key
         {
             get
             {
-                return languageKey;
+                return key;
             }
         }
 
-        public List<Locale> Elements
+        public List<LocalizedString> Elements
         {
             get
             {
@@ -71,8 +73,8 @@ namespace RedBlueGames.MulliganRenamer
 
         public string GetValue(string key)
         {
-            var locale = elements.Find(x => x.Key.Equals(key));
-            return locale != null ? locale.Value : "A0";
+            var language = elements.Find(x => x.Key.Equals(key));
+            return language != null ? language.Value : "A0";
         }
     }
 }
