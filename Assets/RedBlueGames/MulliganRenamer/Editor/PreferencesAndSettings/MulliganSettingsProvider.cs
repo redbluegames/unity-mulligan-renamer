@@ -44,6 +44,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private static MulliganUserPreferences ActivePreferences;
 
+        private static LanguageRetriever LanguageRetriever;
+
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
@@ -56,6 +58,7 @@ namespace RedBlueGames.MulliganRenamer
                 activateHandler = (searchContext, rootElement) =>
                 {
                     ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+                    LanguageRetriever = new LanguageRetriever();
                 },
 
                 // Create the SettingsProvider and initialize its drawing (IMGUI) function in place:
@@ -70,7 +73,8 @@ namespace RedBlueGames.MulliganRenamer
 
         private static void DrawPreferences(string searchContext)
         {
-            MulliganUserPreferencesWindow.DrawPreferences(ActivePreferences);
+            // Pass in state into the Window since window doesn't have any when opened as a Preference item
+            MulliganUserPreferencesWindow.DrawPreferences(ActivePreferences, LanguageRetriever);
         }
 #endif
     }

@@ -42,8 +42,9 @@ namespace RedBlueGames.MulliganRenamer
 
         private const float MaxWidth = 550.0f;
 
-        private MulliganUserPreferences ActivePreferences;
+        private MulliganUserPreferences activePreferences;
 
+        private LanguageRetriever languageRetriever;
 
         private static GUIStyle SampleDiffLabelStyle
         {
@@ -68,19 +69,22 @@ namespace RedBlueGames.MulliganRenamer
 
         private void OnEnable()
         {
-            ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+            // Note that Enable is not called when opened as Preference item (via SettingsProvider api)
+            // We implement it for old versions of Unity that just use a traditional EditorWindow for settings
+            this.activePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+            this.languageRetriever = new LanguageRetriever();
         }
 
         private void OnGUI()
         {
-            DrawPreferences(this.ActivePreferences);
+            DrawPreferences(this.activePreferences, this.languageRetriever);
         }
 
         /// <summary>
         /// Draw the Preferences using Unity GUI framework.
         /// </summary>
         /// <param name="preferences">Preferences to draw and update</param>
-        public static void DrawPreferences(MulliganUserPreferences preferences)
+        public static void DrawPreferences(MulliganUserPreferences preferences, LanguageRetriever languageRetriever)
         {
             // I override LabelWidth (and MaxWidth) just to look more like Unity's native preferences
             EditorGUIUtility.labelWidth = LabelWidth;
@@ -92,13 +96,7 @@ namespace RedBlueGames.MulliganRenamer
                 LocaleManager.Instance.ChangeLocale(newLanguage.LanguageKey);
             }
 
-            if (GUILayout.Button("Refresh"))
-            {
-                //GetRequest("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json");
-                //                GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
-                GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/3b6cb71bb7ef752f81e487c3353118bd6b7dfdbf/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
-                Debug.Log("Pressed");
-            }
+            DrawUpdateLanguagesButton(languageRetriever);
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -145,6 +143,21 @@ namespace RedBlueGames.MulliganRenamer
             {
                 preferences.SaveToEditorPrefs();
             }
+        }
+
+        private static void DrawUpdateLanguagesButton(LanguageRetriever retriever)
+        {
+            EditorGUI.BeginDisabledGroup(!retriever.IsDoneUpdating);
+            if (GUILayout.Button("Refresh"))
+            {
+                Debug.Log("Pressed");
+                retriever.UpdateLanguages();
+                //GetRequest("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json");
+                //                GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
+                //GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/3b6cb71bb7ef752f81e487c3353118bd6b7dfdbf/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
+            }
+
+            EditorGUI.EndDisabledGroup();
         }
 
         private static void GetRequest(string destinationUrl)
