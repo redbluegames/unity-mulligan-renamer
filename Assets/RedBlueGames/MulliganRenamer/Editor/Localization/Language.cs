@@ -44,8 +44,23 @@ namespace RedBlueGames.MulliganRenamer
         private string key;
 
         [SerializeField]
+        private int version;
+
+        [SerializeField]
         private List<LocalizedString> elements;
 #pragma warning restore 0649
+
+        /// <summary>
+        /// The Version of the language, used to determine whether or not data has been updated.
+        /// This should be incremented when changes are made.
+        /// </summary>
+        public int Version
+        {
+            get
+            {
+                return this.version;
+            }
+        }
 
         public string Name
         {
