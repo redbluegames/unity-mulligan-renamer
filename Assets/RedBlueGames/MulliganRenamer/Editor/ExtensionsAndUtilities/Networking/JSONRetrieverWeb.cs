@@ -31,7 +31,7 @@ namespace RedBlueGames.MulliganRenamer
     /// Get a JSON object from a specified address using the specified IWebRequest
     /// </summary>
     /// <typeparam name="T">Type of the JSON object to contstruct after fetching the file.</typeparam>
-    public class JSONRetrieverWeb<T> : IJSONRetriever<T>
+    public class JSONRetrieverWeb<T>
     {
         public static readonly string ErrorCodeInvalidJsonFormat = "Invalid JSON format";
 
