@@ -63,27 +63,13 @@
                 }
             }
 
-            foreach (var language in languages)
-            {
-                this.UpdateLanguage(language);
-                Debug.Log("Language: " + language.Name);
-            }
+            LocalizationManager.Instance.AddOrUpdateLanguages(languages);
         }
 
         private void HandleUpdateComplete()
         {
             Debug.Log("Update Complete");
             this.IsDoneUpdating = true;
-        }
-
-        private void UpdateLanguage(Language language)
-        {
-            // find the corresponding language on disk
-            // LocaleManager.Instance.AllLanguages;
-            // If it doesn't, add this one.
-            // .  LocaleManager.Instance.SaveLanguageToDisk(Locale language) (needs to load it immediately)
-            // compare the two
-            // If new one is newer version, stomp old one. Otherwise nothing.
         }
     }
 }

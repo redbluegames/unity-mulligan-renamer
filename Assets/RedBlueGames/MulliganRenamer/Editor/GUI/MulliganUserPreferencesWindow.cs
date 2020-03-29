@@ -192,8 +192,17 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             var currentLanguageIndex = GetLanguageIndex(currentLanguage);
-            var newIndex = EditorGUILayout.Popup(content, currentLanguageIndex, languages, GUILayout.MaxWidth(MaxWidth));
-            return LocalizationManager.Instance.AllLanguages[newIndex];
+            if (currentLanguageIndex >= 0 && currentLanguageIndex < LocalizationManager.Instance.AllLanguages.Count)
+            {
+                var newIndex = EditorGUILayout.Popup(content, currentLanguageIndex, languages, GUILayout.MaxWidth(MaxWidth));
+                return LocalizationManager.Instance.AllLanguages[newIndex];
+            }
+            else
+            {
+                Debug.Log("Can't draw LanguageDropdown as the CurrentLanguage was not found in LocalizationManager." +
+                    " Restarting Unity should fix this. This should not happen in production, please report it on GitHub issues.");
+                return LocalizationManager.Instance.CurrentLanguage;
+            }
         }
 
         private static int GetLanguageIndex(Language language)
@@ -201,7 +210,7 @@ namespace RedBlueGames.MulliganRenamer
             var currentLanguageIndex = -1;
             for (int i = 0; i < LocalizationManager.Instance.AllLanguages.Count; ++i)
             {
-                if (LocalizationManager.Instance.AllLanguages[i] == language)
+                if (LocalizationManager.Instance.AllLanguages[i].Key == language.Key)
                 {
                     currentLanguageIndex = i;
                     break;
