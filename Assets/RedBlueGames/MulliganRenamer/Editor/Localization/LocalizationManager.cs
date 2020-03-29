@@ -113,18 +113,22 @@ namespace RedBlueGames.MulliganRenamer
             this.CacheAllLanguages();
             this.ChangeLanguage(EditorPrefs.GetString(LanguagePrefKey, "en"));
         }
-
         /// <summary>
         /// Change the current Locale so that Translations are of the new, specified languages
         /// </summary>
         /// <param name="languageKey">LanguageKey to change to</param>
         public void ChangeLanguage(string languageKey)
         {
-            EditorPrefs.SetString(LanguagePrefKey, languageKey);
-            this.currentLanguage = allLanguages.Find(x => x.Key == languageKey);
-            if (this.LanguageChanged != null)
+            var language = this.allLanguages.FirstOrDefault(x => x.Key == languageKey);
+            if (language != null)
             {
-                this.LanguageChanged.Invoke();
+                EditorPrefs.SetString(LanguagePrefKey, languageKey);
+                this.currentLanguage = language;
+
+                if (this.LanguageChanged != null)
+                {
+                    this.LanguageChanged.Invoke();
+                }
             }
         }
 

@@ -43,7 +43,7 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void ChangeLanguage()
+        public void ChangeLanguage_GoodKey_Changes()
         {
             foreach (var language in LocalizationManager.Instance.AllLanguages)
             {
@@ -51,8 +51,21 @@ namespace RedBlueGames.MulliganRenamer
 
                 Assert.That(
                     language.Key.Equals(LocalizationManager.Instance.CurrentLanguage.Key),
-                    "LocaleManager did not change language to specified language, " + language.Name + ".");
+                    "LocalizationManager did not change language to specified language, " + language.Name + ".");
             }
+        }
+
+        [Test]
+        public void ChangeLanguage_BadKey_DoesNotChange()
+        {
+            var oldLanguage = LocalizationManager.Instance.CurrentLanguage;
+            var receivedLanguageChangedEvent = false;
+            LocalizationManager.Instance.LanguageChanged += () => receivedLanguageChangedEvent = true;
+            LocalizationManager.Instance.ChangeLanguage("doesNotExist");
+            Assert.AreEqual(oldLanguage, LocalizationManager.Instance.CurrentLanguage,
+                "LocalizationManager changed language when passed an invalid key. It should remain unchanged.");
+            Assert.False(receivedLanguageChangedEvent, "LocalizationManager fired off event for langauge changed" +
+                ", but it should not have changed, or fired the event.");
         }
     }
 }
