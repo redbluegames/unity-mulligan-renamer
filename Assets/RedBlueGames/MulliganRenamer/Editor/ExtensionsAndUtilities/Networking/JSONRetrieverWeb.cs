@@ -24,10 +24,13 @@ SOFTWARE.
 using System.Collections;
 using System;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace RedBlueGames.MulliganRenamer
 {
+    /// <summary>
+    /// Get a JSON object from a specified address using the specified IWebRequest
+    /// </summary>
+    /// <typeparam name="T">Type of the JSON object to contstruct after fetching the file.</typeparam>
     public class JSONRetrieverWeb<T> : IJSONRetriever<T>
     {
         public static readonly string ErrorCodeInvalidJsonFormat = "Invalid JSON format";
@@ -52,6 +55,11 @@ namespace RedBlueGames.MulliganRenamer
             this.requester = requester;
         }
 
+        /// <summary>
+        /// Request the JSON from the web using the initialized uri. 
+        /// </summary>
+        /// <param name="timeout">Timeout for the web request, which returns AsyncStatus of Timeout.</param>
+        /// <returns>An AsyncOp. Query this for the status of the operation and for its results.</returns>
         public AsyncOp<T> GetJSON(int timeout)
         {
             this.outstandingOp = new AsyncOp<T>();

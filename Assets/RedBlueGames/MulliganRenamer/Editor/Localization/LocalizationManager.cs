@@ -152,6 +152,26 @@ namespace RedBlueGames.MulliganRenamer
             SortLanguages(this.allLanguages);
         }
 
+        /// <summary>
+        /// Get the translated string for the specified key in the current language.
+        /// </summary>
+        /// <param name="languageKey">Key whose value we will retrieve</param>
+        /// <returns>The value stored at the key in the current language</returns>
+        public string GetTranslation(string languageKey)
+        {
+            if (this.currentLanguage == null)
+            {
+                throw new Exception("Current Language is not set");
+            }
+
+            return this.currentLanguage.GetValue(languageKey);
+        }
+
+        private void CacheAllLanguages()
+        {
+            this.allLanguages = LoadAllLanguages();
+        }
+
         private void UpdateLanguage(Language newLanguage)
         {
             Language existingLanguage = this.allLanguages.FirstOrDefault((l) => l.Key == newLanguage.Key);
@@ -178,26 +198,6 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.currentLanguage = newLanguage;
             }
-        }
-
-        /// <summary>
-        /// Get the translated string for the specified key in the current language.
-        /// </summary>
-        /// <param name="languageKey">Key whose value we will retrieve</param>
-        /// <returns>The value stored at the key in the current language</returns>
-        public string GetTranslation(string languageKey)
-        {
-            if (this.currentLanguage == null)
-            {
-                throw new Exception("Current Language is not set");
-            }
-
-            return this.currentLanguage.GetValue(languageKey);
-        }
-
-        private void CacheAllLanguages()
-        {
-            this.allLanguages = LoadAllLanguages();
         }
 
         private void SaveLanguageToDisk(Language language)
