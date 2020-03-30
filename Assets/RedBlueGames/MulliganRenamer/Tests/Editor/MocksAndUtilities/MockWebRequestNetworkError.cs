@@ -24,6 +24,14 @@
             }
         }
 
+        public string ErrorText
+        {
+            get
+            {
+                return "Network error message.";
+            }
+        }
+
         public string DownloadedText
         {
             get

@@ -30,6 +30,14 @@
             }
         }
 
+        public string ErrorText
+        {
+            get
+            {
+                return "Timeout message";
+            }
+        }
+
         public string DownloadedText
         {
             get

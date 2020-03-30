@@ -33,6 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     /// <typeparam name="T">Type of the JSON object to contstruct after fetching the file.</typeparam>
     public class JSONRetrieverWeb<T>
     {
+        public static readonly string ErrorCodeNetworkError = "Network Error";
         public static readonly string ErrorCodeInvalidJsonFormat = "Invalid JSON format";
 
         private IWebRequest requester;
@@ -85,6 +86,8 @@ namespace RedBlueGames.MulliganRenamer
                     if (requester.IsNetworkError)
                     {
                         this.outstandingOp.Status = AsyncStatus.Failed;
+                        this.outstandingOp.FailureCode = ErrorCodeNetworkError;
+                        this.outstandingOp.FailureMessage = requester.ErrorText;
                         yield break;
                     }
 

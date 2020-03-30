@@ -62,7 +62,7 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (bookmarkFetchOp.Status != AsyncStatus.Success)
                 {
-                    Debug.Log("Whoops. Status:" + bookmarkFetchOp.Status + ". FailCode:" + bookmarkFetchOp.FailureCode + ". Message" + bookmarkFetchOp.FailureMessage);
+                    ShowDisplayDialogForFailedOp(bookmarkFetchOp);
                     yield break;
                 }
 
@@ -90,8 +90,8 @@ namespace RedBlueGames.MulliganRenamer
 
                     if (languageFetchOp.Status != AsyncStatus.Success)
                     {
-                        Debug.Log("Whoops. Status:" + languageFetchOp.Status + ". FailCode:" + languageFetchOp.FailureCode + ". Message" + languageFetchOp.FailureMessage);
-                        continue;
+                        ShowDisplayDialogForFailedOp(languageFetchOp);
+                        yield break;
                     }
 
                     languages.Add(languageFetchOp.ResultData);
@@ -102,10 +102,40 @@ namespace RedBlueGames.MulliganRenamer
             EditorUtility.ClearProgressBar();
 
             var reports = LocalizationManager.Instance.AddOrUpdateLanguages(languages);
-            EditorUtility.DisplayDialog("Languages Successfully Updated", this.BuildDisplayStringForReport(reports), "OK");
+            EditorUtility.DisplayDialog("Languages Successfully Updated", BuildDisplayStringForReport(reports), "OK");
         }
 
-        private string BuildDisplayStringForReport(List<LocalizationManager.LanguageUpdateReport> reports)
+        private static void ShowDisplayDialogForFailedOp(AsyncOp op)
+        {
+            var message = BuildDisplayStringForAsyncOp(op);
+            EditorUtility.ClearProgressBar();
+            EditorUtility.DisplayDialog("Language Update Failed", message, "OK");
+        }
+
+        private static string BuildDisplayStringForAsyncOp(AsyncOp op)
+        {
+            string message = string.Empty;
+            if (op.Status == AsyncStatus.Timeout)
+            {
+                message = "Update failed due to web request timeout. If you have internet, our servers may be down. " +
+                    "Please try again later, or report a bug (see UserManual for details) if the issue persists.";
+            }
+            else if (op.Status == AsyncStatus.Failed)
+            {
+                message = string.Format(
+                    "Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}",
+                    op.FailureCode,
+                    op.FailureMessage);
+            }
+            else
+            {
+                // Nothing to display for success or otherwise
+            }
+
+            return message;
+        }
+
+        private static string BuildDisplayStringForReport(List<LocalizationManager.LanguageUpdateReport> reports)
         {
             var updatedStringBuilder = new System.Text.StringBuilder();
             var addedLanguageStringBuilder = new System.Text.StringBuilder();

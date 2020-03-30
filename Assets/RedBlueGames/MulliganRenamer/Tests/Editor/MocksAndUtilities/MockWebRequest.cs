@@ -27,6 +27,14 @@
             }
         }
 
+        public string ErrorText
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
+
         public string DownloadedText { get; private set; }
 
         public MockWebRequest(string outputText)

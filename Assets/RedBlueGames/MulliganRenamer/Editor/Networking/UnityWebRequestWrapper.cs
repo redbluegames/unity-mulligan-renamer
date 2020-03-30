@@ -72,6 +72,14 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
+        public string ErrorText
+        {
+            get
+            {
+                return this.webRequest.error;
+            }
+        }
+
         public string DownloadedText
         {
             get
