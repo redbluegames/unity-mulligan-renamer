@@ -6,15 +6,17 @@
     {
         public int Timeout { get; set; }
 
-        public bool IsDone
+        public bool IsDone { get; private set; }
+
+        public bool IsNetworkError { get; private set; }
+
+        public bool IsHttpError
         {
             get
             {
                 return false;
             }
         }
-
-        public bool IsNetworkError { get; private set; }
 
         public bool IsTimeout
         {
@@ -47,6 +49,7 @@
 
         public void SendWebRequest()
         {
+            this.IsDone = true;
             this.IsNetworkError = true;
         }
 

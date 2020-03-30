@@ -6,19 +6,21 @@
     {
         public int Timeout { get; set; }
 
-        public bool IsDone
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsDone { get; private set; }
 
         public bool IsNetworkError
         {
             get
             {
                 return true;
+            }
+        }
+
+        public bool IsHttpError
+        {
+            get
+            {
+                return false;
             }
         }
 
@@ -52,6 +54,7 @@
 
         public void SendWebRequest()
         {
+            this.IsDone = true;
         }
 
         public void Dispose()

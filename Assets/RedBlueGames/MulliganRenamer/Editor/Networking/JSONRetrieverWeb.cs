@@ -34,6 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     public class JSONRetrieverWeb<T>
     {
         public static readonly string ErrorCodeNetworkError = "Network Error";
+        public static readonly string ErrorCodeHttpError = "Http Error";
         public static readonly string ErrorCodeInvalidJsonFormat = "Invalid JSON format";
 
         private IWebRequest requester;
@@ -77,21 +78,21 @@ namespace RedBlueGames.MulliganRenamer
                 requester.SendWebRequest();
                 while (!requester.IsDone)
                 {
-                    if (requester.IsTimeout)
-                    {
-                        this.outstandingOp.Status = AsyncStatus.Timeout;
-                        yield break;
-                    }
-
-                    if (requester.IsNetworkError)
-                    {
-                        this.outstandingOp.Status = AsyncStatus.Failed;
-                        this.outstandingOp.FailureCode = ErrorCodeNetworkError;
-                        this.outstandingOp.FailureMessage = requester.ErrorText;
-                        yield break;
-                    }
-
                     yield return null;
+                }
+
+                if (requester.IsTimeout)
+                {
+                    this.outstandingOp.Status = AsyncStatus.Timeout;
+                    yield break;
+                }
+
+                if (requester.IsNetworkError || requester.IsHttpError)
+                {
+                    this.outstandingOp.Status = AsyncStatus.Failed;
+                    this.outstandingOp.FailureCode = requester.IsHttpError ? ErrorCodeHttpError : ErrorCodeNetworkError;
+                    this.outstandingOp.FailureMessage = requester.ErrorText;
+                    yield break;
                 }
 
                 this.outstandingOp.Status = AsyncStatus.Success;

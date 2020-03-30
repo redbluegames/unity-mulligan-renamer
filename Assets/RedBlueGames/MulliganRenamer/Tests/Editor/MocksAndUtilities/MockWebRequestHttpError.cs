@@ -1,12 +1,9 @@
 ﻿namespace RedBlueGames.MulliganRenamer
 {
     using System;
-    using UnityEngine.Networking;
 
-    public class MockWebRequest : IWebRequest, IDisposable
+    public class MockWebRequestHttpError : IWebRequest, IDisposable
     {
-        private string mockDownloadText;
-
         public int Timeout { get; set; }
 
         public bool IsDone { get; private set; }
@@ -19,13 +16,7 @@
             }
         }
 
-        public bool IsHttpError
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool IsHttpError { get; private set; }
 
         public bool IsTimeout
         {
@@ -39,24 +30,27 @@
         {
             get
             {
+                return "Http error message.";
+            }
+        }
+
+        public string DownloadedText
+        {
+            get
+            {
                 return string.Empty;
             }
         }
 
-        public string DownloadedText { get; private set; }
-
-        public MockWebRequest(string outputText)
+        public MockWebRequestHttpError()
         {
-            this.mockDownloadText = outputText;
-
-            // Must SendWebRequest before we should consider it done.
-            this.IsDone = false;
+            this.IsHttpError = false;
         }
 
         public void SendWebRequest()
         {
-            this.DownloadedText = this.mockDownloadText;
             this.IsDone = true;
+            this.IsHttpError = true;
         }
 
         public void Dispose()
