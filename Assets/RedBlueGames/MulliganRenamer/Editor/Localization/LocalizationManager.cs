@@ -136,20 +136,25 @@ namespace RedBlueGames.MulliganRenamer
         /// Adds new languages and update existing ones that are new or newer versions, using the specified languages.
         /// </summary>
         /// <param name="languages">Languages to update</param>
-        public void AddOrUpdateLanguages(IEnumerable<Language> languages)
+        public List<LanguageUpdateReport> AddOrUpdateLanguages(IEnumerable<Language> languages)
         {
             // Need to reload the languages in the LocalizationManager so that we compare
             // the new languages against up to date ones. For example, if the user deletes a
             // language or adds their own in the same session. Mostly this is just a use-case in testing.
             this.Initialize();
 
+            var languageUpdateReports = new List<LanguageUpdateReport>();
+
             foreach (var language in languages)
             {
-                LocalizationManager.Instance.UpdateLanguage(language);
+                var report = LocalizationManager.Instance.UpdateLanguage(language);
+                languageUpdateReports.Add(report);
             }
 
             // Resort the languages in case they got reshuffled
             SortLanguages(this.allLanguages);
+
+            return languageUpdateReports;
         }
 
         /// <summary>
@@ -172,23 +177,26 @@ namespace RedBlueGames.MulliganRenamer
             this.allLanguages = LoadAllLanguages();
         }
 
-        private void UpdateLanguage(Language newLanguage)
+        private LanguageUpdateReport UpdateLanguage(Language newLanguage)
         {
+            var report = new LanguageUpdateReport();
+            report.Language = newLanguage;
             Language existingLanguage = this.allLanguages.FirstOrDefault((l) => l.Key == newLanguage.Key);
             if (existingLanguage == null)
             {
-                Debug.Log("Adding new language: " + newLanguage.Name);
+                report.Result = LanguageUpdateReport.UpdateResult.Added;
                 this.SaveLanguageToDisk(newLanguage);
             }
             else if (newLanguage.Version > existingLanguage.Version)
             {
-                Debug.Log("Updating existing language: " + existingLanguage.Name);
+                report.Result = LanguageUpdateReport.UpdateResult.Updated;
+                report.PreviousVersion = existingLanguage.Version;
+                report.NewVersion = newLanguage.Version;
                 this.SaveLanguageToDisk(newLanguage);
             }
             else
             {
-                Debug.Log("Found matching language: " + existingLanguage.Name +
-                    ", but it's the same (or newer) version. Will leave it unchanged.");
+                report.Result = LanguageUpdateReport.UpdateResult.NoChange;
             }
 
             // newLanguage is a new language instance, even if it's the same "language", so
@@ -198,6 +206,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 this.currentLanguage = newLanguage;
             }
+
+            return report;
         }
 
         private void SaveLanguageToDisk(Language language)
@@ -206,8 +216,6 @@ namespace RedBlueGames.MulliganRenamer
             var json = JsonUtility.ToJson(language, true);
             var filename = string.Concat(language.Key, ".json");
             var path = System.IO.Path.Combine(directory, filename);
-
-            Debug.Log("Writing file at path: " + path);
 
             System.IO.File.WriteAllText(path, json);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.Default);
@@ -250,6 +258,24 @@ namespace RedBlueGames.MulliganRenamer
 
             var pathToFirstLanguage = AssetDatabase.GetAssetPath(jsons[0]);
             return System.IO.Path.GetDirectoryName(pathToFirstLanguage);
+        }
+
+        public class LanguageUpdateReport
+        {
+            public Language Language { get; set; }
+
+            public UpdateResult Result { get; set; }
+
+            public int PreviousVersion { get; set; }
+
+            public int NewVersion { get; set; }
+
+            public enum UpdateResult
+            {
+                NoChange,
+                Updated,
+                Added
+            }
         }
     }
 }

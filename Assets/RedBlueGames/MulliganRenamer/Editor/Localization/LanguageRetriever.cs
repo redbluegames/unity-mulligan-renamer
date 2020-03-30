@@ -25,6 +25,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections;
     using System.Collections.Generic;
+    using UnityEditor;
     using UnityEngine;
 
     /// <summary>
@@ -41,12 +42,12 @@ namespace RedBlueGames.MulliganRenamer
 
         public void UpdateLanguages()
         {
-            Debug.Log("Starting Update");
             EditorCoroutineUtility.StartBackgroundTask(this.UpdateLanguagesAsync(), this.HandleUpdateComplete);
         }
 
         private IEnumerator UpdateLanguagesAsync()
         {
+            EditorUtility.DisplayProgressBar("Updating Languages", "Checking for language updates...", 0.0f);
             this.IsDoneUpdating = false;
 
             LanguageBookmarks bookmarks = null;
@@ -70,8 +71,16 @@ namespace RedBlueGames.MulliganRenamer
 
             var languages = new List<Language>();
             {
-                foreach (var url in bookmarks.LanguageUrls)
+                for (int i = 0; i < bookmarks.LanguageUrls.Count; ++i)
                 {
+                    var url = bookmarks.LanguageUrls[i];
+                    var uri = new System.Uri(bookmarks.LanguageUrls[i]);
+                    string filename = System.IO.Path.GetFileName(uri.LocalPath);
+
+                    // Add one because we finished downloading Bookmarks.
+                    var percentComplete = (i + 1) / (float)(bookmarks.LanguageUrls.Count + 1);
+                    EditorUtility.DisplayProgressBar("Updating Languages", "Downloading language " + filename + "...", percentComplete);
+
                     var languageRetriever = new JSONRetrieverWeb<Language>(url);
                     var languageFetchOp = languageRetriever.GetJSON(3);
                     while (languageFetchOp.Status == AsyncStatus.Pending)
@@ -89,12 +98,84 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            LocalizationManager.Instance.AddOrUpdateLanguages(languages);
+            EditorUtility.DisplayProgressBar("Updating Languages", "Saving Changes.", 1.0f);
+            EditorUtility.ClearProgressBar();
+
+            var reports = LocalizationManager.Instance.AddOrUpdateLanguages(languages);
+            EditorUtility.DisplayDialog("Languages Successfully Updated", this.BuildDisplayStringForReport(reports), "OK");
+        }
+
+        private string BuildDisplayStringForReport(List<LocalizationManager.LanguageUpdateReport> reports)
+        {
+            var updatedStringBuilder = new System.Text.StringBuilder();
+            var addedLanguageStringBuilder = new System.Text.StringBuilder();
+            var unchangedStringBuilder = new System.Text.StringBuilder();
+            foreach (var report in reports)
+            {
+                if (report.Result == LocalizationManager.LanguageUpdateReport.UpdateResult.Updated)
+                {
+                    if (updatedStringBuilder.Length > 0)
+                    {
+                        updatedStringBuilder.AppendLine();
+                    }
+
+                    updatedStringBuilder.AppendFormat(
+                        "Updated {0} from version {1} to {2}",
+                        report.Language.Name,
+                        report.PreviousVersion,
+                        report.NewVersion);
+                }
+                else if (report.Result == LocalizationManager.LanguageUpdateReport.UpdateResult.Added)
+                {
+                    if (addedLanguageStringBuilder.Length > 0)
+                    {
+                        addedLanguageStringBuilder.AppendLine();
+                    }
+
+                    addedLanguageStringBuilder.AppendFormat("Added {0}.", report.Language.Name);
+                }
+                else
+                {
+                    if (unchangedStringBuilder.Length > 0)
+                    {
+                        unchangedStringBuilder.AppendLine();
+                    }
+
+                    unchangedStringBuilder.AppendFormat("{0} is up to date.", report.Language.Name);
+                }
+            }
+
+            var message = new System.Text.StringBuilder();
+            if (addedLanguageStringBuilder.Length > 0)
+            {
+                message.Append(addedLanguageStringBuilder);
+            }
+
+            if (updatedStringBuilder.Length > 0)
+            {
+                if (message.Length > 0)
+                {
+                    message.AppendLine();
+                }
+
+                message.Append(updatedStringBuilder);
+            }
+
+            if (message.Length == 0)
+            {
+                message.Append("All languages are up to date.");
+            }
+            else
+            {
+                message.AppendLine();
+                message.Append(unchangedStringBuilder);
+            }
+
+            return message.ToString();
         }
 
         private void HandleUpdateComplete()
         {
-            Debug.Log("Update Complete");
             this.IsDoneUpdating = true;
         }
     }

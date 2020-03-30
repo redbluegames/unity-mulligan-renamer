@@ -23,11 +23,8 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using System.Collections;
-    using System.Text;
     using UnityEditor;
     using UnityEngine;
-    using UnityEngine.Networking;
 
     /// <summary>
     /// Handles drawing the PreferencesWindow in a generic way that works both in the
@@ -90,6 +87,7 @@ namespace RedBlueGames.MulliganRenamer
             EditorGUIUtility.labelWidth = LabelWidth;
 
             var prefsChanged = false;
+            EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth(MaxWidth));
             var newLanguage = DrawLanguageDropdown(LocalizationManager.Instance.CurrentLanguage);
             if (newLanguage != LocalizationManager.Instance.CurrentLanguage)
             {
@@ -97,6 +95,7 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             DrawUpdateLanguagesButton(languageRetriever);
+            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
@@ -148,35 +147,12 @@ namespace RedBlueGames.MulliganRenamer
         private static void DrawUpdateLanguagesButton(LanguageRetriever retriever)
         {
             EditorGUI.BeginDisabledGroup(!retriever.IsDoneUpdating);
-            if (GUILayout.Button("Refresh"))
+            if (GUILayout.Button("Update Languages"))
             {
-                Debug.Log("Pressed");
                 retriever.UpdateLanguages();
-                //GetRequest("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json");
-                //                GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/develop-1.7.0/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
-                //GetRequest("https://github.com/redbluegames/unity-mulligan-renamer/tree/3b6cb71bb7ef752f81e487c3353118bd6b7dfdbf/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages");
             }
 
             EditorGUI.EndDisabledGroup();
-        }
-
-        private static void GetRequest(string destinationUrl)
-        {
-            EditorCoroutineUtility.StartBackgroundTask(Post(destinationUrl));
-        }
-
-        private static IEnumerator Post(string uri)
-        {
-            using (UnityWebRequest w = UnityWebRequest.Get(uri))
-            {
-                yield return w.SendWebRequest();
-
-                while (w.isDone == false)
-                    yield return null;
-
-                System.IO.File.WriteAllText("test.txt", w.downloadHandler.text);
-                Debug.Log(w.downloadHandler.text);
-            }
         }
 
         private static Language DrawLanguageDropdown(Language currentLanguage)
