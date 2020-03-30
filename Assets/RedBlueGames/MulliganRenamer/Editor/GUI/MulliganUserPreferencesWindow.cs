@@ -147,7 +147,7 @@ namespace RedBlueGames.MulliganRenamer
         private static void DrawUpdateLanguagesButton(LanguageRetriever retriever)
         {
             EditorGUI.BeginDisabledGroup(!retriever.IsDoneUpdating);
-            if (GUILayout.Button("Update Languages"))
+            if (GUILayout.Button(LocalizationManager.Instance.GetTranslation("updateLanguages")))
             {
                 retriever.UpdateLanguages();
             }

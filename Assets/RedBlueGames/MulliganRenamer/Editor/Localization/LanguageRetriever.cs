@@ -47,7 +47,10 @@ namespace RedBlueGames.MulliganRenamer
 
         private IEnumerator UpdateLanguagesAsync()
         {
-            EditorUtility.DisplayProgressBar("Updating Languages", "Checking for language updates...", 0.0f);
+            EditorUtility.DisplayProgressBar(
+                LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitle"),
+                LocalizationManager.Instance.GetTranslation("languageUpdateProgressMessage1"),
+                0.0f);
             this.IsDoneUpdating = false;
 
             LanguageBookmarks bookmarks = null;
@@ -79,7 +82,13 @@ namespace RedBlueGames.MulliganRenamer
 
                     // Add one because we finished downloading Bookmarks.
                     var percentComplete = (i + 1) / (float)(bookmarks.LanguageUrls.Count + 1);
-                    EditorUtility.DisplayProgressBar("Updating Languages", "Downloading language " + filename + "...", percentComplete);
+                    EditorUtility.DisplayProgressBar(
+                        LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitle"),
+                        string.Format(
+                            LocalizationManager.Instance.GetTranslation(
+                                "languageUpdateDownloadingLanguages"),
+                                filename),
+                        percentComplete);
 
                     var languageRetriever = new JSONRetrieverWeb<Language>(url);
                     var languageFetchOp = languageRetriever.GetJSON(3);
@@ -98,18 +107,27 @@ namespace RedBlueGames.MulliganRenamer
                 }
             }
 
-            EditorUtility.DisplayProgressBar("Updating Languages", "Saving Changes.", 1.0f);
+            EditorUtility.DisplayProgressBar(
+                LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitle"),
+                LocalizationManager.Instance.GetTranslation("languageUpdateSavingChanges"),
+                1.0f);
             EditorUtility.ClearProgressBar();
 
             var reports = LocalizationManager.Instance.AddOrUpdateLanguages(languages);
-            EditorUtility.DisplayDialog("Languages Successfully Updated", BuildDisplayStringForReport(reports), "OK");
+            EditorUtility.DisplayDialog(
+                LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitleSuccess"),
+                BuildDisplayStringForReport(reports),
+                LocalizationManager.Instance.GetTranslation("ok"));
         }
 
         private static void ShowDisplayDialogForFailedOp(AsyncOp op)
         {
             var message = BuildDisplayStringForAsyncOp(op);
             EditorUtility.ClearProgressBar();
-            EditorUtility.DisplayDialog("Language Update Failed", message, "OK");
+            EditorUtility.DisplayDialog(
+                LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitleFail"),
+                message,
+                LocalizationManager.Instance.GetTranslation("ok"));
         }
 
         private static string BuildDisplayStringForAsyncOp(AsyncOp op)
@@ -117,13 +135,12 @@ namespace RedBlueGames.MulliganRenamer
             string message = string.Empty;
             if (op.Status == AsyncStatus.Timeout)
             {
-                message = "Update failed due to web request timeout. If you have internet, our servers may be down. " +
-                    "Please try again later, or report a bug (see UserManual for details) if the issue persists.";
+                message = LocalizationManager.Instance.GetTranslation("languageUpdateTimeout");
             }
             else if (op.Status == AsyncStatus.Failed)
             {
                 message = string.Format(
-                    "Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}",
+                    LocalizationManager.Instance.GetTranslation("languageUpdateFail"),
                     op.FailureCode,
                     op.FailureMessage);
             }
@@ -150,10 +167,11 @@ namespace RedBlueGames.MulliganRenamer
                     }
 
                     updatedStringBuilder.AppendFormat(
-                        "Updated {0} from version {1} to {2}",
-                        report.Language.Name,
-                        report.PreviousVersion,
-                        report.NewVersion);
+                        string.Format(
+                            LocalizationManager.Instance.GetTranslation("languageUpdated"),
+                            report.Language.Name,
+                            report.PreviousVersion,
+                            report.NewVersion));
                 }
                 else if (report.Result == LocalizationManager.LanguageUpdateReport.UpdateResult.Added)
                 {
@@ -162,7 +180,10 @@ namespace RedBlueGames.MulliganRenamer
                         addedLanguageStringBuilder.AppendLine();
                     }
 
-                    addedLanguageStringBuilder.AppendFormat("Added {0}.", report.Language.Name);
+                    addedLanguageStringBuilder.AppendFormat(
+                        string.Format(
+                            LocalizationManager.Instance.GetTranslation("languageAdded"),
+                            report.Language.Name));
                 }
                 else
                 {
@@ -171,7 +192,10 @@ namespace RedBlueGames.MulliganRenamer
                         unchangedStringBuilder.AppendLine();
                     }
 
-                    unchangedStringBuilder.AppendFormat("{0} is up to date.", report.Language.Name);
+                    unchangedStringBuilder.AppendFormat(
+                        string.Format(
+                            LocalizationManager.Instance.GetTranslation("languageUnchanged"),
+                            report.Language.Name));
                 }
             }
 
@@ -193,7 +217,7 @@ namespace RedBlueGames.MulliganRenamer
 
             if (message.Length == 0)
             {
-                message.Append("All languages are up to date.");
+                message.Append(LocalizationManager.Instance.GetTranslation("languageAllUpToDate"));
             }
             else
             {

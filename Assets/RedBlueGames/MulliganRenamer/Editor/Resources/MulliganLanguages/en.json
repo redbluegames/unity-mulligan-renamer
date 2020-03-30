@@ -622,6 +622,62 @@
         {
             "key": "offset",
             "value": "Offset"
+        },
+        {
+            "key": "updateLanguages",
+            "value": "Update Languages"
+        },
+        {
+            "key": "languageUpdateProgressTitle",
+            "value": "Updating Languages"
+        },
+        {
+            "key": "languageUpdateProgressMessage1",
+            "value": "Checking for language updates..."
+        },
+        {
+            "key": "languageUpdateDownloadingLanguages",
+            "value": "Downloading language {0}..."
+        },
+        {
+            "key": "languageUpdateSavingChanges",
+            "value": "Saving Changes..."
+        },
+        {
+            "key": "languageUpdateProgressTitleSuccess",
+            "value": "Languages Successfully Updated"
+        },
+        {
+            "key": "ok",
+            "value": "OK"
+        },
+        {
+            "key": "languageUpdateProgressTitleFail",
+            "value": "Language Update Failed"
+        },
+        {
+            "key": "languageUpdateTimeout",
+            "value": "Update failed due to web request timeout. If you have internet, our servers may be down. Please try again later, or report a bug (see UserManual for details) if the issue persists."
+        },
+        {
+            "key": "languageUpdateFail",
+            "value": "Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}."
+        },
+        {
+            "key": "languageUpdated",
+            "value": "Updated {0} from version {1} to {2}"
+        },
+        {
+            "key": "languageAdded",
+            "value": "Added {0}."
+        },
+        {
+            "key": "languageUnchanged",
+            "value": "{0} is up to date."
+        },
+        {
+            "key": "languageAllUpToDate",
+            "value": "All languages are up to date."
         }
     ]
 }
