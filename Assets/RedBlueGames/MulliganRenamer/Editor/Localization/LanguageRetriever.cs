@@ -33,6 +33,10 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class LanguageRetriever
     {
+        private static readonly string BookmarksURIRelease = "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/master/LanguageBookmarks.json";
+
+        private static readonly string BookmarksURIStaging = "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/LanguageBookmarks.json";
+
         public bool IsDoneUpdating { get; private set; }
 
         public LanguageRetriever()
@@ -40,12 +44,12 @@ namespace RedBlueGames.MulliganRenamer
             this.IsDoneUpdating = true;
         }
 
-        public void UpdateLanguages()
+        public void UpdateLanguages(bool useStagingLink = false)
         {
-            EditorCoroutineUtility.StartBackgroundTask(this.UpdateLanguagesAsync(), this.HandleUpdateComplete);
+            EditorCoroutineUtility.StartBackgroundTask(this.UpdateLanguagesAsync(useStagingLink), this.HandleUpdateComplete);
         }
 
-        private IEnumerator UpdateLanguagesAsync()
+        private IEnumerator UpdateLanguagesAsync(bool useStagingLink = false)
         {
             EditorUtility.DisplayProgressBar(
                 LocalizationManager.Instance.GetTranslation("languageUpdateProgressTitle"),
@@ -55,8 +59,7 @@ namespace RedBlueGames.MulliganRenamer
 
             LanguageBookmarks bookmarks = null;
             {
-                var bookmarkRetriever = new JSONRetrieverWeb<LanguageBookmarks>
-                    ("https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/LanguageBookmarks.json");
+                var bookmarkRetriever = new JSONRetrieverWeb<LanguageBookmarks>(useStagingLink ? BookmarksURIStaging : BookmarksURIRelease);
                 var bookmarkFetchOp = bookmarkRetriever.GetJSON(3);
                 while (bookmarkFetchOp.Status == AsyncStatus.Pending)
                 {
