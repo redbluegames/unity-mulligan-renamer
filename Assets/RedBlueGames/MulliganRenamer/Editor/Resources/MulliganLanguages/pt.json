@@ -629,23 +629,23 @@
         },
         {
             "key": "languageUpdateProgressTitle",
-            "value": "Updating Languages"
+            "value": "Atualizando Idiomas"
         },
         {
             "key": "languageUpdateProgressMessage1",
-            "value": "Checking for language updates..."
+            "value": "Verificando atualizações de idiomas..."
         },
         {
             "key": "languageUpdateDownloadingLanguages",
-            "value": "Downloading language {0}..."
+            "value": "Baixando idioma {0}..."
         },
         {
             "key": "languageUpdateSavingChanges",
-            "value": "Saving Changes..."
+            "value": "Salvando alterações"
         },
         {
             "key": "languageUpdateProgressTitleSuccess",
-            "value": "Languages Successfully Updated"
+            "value": "Idioma atualizado com sucesso"
         },
         {
             "key": "ok",
@@ -653,31 +653,31 @@
         },
         {
             "key": "languageUpdateProgressTitleFail",
-            "value": "Language Update Failed"
+            "value": "Atualização de idioma falhou"
         },
         {
             "key": "languageUpdateTimeout",
-            "value": "Update failed due to web request timeout. If you have internet, our servers may be down. Please try again later, or report a bug (see UserManual for details) if the issue persists."
+            "value": "Atualização falhou devido à um timeout. Se você está conectado à internet, nossos servidores podem estar desligados. Por favor tente novamente mais tarde, ou reporte um bug (olhe o manual do usuário para detalhes) se o erro persistir."
         },
         {
             "key": "languageUpdateFail",
-            "value": "Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}."
+            "value": "Falha na atualização. Por favor reporte um bug (olhe o manual do usuário para detalhes). Código do erro: {0}, Mensagem: {1}"
         },
         {
             "key": "languageUpdated",
-            "value": "Updated {0} from version {1} to {2}"
+            "value": "Atualizando {0} da versão {1} para {2}"
         },
         {
             "key": "languageAdded",
-            "value": "Added {0}."
+            "value": "{0} adicionada"
         },
         {
             "key": "languageUnchanged",
-            "value": "{0} is up to date."
+            "value": "{0} está atualizado"
         },
         {
             "key": "languageAllUpToDate",
-            "value": "All languages are up to date."
+            "value": "Todos os idiomas estão atualizados."
         }
     ]
 }
