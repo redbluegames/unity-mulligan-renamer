@@ -25,6 +25,15 @@ jobs:
       - store_artifacts:
           path: ./Mulligan_CI.unitypackage
           destination: ./Mulligan_Master.unitypackage
+  test:
+    executor: unity
+    steps:
+      - checkout
+      - run: openssl aes-256-cbc -d -md sha256 -in .circleci/Unity_v2018.x.ulf-cipher -k ${CIPHER_KEY} >> .circleci/Unity_v2018.x.ulf
+      - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -manualLicenseFile .circleci/Unity_v2018.x.ulf || exit 0
+      - run: /opt/Unity/Editor/Unity -batchmode -nographics -silent-crashes -noUpm -logFile -projectPath . -runTests -testResults ./test-results/results.xml
+      - store_test_results:
+          path: test_results
 workflows:
   version: 2
   build:
@@ -37,3 +46,4 @@ workflows:
           filters:
             branches:
               only: master
+      - test
