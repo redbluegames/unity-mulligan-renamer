@@ -986,12 +986,14 @@ namespace RedBlueGames.MulliganRenamer
                 this.firstColumnContentWidth = previewContents.LongestOriginalNameWidth;
                 this.secondColumnContentWidth = previewContents.LongestNewNameWidth;
 
-                const float maxStartingWidth = 400.0f;
+                // Don't let columns be so big we can't see all of them.
+                float maxStartingWidth = scrollRect.width * 0.3f;
+                const float initialContentPadding = 10;
 
                 if (forceResizeToFitContents)
                 {
-                    // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
-                    var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestOriginalNameWidth + 5);
+                    // Use 20% of the window unless we need more to show the contents and can have more.
+                    var desiredWidth = Mathf.Max(scrollRect.width * 0.20f, previewContents.LongestOriginalNameWidth + initialContentPadding);
                     this.FirstColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
                 }
 
@@ -999,8 +1001,8 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     if (shouldShowThirdColumn)
                     {
-                        // Try to make column 25% of the window, unless that would be bigger than it needs to be to fit the content
-                        var desiredWidth = Mathf.Min(scrollRect.width * 0.25f, previewContents.LongestNewNameWidth + 5);
+                        // Use 20% of the window unless we need more to show the contents and can have more.
+                        var desiredWidth = Mathf.Max(scrollRect.width * 0.20f, previewContents.LongestNewNameWidth + initialContentPadding);
                         this.secondColumnWidth = Mathf.Clamp(desiredWidth, this.MinimumColumnWidth, maxStartingWidth);
                     }
                     else
