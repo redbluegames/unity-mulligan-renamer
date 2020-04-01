@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("modify") + "/" + LocaleManager.Instance.GetTranslation("adjustNumbers");
+                return LocalizationManager.Instance.GetTranslation("modify") + "/" + LocalizationManager.Instance.GetTranslation("adjustNumbers");
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("adjustNumbers");
+                return LocalizationManager.Instance.GetTranslation("adjustNumbers");
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("offset");
+                return LocalizationManager.Instance.GetTranslation("offset");
             }
         }
 
@@ -92,10 +92,10 @@ namespace RedBlueGames.MulliganRenamer
         /// <param name="controlPrefix">The prefix of the control to assign to the control names</param>
         protected override void DrawContents(Rect operationRect, int controlPrefix)
         {
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("offset")));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("offset")));
             this.RenameOperation.Offset = EditorGUI.IntField(
                 operationRect.GetSplitVertical(1, 1, LineSpacing),
-                LocaleManager.Instance.GetTranslation("offset"),
+                LocalizationManager.Instance.GetTranslation("offset"),
                 this.RenameOperation.Offset);
         }
     }

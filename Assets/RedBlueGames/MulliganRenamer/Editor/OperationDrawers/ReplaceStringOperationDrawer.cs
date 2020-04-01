@@ -49,7 +49,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("replaceString");
+                return LocalizationManager.Instance.GetTranslation("replaceString");
             }
         }
 
@@ -73,7 +73,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("searchString");
+                return LocalizationManager.Instance.GetTranslation("searchString");
             }
         }
 
@@ -133,8 +133,8 @@ namespace RedBlueGames.MulliganRenamer
 
             int currentGUIElement = 0;
             var regexToggleContent = new GUIContent(
-                LocaleManager.Instance.GetTranslation("useRegex"),
-                LocaleManager.Instance.GetTranslation("matchTermsUsingRegex"));
+                LocalizationManager.Instance.GetTranslation("useRegex"),
+                LocalizationManager.Instance.GetTranslation("matchTermsUsingRegex"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, regexToggleContent.text));
             postGUIModel.UseRegex = EditorGUI.Toggle(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
@@ -146,35 +146,35 @@ namespace RedBlueGames.MulliganRenamer
             if (preGUIModel.UseRegex)
             {
                 searchContent = new GUIContent(
-                    LocaleManager.Instance.GetTranslation("matchRegex"),
-                    LocaleManager.Instance.GetTranslation("regexToUseToMatchTerms"));
+                    LocalizationManager.Instance.GetTranslation("matchRegex"),
+                    LocalizationManager.Instance.GetTranslation("regexToUseToMatchTerms"));
                 replacementContent = new GUIContent("Replacement Regex", "Regular Expression to use when replacing matched patterns.");
             }
             else
             {
                 searchContent = new GUIContent(
-                    LocaleManager.Instance.GetTranslation("searchForString"),
-                    LocaleManager.Instance.GetTranslation("substringsToSeatchInFilenames"));
+                    LocalizationManager.Instance.GetTranslation("searchForString"),
+                    LocalizationManager.Instance.GetTranslation("substringsToSeatchInFilenames"));
                 replacementContent = new GUIContent(
-                    LocaleManager.Instance.GetTranslation("replaceWith"),
-                    LocaleManager.Instance.GetTranslation("stringToReplaceMatchingInstances"));
+                    LocalizationManager.Instance.GetTranslation("replaceWith"),
+                    LocalizationManager.Instance.GetTranslation("stringToReplaceMatchingInstances"));
             }
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("searchString")));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("searchString")));
             postGUIModel.SearchString = EditorGUI.TextField(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
                 searchContent,
                 preGUIModel.SearchString);
 
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("replacementString")));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("replacementString")));
             postGUIModel.ReplacementString = EditorGUI.TextField(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
                 replacementContent,
                 preGUIModel.ReplacementString);
 
             var caseSensitiveContent = new GUIContent(
-                LocaleManager.Instance.GetTranslation("caseSensitive"),
-                LocaleManager.Instance.GetTranslation("searchUsingCaseSensitivity"));
+                LocalizationManager.Instance.GetTranslation("caseSensitive"),
+                LocalizationManager.Instance.GetTranslation("searchUsingCaseSensitivity"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, caseSensitiveContent.text));
             postGUIModel.SearchIsCaseSensitive = EditorGUI.Toggle(
                 operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray),
@@ -188,14 +188,14 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray);
                     helpRect = helpRect.AddPadding(4, 4, 4, 4);
-                    EditorGUI.HelpBox(helpRect, LocaleManager.Instance.GetTranslation("matchExpressNotValid"), MessageType.Error);
+                    EditorGUI.HelpBox(helpRect, LocalizationManager.Instance.GetTranslation("matchExpressNotValid"), MessageType.Error);
                 }
 
                 if (!preGUIModel.ReplacementStringIsValidRegex)
                 {
                     var helpRect = operationRect.GetSplitVerticalWeighted(++currentGUIElement, LineSpacing, weightsArray);
                     helpRect = helpRect.AddPadding(4, 4, 4, 4);
-                    EditorGUI.HelpBox(helpRect, LocaleManager.Instance.GetTranslation("replacementExpressionNotValid"), MessageType.Error);
+                    EditorGUI.HelpBox(helpRect, LocalizationManager.Instance.GetTranslation("replacementExpressionNotValid"), MessageType.Error);
                 }
             }
 

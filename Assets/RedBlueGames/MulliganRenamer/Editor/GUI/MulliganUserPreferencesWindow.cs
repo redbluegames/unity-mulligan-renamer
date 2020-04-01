@@ -39,8 +39,9 @@ namespace RedBlueGames.MulliganRenamer
 
         private const float MaxWidth = 550.0f;
 
-        private MulliganUserPreferences ActivePreferences;
+        private MulliganUserPreferences activePreferences;
 
+        private LanguageRetriever languageRetriever;
 
         private static GUIStyle SampleDiffLabelStyle
         {
@@ -59,48 +60,55 @@ namespace RedBlueGames.MulliganRenamer
         {
             return EditorWindow.GetWindow<MulliganUserPreferencesWindow>(
                 true,
-                LocaleManager.Instance.GetTranslation("preferenceWindowTitle"),
+                LocalizationManager.Instance.GetTranslation("preferenceWindowTitle"),
                 true);
         }
 
         private void OnEnable()
         {
-            ActivePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+            // Note that Enable is not called when opened as Preference item (via SettingsProvider api)
+            // We implement it for old versions of Unity that just use a traditional EditorWindow for settings
+            this.activePreferences = MulliganUserPreferences.LoadOrCreatePreferences();
+            this.languageRetriever = new LanguageRetriever();
         }
 
         private void OnGUI()
         {
-            DrawPreferences(this.ActivePreferences);
+            DrawPreferences(this.activePreferences, this.languageRetriever);
         }
 
         /// <summary>
         /// Draw the Preferences using Unity GUI framework.
         /// </summary>
         /// <param name="preferences">Preferences to draw and update</param>
-        public static void DrawPreferences(MulliganUserPreferences preferences)
+        public static void DrawPreferences(MulliganUserPreferences preferences, LanguageRetriever languageRetriever)
         {
             // I override LabelWidth (and MaxWidth) just to look more like Unity's native preferences
             EditorGUIUtility.labelWidth = LabelWidth;
 
             var prefsChanged = false;
-            var newLanguage = DrawLanguageDropdown(LocaleManager.Instance.CurrentLanguage);
-            if (newLanguage != LocaleManager.Instance.CurrentLanguage)
+            EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth(MaxWidth));
+            var newLanguage = DrawLanguageDropdown(LocalizationManager.Instance.CurrentLanguage);
+            if (newLanguage != LocalizationManager.Instance.CurrentLanguage)
             {
-                LocaleManager.Instance.ChangeLocale(newLanguage.LanguageKey);
+                LocalizationManager.Instance.ChangeLanguage(newLanguage.Key);
             }
 
+            DrawUpdateLanguagesButton(languageRetriever);
+            EditorGUILayout.EndHorizontal();
+
             EditorGUILayout.Space();
             EditorGUILayout.Space();
 
-            GUILayout.Label(LocaleManager.Instance.GetTranslation("preferencesDiffLabel"), EditorStyles.boldLabel);
+            GUILayout.Label(LocalizationManager.Instance.GetTranslation("preferencesDiffLabel"), EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
             preferences.InsertionTextColor = EditorGUILayout.ColorField(
-                LocaleManager.Instance.GetTranslation("preferencesInsertionText"),
+                LocalizationManager.Instance.GetTranslation("preferencesInsertionText"),
                 preferences.InsertionTextColor,
                 GUILayout.MaxWidth(MaxWidth));
             preferences.InsertionBackgroundColor = EditorGUILayout.ColorField(
-                LocaleManager.Instance.GetTranslation("preferencesInsertionBackground"),
+                LocalizationManager.Instance.GetTranslation("preferencesInsertionBackground"),
                 preferences.InsertionBackgroundColor,
                 GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
@@ -109,11 +117,11 @@ namespace RedBlueGames.MulliganRenamer
 
             EditorGUILayout.Space();
             preferences.DeletionTextColor = EditorGUILayout.ColorField(
-                LocaleManager.Instance.GetTranslation("preferencesDeletionText"),
+                LocalizationManager.Instance.GetTranslation("preferencesDeletionText"),
                 preferences.DeletionTextColor,
                 GUILayout.MaxWidth(MaxWidth));
             preferences.DeletionBackgroundColor = EditorGUILayout.ColorField(
-                LocaleManager.Instance.GetTranslation("preferencesDeletionBackground"),
+                LocalizationManager.Instance.GetTranslation("preferencesDeletionBackground"),
                 preferences.DeletionBackgroundColor,
                 GUILayout.MaxWidth(MaxWidth));
             EditorGUILayout.Space();
@@ -124,7 +132,7 @@ namespace RedBlueGames.MulliganRenamer
                 prefsChanged = true;
             }
 
-            if (GUILayout.Button(LocaleManager.Instance.GetTranslation("preferencesReset"), GUILayout.Width(150)))
+            if (GUILayout.Button(LocalizationManager.Instance.GetTranslation("preferencesReset"), GUILayout.Width(150)))
             {
                 preferences.ResetColorsToDefault(EditorGUIUtility.isProSkin);
                 prefsChanged = true;
@@ -136,29 +144,56 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private static LocaleLanguage DrawLanguageDropdown(LocaleLanguage currentLanguage)
+        private static void DrawUpdateLanguagesButton(LanguageRetriever retriever)
+        {
+            EditorGUI.BeginDisabledGroup(!retriever.IsDoneUpdating);
+            var useDebugPresets = Event.current.shift;
+            var buttonText = LocalizationManager.Instance.GetTranslation("updateLanguages");
+            if (useDebugPresets)
+            {
+                buttonText = string.Concat(buttonText, "*");
+            }
+
+            if (GUILayout.Button(buttonText))
+            {
+                retriever.UpdateLanguages(useDebugPresets);
+            }
+
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private static Language DrawLanguageDropdown(Language currentLanguage)
         {
             var content = new GUIContent(
-                LocaleManager.Instance.GetTranslation("language"),
-                LocaleManager.Instance.GetTranslation(" languageTooltip"));
-            var languages = new GUIContent[LocaleManager.Instance.AllLanguages.Count];
-            for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
+                LocalizationManager.Instance.GetTranslation("language"),
+                LocalizationManager.Instance.GetTranslation(" languageTooltip"));
+            var languages = new GUIContent[LocalizationManager.Instance.AllLanguages.Count];
+            for (int i = 0; i < LocalizationManager.Instance.AllLanguages.Count; ++i)
             {
-                var language = LocaleManager.Instance.AllLanguages[i];
-                languages[i] = new GUIContent(language.LanguageName);
+                var language = LocalizationManager.Instance.AllLanguages[i];
+                languages[i] = new GUIContent(language.Name);
             }
 
             var currentLanguageIndex = GetLanguageIndex(currentLanguage);
-            var newIndex = EditorGUILayout.Popup(content, currentLanguageIndex, languages, GUILayout.MaxWidth(MaxWidth));
-            return LocaleManager.Instance.AllLanguages[newIndex];
+            if (currentLanguageIndex >= 0 && currentLanguageIndex < LocalizationManager.Instance.AllLanguages.Count)
+            {
+                var newIndex = EditorGUILayout.Popup(content, currentLanguageIndex, languages, GUILayout.MaxWidth(MaxWidth));
+                return LocalizationManager.Instance.AllLanguages[newIndex];
+            }
+            else
+            {
+                Debug.Log("Can't draw LanguageDropdown as the CurrentLanguage was not found in LocalizationManager." +
+                    " Restarting Unity should fix this. This should not happen in production, please report it on GitHub issues.");
+                return LocalizationManager.Instance.CurrentLanguage;
+            }
         }
 
-        private static int GetLanguageIndex(LocaleLanguage language)
+        private static int GetLanguageIndex(Language language)
         {
             var currentLanguageIndex = -1;
-            for (int i = 0; i < LocaleManager.Instance.AllLanguages.Count; ++i)
+            for (int i = 0; i < LocalizationManager.Instance.AllLanguages.Count; ++i)
             {
-                if (LocaleManager.Instance.AllLanguages[i] == language)
+                if (LocalizationManager.Instance.AllLanguages[i].Key == language.Key)
                 {
                     currentLanguageIndex = i;
                     break;
@@ -197,10 +232,10 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Insertion));
-            renameResult.Add(new Diff(" " + LocaleManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleInserted"), DiffOperation.Insertion));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Insertion));
+            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleInserted"), DiffOperation.Insertion));
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
         }
@@ -216,10 +251,10 @@ namespace RedBlueGames.MulliganRenamer
             };
 
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Deletion));
-            renameResult.Add(new Diff(" " + LocaleManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocaleManager.Instance.GetTranslation("exampleDeleted"), DiffOperation.Deletion));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Deletion));
+            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
+            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleDeleted"), DiffOperation.Deletion));
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }

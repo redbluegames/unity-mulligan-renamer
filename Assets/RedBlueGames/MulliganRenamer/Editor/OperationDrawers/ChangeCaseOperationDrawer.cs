@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("toUpperOrLowercase");
+                return LocalizationManager.Instance.GetTranslation("toUpperOrLowercase");
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return LocaleManager.Instance.GetTranslation("toUppercase");
+                return LocalizationManager.Instance.GetTranslation("toUppercase");
             }
         }
 
@@ -95,10 +95,10 @@ namespace RedBlueGames.MulliganRenamer
             var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
             var casingLabel = new GUIContent(
-                LocaleManager.Instance.GetTranslation("newCasing"),
-                LocaleManager.Instance.GetTranslation("theDesiredCasingForName"));
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("toUppercase")));
-            var options = new GUIContent[] {new GUIContent(LocaleManager.Instance.GetTranslation("Lowercase")), new GUIContent(LocaleManager.Instance.GetTranslation("Uppercase"))};
+                LocalizationManager.Instance.GetTranslation("newCasing"),
+                LocalizationManager.Instance.GetTranslation("theDesiredCasingForName"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("toUppercase")));
+            var options = new GUIContent[] {new GUIContent(LocalizationManager.Instance.GetTranslation("Lowercase")), new GUIContent(LocalizationManager.Instance.GetTranslation("Uppercase"))};
             this.RenameOperation.Casing = (ChangeCaseOperation.CasingChange)EditorGUI.Popup(
                 singleLineRect,
                 casingLabel,
@@ -107,9 +107,9 @@ namespace RedBlueGames.MulliganRenamer
 
             var firstCharOnlyRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
             var firstCharToggleLabel = new GUIContent(
-                LocaleManager.Instance.GetTranslation("onlyFirstCharacter"),
-                LocaleManager.Instance.GetTranslation("changeOnlyTheFirstCharacterCase"));
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocaleManager.Instance.GetTranslation("firstCharOnly")));
+                LocalizationManager.Instance.GetTranslation("onlyFirstCharacter"),
+                LocalizationManager.Instance.GetTranslation("changeOnlyTheFirstCharacterCase"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("firstCharOnly")));
             this.RenameOperation.ChangeFirstCharacterOnly = EditorGUI.Toggle(
                 firstCharOnlyRect,
                 firstCharToggleLabel,

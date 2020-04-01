@@ -1,6 +1,6 @@
 ﻿/* MIT License
 
-Copyright (c) 2020 Murillo Pugliesi Lopes, https://github.com/Mukarillo
+Copyright (c) 2019 Murillo Pugliesi Lopes, https://github.com/Mukarillo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,35 +23,37 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    using NUnit.Framework;
-    using System;
+    using UnityEngine;
 
-    public class LocaleManagerTests
+    /// <summary>
+    /// Class responsible for holding the data for localized text
+    /// </summary>
+    [System.Serializable]
+    public class LocalizedString
     {
-        private LocaleLanguage languageBeforeTest;
+        // These are assigned through Unity's serialization / deserialization.
+        // So we Ignore warning about Unassigned field.
+        #pragma warning disable 0649
+        [SerializeField]
+        private string key;
 
-        [SetUp]
-        public void Init()
-        {
-            this.languageBeforeTest = LocaleManager.Instance.CurrentLanguage;
-        }
+        [SerializeField]
+        private string value;
+        #pragma warning restore 0649
 
-        [TearDown]
-        public void Cleanup()
+        public string Key
         {
-            LocaleManager.Instance.ChangeLocale(this.languageBeforeTest.LanguageKey);
-        }
-
-        [Test]
-        public void ChangeLanguage()
-        {
-            foreach (var language in LocaleManager.Instance.AllLanguages)
+            get
             {
-                LocaleManager.Instance.ChangeLocale(language.LanguageKey);
+                return key;
+            }
+        }
 
-                Assert.That(
-                    language.LanguageKey.Equals(LocaleManager.Instance.CurrentLanguage.LanguageKey),
-                    "LocaleManager did not change language to specified language, " + language.LanguageName + ".");
+        public string Value
+        {
+            get
+            {
+                return value;
             }
         }
     }

@@ -1,627 +1,683 @@
 {
-	"languageName" : "Portugûes",
-	"languageKey" : "pt",
-	"elements" : 
-	[
-		{
-			"key" : "rename",
-			"value" : "Renomear"
-		},
-		{
-			"key" : "renameWarningNotRenamed",
-			"value" : "Alguns objetos possuem alertas e não serão renomeados. Você deseja renomear os outros objetos no grupo?"
-		},
-		{
-			"key" : "warning",
-			"value" : "Alerta"
-		},
-		{
-			"key" : "cancel",
-			"value" : "Cancelar"
-		},
-		{
-			"key" : "failToRenameMulligan",
-			"value" : "Desculpe, o renomeamento de alguns objetos falharam. Algo de errado aconteceu com o Mulligan. Por favor reporte um bug (veja o UserManual para detalhes). Essa operação de renomeação será automaticamente reverida\n\n Erro: "
-		},
-		{
-			"key" : "error",
-			"value" : "Erro"
-		},
-		{
-			"key" : "presets",
-			"value" : "Predefinições"
-		},
-		{
-			"key" : "result",
-			"value" : "Resultado"
-		},
-		{
-			"key" : "addOperation",
-			"value" : "Adicionar Operação"
-		},
-		{
-			"key" : "renameOperation",
-			"value" : "Operação de Renomear"
-		},
-		{
-			"key" : "language",
-			"value" : "Idioma"
-		},
-		{
-			"key" : "languageTooltip",
-			"value" : "Specifies the language for all text used in Mulligan."
-		},
-		{
-			"key" : "prefix",
-			"value" : "Prefixo"
-		},
-		{
-			"key" : "saveAs",
-			"value" : "Salvar como..."
-		},
-		{
-			"key" : "managePresets",
-			"value" : "Gerenciar predefinições"
-		},
-		{
-			"key" : "errorUnrecognizedListButton",
-			"value" : "RenamerWindow achou ListButtonEvent [{0}] não reconhecida no OnGUI. Adicione um case para lidar com esse evento"
-		},
-		{
-			"key" : "errorAddNewOpNotSub",
-			"value" : "MulliganRenamerWindow tentou adicionar uma nova RenameOperation usando um tipo que não é uma subclasse de RenameOperationDrawerBinding. Tipo: "
-		},
-		{
-			"key" : "thankYouForSupport",
-			"value" : "Muito obrigado por suportar Mulligan!"
-		},
-		{
-			"key" : "thankYouForReview",
-			"value" : "Obrigado por avaliar o Mulligan!"
-		},
-		{
-			"key" : "thankYouForUsing",
-			"value" : "Obrigado por usar Mulligan! Se você achou útil, por favor considere suportar o desenvolvimento comprando na Asset Store. Obrigado!"
-		},
-		{
-			"key" : "thankYouForPurchasing",
-			"value" : "Obrigado por comprar o Mulligan! Se você achou útil, por favor considere deixar uma avalição na Asset Store. A loja é muito competitiva e cada avaliação ajuda a sobresair. Obrigado!"
-		},
-		{
-			"key" : "openAssetStore",
-			"value" : "Abrir a Asset Store"
-		},
-		{
-			"key" : "savePreset",
-			"value" : "Salvar Predefinições"
-		},
-		{
-			"key" : "previewSteps",
-			"value" : "Pré-visualização dos passos"
-		},
-		{
-			"key" : "noObjectsSpecified",
-			"value" : "Nenhum objeto específicado para renomear. Arraste objetos para renomea-los, ou"
-		},
-		{
-			"key" : "addMoreObjectsDragPanel",
-			"value" : "Adicione mais objetos arrando-os no painel acima"
-		},
-		{
-			"key" : "addMoreObjectsDragHere",
-			"value" : "Adicione mais objetos arrastando eles aqui"
-		},
-		{
-			"key" : "toRenameMoreObjects",
-			"value" : "Para renomear mais objetos, arraste eles aqui, ou"
-		},
-		{
-			"key" : "removeAll",
-			"value" : "Remover Todos"
-		},
-		{
-			"key" : "object",
-			"value" : "Objeto"
-		},
-		{
-			"key" : "objects",
-			"value" : "Objetos"
-		},
-		{
-			"key" : "renamed",
-			"value" : "Renamed"
-		},
-		{
-			"key" : "original",
-			"value" : "Original"
-		},
-		{
-			"key" : "before",
-			"value" : "Antes"
-		},
-		{
-			"key" : "after",
-			"value" : "Depois"
-		},
-		{
-			"key" : "finalName",
-			"value" : "Nome Final"
-		},
-		{
-			"key" : "addSelectedObjects",
-			"value" : "Adicionar Objetos Selecionados"
-		},
-		{
-			"key" : "errorTryingToAccessModel",
-			"value" : "Tentando acessar PreviewRowModel no index que estão fora dos limites. Index: "
-		},
-		{
-			"key" : "warningNewNameMatchesExisting",
-			"value" : "Novos nomes coincidem um objeto que já existe ou outro objeto renomeado"
-		},
-		{
-			"key" : "assetBlankName",
-			"value" : "O Asset tem um nome em branco"
-		},
-		{
-			"key" : "nameIncludeInvalidCharacter",
-			"value" : "O nome inluí caracteres inválidos (normalmente símbolos como ?.,)."
-		},
-		{
-			"key" : "tryingToAddSpriteToRenamer",
-			"value" : "Tentando adicionar o Sprite {0} para SpriteRenamer que tem um caminho diferente da texture que os outros sprites. Recebeu o caminho {1}, esperando {2}"
-		},
-		{
-			"key" : "errorTryingToAddSpriteToRenamer",
-			"value" : "Tentando adicionar o Sprite para SpriteRenamer ao caminho {0}, mas nenhum arquivo Meta existe no caminho especificado."
-		},
-		{
-			"key" : "errorPresetNameAlreadyExists",
-			"value" : "A predefinicão com nome \"{0}\" já existe. Você deseja substituir?"
-		},
-		{
-			"key" : "no",
-			"value" : "Não"
-		},
-		{
-			"key" : "save",
-			"value" : "Salvar"
-		},
-		{
-			"key" : "errorTryintToGetOriginalName",
-			"value" : "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
-		},
-		{
-			"key" : "errorTryingToGetOriginalNameOutOfBounds",
-			"value" : "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
-		},
-		{
-			"key" : "add",
-			"value" : "Adicionar"
-		},
-		{
-			"key" : "prefixOrSuffix",
-			"value" : "Prefixo ou Sufixo"
-		},
-		{
-			"key" : "stringSequence",
-			"value" : "Sequência de String"
-		},
-		{
-			"key" : "modify",
-			"value" : "Modificar"
-		},
-		{
-			"key" : "changeCase",
-			"value" : "Mudar Case"
-		},
-		{
-			"key" : "countByLetter",
-			"value" : "Contar por Letra"
-		},
-		{
-			"key" : "enumerate",
-			"value" : "Enumerar"
-		},
-		{
-			"key" : "delete",
-			"value" : "Deletar"
-		},
-		{
-			"key" : "replace",
-			"value" : "Substituir"
-		},
-		{
-			"key" : "replaceString",
-			"value" : "Substituir String"
-		},
-		{
-			"key" : "trimCharacters",
-			"value" : "Aparar caracteres"
-		},
-		{
-			"key" : "preset",
-			"value" : "Predefinição"
-		},
-		{
-			"key" : "savedPresets",
-			"value" : "Predefinições Salvas"
-		},
-		{
-			"key" : "errorNoSavedPresets",
-			"value" : "Você não tem nenhuma operação Rename salvas nas predefinições. Selecione 'Salvar como...' no menu \"Predefinições\" para criar uma nova predefinicão"
-		},
-		{
-			"key" : "areYouSureDelete",
-			"value" : "Você tem certeza que quer deletar a predefinicão \"{0}\""
-		},
-		{
-			"key" : "deletePreset",
-			"value" : "Deletar Predefinição"
-		},
-		{
-			"key" : "removeCharacters",
-			"value" : "Remover Caracteres"
-		},
-		{
-			"key" : "bulkRename",
-			"value" : "Renomear em massa"
-		},
-		{
-			"key" : "renamingObjectXofY",
-			"value" : "Renomeando objeto {0} de {1}"
-		},
-		{
-			"key" : "renaming",
-			"value" : "Renomeando"
-		},
-		{
-			"key" : "errorAssetNotBulkRenamed",
-			"value" : "Asset [{0}] não renomeado quando tentando renomear em massa. Pode ser sido cancelado porque um nove nome já foi pego por um objeto no mesmo caminho. O nome nome pode conter caracteres especiais.\n Caminho original: {1}, Novo caminho: {2}"
-		},
-		{
-			"key" : "deleteFromFront",
-			"value" : "Deletar da frente"
-		},
-		{
-			"key" : "deleteFromBack",
-			"value" : "Deletar de trás"
-		},
-		{
-			"key" : "toCamelCase",
-			"value" : "Para Camel Case"
-		},
-		{
-			"key" : "usePascalCasing",
-			"value" : "Usar Pascal Casing"
-		},
-		{
-			"key" : "flagToCapitalizeTheFirstLetterOfname",
-			"value" : "Sinalize para colocar em maiúscula a primeira letra do nome (também conhecida como Upper Camel Casing)."
-		},
-		{
-			"key" : "delimiterCharacters",
-			"value" : "Caracteres delimitadores"
-		},
-		{
-			"key" : "caseSensitiveCharactersIndicateStart",
-			"value" : "Os caracteres que diferenciam maiúsculas de minúsculas que indicam o início de uma palavra."
-		},
-		{
-			"key" : "delimiters",
-			"value" : "Delimitadores"
-		},
-		{
-			"key" : "searchString",
-			"value" : "Procurar String"
-		},
-		{
-			"key" : "useRegex",
-			"value" : "Usar Expressão regular"
-		},
-		{
-			"key" : "matchTermsUsingRegex",
-			"value" : "Correspondência de termos usando Expressões regulares, termos que permitem uma poderosa correspondência de padrões."
-		},
-		{
-			"key" : "matchRegex",
-			"value" : "Correspondência Regex"
-		},
-		{
-			"key" : "regexToUseToMatchTerms",
-			"value" : "Expressão regular a ser usada para corresponder aos termos."
-		},
-		{
-			"key" : "searchForString",
-			"value" : "Procurar por String"
-		},
-		{
-			"key" : "substringsToSeatchInFilenames",
-			"value" : "Substrings a serem pesquisados ​​nos nomes de arquivos. Essas seqüências serão substituídas pela seqüência de substituição."
-		},
-		{
-			"key" : "replaceWith",
-			"value" : "Substituir com"
-		},
-		{
-			"key" : "stringToReplaceMatchingInstances",
-			"value" : "String para substituir instâncias correspondentes da string de Pesquisa."
-		},
-		{
-			"key" : "caseSensitive",
-			"value" : "Sensível a maiúsculas e minúscula"
-		},
-		{
-			"key" : "searchUsingCaseSensitivity",
-			"value" : "Pesquise usando distinção entre maiúsculas e minúsculas. Somente as strings que correspondem à caixa fornecida serão substituídas."
-		},
-		{
-			"key" : "matchExpressNotValid",
-			"value" : "A expressão de correspondência não é uma expressão regular válida."
-		},
-		{
-			"key" : "replacementExpressionNotValid",
-			"value" : "A expressão de substituição não é uma expressão regular válida."
-		},
-		{
-			"key" : "newName",
-			"value" : "Novo Nome"
-		},
-		{
-			"key" : "nameToReplaceTheOldeOne",
-			"value" : "Nome para substituir o antigo."
-		},
-		{
-			"key" : "selectPresetOrSpecifyCharacters",
-			"value" : "Selecione uma predefinição ou especifique seus próprios caracteres."
-		},
-		{
-			"key" : "charactersToRemove",
-			"value" : "Caracteres para Remover."
-		},
-		{
-			"key" : "allCharactersThatWillBeRemoved",
-			"value" : "Todos os caracteres que serão removidos dos nomes."
-		},
-		{
-			"key" : "flagTheSearchToMatchCase",
-			"value" : "Sinalize a pesquisa para corresponder apenas ao caso especificado."
-		},
-		{
-			"key" : "symbols",
-			"value" : "Símbolos"
-		},
-		{
-			"key" : "removeSpecialCharacters",
-			"value" : "Remove caracteres especiais (ex. !@#$%^&*)"
-		},
-		{
-			"key" : "numbers",
-			"value" : "Números"
-		},
-		{
-			"key" : "removeDigits",
-			"value" : "Remove dígitos 0-9"
-		},
-		{
-			"key" : "whitespace",
-			"value" : "Espaço em branco"
-		},
-		{
-			"key" : "removesWhitespace",
-			"value" : "Remove Espaços em branco"
-		},
-		{
-			"key" : "count",
-			"value" : "Contagem"
-		},
-		{
-			"key" : "format",
-			"value" : "Formato"
-		},
-		{
-			"key" : "selectPresetFormat",
-			"value" : "Selecione um formato predefinido ou especifique seu próprio formato."
-		},
-		{
-			"key" : "countFormat",
-			"value" : "Formato de contagem"
-		},
-		{
-			"key" : "theStringFormatToUseWhenAddingTheCountToName",
-			"value" : "O formato da sequência a ser usada ao adicionar a contagem ao nome."
-		},
-		{
-			"key" : "invalidCountFormat",
-			"value" : "Formato de contagem inválido. Os formatos típicos são D1 para um dígito sem zeros à esquerda, D2, para dois etc.\nProcure o método String.Format () para obter mais informações sobre as opções de formatação."
-		},
-		{
-			"key" : "countFrom",
-			"value" : "Contagem de"
-		},
-		{
-			"key" : "theValueToStartCountingFrom",
-			"value" : "O valor para começar a contar. O primeiro objeto terá esse número."
-		},
-		{
-			"key" : "increment",
-			"value" : "Incremento"
-		},
-		{
-			"key" : "theValueToAddToEachObjectWhenCounting",
-			"value" : "O valor a ser adicionado a cada objeto ao contar."
-		},
-		{
-			"key" : "addAsPrefix",
-			"value" : "Adicionar como prefixo"
-		},
-		{
-			"key" : "addTheCountToTheFontOfTheObjectName",
-			"value" : "Adicione a contagem à frente do nome do objeto."
-		},
-		{
-			"key" : "custom",
-			"value" : "Personalizados"
-		},
-		{
-			"key" : "strings",
-			"value" : "Strings"
-		},
-		{
-			"key" : "theStringsOfLettersToAdd",
-			"value" : "As seqüências de letras a serem adicionadas, separadas por vírgula. Ex: \"A, B, C\" anexará A, B e C aos três primeiros objetos, respectivamente. Depois disso, ele adicionará outra sequência, começando com AA, AB, AC, etc."
-		},
-		{
-			"key" : "formatForTheAddedLetters",
-			"value" : "Formato para as letras adicionadas."
-		},
-		{
-			"key" : "theValueToStartCounting",
-			"value" : "O valor para começar a contar. A sequência da sequência nessa contagem será anexada ao primeiro objeto."
-		},
-		{
-			"key" : "startsWith",
-			"value" : "Começa com"
-		},
-		{
-			"key" : "theValueToAddToTheCount",
-			"value" : "The value to add to the count after naming an object."
-		},
-		{
-			"key" : "addTheCountToTheFront",
-			"value" : "O valor a ser adicionado à contagem após nomear um objeto."
-		},
-		{
-			"key" : "uppercaseAlphabet",
-			"value" : "Alfabeto em Maiúsculas"
-		},
-		{
-			"key" : "lowercaseAlphabet",
-			"value" : "Alfabeto em Minúsculas"
-		},
-		{
-			"key" : "toUpperOrLowercase",
-			"value" : "Para Maiúsculas ou Minúsculas"
-		},
-		{
-			"key" : "toUppercase",
-			"value" : "Para maiúsculas"
-		},
-		{
-			"key" : "newCasing",
-			"value" : "Nova Caixa"
-		},
-		{
-			"key" : "theDesiredCasingForName",
-			"value" : "A Caixa desejada para o novo nome."
-		},
-		{
-			"key" : "onlyFirstCharacter",
-			"value" : "Apenas o Primeiro Caractere"
-		},
-		{
-			"key" : "changeOnlyTheFirstCharacterCase",
-			"value" : "Mude apenas o caso do primeiro caractere."
-		},
-		{
-			"key" : "addStringSequence",
-			"value" : "Adicionar sequência de strings"
-		},
-		{
-			"key" : "sequence",
-			"value" : "Sequência"
-		},
-		{
-			"key" : "theSequenceOfStringsToAddCommaSeparted",
-			"value" : "A sequência de sequências a serem adicionadas, separadas por vírgula."
-		},
-		{
-			"key" : "addTheCountToTheFrontOfTheObjectName",
-			"value" : "Adicione a contagem à frente do nome do objeto."
-		},
-		{
-			"key" : "addPrefixOrSuffix",
-			"value" : "Adicionar prefixo ou sufixo"
-		},
-		{
-			"key" : "suffix",
-			"value" : "Sufixo"
-		},
-		{
-			"key" : "replacementString",
-			"value" : "Substituição de String"
-		},
-		{
-			"key" : "preferenceWindowTitle",
-			"value" : "Preferências do Mulligan Renamer"
-		},
-		{
-			"key" : "preferencesMenuItem",
-			"value" : "Mulligan Renamer"
-		},
-		{
-			"key" : "preferencesDiffLabel",
-			"value" : "Cores de Diff"
-		},
-		{
-			"key" : "preferencesInsertionText",
-			"value" : "Inserção de texto"
-		},
-		{
-			"key" : "preferencesInsertionBackground",
-			"value" : "Inserção de fundo"
-		},
-		{
-			"key" : "preferencesDeletionText",
-			"value" : "Eliminação de texto"
-		},
-		{
-			"key" : "preferencesDeletionBackground",
-			"value" : "Elimninação de fundo"
-		},
-		{
-			"key" : "preferencesReset",
-			"value" : "Restaurar ao padrão"
-		},
-		{
-			"key" : "preferences",
-			"value" : "Preferências"
-		},
-		{
-			"key" : "exampleThisIs",
-			"value" : "Esse é"
-		},
-		{
-			"key" : "exampleSampleText",
-			"value" : "um texto exemplo"
-		},
-		{
-			"key" : "exampleWithWords",
-			"value" : "com palavras"
-		},
-		{
-			"key" : "exampleInserted",
-			"value" : "inseridas"
-		},
-		{
-			"key" : "exampleDeleted",
-			"value" : "eliminadas"
-		},
-		{
-			"key" : "adjustNumbers",
-			"value" : "Ajustar números"
-		},
-		{
-			"key" : "Lowercase",
-			"value" : "Caixa baixa"
-		},
-		{
-			"key" : "Uppercase",
-			"value" : "Caixa alta"
-		},
-		{
-			"key" : "offset",
-			"value" : "Compensar"
-		}
-	]
+    "name": "Portugûes",
+    "key": "pt",
+    "version": 0,
+    "elements": [
+        {
+            "key": "rename",
+            "value": "Renomear"
+        },
+        {
+            "key": "renameWarningNotRenamed",
+            "value": "Alguns objetos possuem alertas e não serão renomeados. Você deseja renomear os outros objetos no grupo?"
+        },
+        {
+            "key": "warning",
+            "value": "Alerta"
+        },
+        {
+            "key": "cancel",
+            "value": "Cancelar"
+        },
+        {
+            "key": "failToRenameMulligan",
+            "value": "Desculpe, o renomeamento de alguns objetos falharam. Algo de errado aconteceu com o Mulligan. Por favor reporte um bug (veja o UserManual para detalhes). Essa operação de renomeação será automaticamente reverida\n\n Erro: "
+        },
+        {
+            "key": "error",
+            "value": "Erro"
+        },
+        {
+            "key": "presets",
+            "value": "Predefinições"
+        },
+        {
+            "key": "result",
+            "value": "Resultado"
+        },
+        {
+            "key": "addOperation",
+            "value": "Adicionar Operação"
+        },
+        {
+            "key": "renameOperation",
+            "value": "Operação de Renomear"
+        },
+        {
+            "key": "language",
+            "value": "Idioma"
+        },
+        {
+            "key": "languageTooltip",
+            "value": "Specifies the language for all text used in Mulligan."
+        },
+        {
+            "key": "prefix",
+            "value": "Prefixo"
+        },
+        {
+            "key": "saveAs",
+            "value": "Salvar como..."
+        },
+        {
+            "key": "managePresets",
+            "value": "Gerenciar predefinições"
+        },
+        {
+            "key": "errorUnrecognizedListButton",
+            "value": "RenamerWindow achou ListButtonEvent [{0}] não reconhecida no OnGUI. Adicione um case para lidar com esse evento"
+        },
+        {
+            "key": "errorAddNewOpNotSub",
+            "value": "MulliganRenamerWindow tentou adicionar uma nova RenameOperation usando um tipo que não é uma subclasse de RenameOperationDrawerBinding. Tipo: "
+        },
+        {
+            "key": "thankYouForSupport",
+            "value": "Muito obrigado por suportar Mulligan!"
+        },
+        {
+            "key": "thankYouForReview",
+            "value": "Obrigado por avaliar o Mulligan!"
+        },
+        {
+            "key": "thankYouForUsing",
+            "value": "Obrigado por usar Mulligan! Se você achou útil, por favor considere suportar o desenvolvimento comprando na Asset Store. Obrigado!"
+        },
+        {
+            "key": "thankYouForPurchasing",
+            "value": "Obrigado por comprar o Mulligan! Se você achou útil, por favor considere deixar uma avalição na Asset Store. A loja é muito competitiva e cada avaliação ajuda a sobresair. Obrigado!"
+        },
+        {
+            "key": "openAssetStore",
+            "value": "Abrir a Asset Store"
+        },
+        {
+            "key": "savePreset",
+            "value": "Salvar Predefinições"
+        },
+        {
+            "key": "previewSteps",
+            "value": "Pré-visualização dos passos"
+        },
+        {
+            "key": "noObjectsSpecified",
+            "value": "Nenhum objeto específicado para renomear. Arraste objetos para renomea-los, ou"
+        },
+        {
+            "key": "addMoreObjectsDragPanel",
+            "value": "Adicione mais objetos arrando-os no painel acima"
+        },
+        {
+            "key": "addMoreObjectsDragHere",
+            "value": "Adicione mais objetos arrastando eles aqui"
+        },
+        {
+            "key": "toRenameMoreObjects",
+            "value": "Para renomear mais objetos, arraste eles aqui, ou"
+        },
+        {
+            "key": "removeAll",
+            "value": "Remover Todos"
+        },
+        {
+            "key": "object",
+            "value": "Objeto"
+        },
+        {
+            "key": "objects",
+            "value": "Objetos"
+        },
+        {
+            "key": "renamed",
+            "value": "Renamed"
+        },
+        {
+            "key": "original",
+            "value": "Original"
+        },
+        {
+            "key": "before",
+            "value": "Antes"
+        },
+        {
+            "key": "after",
+            "value": "Depois"
+        },
+        {
+            "key": "finalName",
+            "value": "Nome Final"
+        },
+        {
+            "key": "addSelectedObjects",
+            "value": "Adicionar Objetos Selecionados"
+        },
+        {
+            "key": "errorTryingToAccessModel",
+            "value": "Tentando acessar PreviewRowModel no index que estão fora dos limites. Index: "
+        },
+        {
+            "key": "warningNewNameMatchesExisting",
+            "value": "Novos nomes coincidem um objeto que já existe ou outro objeto renomeado"
+        },
+        {
+            "key": "assetBlankName",
+            "value": "O Asset tem um nome em branco"
+        },
+        {
+            "key": "nameIncludeInvalidCharacter",
+            "value": "O nome inluí caracteres inválidos (normalmente símbolos como ?.,)."
+        },
+        {
+            "key": "tryingToAddSpriteToRenamer",
+            "value": "Tentando adicionar o Sprite {0} para SpriteRenamer que tem um caminho diferente da texture que os outros sprites. Recebeu o caminho {1}, esperando {2}"
+        },
+        {
+            "key": "errorTryingToAddSpriteToRenamer",
+            "value": "Tentando adicionar o Sprite para SpriteRenamer ao caminho {0}, mas nenhum arquivo Meta existe no caminho especificado."
+        },
+        {
+            "key": "errorPresetNameAlreadyExists",
+            "value": "A predefinicão com nome \"{0}\" já existe. Você deseja substituir?"
+        },
+        {
+            "key": "no",
+            "value": "Não"
+        },
+        {
+            "key": "save",
+            "value": "Salvar"
+        },
+        {
+            "key": "errorTryintToGetOriginalName",
+            "value": "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
+        },
+        {
+            "key": "errorTryingToGetOriginalNameOutOfBounds",
+            "value": "Tentando obter o nome original para RenameResultSequence no index que está fora dos limits. Index: {0}"
+        },
+        {
+            "key": "add",
+            "value": "Adicionar"
+        },
+        {
+            "key": "prefixOrSuffix",
+            "value": "Prefixo ou Sufixo"
+        },
+        {
+            "key": "stringSequence",
+            "value": "Sequência de String"
+        },
+        {
+            "key": "modify",
+            "value": "Modificar"
+        },
+        {
+            "key": "changeCase",
+            "value": "Mudar Case"
+        },
+        {
+            "key": "countByLetter",
+            "value": "Contar por Letra"
+        },
+        {
+            "key": "enumerate",
+            "value": "Enumerar"
+        },
+        {
+            "key": "delete",
+            "value": "Deletar"
+        },
+        {
+            "key": "replace",
+            "value": "Substituir"
+        },
+        {
+            "key": "replaceString",
+            "value": "Substituir String"
+        },
+        {
+            "key": "trimCharacters",
+            "value": "Aparar caracteres"
+        },
+        {
+            "key": "preset",
+            "value": "Predefinição"
+        },
+        {
+            "key": "savedPresets",
+            "value": "Predefinições Salvas"
+        },
+        {
+            "key": "errorNoSavedPresets",
+            "value": "Você não tem nenhuma operação Rename salvas nas predefinições. Selecione 'Salvar como...' no menu \"Predefinições\" para criar uma nova predefinicão"
+        },
+        {
+            "key": "areYouSureDelete",
+            "value": "Você tem certeza que quer deletar a predefinicão \"{0}\""
+        },
+        {
+            "key": "deletePreset",
+            "value": "Deletar Predefinição"
+        },
+        {
+            "key": "removeCharacters",
+            "value": "Remover Caracteres"
+        },
+        {
+            "key": "bulkRename",
+            "value": "Renomear em massa"
+        },
+        {
+            "key": "renamingObjectXofY",
+            "value": "Renomeando objeto {0} de {1}"
+        },
+        {
+            "key": "renaming",
+            "value": "Renomeando"
+        },
+        {
+            "key": "errorAssetNotBulkRenamed",
+            "value": "Asset [{0}] não renomeado quando tentando renomear em massa. Pode ser sido cancelado porque um nove nome já foi pego por um objeto no mesmo caminho. O nome nome pode conter caracteres especiais.\n Caminho original: {1}, Novo caminho: {2}"
+        },
+        {
+            "key": "deleteFromFront",
+            "value": "Deletar da frente"
+        },
+        {
+            "key": "deleteFromBack",
+            "value": "Deletar de trás"
+        },
+        {
+            "key": "toCamelCase",
+            "value": "Para Camel Case"
+        },
+        {
+            "key": "usePascalCasing",
+            "value": "Usar Pascal Casing"
+        },
+        {
+            "key": "flagToCapitalizeTheFirstLetterOfname",
+            "value": "Sinalize para colocar em maiúscula a primeira letra do nome (também conhecida como Upper Camel Casing)."
+        },
+        {
+            "key": "delimiterCharacters",
+            "value": "Caracteres delimitadores"
+        },
+        {
+            "key": "caseSensitiveCharactersIndicateStart",
+            "value": "Os caracteres que diferenciam maiúsculas de minúsculas que indicam o início de uma palavra."
+        },
+        {
+            "key": "delimiters",
+            "value": "Delimitadores"
+        },
+        {
+            "key": "searchString",
+            "value": "Procurar String"
+        },
+        {
+            "key": "useRegex",
+            "value": "Usar Expressão regular"
+        },
+        {
+            "key": "matchTermsUsingRegex",
+            "value": "Correspondência de termos usando Expressões regulares, termos que permitem uma poderosa correspondência de padrões."
+        },
+        {
+            "key": "matchRegex",
+            "value": "Correspondência Regex"
+        },
+        {
+            "key": "regexToUseToMatchTerms",
+            "value": "Expressão regular a ser usada para corresponder aos termos."
+        },
+        {
+            "key": "searchForString",
+            "value": "Procurar por String"
+        },
+        {
+            "key": "substringsToSeatchInFilenames",
+            "value": "Substrings a serem pesquisados ​​nos nomes de arquivos. Essas seqüências serão substituídas pela seqüência de substituição."
+        },
+        {
+            "key": "replaceWith",
+            "value": "Substituir com"
+        },
+        {
+            "key": "stringToReplaceMatchingInstances",
+            "value": "String para substituir instâncias correspondentes da string de Pesquisa."
+        },
+        {
+            "key": "caseSensitive",
+            "value": "Sensível a maiúsculas e minúscula"
+        },
+        {
+            "key": "searchUsingCaseSensitivity",
+            "value": "Pesquise usando distinção entre maiúsculas e minúsculas. Somente as strings que correspondem à caixa fornecida serão substituídas."
+        },
+        {
+            "key": "matchExpressNotValid",
+            "value": "A expressão de correspondência não é uma expressão regular válida."
+        },
+        {
+            "key": "replacementExpressionNotValid",
+            "value": "A expressão de substituição não é uma expressão regular válida."
+        },
+        {
+            "key": "newName",
+            "value": "Novo Nome"
+        },
+        {
+            "key": "nameToReplaceTheOldeOne",
+            "value": "Nome para substituir o antigo."
+        },
+        {
+            "key": "selectPresetOrSpecifyCharacters",
+            "value": "Selecione uma predefinição ou especifique seus próprios caracteres."
+        },
+        {
+            "key": "charactersToRemove",
+            "value": "Caracteres para Remover."
+        },
+        {
+            "key": "allCharactersThatWillBeRemoved",
+            "value": "Todos os caracteres que serão removidos dos nomes."
+        },
+        {
+            "key": "flagTheSearchToMatchCase",
+            "value": "Sinalize a pesquisa para corresponder apenas ao caso especificado."
+        },
+        {
+            "key": "symbols",
+            "value": "Símbolos"
+        },
+        {
+            "key": "removeSpecialCharacters",
+            "value": "Remove caracteres especiais (ex. !@#$%^&*)"
+        },
+        {
+            "key": "numbers",
+            "value": "Números"
+        },
+        {
+            "key": "removeDigits",
+            "value": "Remove dígitos 0-9"
+        },
+        {
+            "key": "whitespace",
+            "value": "Espaço em branco"
+        },
+        {
+            "key": "removesWhitespace",
+            "value": "Remove Espaços em branco"
+        },
+        {
+            "key": "count",
+            "value": "Contagem"
+        },
+        {
+            "key": "format",
+            "value": "Formato"
+        },
+        {
+            "key": "selectPresetFormat",
+            "value": "Selecione um formato predefinido ou especifique seu próprio formato."
+        },
+        {
+            "key": "countFormat",
+            "value": "Formato de contagem"
+        },
+        {
+            "key": "theStringFormatToUseWhenAddingTheCountToName",
+            "value": "O formato da sequência a ser usada ao adicionar a contagem ao nome."
+        },
+        {
+            "key": "invalidCountFormat",
+            "value": "Formato de contagem inválido. Os formatos típicos são D1 para um dígito sem zeros à esquerda, D2, para dois etc.\nProcure o método String.Format () para obter mais informações sobre as opções de formatação."
+        },
+        {
+            "key": "countFrom",
+            "value": "Contagem de"
+        },
+        {
+            "key": "theValueToStartCountingFrom",
+            "value": "O valor para começar a contar. O primeiro objeto terá esse número."
+        },
+        {
+            "key": "increment",
+            "value": "Incremento"
+        },
+        {
+            "key": "theValueToAddToEachObjectWhenCounting",
+            "value": "O valor a ser adicionado a cada objeto ao contar."
+        },
+        {
+            "key": "addAsPrefix",
+            "value": "Adicionar como prefixo"
+        },
+        {
+            "key": "addTheCountToTheFontOfTheObjectName",
+            "value": "Adicione a contagem à frente do nome do objeto."
+        },
+        {
+            "key": "custom",
+            "value": "Personalizados"
+        },
+        {
+            "key": "strings",
+            "value": "Strings"
+        },
+        {
+            "key": "theStringsOfLettersToAdd",
+            "value": "As seqüências de letras a serem adicionadas, separadas por vírgula. Ex: \"A, B, C\" anexará A, B e C aos três primeiros objetos, respectivamente. Depois disso, ele adicionará outra sequência, começando com AA, AB, AC, etc."
+        },
+        {
+            "key": "formatForTheAddedLetters",
+            "value": "Formato para as letras adicionadas."
+        },
+        {
+            "key": "theValueToStartCounting",
+            "value": "O valor para começar a contar. A sequência da sequência nessa contagem será anexada ao primeiro objeto."
+        },
+        {
+            "key": "startsWith",
+            "value": "Começa com"
+        },
+        {
+            "key": "theValueToAddToTheCount",
+            "value": "The value to add to the count after naming an object."
+        },
+        {
+            "key": "addTheCountToTheFront",
+            "value": "O valor a ser adicionado à contagem após nomear um objeto."
+        },
+        {
+            "key": "uppercaseAlphabet",
+            "value": "Alfabeto em Maiúsculas"
+        },
+        {
+            "key": "lowercaseAlphabet",
+            "value": "Alfabeto em Minúsculas"
+        },
+        {
+            "key": "toUpperOrLowercase",
+            "value": "Para Maiúsculas ou Minúsculas"
+        },
+        {
+            "key": "toUppercase",
+            "value": "Para maiúsculas"
+        },
+        {
+            "key": "newCasing",
+            "value": "Nova Caixa"
+        },
+        {
+            "key": "theDesiredCasingForName",
+            "value": "A Caixa desejada para o novo nome."
+        },
+        {
+            "key": "onlyFirstCharacter",
+            "value": "Apenas o Primeiro Caractere"
+        },
+        {
+            "key": "changeOnlyTheFirstCharacterCase",
+            "value": "Mude apenas o caso do primeiro caractere."
+        },
+        {
+            "key": "addStringSequence",
+            "value": "Adicionar sequência de strings"
+        },
+        {
+            "key": "sequence",
+            "value": "Sequência"
+        },
+        {
+            "key": "theSequenceOfStringsToAddCommaSeparted",
+            "value": "A sequência de sequências a serem adicionadas, separadas por vírgula."
+        },
+        {
+            "key": "addTheCountToTheFrontOfTheObjectName",
+            "value": "Adicione a contagem à frente do nome do objeto."
+        },
+        {
+            "key": "addPrefixOrSuffix",
+            "value": "Adicionar prefixo ou sufixo"
+        },
+        {
+            "key": "suffix",
+            "value": "Sufixo"
+        },
+        {
+            "key": "replacementString",
+            "value": "Substituição de String"
+        },
+        {
+            "key": "preferenceWindowTitle",
+            "value": "Preferências do Mulligan Renamer"
+        },
+        {
+            "key": "preferencesMenuItem",
+            "value": "Mulligan Renamer"
+        },
+        {
+            "key": "preferencesDiffLabel",
+            "value": "Cores de Diff"
+        },
+        {
+            "key": "preferencesInsertionText",
+            "value": "Inserção de texto"
+        },
+        {
+            "key": "preferencesInsertionBackground",
+            "value": "Inserção de fundo"
+        },
+        {
+            "key": "preferencesDeletionText",
+            "value": "Eliminação de texto"
+        },
+        {
+            "key": "preferencesDeletionBackground",
+            "value": "Elimninação de fundo"
+        },
+        {
+            "key": "preferencesReset",
+            "value": "Restaurar ao padrão"
+        },
+        {
+            "key": "preferences",
+            "value": "Preferências"
+        },
+        {
+            "key": "exampleThisIs",
+            "value": "Esse é"
+        },
+        {
+            "key": "exampleSampleText",
+            "value": "um texto exemplo"
+        },
+        {
+            "key": "exampleWithWords",
+            "value": "com palavras"
+        },
+        {
+            "key": "exampleInserted",
+            "value": "inseridas"
+        },
+        {
+            "key": "exampleDeleted",
+            "value": "eliminadas"
+        },
+        {
+            "key": "adjustNumbers",
+            "value": "Ajustar números"
+        },
+        {
+            "key": "Lowercase",
+            "value": "Caixa baixa"
+        },
+        {
+            "key": "Uppercase",
+            "value": "Caixa alta"
+        },
+        {
+            "key": "offset",
+            "value": "Compensar"
+        },
+        {
+            "key": "updateLanguages",
+            "value": "Atualizar Idiomas"
+        },
+        {
+            "key": "languageUpdateProgressTitle",
+            "value": "Atualizando Idiomas"
+        },
+        {
+            "key": "languageUpdateProgressMessage1",
+            "value": "Verificando atualizações de idiomas..."
+        },
+        {
+            "key": "languageUpdateDownloadingLanguages",
+            "value": "Baixando idioma {0}..."
+        },
+        {
+            "key": "languageUpdateSavingChanges",
+            "value": "Salvando alterações"
+        },
+        {
+            "key": "languageUpdateProgressTitleSuccess",
+            "value": "Idioma atualizado com sucesso"
+        },
+        {
+            "key": "ok",
+            "value": "OK"
+        },
+        {
+            "key": "languageUpdateProgressTitleFail",
+            "value": "Atualização de idioma falhou"
+        },
+        {
+            "key": "languageUpdateTimeout",
+            "value": "Atualização falhou devido à um timeout. Se você está conectado à internet, nossos servidores podem estar desligados. Por favor tente novamente mais tarde, ou reporte um bug (olhe o manual do usuário para detalhes) se o erro persistir."
+        },
+        {
+            "key": "languageUpdateFail",
+            "value": "Falha na atualização. Por favor reporte um bug (olhe o manual do usuário para detalhes). Código do erro: {0}, Mensagem: {1}"
+        },
+        {
+            "key": "languageUpdated",
+            "value": "Atualizando {0} da versão {1} para {2}"
+        },
+        {
+            "key": "languageAdded",
+            "value": "{0} adicionada"
+        },
+        {
+            "key": "languageUnchanged",
+            "value": "{0} está atualizado"
+        },
+        {
+            "key": "languageAllUpToDate",
+            "value": "Todos os idiomas estão atualizados."
+        }
+    ]
 }

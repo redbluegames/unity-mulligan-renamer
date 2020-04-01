@@ -26,31 +26,31 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections.Generic;
     using NUnit.Framework;
 
-    public class LocaleLanguageTests
+    public class LanguageTests
     {
-        private List<LocaleLanguage> allResourceLanguages;
+        private List<Language> allResourceLanguages;
 
         [SetUp]
         public void Init()
         {
-            this.allResourceLanguages = LocaleManager.LoadAllLanguages();
+            this.allResourceLanguages = LocalizationManager.LoadAllLanguages();
         }
 
         [Test]
-        public void CheckAllLanguageKeys_WithEnglish()
+        public void CheckAllLanguages_ForMatchingEnglishElement()
         {
-            var englishLanguage = this.allResourceLanguages.Find(x => x.LanguageKey == "en");
+            var englishLanguage = this.allResourceLanguages.Find(x => x.Key == "en");
 
             foreach (var language in this.allResourceLanguages)
             {
-                if (language.LanguageKey == "en")
+                if (language.Key == "en")
                     continue;
 
                 foreach (var englishElement in englishLanguage.Elements)
                 {
                     Assert.That(
                         language.Elements.Exists(x => x.Key == englishElement.Key),
-                        "Language " + language.LanguageName + " does not contain key \"" + englishElement.Key +
+                        "Language " + language.Name + " does not contain key \"" + englishElement.Key +
                         "\". Please add an element with this key to the language.");
                 }
             }
@@ -64,7 +64,7 @@ namespace RedBlueGames.MulliganRenamer
                 foreach (var element in language.Elements)
                 {
                     Assert.That(!string.IsNullOrEmpty(element.Value),
-                        "Language " + language.LanguageName + " does not contain a value for key \"" + element.Key +
+                        "Language " + language.Name + " does not contain a value for key \"" + element.Key +
                         "\". Please add a value to the language.");
                 }
             }
@@ -95,7 +95,7 @@ namespace RedBlueGames.MulliganRenamer
                     Assert.That(
                         language.Elements.Exists(x => x.Key == scriptKeyPair.Key),
                         "Script \"" + scriptKeyPair.ScriptName + "\" tries to access key \"" + scriptKeyPair.Key +
-                        "\" from Language " + language.LanguageName + " but it could not be found." +
+                        "\" from Language " + language.Name + " but it could not be found." +
                         "Please add an element with this key to the language, or remove the GetTranslation call.");
                 }
             }
