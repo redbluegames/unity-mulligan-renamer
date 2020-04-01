@@ -21,11 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections.Generic;
+    using UnityEngine;
     public class LanguageBookmarks
     {
         // These are assigned through Unity's serialization / deserialization.

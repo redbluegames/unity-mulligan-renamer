@@ -21,12 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Collections;
-using System;
-using UnityEngine;
-
 namespace RedBlueGames.MulliganRenamer
 {
+    using System.Collections;
+    using System;
+    using UnityEngine;
+
     /// <summary>
     /// Get a JSON object from a specified address using the specified IWebRequest
     /// </summary>
