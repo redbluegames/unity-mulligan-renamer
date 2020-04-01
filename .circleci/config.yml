@@ -48,4 +48,7 @@ workflows:
               only: master
   test:
     jobs:
-      - test
+      - test:
+          filters:
+            branches:
+              only: /242*/
