@@ -1,7 +1,7 @@
 {
     "languageUrls":
     [
-        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json",
-        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/pt.json"
+        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json",
+        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/pt.json"
     ]
 }

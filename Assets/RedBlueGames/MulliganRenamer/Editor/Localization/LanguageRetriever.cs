@@ -35,7 +35,7 @@ namespace RedBlueGames.MulliganRenamer
     {
         private static readonly string BookmarksURIRelease = "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/master/LanguageBookmarks.json";
 
-        private static readonly string BookmarksURIStaging = "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/languages-from-web-tested/LanguageBookmarks.json";
+        private static readonly string BookmarksURIStaging = "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/LanguageBookmarks.json";
 
         public bool IsDoneUpdating { get; private set; }
 
