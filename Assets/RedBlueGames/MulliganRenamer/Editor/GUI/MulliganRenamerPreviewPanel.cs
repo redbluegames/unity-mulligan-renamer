@@ -61,11 +61,6 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public event System.Action<int> ObjectRemovedAtIndex;
 
-        /// <summary>
-        /// Event fired when an Object wants to change order
-        /// </summary>
-        public event System.Action<int, int> ChangeObjectOrder;
-
         public event System.Action ColumnsResized;
 
         /// <summary>

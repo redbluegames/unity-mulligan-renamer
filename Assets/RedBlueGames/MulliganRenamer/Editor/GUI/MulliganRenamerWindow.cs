@@ -293,7 +293,6 @@ namespace RedBlueGames.MulliganRenamer
             this.previewPanel.RemoveAllClicked += this.HandleRemoveAllObjectsClicked;
             this.previewPanel.AddSelectedObjectsClicked += this.HandleAddSelectedObjectsClicked;
             this.previewPanel.ObjectRemovedAtIndex += this.HandleObjectRemoved;
-            this.previewPanel.ChangeObjectOrder += this.HandleChangeObjectOrder;
             this.previewPanel.ColumnsResized += this.Repaint;
         }
 
@@ -316,17 +315,6 @@ namespace RedBlueGames.MulliganRenamer
         private void HandleObjectRemoved(int index)
         {
             this.ObjectsToRename.RemoveAt(index);
-        }
-
-        private void HandleChangeObjectOrder(int currentIndex, int newIndex)
-        {
-            var objects = new List<Object>(this.ObjectsToRename);
-            var holder = objects[currentIndex];
-            objects[currentIndex] = objects[newIndex];
-            objects[newIndex] = holder;
-
-            this.ObjectsToRename.Clear();
-            this.ObjectsToRename.AddRange(objects);
         }
 
         private void HandleLanguageChanged()
