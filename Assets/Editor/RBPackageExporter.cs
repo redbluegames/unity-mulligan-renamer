@@ -32,8 +32,17 @@ using UnityEngine;
 /// </summary>
 public class RBPackageExporter
 {
+    private readonly string pathToSettingsFile = System.IO.Path.Combine(Application.dataPath, "RedBlueGames/MulliganRenamer/Editor/RBPackageSettings.cs");
+
+    private readonly string pathToSettingsOverrideFile =
+            Application.dataPath +
+            System.IO.Path.DirectorySeparatorChar + ".." + System.IO.Path.DirectorySeparatorChar +
+            "RBPackageSettings.cs";
+
     public void Export(bool includeTestDirectories)
     {
+        var oldSettings = this.SaveFilesForGitHubRelease();
+
         // Export function heavily inspired by this blog post:
         // https://medium.com/@neuecc/using-circle-ci-to-build-test-make-unitypackage-on-unity-9f9fa2b3adfd
         var root = "RedBlueGames/MulliganRenamer";
@@ -55,6 +64,22 @@ public class RBPackageExporter
             exportPath,
             ExportPackageOptions.Default);
 
+        // Restore the old file so that we don't dirty the repo.
+        if (!string.IsNullOrEmpty(oldSettings))
+        {
+            System.IO.File.WriteAllText(this.pathToSettingsFile, oldSettings);
+        }
+
         UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
+    }
+
+    private string SaveFilesForGitHubRelease()
+    {
+        var oldSettings = System.IO.File.ReadAllText(this.pathToSettingsFile);
+        var settingsOverride = System.IO.File.ReadAllText(this.pathToSettingsOverrideFile);
+        settingsOverride = string.Concat("/* THIS CLASS IS AUTO-GENERATED! DO NOT MODIFY!  */ \n", settingsOverride);
+        System.IO.File.WriteAllText(this.pathToSettingsFile, settingsOverride);
+
+        return oldSettings;
     }
 }
