@@ -1,0 +1,683 @@
+{
+    "name": "English",
+    "key": "en",
+    "version": 0,
+    "elements": [
+        {
+            "key": "rename",
+            "value": "Rename"
+        },
+        {
+            "key": "renameWarningNotRenamed",
+            "value": "Some objects have warnings and will not be renamed. Do you want to rename the other objects in the group?"
+        },
+        {
+            "key": "warning",
+            "value": "Warning"
+        },
+        {
+            "key": "cancel",
+            "value": "Cancel"
+        },
+        {
+            "key": "failToRenameMulligan",
+            "value": "Sorry, some objects failed to rename. Something went wrong with Mulligan. Please report a bug (see UserManual for details). This rename operation will be automatically undone\n\nException: "
+        },
+        {
+            "key": "error",
+            "value": "Error"
+        },
+        {
+            "key": "presets",
+            "value": "Presets"
+        },
+        {
+            "key": "result",
+            "value": "Result"
+        },
+        {
+            "key": "addOperation",
+            "value": "Add Operation"
+        },
+        {
+            "key": "renameOperation",
+            "value": "Rename Operation"
+        },
+        {
+            "key": "language",
+            "value": "Language"
+        },
+        {
+            "key": "languageTooltip",
+            "value": "Specifies the language for all text used in Mulligan."
+        },
+        {
+            "key": "prefix",
+            "value": "Prefix"
+        },
+        {
+            "key": "saveAs",
+            "value": "Save As..."
+        },
+        {
+            "key": "managePresets",
+            "value": "Manage Presets"
+        },
+        {
+            "key": "errorUnrecognizedListButton",
+            "value": "RenamerWindow found Unrecognized ListButtonEvent [{0}] in OnGUI. Add a case to handle this event."
+        },
+        {
+            "key": "errorAddNewOpNotSub",
+            "value": "MulliganRenamerWindow tried to add a new RenameOperation using a type that is not a subclass of RenameOperationDrawerBinding. Operation type: "
+        },
+        {
+            "key": "thankYouForSupport",
+            "value": "Thank you very much for supporting Mulligan!"
+        },
+        {
+            "key": "thankYouForReview",
+            "value": "Thank you for reviewing Mulligan!"
+        },
+        {
+            "key": "thankYouForUsing",
+            "value": "Thank you for using Mulligan! If you've found it useful, please consider supporting its development by purchasing it from the Asset Store. Thanks!"
+        },
+        {
+            "key": "thankYouForPurchasing",
+            "value": "Thank you for purchasing Mulligan! If you've found it useful, please consider leaving a review on the Asset Store. The store is very competitive and every review helps to stand out. Thanks!"
+        },
+        {
+            "key": "openAssetStore",
+            "value": "Open Asset Store"
+        },
+        {
+            "key": "savePreset",
+            "value": "Save Preset"
+        },
+        {
+            "key": "previewSteps",
+            "value": "Preview Steps"
+        },
+        {
+            "key": "noObjectsSpecified",
+            "value": "No objects specified for rename. Drag objects here to rename them, or"
+        },
+        {
+            "key": "addMoreObjectsDragPanel",
+            "value": "Add more objects by dragging them into the above panel"
+        },
+        {
+            "key": "addMoreObjectsDragHere",
+            "value": "Add more objects by dragging them here"
+        },
+        {
+            "key": "toRenameMoreObjects",
+            "value": "To rename more objects, drag them here, or"
+        },
+        {
+            "key": "removeAll",
+            "value": "Remove All"
+        },
+        {
+            "key": "object",
+            "value": "Object"
+        },
+        {
+            "key": "objects",
+            "value": "Objects"
+        },
+        {
+            "key": "renamed",
+            "value": "Renamed"
+        },
+        {
+            "key": "original",
+            "value": "Original"
+        },
+        {
+            "key": "before",
+            "value": "Before"
+        },
+        {
+            "key": "after",
+            "value": "After"
+        },
+        {
+            "key": "finalName",
+            "value": "Final Name"
+        },
+        {
+            "key": "addSelectedObjects",
+            "value": "Add Selected Objects"
+        },
+        {
+            "key": "errorTryingToAccessModel",
+            "value": "Trying to access PreviewRowModel at index that is out of bounds. Index: "
+        },
+        {
+            "key": "warningNewNameMatchesExisting",
+            "value": "New name matches an existing file or another renamed object."
+        },
+        {
+            "key": "assetBlankName",
+            "value": "Asset has blank name."
+        },
+        {
+            "key": "nameIncludeInvalidCharacter",
+            "value": "Name includes invalid characters (usually symbols such as ?.,)."
+        },
+        {
+            "key": "tryingToAddSpriteToRenamer",
+            "value": "Trying to add Sprite {0} to SpriteRenamer that has a different path to texture than the other sprites. Received path {1}, expected {2}"
+        },
+        {
+            "key": "errorTryingToAddSpriteToRenamer",
+            "value": "Trying to add Sprite to SpriteRenamer at path {0}, but no meta file exists at the specified path."
+        },
+        {
+            "key": "errorPresetNameAlreadyExists",
+            "value": "A preset named \"{0}\" already exists. Do you want to replace it?"
+        },
+        {
+            "key": "no",
+            "value": "No"
+        },
+        {
+            "key": "save",
+            "value": "Save"
+        },
+        {
+            "key": "errorTryintToGetOriginalName",
+            "value": "Trying to get original name for RenameResultSequence at index that's out of bounds. Index: {0}"
+        },
+        {
+            "key": "errorTryingToGetOriginalNameOutOfBounds",
+            "value": "Trying to get original name for RenameResultSequence at index that's out of bounds. Index: {0}"
+        },
+        {
+            "key": "add",
+            "value": "Add"
+        },
+        {
+            "key": "prefixOrSuffix",
+            "value": "Prefix or Suffix"
+        },
+        {
+            "key": "stringSequence",
+            "value": "String Sequence"
+        },
+        {
+            "key": "modify",
+            "value": "Modify"
+        },
+        {
+            "key": "changeCase",
+            "value": "Change Case"
+        },
+        {
+            "key": "countByLetter",
+            "value": "Count By Letter"
+        },
+        {
+            "key": "enumerate",
+            "value": "Enumerate"
+        },
+        {
+            "key": "delete",
+            "value": "Delete"
+        },
+        {
+            "key": "replace",
+            "value": "Replace"
+        },
+        {
+            "key": "replaceString",
+            "value": "Replace String"
+        },
+        {
+            "key": "trimCharacters",
+            "value": "Trim Characters"
+        },
+        {
+            "key": "preset",
+            "value": "Preset"
+        },
+        {
+            "key": "savedPresets",
+            "value": "Saved Presets"
+        },
+        {
+            "key": "errorNoSavedPresets",
+            "value": "You have no saved Rename Operation presets. Select 'Save as...' in the \"Presets\" dropdown to create a new preset."
+        },
+        {
+            "key": "areYouSureDelete",
+            "value": "Are you sure you want to delete the preset \"{0}\"?"
+        },
+        {
+            "key": "deletePreset",
+            "value": "Delete Preset"
+        },
+        {
+            "key": "removeCharacters",
+            "value": "Remove Characters"
+        },
+        {
+            "key": "bulkRename",
+            "value": "Bulk Rename"
+        },
+        {
+            "key": "renamingObjectXofY",
+            "value": "Renaming Object {0} of {1}"
+        },
+        {
+            "key": "renaming",
+            "value": "Renaming"
+        },
+        {
+            "key": "errorAssetNotBulkRenamed",
+            "value": "Asset [{0}] not renamed when trying to RenameAsset in BulkRenamer. It may have been canceled because the new name was already taken by an object at the same path. The new name may also have contained special characters.\nOriginalPath: {1}, New Name: {2}"
+        },
+        {
+            "key": "deleteFromFront",
+            "value": "Delete from Front"
+        },
+        {
+            "key": "deleteFromBack",
+            "value": "Delete from Back"
+        },
+        {
+            "key": "toCamelCase",
+            "value": "To Camel Case"
+        },
+        {
+            "key": "usePascalCasing",
+            "value": "Use Pascal Casing"
+        },
+        {
+            "key": "flagToCapitalizeTheFirstLetterOfname",
+            "value": "Flag to capitalize the first letter of the name (also known as Upper Camel Casing)."
+        },
+        {
+            "key": "delimiterCharacters",
+            "value": "Delimiter Characters"
+        },
+        {
+            "key": "caseSensitiveCharactersIndicateStart",
+            "value": "The case sensitive characters that indicate the start of a word."
+        },
+        {
+            "key": "delimiters",
+            "value": "Delimiters"
+        },
+        {
+            "key": "searchString",
+            "value": "Search String"
+        },
+        {
+            "key": "useRegex",
+            "value": "Use Regular Expression"
+        },
+        {
+            "key": "matchTermsUsingRegex",
+            "value": "Match terms using Regular Expressions, terms that allow for powerful pattern matching."
+        },
+        {
+            "key": "matchRegex",
+            "value": "Match Regex"
+        },
+        {
+            "key": "regexToUseToMatchTerms",
+            "value": "Regular Expression to use to match terms."
+        },
+        {
+            "key": "searchForString",
+            "value": "Search for String"
+        },
+        {
+            "key": "substringsToSeatchInFilenames",
+            "value": "Substrings to search for in the filenames. These strings will be replaced by the Replacement String."
+        },
+        {
+            "key": "replaceWith",
+            "value": "Replace with"
+        },
+        {
+            "key": "stringToReplaceMatchingInstances",
+            "value": "String to replace matching instances of the Search string."
+        },
+        {
+            "key": "caseSensitive",
+            "value": "Case Sensitive"
+        },
+        {
+            "key": "searchUsingCaseSensitivity",
+            "value": "Search using case sensitivity. Only strings that match the supplied casing will be replaced."
+        },
+        {
+            "key": "matchExpressNotValid",
+            "value": "Match Expression is not a valid Regular Expression."
+        },
+        {
+            "key": "replacementExpressionNotValid",
+            "value": "Replacement Expression is not a valid Regular Expression."
+        },
+        {
+            "key": "newName",
+            "value": "New Name"
+        },
+        {
+            "key": "nameToReplaceTheOldeOne",
+            "value": "Name to replace the old one with."
+        },
+        {
+            "key": "selectPresetOrSpecifyCharacters",
+            "value": "Select a preset or specify your own characters."
+        },
+        {
+            "key": "charactersToRemove",
+            "value": "Characters to Remove"
+        },
+        {
+            "key": "allCharactersThatWillBeRemoved",
+            "value": "All characters that will be removed from the names."
+        },
+        {
+            "key": "flagTheSearchToMatchCase",
+            "value": "Flag the search to match only the specified case"
+        },
+        {
+            "key": "symbols",
+            "value": "Symbols"
+        },
+        {
+            "key": "removeSpecialCharacters",
+            "value": "Removes special characters (ie. !@#$%^&*)"
+        },
+        {
+            "key": "numbers",
+            "value": "Numbers"
+        },
+        {
+            "key": "removeDigits",
+            "value": "Removes digits 0-9"
+        },
+        {
+            "key": "whitespace",
+            "value": "Whitespace"
+        },
+        {
+            "key": "removesWhitespace",
+            "value": "Removes Whitespace"
+        },
+        {
+            "key": "count",
+            "value": "Count"
+        },
+        {
+            "key": "format",
+            "value": "Format"
+        },
+        {
+            "key": "selectPresetFormat",
+            "value": "Select a preset format or specify your own format."
+        },
+        {
+            "key": "countFormat",
+            "value": "Count Format"
+        },
+        {
+            "key": "theStringFormatToUseWhenAddingTheCountToName",
+            "value": "The string format to use when adding the Count to the name."
+        },
+        {
+            "key": "invalidCountFormat",
+            "value": "Invalid Count Format. Typical formats are D1 for one digit with no leading zeros, D2, for two, etc.\nLookup the String.Format() method for more info on formatting options."
+        },
+        {
+            "key": "countFrom",
+            "value": "Count From"
+        },
+        {
+            "key": "theValueToStartCountingFrom",
+            "value": "The value to start counting from. The first object will have this number."
+        },
+        {
+            "key": "increment",
+            "value": "Increment"
+        },
+        {
+            "key": "theValueToAddToEachObjectWhenCounting",
+            "value": "The value to add to each object when counting."
+        },
+        {
+            "key": "addAsPrefix",
+            "value": "Add As Prefix"
+        },
+        {
+            "key": "addTheCountToTheFontOfTheObjectName",
+            "value": "Add the count to the front of the object's name."
+        },
+        {
+            "key": "custom",
+            "value": "Custom"
+        },
+        {
+            "key": "strings",
+            "value": "Strings"
+        },
+        {
+            "key": "theStringsOfLettersToAdd",
+            "value": "The strings of letters to add, comma separated. Ex: \"A,B,C\" will append A, B, and C to the first three objects respectively. After that it will add another sequence, starting with AA, then AB, then AC, etc."
+        },
+        {
+            "key": "formatForTheAddedLetters",
+            "value": "Format for the added letters."
+        },
+        {
+            "key": "theValueToStartCounting",
+            "value": "The value to start counting from. The string from the sequence at this count will be appended to the first object."
+        },
+        {
+            "key": "startsWith",
+            "value": "Starts with"
+        },
+        {
+            "key": "theValueToAddToTheCount",
+            "value": "The value to add to the count after naming an object."
+        },
+        {
+            "key": "addTheCountToTheFront",
+            "value": "Add the count to the front of the object's name."
+        },
+        {
+            "key": "uppercaseAlphabet",
+            "value": "Uppercase Alphabet"
+        },
+        {
+            "key": "lowercaseAlphabet",
+            "value": "Lowercase Alphabet"
+        },
+        {
+            "key": "toUpperOrLowercase",
+            "value": "To Upper or Lowercase"
+        },
+        {
+            "key": "toUppercase",
+            "value": "To Uppercase"
+        },
+        {
+            "key": "newCasing",
+            "value": "New Casing"
+        },
+        {
+            "key": "theDesiredCasingForName",
+            "value": "The desired casing for the new name."
+        },
+        {
+            "key": "onlyFirstCharacter",
+            "value": "Only First Character"
+        },
+        {
+            "key": "changeOnlyTheFirstCharacterCase",
+            "value": "Change only the first character's case."
+        },
+        {
+            "key": "addStringSequence",
+            "value": "Add String Sequence"
+        },
+        {
+            "key": "sequence",
+            "value": "Sequence"
+        },
+        {
+            "key": "theSequenceOfStringsToAddCommaSeparted",
+            "value": "The sequence of strings to add, comma separted."
+        },
+        {
+            "key": "addTheCountToTheFrontOfTheObjectName",
+            "value": "Add the count to the front of the object's name."
+        },
+        {
+            "key": "addPrefixOrSuffix",
+            "value": "Add Prefix or Suffix"
+        },
+        {
+            "key": "suffix",
+            "value": "Suffix"
+        },
+        {
+            "key": "replacementString",
+            "value": "Replacement String"
+        },
+        {
+            "key": "preferenceWindowTitle",
+            "value": "Mulligan Renamer Preferences"
+        },
+        {
+            "key": "preferencesMenuItem",
+            "value": "Mulligan Renamer"
+        },
+        {
+            "key": "preferencesDiffLabel",
+            "value": "Diff Colors"
+        },
+        {
+            "key": "preferencesInsertionText",
+            "value": "Insertion Text"
+        },
+        {
+            "key": "preferencesInsertionBackground",
+            "value": "Insertion Background"
+        },
+        {
+            "key": "preferencesDeletionText",
+            "value": "Deletion Text"
+        },
+        {
+            "key": "preferencesDeletionBackground",
+            "value": "Deletion Background"
+        },
+        {
+            "key": "preferencesReset",
+            "value": "Reset to Default"
+        },
+        {
+            "key": "preferences",
+            "value": "Preferences"
+        },
+        {
+            "key": "exampleThisIs",
+            "value": "This is"
+        },
+        {
+            "key": "exampleSampleText",
+            "value": "sample text"
+        },
+        {
+            "key": "exampleWithWords",
+            "value": "with words"
+        },
+        {
+            "key": "exampleInserted",
+            "value": "inserted"
+        },
+        {
+            "key": "exampleDeleted",
+            "value": "deleted"
+        },
+        {
+            "key": "adjustNumbers",
+            "value": "Adjust Numbers"
+        },
+        {
+            "key": "Lowercase",
+            "value": "Lowercase"
+        },
+        {
+            "key": "Uppercase",
+            "value": "Uppercase"
+        },
+        {
+            "key": "offset",
+            "value": "Offset"
+        },
+        {
+            "key": "updateLanguages",
+            "value": "Update Languages"
+        },
+        {
+            "key": "languageUpdateProgressTitle",
+            "value": "Updating Languages"
+        },
+        {
+            "key": "languageUpdateProgressMessage1",
+            "value": "Checking for language updates..."
+        },
+        {
+            "key": "languageUpdateDownloadingLanguages",
+            "value": "Downloading language {0}..."
+        },
+        {
+            "key": "languageUpdateSavingChanges",
+            "value": "Saving Changes..."
+        },
+        {
+            "key": "languageUpdateProgressTitleSuccess",
+            "value": "Languages Successfully Updated"
+        },
+        {
+            "key": "ok",
+            "value": "OK"
+        },
+        {
+            "key": "languageUpdateProgressTitleFail",
+            "value": "Language Update Failed"
+        },
+        {
+            "key": "languageUpdateTimeout",
+            "value": "Update failed due to web request timeout. If you have internet, our servers may be down. Please try again later, or report a bug (see UserManual for details) if the issue persists."
+        },
+        {
+            "key": "languageUpdateFail",
+            "value": "Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}."
+        },
+        {
+            "key": "languageUpdated",
+            "value": "Updated {0} from version {1} to {2}"
+        },
+        {
+            "key": "languageAdded",
+            "value": "Added {0}."
+        },
+        {
+            "key": "languageUnchanged",
+            "value": "{0} is up to date."
+        },
+        {
+            "key": "languageAllUpToDate",
+            "value": "All languages are up to date."
+        }
+    ]
+}

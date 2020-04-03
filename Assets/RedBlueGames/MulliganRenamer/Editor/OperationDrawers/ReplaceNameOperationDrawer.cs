@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Replace/Rename";
+                return GetOperationPath("replace", "rename");
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Rename";
+                return LocalizationManager.Instance.GetTranslation("rename");
             }
         }
 
@@ -72,7 +72,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "New Name";
+                return LocalizationManager.Instance.GetTranslation("newName");
             }
         }
 
@@ -95,7 +95,9 @@ namespace RedBlueGames.MulliganRenamer
             // Split even a single line GUI so that we properly subtract out spacing
             var singleLineRect = operationRect.GetSplitVertical(1, 1, LineSpacing);
 
-            GUIContent newNameContent = new GUIContent("New Name", "Name to replace the old one with.");
+            GUIContent newNameContent = new GUIContent(
+                LocalizationManager.Instance.GetTranslation("newName"),
+                LocalizationManager.Instance.GetTranslation("nameToReplaceTheOldeOne"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, newNameContent.text));
             this.RenameOperation.NewName = EditorGUI.TextField(singleLineRect, newNameContent, this.RenameOperation.NewName);
         }

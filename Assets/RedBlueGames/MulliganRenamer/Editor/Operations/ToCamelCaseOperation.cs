@@ -171,7 +171,7 @@ namespace RedBlueGames.MulliganRenamer
                 inputCaseChanged = input;
             }
 
-            var renameResult = this.GetDiffResultFromStrings(input, inputCaseChanged);
+            var renameResult = RenameResultUtilities.GetDiffResultFromStrings(input, inputCaseChanged);
             return renameResult;
         }
 
@@ -220,39 +220,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             return wordCaseChanged;
-        }
-
-        private RenameResult GetDiffResultFromStrings(string stringA, string stringB)
-        {
-            var renameResult = new RenameResult();
-            var consecutiveEqualChars = string.Empty;
-            for (int i = 0; i < stringA.Length; ++i)
-            {
-                string oldLetter = stringA.Substring(i, 1);
-                string newLetter = stringB.Substring(i, 1);
-                if (oldLetter.Equals(newLetter))
-                {
-                    consecutiveEqualChars = string.Concat(consecutiveEqualChars, oldLetter);
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(consecutiveEqualChars))
-                    {
-                        renameResult.Add(new Diff(consecutiveEqualChars, DiffOperation.Equal));
-                        consecutiveEqualChars = string.Empty;
-                    }
-
-                    renameResult.Add(new Diff(oldLetter, DiffOperation.Deletion));
-                    renameResult.Add(new Diff(newLetter, DiffOperation.Insertion));
-                }
-            }
-
-            if (!string.IsNullOrEmpty(consecutiveEqualChars))
-            {
-                renameResult.Add(new Diff(consecutiveEqualChars, DiffOperation.Equal));
-            }
-
-            return renameResult;
         }
     }
 }

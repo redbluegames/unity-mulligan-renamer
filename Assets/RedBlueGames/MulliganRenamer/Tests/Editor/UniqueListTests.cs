@@ -83,13 +83,15 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
-        public void AddRange_Duplicates_Throws()
+        public void AddRange_Duplicates_IgnoresDuplicate()
         {
             // Act
             var list = new UniqueList<string>();
 
+            list.AddRange(new List<string>() { "Test", "Test" });
+
             // Assert
-            Assert.Throws<System.InvalidOperationException>(() => list.AddRange(new List<string>() { "Test", "Test" }));
+            CollectionAssert.AreEquivalent(new[] { "Test", }, list);
         }
 
         [Test]

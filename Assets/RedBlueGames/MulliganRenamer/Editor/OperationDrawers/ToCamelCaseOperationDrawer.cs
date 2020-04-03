@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "Modify/To Camel Case";
+                return GetOperationPath("modify", "toCamelCase");
             }
         }
 
@@ -48,7 +48,7 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return "To Camel Case";
+                return LocalizationManager.Instance.GetTranslation("toCamelCase");
             }
         }
 
@@ -94,7 +94,9 @@ namespace RedBlueGames.MulliganRenamer
         {
             var singleLineRect = operationRect.GetSplitVertical(1, 2, LineSpacing);
 
-            var pascalLabel = new GUIContent("Use Pascal Casing", "Flag to capitalize the first letter of the name (also known as Upper Camel Casing).");
+            var pascalLabel = new GUIContent(
+                LocalizationManager.Instance.GetTranslation("usePascalCasing"),
+                LocalizationManager.Instance.GetTranslation("flagToCapitalizeTheFirstLetterOfname"));
             GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Pascal"));
             this.RenameOperation.UsePascal = EditorGUI.Toggle(
                 singleLineRect,
@@ -103,8 +105,10 @@ namespace RedBlueGames.MulliganRenamer
             );
 
             var delimitersRect = operationRect.GetSplitVertical(2, 2, LineSpacing);
-            var delimitersLabel = new GUIContent("Delimiter Characters", "The case sensitive characters that indicate the start of a word.");
-            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, "Delimiters"));
+            var delimitersLabel = new GUIContent(
+                LocalizationManager.Instance.GetTranslation("delimiterCharacters"),
+                LocalizationManager.Instance.GetTranslation("caseSensitiveCharactersIndicateStart"));
+            GUI.SetNextControlName(GUIControlNameUtility.CreatePrefixedName(controlPrefix, LocalizationManager.Instance.GetTranslation("delimiters")));
             this.RenameOperation.DelimiterCharacters = EditorGUI.TextField(
                 delimitersRect,
                 delimitersLabel,
