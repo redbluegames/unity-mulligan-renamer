@@ -52,7 +52,11 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
+                #if UNITY_5
+                return this.webRequest.isError && this.webRequest.error == "Request timeout";
+                #else
                 return this.webRequest.isNetworkError && this.webRequest.error == "Request timeout";
+                #endif
             }
         }
 
@@ -68,7 +72,11 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
+                #if UNITY_5
+                return this.webRequest.isError;
+                #else
                 return this.webRequest.isNetworkError;
+                #endif
             }
         }
 
@@ -76,7 +84,11 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
+                #if UNITY_5
+                return this.webRequest.isError;
+                #else
                 return this.webRequest.isHttpError;
+                #endif
             }
         }
 
@@ -116,7 +128,11 @@ namespace RedBlueGames.MulliganRenamer
         /// </summary>
         public void SendWebRequest()
         {
+            #if UNITY_5
+            this.webRequest.Send();
+            #else
             this.webRequest.SendWebRequest();
+            #endif
         }
 
         public void Dispose()
