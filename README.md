@@ -52,6 +52,7 @@ Contributing to the project is welcome. You can do so by adding GitHub issues, o
 
 
 ## Contributors and Credits
+- [Mukarillo](https://github.com/Mukarillo) for translating Portuguese and implementing Localization
 - [uvivagabond](https://github.com/uvivagabond)
 - [lucasrowe](https://github.com/lucasrowe)
 - [kevinrmabie](https://github.com/kevinrmabie)
