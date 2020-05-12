@@ -72,6 +72,9 @@ namespace RedBlueGames.MulliganRenamer
         [SerializeField]
         private bool hasInitializedColors;
 
+        [SerializeField]
+        private string currentLanguageKey;
+
         /// <summary>
         /// Gets or Sets the previously used Sequence of Rename Operations
         /// </summary>
@@ -229,6 +232,19 @@ namespace RedBlueGames.MulliganRenamer
             set
             {
                 this.deletionBackgroundColor = value;
+            }
+        }
+
+        public string CurrentLanguageKey
+        {
+            get
+            {
+                return this.currentLanguageKey;
+            }
+
+            set
+            {
+                this.currentLanguageKey = value;
             }
         }
 
@@ -401,6 +417,7 @@ namespace RedBlueGames.MulliganRenamer
 
             this.savedPresets = new List<RenameSequencePreset>();
 
+            this.currentLanguageKey = "en";
         }
 
         private void UpgradePreferences()
@@ -410,6 +427,9 @@ namespace RedBlueGames.MulliganRenamer
                 this.ResetColorsToDefault();
                 this.hasInitializedColors = true;
             }
+
+            // We moved this value into MulliganUserPrefs so delete it if it exists
+            EditorPrefs.DeleteKey("RedBlueGames.MulliganRenamer.Locale");
         }
     }
 }

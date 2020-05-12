@@ -38,8 +38,6 @@ namespace RedBlueGames.MulliganRenamer
     {
         private static LocalizationManager _Instance;
 
-        private const string LanguagePrefKey = "RedBlueGames.MulliganRenamer.Locale";
-
         private const string LanguageFoldername = "MulliganLanguages";
 
         public event System.Action LanguageChanged;
@@ -111,7 +109,8 @@ namespace RedBlueGames.MulliganRenamer
         public void Initialize()
         {
             this.CacheAllLanguages();
-            this.ChangeLanguage(EditorPrefs.GetString(LanguagePrefKey, "en"));
+            var preferences = MulliganUserPreferences.LoadOrCreatePreferences();
+            this.ChangeLanguage(preferences.CurrentLanguageKey);
         }
         /// <summary>
         /// Change the current Locale so that Translations are of the new, specified languages
@@ -122,7 +121,6 @@ namespace RedBlueGames.MulliganRenamer
             var language = this.allLanguages.FirstOrDefault(x => x.Key == languageKey);
             if (language != null)
             {
-                EditorPrefs.SetString(LanguagePrefKey, languageKey);
                 this.currentLanguage = language;
 
                 if (this.LanguageChanged != null)
