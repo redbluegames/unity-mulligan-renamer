@@ -51,6 +51,14 @@ namespace RedBlueGames.MulliganRenamer
                     _Instance = new LocalizationManager();
                 }
 
+                // Issue #252 - When updating from 1.6 to 1.7 with window open, Resources would be null on first frame.
+                // This resulted in exception spam when trying to GetTranslation because no languages were loaded.
+                // Now we set a flag so that we will continue to reload until we get languages.
+                if (!_Instance.areLanguagesLoaded)
+                {
+                    _Instance.Initialize();
+                }
+
                 return _Instance;
             }
         }
@@ -72,7 +80,10 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         private Language currentLanguage;
+
         private List<Language> allLanguages;
+
+        private bool areLanguagesLoaded;
 
         private LocalizationManager()
         {
@@ -109,9 +120,13 @@ namespace RedBlueGames.MulliganRenamer
         public void Initialize()
         {
             this.CacheAllLanguages();
-            var preferences = MulliganUserPreferences.LoadOrCreatePreferences();
-            this.ChangeLanguage(preferences.CurrentLanguageKey);
+            if (this.areLanguagesLoaded)
+            {
+                var preferences = MulliganUserPreferences.LoadOrCreatePreferences();
+                this.ChangeLanguage(preferences.CurrentLanguageKey);
+            }
         }
+
         /// <summary>
         /// Change the current Locale so that Translations are of the new, specified languages
         /// </summary>
@@ -127,6 +142,11 @@ namespace RedBlueGames.MulliganRenamer
                 {
                     this.LanguageChanged.Invoke();
                 }
+            }
+            else
+            {
+                throw new Exception("Language with key [" + languageKey + "] not found in LocalizationManager's loaded languages. " +
+                    "Are you sure it's a valid key? Did ChangeLanguage get called bofore LocalizationManager could load languages?");
             }
         }
 
@@ -162,17 +182,30 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The value stored at the key in the current language</returns>
         public string GetTranslation(string languageKey)
         {
-            if (this.currentLanguage == null)
+            if (!this.areLanguagesLoaded)
             {
-                throw new Exception("Current Language is not set");
+                return string.Empty;
             }
 
-            return this.currentLanguage.GetValue(languageKey);
+            if (this.currentLanguage != null)
+            {
+                return this.currentLanguage.GetValue(languageKey);
+            }
+            else
+            {
+                throw new Exception("CurrentLanguage is unset on LocalizationManager. Somehow we are requesting translations " +
+                    "before LocalizationManager succesfully loaded languages.");
+            }
         }
 
         private void CacheAllLanguages()
         {
+            this.areLanguagesLoaded = false;
             this.allLanguages = LoadAllLanguages();
+            if (this.allLanguages != null && this.allLanguages.Count > 0)
+            {
+                this.areLanguagesLoaded = true;
+            }
         }
 
         private LanguageUpdateReport UpdateLanguage(Language newLanguage)
