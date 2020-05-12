@@ -38,8 +38,6 @@ namespace RedBlueGames.MulliganRenamer
     {
         private static LocalizationManager _Instance;
 
-        private const string LanguagePrefKey = "RedBlueGames.MulliganRenamer.Locale";
-
         private const string LanguageFoldername = "MulliganLanguages";
 
         public event System.Action LanguageChanged;
@@ -53,6 +51,14 @@ namespace RedBlueGames.MulliganRenamer
                     _Instance = new LocalizationManager();
                 }
 
+                // Issue #252 - When updating from 1.6 to 1.7 with window open, Resources would be null on first frame.
+                // This resulted in exception spam when trying to GetTranslation because no languages were loaded.
+                // Now we set a flag so that we will continue to reload until we get languages.
+                if (!_Instance.areLanguagesLoaded)
+                {
+                    _Instance.Initialize();
+                }
+
                 return _Instance;
             }
         }
@@ -61,7 +67,14 @@ namespace RedBlueGames.MulliganRenamer
         {
             get
             {
-                return this.currentLanguage;
+                return this.GetLanguageByKey(currentLanguageKey);
+            }
+            set
+            {
+                if (value != null)
+                {
+                    this.currentLanguageKey = value.Key;
+                }
             }
         }
 
@@ -73,8 +86,11 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        private Language currentLanguage;
+        private string currentLanguageKey;
+
         private List<Language> allLanguages;
+
+        private bool areLanguagesLoaded;
 
         private LocalizationManager()
         {
@@ -111,24 +127,33 @@ namespace RedBlueGames.MulliganRenamer
         public void Initialize()
         {
             this.CacheAllLanguages();
-            this.ChangeLanguage(EditorPrefs.GetString(LanguagePrefKey, "en"));
+            if (this.areLanguagesLoaded)
+            {
+                var preferences = MulliganUserPreferences.LoadOrCreatePreferences();
+                this.ChangeLanguage(preferences.CurrentLanguageKey);
+            }
         }
+
         /// <summary>
         /// Change the current Locale so that Translations are of the new, specified languages
         /// </summary>
         /// <param name="languageKey">LanguageKey to change to</param>
         public void ChangeLanguage(string languageKey)
         {
-            var language = this.allLanguages.FirstOrDefault(x => x.Key == languageKey);
+            var language = this.GetLanguageByKey(languageKey);
             if (language != null)
             {
-                EditorPrefs.SetString(LanguagePrefKey, languageKey);
-                this.currentLanguage = language;
+                this.CurrentLanguage = language;
 
                 if (this.LanguageChanged != null)
                 {
                     this.LanguageChanged.Invoke();
                 }
+            }
+            else
+            {
+                throw new Exception("Language with key [" + languageKey + "] not found in LocalizationManager's loaded languages. " +
+                    "Are you sure it's a valid key? Did ChangeLanguage get called bofore LocalizationManager could load languages?");
             }
         }
 
@@ -164,24 +189,37 @@ namespace RedBlueGames.MulliganRenamer
         /// <returns>The value stored at the key in the current language</returns>
         public string GetTranslation(string languageKey)
         {
-            if (this.currentLanguage == null)
+            if (!this.areLanguagesLoaded)
             {
-                throw new Exception("Current Language is not set");
+                return string.Empty;
             }
 
-            return this.currentLanguage.GetValue(languageKey);
+            if (this.CurrentLanguage != null)
+            {
+                return this.CurrentLanguage.GetValue(languageKey);
+            }
+            else
+            {
+                throw new Exception("CurrentLanguage is unset on LocalizationManager. Somehow we are requesting translations " +
+                    "before LocalizationManager succesfully loaded languages.");
+            }
         }
 
         private void CacheAllLanguages()
         {
+            this.areLanguagesLoaded = false;
             this.allLanguages = LoadAllLanguages();
+            if (this.allLanguages != null && this.allLanguages.Count > 0)
+            {
+                this.areLanguagesLoaded = true;
+            }
         }
 
         private LanguageUpdateReport UpdateLanguage(Language newLanguage)
         {
             var report = new LanguageUpdateReport();
             report.Language = newLanguage;
-            Language existingLanguage = this.allLanguages.FirstOrDefault((l) => l.Key == newLanguage.Key);
+            Language existingLanguage = this.GetLanguageByKey(newLanguage.Key);
             if (existingLanguage == null)
             {
                 report.Result = LanguageUpdateReport.UpdateResult.Added;
@@ -197,14 +235,6 @@ namespace RedBlueGames.MulliganRenamer
             else
             {
                 report.Result = LanguageUpdateReport.UpdateResult.NoChange;
-            }
-
-            // newLanguage is a new language instance, even if it's the same "language", so
-            // we need to update the reference for the CurrentLanguage to the new one.
-            // Note this is not really "changing languages" so we don't fire the callback or update PrefKey
-            if (this.CurrentLanguage.Key == newLanguage.Key)
-            {
-                this.currentLanguage = newLanguage;
             }
 
             return report;
@@ -258,6 +288,11 @@ namespace RedBlueGames.MulliganRenamer
 
             var pathToFirstLanguage = AssetDatabase.GetAssetPath(jsons[0]);
             return System.IO.Path.GetDirectoryName(pathToFirstLanguage);
+        }
+
+        private Language GetLanguageByKey(string languagekey)
+        {
+            return this.allLanguages.FirstOrDefault(x => x.Key == languagekey);
         }
 
         public class LanguageUpdateReport

@@ -387,7 +387,7 @@ namespace RedBlueGames.MulliganRenamer
             GUI.Box(scrollViewRect, "", this.guiStyles.PreviewScroll);
 
             var newScrollPosition = previewPanelScrollPosition;
-            if (preview.NumObjects == 0)
+            if (preview == null || preview.NumObjects == 0)
             {
                 this.DrawPreviewPanelContentsEmpty(scrollViewRect);
                 this.drewEmptyLastFrame = true;
