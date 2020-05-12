@@ -287,6 +287,14 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         /// <summary>
+        /// Debug function to fully delete the PrefKeys
+        /// </summary>
+        public static void Debug_DeletePreferences()
+        {
+            EditorPrefs.DeleteKey(UserPreferencesPrefKey);
+        }
+
+        /// <summary>
         /// Get a saved preset by name, or null if none exists
         /// </summary>
         /// <param name="name">Name of the preset to find</param>
