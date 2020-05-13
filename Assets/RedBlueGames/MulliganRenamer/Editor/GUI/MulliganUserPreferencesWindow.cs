@@ -91,6 +91,7 @@ namespace RedBlueGames.MulliganRenamer
             var newLanguage = DrawLanguageDropdown(LocalizationManager.Instance.CurrentLanguage);
             if (newLanguage != LocalizationManager.Instance.CurrentLanguage)
             {
+                preferences.CurrentLanguageKey = newLanguage.Key;
                 LocalizationManager.Instance.ChangeLanguage(newLanguage.Key);
             }
 

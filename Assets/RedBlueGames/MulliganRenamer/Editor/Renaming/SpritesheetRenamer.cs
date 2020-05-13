@@ -143,6 +143,7 @@ namespace RedBlueGames.MulliganRenamer
         private static string ReplaceSpriteNameInMetaFile(string metafileText, string spriteName, string newName)
         {
             string modifiedMetafile = ReplaceFileIDRecycleNames(metafileText, spriteName, newName);
+            modifiedMetafile = ReplaceInternalIDToNameTable(modifiedMetafile, spriteName, newName);
             modifiedMetafile = ReplaceSpriteData(modifiedMetafile, spriteName, newName);
             return modifiedMetafile;
         }
@@ -158,6 +159,14 @@ namespace RedBlueGames.MulliganRenamer
         private static string ReplaceSpriteData(string metafileText, string oldName, string newName)
         {
             string spritenamePattern = "(name: )" + oldName + "(\r?\n)";
+            var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
+            string replacementText = "${1}" + newName + "${2}";
+            return spritenameRegex.Replace(metafileText, replacementText);
+        }
+
+        private static string ReplaceInternalIDToNameTable(string metafileText, string oldName, string newName)
+        {
+            string spritenamePattern = "(second: )" + oldName + "(\r?\n)";
             var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
             string replacementText = "${1}" + newName + "${2}";
             return spritenameRegex.Replace(metafileText, replacementText);
