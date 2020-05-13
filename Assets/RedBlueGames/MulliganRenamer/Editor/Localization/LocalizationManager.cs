@@ -152,8 +152,10 @@ namespace RedBlueGames.MulliganRenamer
             }
             else
             {
-                throw new Exception("Language with key [" + languageKey + "] not found in LocalizationManager's loaded languages. " +
-                    "Are you sure it's a valid key? Did ChangeLanguage get called bofore LocalizationManager could load languages?");
+                throw new System.ArgumentException(
+                    "Language with key [" + languageKey + "] not found in LocalizationManager's loaded languages. " +
+                    "Are you sure it's a valid key? Did ChangeLanguage get called bofore LocalizationManager could load languages?",
+                    "languageKey");
             }
         }
 

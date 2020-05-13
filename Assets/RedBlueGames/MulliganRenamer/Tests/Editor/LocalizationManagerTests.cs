@@ -61,7 +61,10 @@ namespace RedBlueGames.MulliganRenamer
             var oldLanguage = LocalizationManager.Instance.CurrentLanguage;
             var receivedLanguageChangedEvent = false;
             LocalizationManager.Instance.LanguageChanged += () => receivedLanguageChangedEvent = true;
-            LocalizationManager.Instance.ChangeLanguage("doesNotExist");
+            Assert.Throws(
+                typeof(System.ArgumentException),
+                () => LocalizationManager.Instance.ChangeLanguage("doesNotExist"),
+                "Expected LocalizationManager to throw an ArgumentException when changing to a bad langugage but it did not.");
             Assert.AreEqual(oldLanguage, LocalizationManager.Instance.CurrentLanguage,
                 "LocalizationManager changed language when passed an invalid key. It should remain unchanged.");
             Assert.False(receivedLanguageChangedEvent, "LocalizationManager fired off event for langauge changed" +
