@@ -690,7 +690,8 @@ namespace RedBlueGames.MulliganRenamer
                     case PreviewRowResult.Delete:
                         if (this.ObjectRemovedAtIndex != null)
                         {
-                            this.ObjectRemovedAtIndex.Invoke(i);
+                            var absoluteIndex = previewContents.FirstVisibleItemIndex + i;
+                            this.ObjectRemovedAtIndex.Invoke(absoluteIndex);
                         }
                         break;
                     default:
@@ -1109,6 +1110,8 @@ namespace RedBlueGames.MulliganRenamer
 
             public int TotalNumRows { get; set; }
 
+            public int FirstVisibleItemIndex {get; set;}
+
             public int NumVisibleRows
             {
                 get
@@ -1144,6 +1147,7 @@ namespace RedBlueGames.MulliganRenamer
                 int stepIndex)
             {
                 var previewPanelContents = new PreviewPanelContents();
+                previewPanelContents.FirstVisibleItemIndex = firstPreviewIndex;
                 previewPanelContents.RenameStepIndex = stepIndex;
 
                 var numVisibleObjects = Mathf.Min(numObjectsToShow, preview.NumObjects);
