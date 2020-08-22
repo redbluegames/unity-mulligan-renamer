@@ -36,10 +36,13 @@ If you'd like to be added to the Frequent Contributors team here: https://github
 
 ### Branching Strategy / Pull Requests ###
 
-There are two branches to know about:
+There are three branches to know about:
 * master
-* develop-v1.X
+* staging
+* develop-v1.X.Y
 
-Master should reflect live code, which is pushed to the Releases and also Unity Asset store. The develop branch is where we  stage changes before merging them into master and creating a release. Pull requests should be made into the develop branch.
+Master should reflect live code, which is pushed to the Releases and also Unity Asset store.
+Staging is where we push code before going live. This is mainly useful for updating languages, as we can add the languages to staging and then request them with debugs in Mulligan.
+Develop branch is where we work out of before merging them into staging and creating a release. Pull requests should be made into the develop branch.
 
-Current Development branch: https://github.com/redbluegames/unity-mulligan-renamer/tree/develop-1.7.0
+If there is no develop branch pushed, it means there is no patch currently in development. In this event, pull requests can be made into staging.
