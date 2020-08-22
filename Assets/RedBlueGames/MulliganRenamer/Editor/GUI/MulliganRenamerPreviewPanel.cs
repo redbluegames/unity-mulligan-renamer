@@ -1179,8 +1179,6 @@ namespace RedBlueGames.MulliganRenamer
                     }
 
                     info.IndexInPreview = indexOfVisibleObject;
-                    info.FirstElement = j == 0;
-                    info.LastElement = j == (numVisibleObjects - 1);
                     previewPanelContents.PreviewRowInfos[j] = info;
                 }
 
@@ -1261,10 +1259,6 @@ namespace RedBlueGames.MulliganRenamer
             }
 
             public int IndexInPreview { get; set; }
-
-            public bool LastElement { get; set; }
-
-            public bool FirstElement { get; set; }
 
             public RenameResultSequence RenameResultSequence { get; set; }
             public int RenameStepIndex { get; set; }
