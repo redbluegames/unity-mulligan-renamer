@@ -623,61 +623,61 @@
 			"key" : "offset",
 			"value" : "Compensar"
 		},
-        {
-            "key": "updateLanguages",
-            "value": "TODO: Update Languages"
-        },
-        {
-            "key": "languageUpdateProgressTitle",
-            "value": "TODO: Updating Languages"
-        },
-        {
-            "key": "languageUpdateProgressMessage1",
-            "value": "TODO: Checking for language updates..."
-        },
-        {
-            "key": "languageUpdateDownloadingLanguages",
-            "value": "TODO: Downloading language {0}..."
-        },
-        {
-            "key": "languageUpdateSavingChanges",
-            "value": "TODO: Saving Changes..."
-        },
-        {
-            "key": "languageUpdateProgressTitleSuccess",
-            "value": "TODO: Languages Successfully Updated"
-        },
-        {
-            "key": "ok",
-            "value": "TODO: OK"
-        },
-        {
-            "key": "languageUpdateProgressTitleFail",
-            "value": "TODO: Language Update Failed"
-        },
-        {
-            "key": "languageUpdateTimeout",
-            "value": "TODO: Update failed due to web request timeout. If you have internet, our servers may be down. Please try again later, or report a bug (see UserManual for details) if the issue persists."
-        },
-        {
-            "key": "languageUpdateFail",
-            "value": "TODO: Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}."
-        },
-        {
-            "key": "languageUpdated",
-            "value": "TODO: Updated {0} from version {1} to {2}"
-        },
-        {
-            "key": "languageAdded",
-            "value": "TODO: Added {0}."
-        },
-        {
-            "key": "languageUnchanged",
-            "value": "TODO: {0} is up to date."
-        },
-        {
-            "key": "languageAllUpToDate",
-            "value": "TODO: All languages are up to date."
-        }
+        	{
+            		"key": "updateLanguages",
+            		"value": "Actualizar Idiomas"
+        	},
+		{
+		    	"key": "languageUpdateProgressTitle",
+		    	"value": "Actualizando Idiomas"
+		},
+		{
+            		"key": "languageUpdateProgressMessage1",
+            		"value": "Verificando por actualizaciones de idiomas..."
+		},
+		{
+		    	"key": "languageUpdateDownloadingLanguages",
+		    	"value": "Bajando idioma {0}..."
+		},
+		{
+		    	"key": "languageUpdateSavingChanges",
+		    	"value": "Guardando cambios..."
+		},
+		{
+		    	"key": "languageUpdateProgressTitleSuccess",
+		    	"value": "Idioma actualizados con exito"
+		},
+		{
+		    	"key": "ok",
+		    	"value": "OK"
+		},
+		{
+		    	"key": "languageUpdateProgressTitleFail",
+		    	"value": "La actualización de idioma falló"
+		},
+		{
+		    	"key": "languageUpdateTimeout",
+		    	"value": "Actualización falló debido a que se terminó el tiempo de la solicitud a la web. Si tienes internet, nuestros servidores pueden estar caidos. Por favor intenta de nuevo más tarde, o reporta un error (ve el Manual de Usuario para detalles) si este error persite."
+		},
+		{
+		    	"key": "languageUpdateFail",
+		    	"value": "Actualización falló. Por favor reportelo ese error (use el manual del usuario para detalles). Código de Error: {0}, Mensaje: {1}."
+		},
+		{
+		    	"key": "languageUpdated",
+		    	"value": "Actualizado {0} de la version {1} a {2}"
+		},
+		{
+		    	"key": "languageAdded",
+		    	"value": "{0} agregado."
+		},
+		{
+		    	"key": "languageUnchanged",
+		    	"value": "{0} está actualizado."
+		},
+		{
+		    	"key": "languageAllUpToDate",
+		    	"value": "Todos los idiomas están actualizados."
+		}
 	]
 }
