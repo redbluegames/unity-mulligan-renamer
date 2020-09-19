@@ -1,6 +1,6 @@
 {
-	"languageName" : "Español",
-	"languageKey" : "es",
+	"name" : "Español",
+	"key" : "es",
 	"elements" : 
 	[
 		{
@@ -622,6 +622,62 @@
 		{
 			"key" : "offset",
 			"value" : "Compensar"
-		}
+		},
+        {
+            "key": "updateLanguages",
+            "value": "TODO: Update Languages"
+        },
+        {
+            "key": "languageUpdateProgressTitle",
+            "value": "TODO: Updating Languages"
+        },
+        {
+            "key": "languageUpdateProgressMessage1",
+            "value": "TODO: Checking for language updates..."
+        },
+        {
+            "key": "languageUpdateDownloadingLanguages",
+            "value": "TODO: Downloading language {0}..."
+        },
+        {
+            "key": "languageUpdateSavingChanges",
+            "value": "TODO: Saving Changes..."
+        },
+        {
+            "key": "languageUpdateProgressTitleSuccess",
+            "value": "TODO: Languages Successfully Updated"
+        },
+        {
+            "key": "ok",
+            "value": "TODO: OK"
+        },
+        {
+            "key": "languageUpdateProgressTitleFail",
+            "value": "TODO: Language Update Failed"
+        },
+        {
+            "key": "languageUpdateTimeout",
+            "value": "TODO: Update failed due to web request timeout. If you have internet, our servers may be down. Please try again later, or report a bug (see UserManual for details) if the issue persists."
+        },
+        {
+            "key": "languageUpdateFail",
+            "value": "TODO: Update failed. Please report a bug (see UserManual for details). FailCode: {0}, Message: {1}."
+        },
+        {
+            "key": "languageUpdated",
+            "value": "TODO: Updated {0} from version {1} to {2}"
+        },
+        {
+            "key": "languageAdded",
+            "value": "TODO: Added {0}."
+        },
+        {
+            "key": "languageUnchanged",
+            "value": "TODO: {0} is up to date."
+        },
+        {
+            "key": "languageAllUpToDate",
+            "value": "TODO: All languages are up to date."
+        }
 	]
 }

@@ -37,6 +37,22 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void CheckAllLanguages_ForNameKey()
+        {
+            var jsons = UnityEngine.Resources.LoadAll<UnityEngine.TextAsset>("MulliganLanguages");
+            foreach (var json in jsons)
+            {
+                var language = UnityEngine.JsonUtility.FromJson<Language>(json.text);
+                Assert.That(
+                    !string.IsNullOrEmpty(language.Name),
+                    "Name element for the language in json file named: " + json.name + " was null or empty. Is the Key named correctly?");
+                Assert.That(
+                    !string.IsNullOrEmpty(language.Key),
+                    "Key element for the language in json file named: " + json.name + " was null or empty. Is the Key named correctly?");
+            }
+        }
+
+        [Test]
         public void CheckAllLanguages_ForMatchingEnglishElement()
         {
             var englishLanguage = this.allResourceLanguages.Find(x => x.Key == "en");
