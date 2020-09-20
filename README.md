@@ -54,7 +54,7 @@ Contributing to the project is welcome. You can do so by adding GitHub issues, o
 ## Contributors and Credits
 **Portuguese Translation and Localization** - [Mukarillo](https://github.com/Mukarillo)
 
-**Spansih Translation** - [Jesús Dávalos](https://github.com/jesus-davalos)
+**Spanish Translation** - [Jesús Dávalos](https://github.com/jesus-davalos)
 
 **Continuous Integration Support** - [andyzickler](https://github.com/andyzickler)
 
