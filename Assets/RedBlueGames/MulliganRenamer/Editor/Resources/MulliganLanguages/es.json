@@ -41,7 +41,7 @@
         },
         {
             "key": "renameOperation",
-            "value": "Operaciión de Renombrar"
+            "value": "Operación de Renombrar"
         },
         {
             "key": "language",
@@ -69,7 +69,7 @@
         },
         {
             "key": "errorAddNewOpNotSub",
-            "value": "MulliganRenamerWindow intento agregar una nueva RenameOperation usando un tipo que no es una subclase de RenameOperationDrawerBinding. Tipo de Operación: "
+            "value": "MulliganRenamerWindow intentó agregar una nueva RenameOperation usando un tipo que no es una subclase de RenameOperationDrawerBinding. Tipo de Operación: "
         },
         {
             "key": "thankYouForSupport",
@@ -101,19 +101,19 @@
         },
         {
             "key": "noObjectsSpecified",
-            "value": "No hay objetos específicados para renombrar. Arraste los objetos para renombrarlos, o"
+            "value": "No hay objetos especificados para renombrar. Arrastre los objetos para renombrarlos, o"
         },
         {
             "key": "addMoreObjectsDragPanel",
-            "value": "Agrega más objetos arrastandolos en el panel de arriba"
+            "value": "Agrega más objetos arrastrándolos en el panel de arriba"
         },
         {
             "key": "addMoreObjectsDragHere",
-            "value": "Agrega más objetos arrastandolos aquí"
+            "value": "Agrega más objetos arrastrándolos aquí"
         },
         {
             "key": "toRenameMoreObjects",
-            "value": "Para renombrar más objetos, arrastralos aquí, o"
+            "value": "Para renombrar más objetos, arrástralos aquí, o"
         },
         {
             "key": "removeAll",
@@ -249,11 +249,11 @@
         },
         {
             "key": "errorNoSavedPresets",
-            "value": "No has guardado ninguna operación predefinidas Rename. Selecione 'Guardar como...' en el menu \"Predefiniciones\" para crear una nueva predefinición"
+            "value": "No has guardado ninguna operación predefinidas Rename. Seleccione 'Guardar como...' en el menú \"Predefiniciones\" para crear una nueva predefinición"
         },
         {
             "key": "areYouSureDelete",
-            "value": "¿Estas seguro que quieres eliminar la predefinición \"{0}\"?"
+            "value": "¿Estás seguro que quieres eliminar la predefinición \"{0}\"?"
         },
         {
             "key": "deletePreset",
@@ -277,7 +277,7 @@
         },
         {
             "key": "errorAssetNotBulkRenamed",
-            "value": "Asset [{0}] no se ha renombrado cuando se ha intentado RenameAsset en BulkRenamer. Pudo haber sido cancelado porque un el nuevo nombre nome ya ha sido tomado por un objeto en el mismo directorio. El nuevo nombre pudo contener caracteres especiales.\nOriginalPath:: {1}, Nuevo nombre: {2}"
+            "value": "Asset [{0}] no se ha renombrado cuando se ha intentado RenameAsset en BulkRenamer. Pudo haber sido cancelado porque el nuevo nombre ya ha sido tomado por un objeto en el mismo directorio. El nuevo nombre pudo contener caracteres especiales.\nOriginalPath:: {1}, Nuevo nombre: {2}",
         },
         {
             "key": "deleteFromFront",
@@ -289,7 +289,7 @@
         },
         {
             "key": "toCamelCase",
-            "value": "Para Camel Case"
+            "value": "A Camel Case"
         },
         {
             "key": "usePascalCasing",
@@ -305,7 +305,7 @@
         },
         {
             "key": "caseSensitiveCharactersIndicateStart",
-            "value": "Los caracteres sensibles a mayúsculas y minúsculas que indican o inician de una palabra."
+            "value": "Los caracteres sensibles a mayúsculas y minúsculas que indican el inicio de una palabra.",
         },
         {
             "key": "delimiters",
@@ -321,15 +321,15 @@
         },
         {
             "key": "matchTermsUsingRegex",
-            "value": "Encuentra terminos usando Expresiones Regulares, terminos que permiten un poderoso patrón de igualdad."
+            "value": "Encuentra términos usando Expresiones Regulares, términos que permiten un poderoso patrón de igualdad."
         },
         {
             "key": "matchRegex",
-            "value": "Emparejar Regex"
+            "value": "Emparejar Expresión Regular"
         },
         {
             "key": "regexToUseToMatchTerms",
-            "value": "Expresión regular para ser usada en emparejamiento de terminos."
+            "value": "Expresión regular para ser usada en el emparejamiento de términos."
         },
         {
             "key": "searchForString",
@@ -337,7 +337,7 @@
         },
         {
             "key": "substringsToSeatchInFilenames",
-            "value": "Substrings a buscar en los ​nombres de los archivos. Estos strings serán reemplazados por el String Reemplazador."
+            "value": "Substrings a buscar en los nombres de los archivos. Estos strings serán reemplazados por el String Reemplazador."
         },
         {
             "key": "replaceWith",
@@ -345,7 +345,7 @@
         },
         {
             "key": "stringToReplaceMatchingInstances",
-            "value": "String para reemplazar instancias encontradas de la busqueda de string."
+            "value": "String para reemplazar instancias encontradas de la búsqueda de string."
         },
         {
             "key": "caseSensitive",
@@ -357,11 +357,11 @@
         },
         {
             "key": "matchExpressNotValid",
-            "value": "La expresión de encontrar no es una expresión regular valida."
+            "value": "La expresión usada para encontrar no es una expresión regular válida."
         },
         {
             "key": "replacementExpressionNotValid",
-            "value": "La expresión de reemplazar no es una expresión regular valida."
+            "value": "La expresión usada para reemplazar no es una expresión regular válida."
         },
         {
             "key": "newName",
@@ -369,7 +369,7 @@
         },
         {
             "key": "nameToReplaceTheOldeOne",
-            "value": "Nombre a reemplazar con la antigua."
+            "value": "Nombre para reemplazar con el antiguo."
         },
         {
             "key": "selectPresetOrSpecifyCharacters",
@@ -385,7 +385,7 @@
         },
         {
             "key": "flagTheSearchToMatchCase",
-            "value": "Señale la busqueda para encontrar solo la letra."
+            "value": "Señale la búsqueda para encontrar solo la letra."
         },
         {
             "key": "symbols",
@@ -421,7 +421,7 @@
         },
         {
             "key": "selectPresetFormat",
-            "value": "Selecione un formato predefinido o especifica tu propio formato."
+            "value": "Seleccione un formato predefinido o especifica tu propio formato."
         },
         {
             "key": "countFormat",
@@ -485,7 +485,7 @@
         },
         {
             "key": "theValueToAddToTheCount",
-            "value": "El valor de la cuenta a agregar despues de nombrar el objeto."
+            "value": "El valor de la cuenta a agregar después de nombrar el objeto."
         },
         {
             "key": "addTheCountToTheFront",
@@ -661,11 +661,11 @@
         },
         {
             "key": "languageUpdateFail",
-            "value": "Actualización falló. Por favor reportelo ese error (use el manual del usuario para detalles). Código de Error: {0}, Mensaje: {1}."
+            "value": "Actualización falló. Por favor reporte ese error (use el manual del usuario para detalles). Código de Error: {0}, Mensaje: {1}."
         },
         {
             "key": "languageUpdated",
-            "value": "Actualizado {0} de la version {1} a {2}"
+            "value": "Actualizado {0} de la versión {1} a {2}"
         },
         {
             "key": "languageAdded",
