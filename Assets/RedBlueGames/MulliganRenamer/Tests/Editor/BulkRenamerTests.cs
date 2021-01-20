@@ -561,7 +561,13 @@ namespace RedBlueGames.MulliganRenamer
                 resultingNames.Add(sprite.name);
             }
 
-            Assert.AreEqual(expectedNames, resultingNames);
+            // In order to not depend on how these sprites are Loaded, we check Contains instead of comparing 
+            // the lists directly
+            Assert.That(resultingNames.Count, Is.EqualTo(expectedNames.Count));
+            foreach (var name in resultingNames)
+            {
+                Assert.That(expectedNames.Contains(name));
+            }
         }
 
         private Texture2D SetupSpriteSheet(SpriteSheetGenerationConfig config)
