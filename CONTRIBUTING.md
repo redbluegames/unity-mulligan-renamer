@@ -30,18 +30,18 @@ Frequent Contributors:
 2. If the issue is in a Project, move it to To Do.
 3. When complete, submit a Pull Request into the development branch. A repository admin will move it to Done when it's approved and merged into the developoment branch.
 
-Issues are "Closed" only once they are merged into master and released.
+Issues are "Closed" only once they are merged into main and released.
 
 If you'd like to be added to the Frequent Contributors team here: https://github.com/orgs/redbluegames/teams/frequent-collaborators
 
 ### Branching Strategy / Pull Requests ###
 
 There are three branches to know about:
-* master
+* main
 * staging
 * develop-v1.X.Y
 
-Master should reflect live code, which is pushed to the Releases and also Unity Asset store.
+Main should reflect live code, which is pushed to the Releases and also Unity Asset store.
 Staging is where we push code before going live. This is mainly useful for updating languages, as we can add the languages to staging and then request them with debugs in Mulligan.
 Develop branch is where we work out of before merging them into staging and creating a release. Pull requests should be made into the develop branch.
 
