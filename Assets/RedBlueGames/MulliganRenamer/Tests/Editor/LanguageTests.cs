@@ -37,6 +37,16 @@ namespace RedBlueGames.MulliganRenamer
         }
 
         [Test]
+        public void CheckAllLanguages_ForValidJSON()
+        {
+	        var jsons = UnityEngine.Resources.LoadAll<UnityEngine.TextAsset>("MulliganLanguages");
+	        foreach (var json in jsons)
+	        {
+		        Assert.DoesNotThrow(() => UnityEngine.JsonUtility.FromJson<Language>(json.text)); 
+	        }
+        }
+
+        [Test]
         public void CheckAllLanguages_ForNameKey()
         {
             var jsons = UnityEngine.Resources.LoadAll<UnityEngine.TextAsset>("MulliganLanguages");
