@@ -1,5 +1,5 @@
 {
-    "name": "Español",
+    "name": "Espanol",
     "key": "es",
     "version": 0,
     "elements": [
@@ -277,7 +277,7 @@
         },
         {
             "key": "errorAssetNotBulkRenamed",
-            "value": "Asset [{0}] no se ha renombrado cuando se ha intentado RenameAsset en BulkRenamer. Pudo haber sido cancelado porque el nuevo nombre ya ha sido tomado por un objeto en el mismo directorio. El nuevo nombre pudo contener caracteres especiales.\nOriginalPath:: {1}, Nuevo nombre: {2}",
+            "value": "Asset [{0}] no se ha renombrado cuando se ha intentado RenameAsset en BulkRenamer. Pudo haber sido cancelado porque el nuevo nombre ya ha sido tomado por un objeto en el mismo directorio. El nuevo nombre pudo contener caracteres especiales.\nOriginalPath:: {1}, Nuevo nombre: {2}"
         },
         {
             "key": "deleteFromFront",
@@ -305,7 +305,7 @@
         },
         {
             "key": "caseSensitiveCharactersIndicateStart",
-            "value": "Los caracteres sensibles a mayúsculas y minúsculas que indican el inicio de una palabra.",
+            "value": "Los caracteres sensibles a mayúsculas y minúsculas que indican el inicio de una palabra."
         },
         {
             "key": "delimiters",
