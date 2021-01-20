@@ -371,10 +371,11 @@ namespace RedBlueGames.MulliganRenamer
             // Tests Issue #143: https://github.com/redbluegames/unity-mulligan-renamer/issues/143
             // Arrange
             var spriteSheetConfig = new SpriteSheetGenerationConfig(4, "Texture.png");
+            var targetSpriteName = "Texture_Sprite1";
             spriteSheetConfig.NamePrefix = "Texture_Sprite";
             var textureWithSprites = this.SetupSpriteSheet(spriteSheetConfig);
             var replaceNameOp = new ReplaceStringOperation();
-            replaceNameOp.SearchString = "Texture_Sprite1";
+            replaceNameOp.SearchString = targetSpriteName;
             replaceNameOp.ReplacementString = "CoolSprite";
 
             var renameSequence = new RenameOperationSequence<IRenameOperation>();
@@ -383,17 +384,22 @@ namespace RedBlueGames.MulliganRenamer
             var path = AssetDatabase.GetAssetPath(textureWithSprites);
             var allAssetsAtPath = AssetDatabase.LoadAllAssetsAtPath(path);
             var allSprites = new List<Object>();
+            Object targetSprite = null;
             foreach (var asset in allAssetsAtPath)
             {
                 if (asset is Sprite)
                 {
                     allSprites.Add(asset);
+                    if (asset.name == targetSpriteName)
+                    {
+                        targetSprite = asset;
+                    }
                 }
             }
 
             // Act
             var bulkRenamer = new BulkRenamer(renameSequence);
-            bulkRenamer.RenameObjects(new List<Object>() { allSprites[0] }, true);
+            bulkRenamer.RenameObjects(new List<Object>() { targetSprite }, true);
 
             // Assert
             var expectedNames = new List<string>
@@ -422,7 +428,13 @@ namespace RedBlueGames.MulliganRenamer
                 resultingNames.Add(sprite.name);
             }
 
-            Assert.AreEqual(expectedNames, resultingNames);
+            // In order to not depend on how these sprites are Loaded, we check Contains instead of comparing 
+            // the lists directly
+            Assert.That(resultingNames.Count, Is.EqualTo(expectedNames.Count));
+            foreach (var name in resultingNames)
+            {
+                Assert.That(expectedNames.Contains(name), "Expected names did not contain name: " + name);
+            }
         }
 
         [Test]
@@ -561,7 +573,13 @@ namespace RedBlueGames.MulliganRenamer
                 resultingNames.Add(sprite.name);
             }
 
-            Assert.AreEqual(expectedNames, resultingNames);
+            // In order to not depend on how these sprites are Loaded, we check Contains instead of comparing 
+            // the lists directly
+            Assert.That(resultingNames.Count, Is.EqualTo(expectedNames.Count));
+            foreach (var name in resultingNames)
+            {
+                Assert.That(expectedNames.Contains(name), "Expected names did not contain name: " + name);
+            }
         }
 
         private Texture2D SetupSpriteSheet(SpriteSheetGenerationConfig config)

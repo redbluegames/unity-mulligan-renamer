@@ -54,6 +54,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 #if UNITY_5
                 return this.webRequest.isError && this.webRequest.error == "Request timeout";
+                #elif UNITY_2020_1_OR_NEWER
+                return this.webRequest.result == UnityWebRequest.Result.ConnectionError && this.webRequest.error == "Request timeout";
                 #else
                 return this.webRequest.isNetworkError && this.webRequest.error == "Request timeout";
                 #endif
@@ -74,6 +76,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 #if UNITY_5
                 return this.webRequest.isError;
+                #elif UNITY_2020_1_OR_NEWER
+                return this.webRequest.result == UnityWebRequest.Result.ConnectionError;
                 #else
                 return this.webRequest.isNetworkError;
                 #endif
@@ -86,6 +90,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 #if UNITY_5
                 return this.webRequest.isError;
+                #elif UNITY_2020_1_OR_NEWER
+                return this.webRequest.result == UnityWebRequest.Result.ProtocolError;
                 #else
                 return this.webRequest.isHttpError;
                 #endif

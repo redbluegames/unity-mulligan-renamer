@@ -107,10 +107,17 @@ namespace RedBlueGames.MulliganRenamer
             var jsons = Resources.LoadAll<TextAsset>(LanguageFoldername);
             foreach (var json in jsons)
             {
-                var language = JsonUtility.FromJson<Language>(json.text);
-                if (!string.IsNullOrEmpty(language.Key))
+                try
                 {
-                    loadedLanguages.Add(language);
+                    var language = JsonUtility.FromJson<Language>(json.text);
+                    if (!string.IsNullOrEmpty(language.Key))
+                    {
+                        loadedLanguages.Add(language);
+                    }
+                }
+                catch (ArgumentException)
+                {
+                     //I don't want to spam users with an error here, so we will just have to fail silently for now.
                 }
             }
 
