@@ -15,7 +15,7 @@ jobs:
       - store_artifacts:
           path: ./Mulligan_CI.unitypackage
           destination: ./Mulligan_Staging.unitypackage
-  build-master:
+  build-main:
     executor: unity
     steps:
       - checkout
@@ -24,7 +24,7 @@ jobs:
       - run: /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -noUpm -logFile -projectPath . -executeMethod RBPackageExporterCLI.ExportMulliganForGitHub
       - store_artifacts:
           path: ./Mulligan_CI.unitypackage
-          destination: ./Mulligan_Master.unitypackage
+          destination: ./Mulligan_Main.unitypackage
 workflows:
   version: 2
   build:
@@ -33,7 +33,7 @@ workflows:
           filters:
             branches:
               only: staging
-      - build-master:
+      - build-main:
           filters:
             branches:
-              only: master
+              only: main
