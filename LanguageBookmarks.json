@@ -3,6 +3,7 @@
     [
         "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/en.json",
         "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/pt.json",
-        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/es.json"
+        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/es.json",
+        "https://raw.githubusercontent.com/redbluegames/unity-mulligan-renamer/staging/Assets/RedBlueGames/MulliganRenamer/Editor/Resources/MulliganLanguages/zh_CN.json"
     ]
 }
