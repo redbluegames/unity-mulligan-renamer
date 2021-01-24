@@ -1,0 +1,683 @@
+{
+    "name": "Simplified Chinese",
+    "key": "Zh_cn",
+    "version": 0,
+    "elements": [
+        {
+            "key": "rename",
+            "value": "重命名"
+        },
+        {
+            "key": "renameWarningNotRenamed",
+            "value": "有些对象有警告，不会被重命名。您是否想重命名组中的其他对象？"
+        },
+        {
+            "key": "warning",
+            "value": "警告"
+        },
+        {
+            "key": "cancel",
+            "value": "取消"
+        },
+        {
+            "key": "failToRenameMulligan",
+            "value": "抱歉，有些对象无法重命名。Mulligan出了点问题。请报告一个错误（详情请看UserManual）。此重命名操作将被自动撤销\n\n例外: "
+        },
+        {
+            "key": "error",
+            "value": "错误"
+        },
+        {
+            "key": "presets",
+            "value": "预设"
+        },
+        {
+            "key": "result",
+            "value": "结果"
+        },
+        {
+            "key": "addOperation",
+            "value": "添加操作"
+        },
+        {
+            "key": "renameOperation",
+            "value": "重命名操作"
+        },
+        {
+            "key": "language",
+            "value": "语言"
+        },
+        {
+            "key": "languageTooltip",
+            "value": "指定Mulligan中使用的所有文本的语言."
+        },
+        {
+            "key": "prefix",
+            "value": "前缀"
+        },
+        {
+            "key": "saveAs",
+            "value": "另存为..."
+        },
+        {
+            "key": "managePresets",
+            "value": "管理预设"
+        },
+        {
+            "key": "errorUnrecognizedListButton",
+            "value": "RenamerWindow在OnGUI中发现未识别的ListButtonEvent[{0}]。在OnGUI中添加一个案例来处理这个事件."
+        },
+        {
+            "key": "errorAddNewOpNotSub",
+            "value": "MulliganRenamerWindow试图使用不是RenameOperationDrawerBinding子类的类型添加一个新的RenameOperation。操作类型。 "
+        },
+        {
+            "key": "thankYouForSupport",
+            "value": "非常感谢您对Mulligan的支持!"
+        },
+        {
+            "key": "thankYouForReview",
+            "value": "谢谢你对Mulligan的评价!"
+        },
+        {
+            "key": "thankYouForUsing",
+            "value": "谢谢你使用Mulligan！如果你觉得有用，请考虑从资产商店购买支持其发展。如果你觉得它有用，请考虑从资产商店购买它来支持它的发展。谢谢您的支持"
+        },
+        {
+            "key": "thankYouForPurchasing",
+            "value": "感谢你购买Mulligan！如果你觉得有用，请考虑在资产商店留下评论。如果您觉得有用，请考虑在资产商店留下评论。商店的竞争非常激烈，每条评论都有助于脱颖而出。谢谢您的支持"
+        },
+        {
+            "key": "openAssetStore",
+            "value": "打开Asset商店"
+        },
+        {
+            "key": "savePreset",
+            "value": "保存预设"
+        },
+        {
+            "key": "previewSteps",
+            "value": "预览步骤"
+        },
+        {
+            "key": "noObjectsSpecified",
+            "value": "没有指定要重命名的对象。在这里拖动对象来重命名它们，或者"
+        },
+        {
+            "key": "addMoreObjectsDragPanel",
+            "value": "将更多的对象拖动到上面的面板中，从而添加更多的对象."
+        },
+        {
+            "key": "addMoreObjectsDragHere",
+            "value": "将更多的对象拖到这里来添加"
+        },
+        {
+            "key": "toRenameMoreObjects",
+            "value": "要重新命名更多的对象，请将它们拖到这里，或者是"
+        },
+        {
+            "key": "removeAll",
+            "value": "移除所有"
+        },
+        {
+            "key": "object",
+            "value": "个对象"
+        },
+        {
+            "key": "objects",
+            "value": "个对象"
+        },
+        {
+            "key": "renamed",
+            "value": "重新命名成功"
+        },
+        {
+            "key": "original",
+            "value": "原始"
+        },
+        {
+            "key": "before",
+            "value": "之前"
+        },
+        {
+            "key": "after",
+            "value": "之后"
+        },
+        {
+            "key": "finalName",
+            "value": "最终名称"
+        },
+        {
+            "key": "addSelectedObjects",
+            "value": "添加所选对象"
+        },
+        {
+            "key": "errorTryingToAccessModel",
+            "value": "试图访问PreviewRowModel的索引超出了边界.索引. "
+        },
+        {
+            "key": "warningNewNameMatchesExisting",
+            "value": "新名称与现有的文件或其他重命名的对象相匹配."
+        },
+        {
+            "key": "assetBlankName",
+            "value": "资源名称为空白."
+        },
+        {
+            "key": "nameIncludeInvalidCharacter",
+            "value": "名称包括无效字符（通常是符号，如 ?.,)."
+        },
+        {
+            "key": "tryingToAddSpriteToRenamer",
+            "value": "试图将Sprite {0}添加到SpriteRenamer中，它的纹理路径与其他精灵不同。接收到的路径为{1}，预期为{2}."
+        },
+        {
+            "key": "errorTryingToAddSpriteToRenamer",
+            "value": "试图在路径{0}处添加Sprite到SpriteRenamer中，但在指定的路径上没有元文件存在."
+        },
+        {
+            "key": "errorPresetNameAlreadyExists",
+            "value": "已经有一个名为 \"{0}\" 的预设.你要不要换掉它?"
+        },
+        {
+            "key": "no",
+            "value": "否"
+        },
+        {
+            "key": "save",
+            "value": "保存"
+        },
+        {
+            "key": "errorTryintToGetOriginalName",
+            "value": "试图在超出边界的索引处获取RenameResultSequence的原始名称.索引: {0}"
+        },
+        {
+            "key": "errorTryingToGetOriginalNameOutOfBounds",
+            "value": "试图在超出边界的索引处获取RenameResultSequence的原始名称.索引: {0}"
+        },
+        {
+            "key": "add",
+            "value": "添加"
+        },
+        {
+            "key": "prefixOrSuffix",
+            "value": "前缀或后缀"
+        },
+        {
+            "key": "stringSequence",
+            "value": "字符串序列"
+        },
+        {
+            "key": "modify",
+            "value": "修改"
+        },
+        {
+            "key": "changeCase",
+            "value": "更改案例"
+        },
+        {
+            "key": "countByLetter",
+            "value": "按字母计数"
+        },
+        {
+            "key": "enumerate",
+            "value": "枚举"
+        },
+        {
+            "key": "delete",
+            "value": "删除"
+        },
+        {
+            "key": "replace",
+            "value": "替换"
+        },
+        {
+            "key": "replaceString",
+            "value": "替换字符串"
+        },
+        {
+            "key": "trimCharacters",
+            "value": "Trim字符"
+        },
+        {
+            "key": "preset",
+            "value": "预设"
+        },
+        {
+            "key": "savedPresets",
+            "value": "保存 预设"
+        },
+        {
+            "key": "errorNoSavedPresets",
+            "value": "你没有保存的重命名操作预设。在\"Presets\" 下拉菜单中选择'另存为...'来创建一个新的预设."
+        },
+        {
+            "key": "areYouSureDelete",
+            "value": "你确定要删除预设 \"{0}\" 吗?"
+        },
+        {
+            "key": "deletePreset",
+            "value": "删除预设"
+        },
+        {
+            "key": "removeCharacters",
+            "value": "删除字符"
+        },
+        {
+            "key": "bulkRename",
+            "value": "批量重命名"
+        },
+        {
+            "key": "renamingObjectXofY",
+            "value": "重命名对象{0}的{1}"
+        },
+        {
+            "key": "renaming",
+            "value": "重命名"
+        },
+        {
+            "key": "errorAssetNotBulkRenamed",
+            "value": "在BulkRenamer中尝试重命名资产时，资产{0}未被重命名。它可能被取消了，因为新的名称已经被同一路径上的一个对象所采用。新名称也可能包含了特殊的字符.\n原始路径: {1}, 新名称: {2}"
+        },
+        {
+            "key": "deleteFromFront",
+            "value": "从前面删除"
+        },
+        {
+            "key": "deleteFromBack",
+            "value": "从后面删除"
+        },
+        {
+            "key": "toCamelCase",
+            "value": "驼峰命名"
+        },
+        {
+            "key": "usePascalCasing",
+            "value": "使用帕斯卡拼写法"
+        },
+        {
+            "key": "flagToCapitalizeTheFirstLetterOfname",
+            "value": "标识大写的名字的第一个字母（又称 驼峰命名）."
+        },
+        {
+            "key": "delimiterCharacters",
+            "value": "定界符"
+        },
+        {
+            "key": "caseSensitiveCharactersIndicateStart",
+            "value": "表示单词开头的大小写敏感字符."
+        },
+        {
+            "key": "delimiters",
+            "value": "定界符"
+        },
+        {
+            "key": "searchString",
+            "value": "搜索字符串"
+        },
+        {
+            "key": "useRegex",
+            "value": "使用正则表达式"
+        },
+        {
+            "key": "matchTermsUsingRegex",
+            "value": "使用正则表达式匹配术语，术语可以实现强大的模式匹配。."
+        },
+        {
+            "key": "matchRegex",
+            "value": "匹配规则"
+        },
+        {
+            "key": "regexToUseToMatchTerms",
+            "value": "用于匹配术语的正则表达式."
+        },
+        {
+            "key": "searchForString",
+            "value": "搜索字符串"
+        },
+        {
+            "key": "substringsToSeatchInFilenames",
+            "value": "要在文件名中搜索的子字符串。这些字符串将被替换字符串替换为."
+        },
+        {
+            "key": "replaceWith",
+            "value": "替换为"
+        },
+        {
+            "key": "stringToReplaceMatchingInstances",
+            "value": "替换搜索字符串匹配实例的字符串."
+        },
+        {
+            "key": "caseSensitive",
+            "value": "大小写敏感"
+        },
+        {
+            "key": "searchUsingCaseSensitivity",
+            "value": "使用大小写敏感度进行搜索。只有符合所提供外壳的字符串才会被替换."
+        },
+        {
+            "key": "matchExpressNotValid",
+            "value": "匹配表达式不是有效的正则表达式."
+        },
+        {
+            "key": "replacementExpressionNotValid",
+            "value": "替换表达式不是有效的正则表达式."
+        },
+        {
+            "key": "newName",
+            "value": "新名称"
+        },
+        {
+            "key": "nameToReplaceTheOldeOne",
+            "value": "替换旧名称."
+        },
+        {
+            "key": "selectPresetOrSpecifyCharacters",
+            "value": "选择预设或指定自己的字符."
+        },
+        {
+            "key": "charactersToRemove",
+            "value": "要删除的字符"
+        },
+        {
+            "key": "allCharactersThatWillBeRemoved",
+            "value": "所有将从名称中删除的字符."
+        },
+        {
+            "key": "flagTheSearchToMatchCase",
+            "value": "标记搜索只匹配指定的情况"
+        },
+        {
+            "key": "symbols",
+            "value": "符号"
+        },
+        {
+            "key": "removeSpecialCharacters",
+            "value": "删除特殊字符 (ie. !@#$%^&*)"
+        },
+        {
+            "key": "numbers",
+            "value": "数字"
+        },
+        {
+            "key": "removeDigits",
+            "value": "去除数字 0-9"
+        },
+        {
+            "key": "whitespace",
+            "value": "空白"
+        },
+        {
+            "key": "removesWhitespace",
+            "value": "移除空白处"
+        },
+        {
+            "key": "count",
+            "value": "计数"
+        },
+        {
+            "key": "format",
+            "value": "格式"
+        },
+        {
+            "key": "selectPresetFormat",
+            "value": "选择预设格式或指定自己的格式."
+        },
+        {
+            "key": "countFormat",
+            "value": "计数格式"
+        },
+        {
+            "key": "theStringFormatToUseWhenAddingTheCountToName",
+            "value": "将Count添加到名称中时要使用的字符串格式."
+        },
+        {
+            "key": "invalidCountFormat",
+            "value": "无效的计数格式。典型的格式是D1代表一位数，没有前导零，D2代表两位数，等等.\n查一查 String.Format() 方法，了解更多关于格式选项的信息."
+        },
+        {
+            "key": "countFrom",
+            "value": "数目从"
+        },
+        {
+            "key": "theValueToStartCountingFrom",
+            "value": "要从这个值开始计数。第一个对象将有这个数字."
+        },
+        {
+            "key": "increment",
+            "value": "增量"
+        },
+        {
+            "key": "theValueToAddToEachObjectWhenCounting",
+            "value": "计数时要加到每个对象上的值."
+        },
+        {
+            "key": "addAsPrefix",
+            "value": "添加为前缀"
+        },
+        {
+            "key": "addTheCountToTheFontOfTheObjectName",
+            "value": "在对象名称的前面加上计数."
+        },
+        {
+            "key": "custom",
+            "value": "自定义"
+        },
+        {
+            "key": "strings",
+            "value": "字符串"
+        },
+        {
+            "key": "theStringsOfLettersToAdd",
+            "value": "要添加的字母串，以逗号分隔。例: \"A,B,C\" 将在前三个对象上分别添加A、B、C。之后，它将添加另一个序列，从AA开始，然后是AB，然后是AC，等等."
+        },
+        {
+            "key": "formatForTheAddedLetters",
+            "value": "新增字母的格式."
+        },
+        {
+            "key": "theValueToStartCounting",
+            "value": "开始计数的值。在此计数时，序列中的字符串将被附加到第一个对象上."
+        },
+        {
+            "key": "startsWith",
+            "value": "开始于"
+        },
+        {
+            "key": "theValueToAddToTheCount",
+            "value": "命名对象后加到计数中的值."
+        },
+        {
+            "key": "addTheCountToTheFront",
+            "value": "在对象名称的前面加上计数."
+        },
+        {
+            "key": "uppercaseAlphabet",
+            "value": "大写字母"
+        },
+        {
+            "key": "lowercaseAlphabet",
+            "value": "小写字母"
+        },
+        {
+            "key": "toUpperOrLowercase",
+            "value": "转大写或小写"
+        },
+        {
+            "key": "toUppercase",
+            "value": "转大写"
+        },
+        {
+            "key": "newCasing",
+            "value": "新命名法"
+        },
+        {
+            "key": "theDesiredCasingForName",
+            "value": "给新的命名法命名."
+        },
+        {
+            "key": "onlyFirstCharacter",
+            "value": "只有第一个字符"
+        },
+        {
+            "key": "changeOnlyTheFirstCharacterCase",
+            "value": "只改第一个字的大小写."
+        },
+        {
+            "key": "addStringSequence",
+            "value": "添加字符串序列"
+        },
+        {
+            "key": "sequence",
+            "value": "序列"
+        },
+        {
+            "key": "theSequenceOfStringsToAddCommaSeparted",
+            "value": "要添加的字符串序列，以逗号分隔."
+        },
+        {
+            "key": "addTheCountToTheFrontOfTheObjectName",
+            "value": "在对象名称的前面加上计数."
+        },
+        {
+            "key": "addPrefixOrSuffix",
+            "value": "添加前缀或后缀"
+        },
+        {
+            "key": "suffix",
+            "value": "后缀"
+        },
+        {
+            "key": "replacementString",
+            "value": "替换字符串"
+        },
+        {
+            "key": "preferenceWindowTitle",
+            "value": "Mulligan Renamer 首选项"
+        },
+        {
+            "key": "preferencesMenuItem",
+            "value": "Mulligan Renamer"
+        },
+        {
+            "key": "preferencesDiffLabel",
+            "value": "差异颜色"
+        },
+        {
+            "key": "preferencesInsertionText",
+            "value": "嵌入文本"
+        },
+        {
+            "key": "preferencesInsertionBackground",
+            "value": "嵌入背景"
+        },
+        {
+            "key": "preferencesDeletionText",
+            "value": "删除文本"
+        },
+        {
+            "key": "preferencesDeletionBackground",
+            "value": "删除背景"
+        },
+        {
+            "key": "preferencesReset",
+            "value": "重置为默认值"
+        },
+        {
+            "key": "preferences",
+            "value": "首选项"
+        },
+        {
+            "key": "exampleThisIs",
+            "value": "这就是"
+        },
+        {
+            "key": "exampleSampleText",
+            "value": "例文"
+        },
+        {
+            "key": "exampleWithWords",
+            "value": "带字"
+        },
+        {
+            "key": "exampleInserted",
+            "value": "插入式"
+        },
+        {
+            "key": "exampleDeleted",
+            "value": "已删除"
+        },
+        {
+            "key": "adjustNumbers",
+            "value": "调整数字"
+        },
+        {
+            "key": "Lowercase",
+            "value": "小写"
+        },
+        {
+            "key": "Uppercase",
+            "value": "大写"
+        },
+        {
+            "key": "offset",
+            "value": "偏移"
+        },
+        {
+            "key": "updateLanguages",
+            "value": "更新语言"
+        },
+        {
+            "key": "languageUpdateProgressTitle",
+            "value": "更新语言中"
+        },
+        {
+            "key": "languageUpdateProgressMessage1",
+            "value": "检查语言更新..."
+        },
+        {
+            "key": "languageUpdateDownloadingLanguages",
+            "value": "下载语言 {0}..."
+        },
+        {
+            "key": "languageUpdateSavingChanges",
+            "value": "保存更改..."
+        },
+        {
+            "key": "languageUpdateProgressTitleSuccess",
+            "value": "语言更新成功"
+        },
+        {
+            "key": "ok",
+            "value": "是"
+        },
+        {
+            "key": "languageUpdateProgressTitleFail",
+            "value": "语言更新失败"
+        },
+        {
+            "key": "languageUpdateTimeout",
+            "value": "由于网络请求超时，更新失败。如果您有网络，我们的服务器可能会出现故障。请稍后再试，如果问题仍然存在，请报告一个错误（详情见用户手册）."
+        },
+        {
+            "key": "languageUpdateFail",
+            "value": "更新失败。请报告一个错误（详见用户手册）。失败代码：{0}, 信息： 0}, Message: {1}."
+        },
+        {
+            "key": "languageUpdated",
+            "value": "版本更新 {0} 从 {1} 到 {2}"
+        },
+        {
+            "key": "languageAdded",
+            "value": "新增 {0}."
+        },
+        {
+            "key": "languageUnchanged",
+            "value": "{0} 是最新的."
+        },
+        {
+            "key": "languageAllUpToDate",
+            "value": "所有语言都是最新的."
+        }
+    ]
+}
