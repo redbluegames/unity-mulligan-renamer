@@ -56,6 +56,8 @@ Contributing to the project is welcome. You can do so by adding GitHub issues, o
 
 **Spanish Translation** - [Jesús Dávalos](https://github.com/jesus-davalos)
 
+**Simplified Chinese Translation** - [独行](https://github.com/1401046425)
+
 **Continuous Integration Support** - [andyzickler](https://github.com/andyzickler)
 
 - [uvivagabond](https://github.com/uvivagabond)
