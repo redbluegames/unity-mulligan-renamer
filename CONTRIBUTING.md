@@ -5,9 +5,7 @@ Thanks for your interest in contributing to the project! Please follow these sug
 ## Submitting an Issue ##
 Before submitting an issue, give a quick search to see if the issue is already logged. For new issues, feel free to format the Issue however you like. We will add any necessary labels, or reformat it if it will help with organization. If you are submitting a feature request, a mockup would be incredibly helpful to quickly understand the request.
 
-## Submitting Code Changes ##
-
-### Coding Guidelines ###
+## Coding Guidelines ##
 
 1. It is very helpful to first submit an issue for whatever you'd like to see added to the base repository. 
 This way you can reference the issue in your commits.
@@ -18,7 +16,7 @@ This way you can reference the issue in your commits.
 1. Please use [well-formed git commit messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
 1. Submit a [pull request](https://help.github.com/articles/creating-a-pull-request) for your change.
 
-### Issue Management ###
+## Issue Management ##
 When starting work on an issue, follow these steps:
 
 New Contributors:
@@ -34,7 +32,7 @@ Issues are "Closed" only once they are merged into main and released.
 
 If you'd like to be added to the Frequent Contributors team here: https://github.com/orgs/redbluegames/teams/frequent-collaborators
 
-### Branching Strategy / Pull Requests ###
+## Branching Strategy / Pull Requests ##
 
 There are three branches to know about:
 * main
