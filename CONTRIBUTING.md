@@ -44,3 +44,16 @@ Staging is where we push code before going live. This is mainly useful for updat
 Develop branch is where we work out of before merging them into staging and creating a release. Pull requests should be made into the develop branch.
 
 If there is no develop branch pushed, it means there is no patch currently in development. In this event, pull requests can be made into staging.
+
+## Adding a Language ##
+
+To Add a language:
+1. Duplicate the English file (en.json), which is located in the Resources subfolder inside the Mulligan folder.
+1. In the new file, replace all its fields for the given new language.
+1. You should be able to switch to the new language in the Mulligan preferences as soon as you've created it. You can use this to verify your strings in the tool as you go.
+1. Verify tests.
+1. After you've finished, merge into staging.
+1. Find the link to the new language file in the respository and add that into the LanguageBookmarks.json file in root of the directory. This lets the Preferences lookup find the file.
+1. Once the bookmarks are set, you should be able to delete your local language file, and download it by holding SHIFT while pressing "Update Language" in preferences.
+1. Merge to main.
+1. Update LanguageBookmarks.json to point to the language file on Main.
