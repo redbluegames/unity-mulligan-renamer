@@ -57,3 +57,20 @@ To Add a language:
 1. Once the bookmarks are set, you should be able to delete your local language file, and download it by holding SHIFT while pressing "Update Language" in preferences.
 1. Merge to main.
 1. Update LanguageBookmarks.json to point to the language file on Main.
+
+## Making a Release ##
+
+### Adding a Release to GitHub ###
+1. Update the version number in MulliganRenamerWindow.cs.
+1. After merging to Staging, verify the artifact on CircleCI works. Note you may need to rename the file extension to .unitypackage
+1. If necessary, make a beta release for this build.
+1. Merge staging to master. Verify the artifact works.
+1. Upload a new release to the GitHub page. (Duplicate the previous entry as needed.)
+
+### Adding a Release to Unity Asset Store ###
+1. After adding the GitHub release, make a new branch for the asset store release.
+1. Open the new branch on Windows, inside Unity 5.5.5.
+1. Delete the Tests folders.
+1. Push to the asset store branch.
+1. Make a new release on the Asset Store page
+1. Publish using Asset Store tools inside Unity.
