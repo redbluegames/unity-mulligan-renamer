@@ -76,6 +76,6 @@ To Add a language:
 1. Publish using Asset Store tools inside Unity.
 
 ## Debugging ##
-* Holding left SHIFT is the general debug key
+Left SHIFT is the general debug key
 * Hold SHIFT while clicking Presets button in the Mulligan Window to delete all local settings
 * Hold SHIFT while clicking Update Languages in Preferences to poll languages from the staging branch
