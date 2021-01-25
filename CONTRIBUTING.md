@@ -5,9 +5,7 @@ Thanks for your interest in contributing to the project! Please follow these sug
 ## Submitting an Issue ##
 Before submitting an issue, give a quick search to see if the issue is already logged. For new issues, feel free to format the Issue however you like. We will add any necessary labels, or reformat it if it will help with organization. If you are submitting a feature request, a mockup would be incredibly helpful to quickly understand the request.
 
-## Submitting Code Changes ##
-
-### Coding Guidelines ###
+## Coding Guidelines ##
 
 1. It is very helpful to first submit an issue for whatever you'd like to see added to the base repository. 
 This way you can reference the issue in your commits.
@@ -18,7 +16,7 @@ This way you can reference the issue in your commits.
 1. Please use [well-formed git commit messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
 1. Submit a [pull request](https://help.github.com/articles/creating-a-pull-request) for your change.
 
-### Issue Management ###
+## Issue Management ##
 When starting work on an issue, follow these steps:
 
 New Contributors:
@@ -34,7 +32,7 @@ Issues are "Closed" only once they are merged into main and released.
 
 If you'd like to be added to the Frequent Contributors team here: https://github.com/orgs/redbluegames/teams/frequent-collaborators
 
-### Branching Strategy / Pull Requests ###
+## Branching Strategy / Pull Requests ##
 
 There are three branches to know about:
 * main
@@ -46,3 +44,38 @@ Staging is where we push code before going live. This is mainly useful for updat
 Develop branch is where we work out of before merging them into staging and creating a release. Pull requests should be made into the develop branch.
 
 If there is no develop branch pushed, it means there is no patch currently in development. In this event, pull requests can be made into staging.
+
+## Adding a Language ##
+
+To Add a language:
+1. Duplicate the English file (en.json), which is located in the Resources subfolder inside the Mulligan folder.
+1. In the new file, replace all its fields for the given new language.
+1. You should be able to switch to the new language in the Mulligan preferences as soon as you've created it. You can use this to verify your strings in the tool as you go.
+1. Verify tests.
+1. After you've finished, merge into staging.
+1. Find the link to the new language file in the respository and add that into the LanguageBookmarks.json file in root of the directory. This lets the Preferences lookup find the file.
+1. Once the bookmarks are set, you should be able to delete your local language file, and download it by holding SHIFT while pressing "Update Language" in preferences.
+1. Merge to main.
+1. Update LanguageBookmarks.json to point to the language file on Main.
+
+## Making a Release ##
+
+### Adding a Release to GitHub ###
+1. Update the version number in MulliganRenamerWindow.cs.
+1. After merging to Staging, verify the artifact on CircleCI works. Note you may need to rename the file extension to .unitypackage
+1. If necessary, make a beta release for this build.
+1. Merge staging to master. Verify the artifact works.
+1. Upload a new release to the GitHub page. (Duplicate the previous entry as needed.)
+
+### Adding a Release to Unity Asset Store ###
+1. After adding the GitHub release, make a new branch for the asset store release.
+1. Open the new branch on Windows, inside Unity 5.5.5.
+1. Delete the Tests folders.
+1. Push to the asset store branch.
+1. Make a new release on the Asset Store page
+1. Publish using Asset Store tools inside Unity.
+
+## Debugging ##
+Left SHIFT is the general debug key
+* Hold SHIFT while clicking Presets button in the Mulligan Window to delete all local settings
+* Hold SHIFT while clicking Update Languages in Preferences to poll languages from the staging branch
