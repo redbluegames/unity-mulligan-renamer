@@ -1,6 +1,6 @@
 {
   "name": "com.redbluegames.mulligan",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "displayName": "Mulligan Renamer",
   "description": "The Mulligan Renamer tool for Unity allows for quick and safe renaming of many assets or GameObjects all at once.",
   "unity": "5.5.5",
