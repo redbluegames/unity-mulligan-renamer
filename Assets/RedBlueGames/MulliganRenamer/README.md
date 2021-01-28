@@ -29,6 +29,26 @@ To install this package follow these steps:
   - In _Unity Editor_ go to **Assets** -> **Import Package** -> **Custom Package...**
   - Select the .unitypackage file you just downloaded. We recommend storing the files at the default location (Assets/RedBlueGames), but it should work anywhere.
 
+### Through NPM
+
+This package is registered at https://registry.npmjs.org as com.redbluegames.mulligan. You can use npm to install it, or use Unity Package Manager by adding the following into your `Packages/manifest.json`:
+```
+{
+  "scopedRegistries": [
+    {
+      "name": "NPM",
+      "url": "https://registry.npmjs.org",
+      "scopes": [
+        "com.redbluegames"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.redbluegames.muligan": "1.7.5"
+  }
+}
+```
+
 ## Using the Tool
 To use the Mulligan Renamer tool, open it from the `Window/Red Blue` menu. If you have Objects selected,
 they will automatically be entered for rename. Otherwise, drag and drop the Assets or GameObjects you want to
