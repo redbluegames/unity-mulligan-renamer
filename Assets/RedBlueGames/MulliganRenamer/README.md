@@ -31,7 +31,7 @@ To install this package follow these steps:
 
 ### Through NPM
 
-This package is registered at https://registry.npmjs.org as com.redbluegames.mulligan. You can use npm to install it, or use Unity Package Manager by adding the following into your `Packages/manifest.json`:
+This package is registered at https://registry.npmjs.org as `com.redbluegames.mulligan`. You can use npm to install it manually, or use Unity Package Manager by adding the following into your `Packages/manifest.json`:
 ```
 {
   "scopedRegistries": [
@@ -44,7 +44,7 @@ This package is registered at https://registry.npmjs.org as com.redbluegames.mul
     }
   ],
   "dependencies": {
-    "com.redbluegames.muligan": "1.7.5"
+    "com.redbluegames.mulligan": "1.7.5"
   }
 }
 ```
