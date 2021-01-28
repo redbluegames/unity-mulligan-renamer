@@ -1,18 +1,18 @@
-![MulliganRenameTitle](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/mulligan-github-banner.png)
+![MulliganRenameTitle](https://github.com/redbluegames/unity-bulk-rename/blob/main/ReadMeImages/mulligan-github-banner.png)
 
 # Unity - Mulligan Renamer
 The Mulligan Renamer tool for Unity allows for quick and safe renaming of many assets or GameObjects all at once. It provides several ways to rename Objects including the ability to replace substrings, add prefixes and suffixes, add numbers, and delete characters from the front or back of the name of each Object.
 
 This ReadMe provides a quick overview of the tool. For more detailed documentation, check out the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki).
 
-![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/mulligan-renamer-overview.gif)
+![MulliganRenameGIF](https://github.com/redbluegames/unity-bulk-rename/blob/main/ReadMeImages/mulligan-renamer-overview.gif)
 
 ## Installation
 
 ### Through Unity Asset Store
 
 <p align="center">
-  <a href="https://assetstore.unity.com/packages/slug/99843"><img src="https://github.com/redbluegames/unity-bulk-rename/blob/master/ReadMeImages/readme-asset-store.png" alt="Unity Asset Store"/></a>
+  <a href="https://assetstore.unity.com/packages/slug/99843"><img src="https://github.com/redbluegames/unity-bulk-rename/blob/main/ReadMeImages/readme-asset-store.png" alt="Unity Asset Store"/></a>
 </p>
 
 Development on Mulligan Renamer is supported through purchases on the Asset Store, as well as through volunteer time of contributors. Please consider supporting further development by purchasing it through the [Unity Asset Store](https://assetstore.unity.com/packages/slug/99843).
@@ -48,7 +48,7 @@ The tool allows for many rename operations. Here are a few:
 You can combine any number of the rename operations in any order to achieve the rename results you want. Read more about the operations in the [wiki](https://github.com/redbluegames/unity-bulk-rename/wiki) [here](https://github.com/redbluegames/unity-bulk-rename/wiki/Rename-Operations). 
 
 ## Contributing
-Contributing to the project is welcome. You can do so by adding GitHub issues, or by submitting code pull requests. Please read the [Contributing Guidelines](https://github.com/redbluegames/unity-mulligan-renamer/blob/master/CONTRIBUTING.md) before contributing.
+Contributing to the project is welcome. You can do so by adding GitHub issues, or by submitting code pull requests. Please read the [Contributing Guidelines](https://github.com/redbluegames/unity-mulligan-renamer/blob/main/CONTRIBUTING.md) before contributing.
 
 
 ## Contributors and Credits
