@@ -109,7 +109,7 @@ namespace RedBlueGames.MulliganRenamer
                     return false;
                 }
 
-                var invalidCharacters = new char[] { '?', '.', '/', '<', '>', '\\', '|', '*', ':', '"' };
+                var invalidCharacters = new char[] { '?', '/', '<', '>', '\\', '|', '*', ':', '"' };
                 return this.RenameResultSequence.NewName.IndexOfAny(invalidCharacters) >= 0;
             }
         }
