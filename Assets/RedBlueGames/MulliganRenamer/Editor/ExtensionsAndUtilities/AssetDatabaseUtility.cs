@@ -100,7 +100,8 @@ namespace RedBlueGames.MulliganRenamer
             foreach (var filePath in filePaths)
             {
                 // Textures have sprites in them. Add all assets in this file, including the file itself.
-                var assetRelativePath = filePath.Substring(filePath.IndexOf("Assets/"));
+                var pathParts = filePath.Split('/');
+                var assetRelativePath = (pathParts.Length > 0) ? filePath.Substring(filePath.IndexOf(pathParts[0])) : filePath;
 
                 // Workaround: Scene assets for some reason error if you load them via LoadAllAssets.
                 // (does it maybe try to load the contents inside the scene?)
