@@ -99,20 +99,16 @@ namespace RedBlueGames.MulliganRenamer
             var assetsAtPath = new List<UnityEngine.Object>();
             foreach (var filePath in filePaths)
             {
-                // Textures have sprites in them. Add all assets in this file, including the file itself.
-                var pathParts = filePath.Split('/');
-                var assetRelativePath = (pathParts.Length > 0) ? filePath.Substring(filePath.IndexOf(pathParts[0])) : filePath;
-
                 // Workaround: Scene assets for some reason error if you load them via LoadAllAssets.
                 // (does it maybe try to load the contents inside the scene?)
-                if (System.IO.Path.GetExtension(assetRelativePath) == ".unity")
+                if (System.IO.Path.GetExtension(filePath) == ".unity")
                 {
-                    var sceneAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetRelativePath);
+                    var sceneAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(filePath);
                     assetsAtPath.Add(sceneAsset);
                 }
                 else
                 {
-                    var subAssets = AssetDatabase.LoadAllAssetsAtPath(assetRelativePath);
+                    var subAssets = AssetDatabase.LoadAllAssetsAtPath(filePath);
                     foreach (var subAsset in subAssets)
                     {
                         // It's possible for user created assets to include nulls...
