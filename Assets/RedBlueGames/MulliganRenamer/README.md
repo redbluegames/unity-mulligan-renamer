@@ -17,7 +17,32 @@ This ReadMe provides a quick overview of the tool. For more detailed documentati
 
 Development on Mulligan Renamer is supported through purchases on the Asset Store, as well as through volunteer time of contributors. Please consider supporting further development by purchasing it through the [Unity Asset Store](https://assetstore.unity.com/packages/slug/99843).
 
-### Through Github
+### Through Github as a UPM Package
+
+In your `Project/Packages/manifest.json`, add the following as a dependency:
+
+```
+"com.redbluegames.mulligan": "https://github.com/redbluegames/unity-mulligan-renamer.git?path=/Assets/RedBlueGames/MulliganRenamer"
+```
+
+Your file will look something like this:
+```
+{
+  "dependencies": {
+    "com.redbluegames.mulligan": "https://github.com/redbluegames/unity-mulligan-renamer.git?path=/Assets/RedBlueGames/MulliganRenamer",
+    "com.unity.textmeshpro": "2.1.1",
+    "com.unity.timeline": "1.2.17",
+    "com.unity.ugui": "1.0.0",
+  },
+  "testables": [
+    "com.unity.inputsystem"
+  ]
+}
+```
+
+Save. When you open Unity it should automatically download Mulligan and add it to your Packages folder in the project.
+
+### Through Github as .unitypackage
 
 To install this package follow these steps:
 
