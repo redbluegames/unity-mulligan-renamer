@@ -25,6 +25,8 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
+    using System.Text.RegularExpressions;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Handles drawing the PreferencesWindow in a generic way that works both in the
@@ -232,11 +234,25 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.InsertionTextColor,
             };
 
+            // === === === === ===
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Insertion));
-            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleInserted"), DiffOperation.Insertion));
+            string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
+            Regex regex = new Regex(@"{+\d+}+");
+            MatchCollection matches = regex.Matches(translatedText);
+            List<Diff> subStrings = new List<Diff>();
+            
+            foreach (Match match in matches)
+            {
+                subStrings.Add(new Diff(translatedText.Substring(0, translatedText.IndexOf(match.Value)), DiffOperation.Equal));
+                subStrings.Add(new Diff("!", DiffOperation.Insertion));
+                translatedText = translatedText.Remove(0, translatedText.IndexOf(match.Value) + match.Value.Length);
+            }
+
+            foreach (Diff currentString in subStrings)
+            {
+                renameResult.Add(currentString);
+            }
+            // === === === === ===
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
         }
@@ -251,11 +267,25 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.DeletionTextColor,
             };
 
+            // === === === === ===
             var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Deletion));
-            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleDeleted"), DiffOperation.Deletion));
+            string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
+            Regex regex = new Regex(@"{+\d+}+");
+            MatchCollection matches = regex.Matches(translatedText);
+            List<Diff> subStrings = new List<Diff>();
+            
+            foreach (Match match in matches)
+            {
+                subStrings.Add(new Diff(translatedText.Substring(0, translatedText.IndexOf(match.Value)), DiffOperation.Equal));
+                subStrings.Add(new Diff("!", DiffOperation.Deletion));
+                translatedText = translatedText.Remove(0, translatedText.IndexOf(match.Value) + match.Value.Length);
+            }
+
+            foreach (Diff currentString in subStrings)
+            {
+                renameResult.Add(currentString);
+            }
+            // === === === === ===
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }
