@@ -267,7 +267,7 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.DeletionTextColor,
             };
 
-            // === === === === ===
+            // === === === === === ===
             var renameResult = new RenameResult();
             string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
             Regex regex = new Regex(@"{+\d+}+");
@@ -285,7 +285,7 @@ namespace RedBlueGames.MulliganRenamer
             {
                 renameResult.Add(currentString);
             }
-            // === === === === ===
+            // === === === === === ===
 
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
         }
