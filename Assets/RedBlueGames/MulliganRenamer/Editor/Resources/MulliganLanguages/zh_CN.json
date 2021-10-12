@@ -588,6 +588,10 @@
             "value": "首选项"
         },
         {
+            "key": "exampleTextWithInsertedWords",
+            "value": "这就是 {0} 带字 {1}"
+        },
+        {
             "key": "exampleThisIs",
             "value": "这就是"
         },

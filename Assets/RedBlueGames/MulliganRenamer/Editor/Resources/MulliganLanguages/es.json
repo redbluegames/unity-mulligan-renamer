@@ -588,6 +588,10 @@
             "value": "Preferencias"
         },
         {
+            "key": "exampleTextWithInsertedWords",
+            "value": "Esto es {0} con palabras {1}"
+        },
+        {
             "key": "exampleThisIs",
             "value": "Esto es"
         },
