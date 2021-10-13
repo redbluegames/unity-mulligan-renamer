@@ -234,26 +234,7 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.InsertionTextColor,
             };
 
-            // === === === === ===
-            var renameResult = new RenameResult();
-            string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
-            Regex regex = new Regex(@"{+\d+}+");
-            MatchCollection matches = regex.Matches(translatedText);
-            List<Diff> subStrings = new List<Diff>();
-            
-            foreach (Match match in matches)
-            {
-                subStrings.Add(new Diff(translatedText.Substring(0, translatedText.IndexOf(match.Value)), DiffOperation.Equal));
-                subStrings.Add(new Diff("!", DiffOperation.Insertion));
-                translatedText = translatedText.Remove(0, translatedText.IndexOf(match.Value) + match.Value.Length);
-            }
-
-            foreach (Diff currentString in subStrings)
-            {
-                renameResult.Add(currentString);
-            }
-            // === === === === ===
-
+            var renameResult = CreateSampleTextForDiffOp(new string[] {"exampleSampleText", "exampleInserted"}, DiffOperation.Insertion);
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
         }
 
@@ -267,17 +248,25 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.DeletionTextColor,
             };
 
-            // === === === === ===
+            var renameResult = CreateSampleTextForDiffOp(new string[] {"exampleSampleText", "exampleDeleted"}, DiffOperation.Deletion);
+            MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
+        }
+
+        private static RenameResult CreateSampleTextForDiffOp(string[] keys, DiffOperation diffOp)
+        {
             var renameResult = new RenameResult();
             string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
             Regex regex = new Regex(@"{+\d+}+");
             MatchCollection matches = regex.Matches(translatedText);
             List<Diff> subStrings = new List<Diff>();
-            
-            foreach (Match match in matches)
+
+            for(int i = 0; i < matches.Count; i++)
             {
+                var match = matches[i];
                 subStrings.Add(new Diff(translatedText.Substring(0, translatedText.IndexOf(match.Value)), DiffOperation.Equal));
-                subStrings.Add(new Diff("!", DiffOperation.Deletion));
+
+                var stringToInsert = i >= 0 && i < keys.Length ? LocalizationManager.Instance.GetTranslation(keys[i]) : "modified";
+                subStrings.Add(new Diff(stringToInsert, diffOp));
                 translatedText = translatedText.Remove(0, translatedText.IndexOf(match.Value) + match.Value.Length);
             }
 
@@ -285,9 +274,8 @@ namespace RedBlueGames.MulliganRenamer
             {
                 renameResult.Add(currentString);
             }
-            // === === === === ===
 
-            MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
+            return renameResult;
         }
     }
 }

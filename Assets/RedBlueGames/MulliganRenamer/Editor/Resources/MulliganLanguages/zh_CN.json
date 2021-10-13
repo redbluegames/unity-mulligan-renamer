@@ -592,16 +592,8 @@
             "value": "这就是 {0} 带字 {1}"
         },
         {
-            "key": "exampleThisIs",
-            "value": "这就是"
-        },
-        {
             "key": "exampleSampleText",
             "value": "例文"
-        },
-        {
-            "key": "exampleWithWords",
-            "value": "带字"
         },
         {
             "key": "exampleInserted",

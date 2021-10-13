@@ -592,16 +592,8 @@
             "value": "Esse é {0} com palavras {1}"
         },
         {
-            "key": "exampleThisIs",
-            "value": "Esse é"
-        },
-        {
             "key": "exampleSampleText",
             "value": "um texto exemplo"
-        },
-        {
-            "key": "exampleWithWords",
-            "value": "com palavras"
         },
         {
             "key": "exampleInserted",
