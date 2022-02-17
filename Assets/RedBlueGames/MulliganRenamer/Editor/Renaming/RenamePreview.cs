@@ -109,6 +109,12 @@ namespace RedBlueGames.MulliganRenamer
                     return false;
                 }
 
+                // Sprites are actually allowed to have all the characters that are considered invalid in Assets
+                if(this.ObjectToRename is Sprite)
+                {
+                    return false;
+                }
+
                 var invalidCharacters = new char[] { '?', '/', '<', '>', '\\', '|', '*', ':', '"' };
                 return this.RenameResultSequence.NewName.IndexOfAny(invalidCharacters) >= 0;
             }
