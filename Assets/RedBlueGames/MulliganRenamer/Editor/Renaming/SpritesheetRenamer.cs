@@ -150,7 +150,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string ReplaceFileIDRecycleNames(string metafileText, string oldName, string newName)
         {
-            string fileIDPattern = "([\\d]{8}: )" + oldName + "(\r?\n)";
+            string fileIDPattern = "([\\d]{8}: )" + System.Text.RegularExpressions.Regex.Escape(oldName) + "(\r?\n)";
             var fileIDRegex = new System.Text.RegularExpressions.Regex(fileIDPattern);
             string replacementText = "${1}" + newName + "${2}";
             return fileIDRegex.Replace(metafileText, replacementText);
@@ -158,7 +158,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string ReplaceSpriteData(string metafileText, string oldName, string newName)
         {
-            string spritenamePattern = "(name: )" + oldName + "(\r?\n)";
+            string spritenamePattern = "(name: )" + System.Text.RegularExpressions.Regex.Escape(oldName) + "(\r?\n)";
             var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
             string replacementText = "${1}" + newName + "${2}";
             return spritenameRegex.Replace(metafileText, replacementText);
@@ -166,7 +166,7 @@ namespace RedBlueGames.MulliganRenamer
 
         private static string ReplaceInternalIDToNameTable(string metafileText, string oldName, string newName)
         {
-            string spritenamePattern = "(second: )" + oldName + "(\r?\n)";
+            string spritenamePattern = "(second: )" + System.Text.RegularExpressions.Regex.Escape(oldName) + "(\r?\n)";
             var spritenameRegex = new System.Text.RegularExpressions.Regex(spritenamePattern);
             string replacementText = "${1}" + newName + "${2}";
             return spritenameRegex.Replace(metafileText, replacementText);

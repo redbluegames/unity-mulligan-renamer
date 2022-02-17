@@ -25,6 +25,8 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
+    using System.Text.RegularExpressions;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Handles drawing the PreferencesWindow in a generic way that works both in the
@@ -232,12 +234,7 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.InsertionTextColor,
             };
 
-            var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Insertion));
-            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleInserted"), DiffOperation.Insertion));
-
+            var renameResult = CreateSampleTextForDiffOp(new string[] {"exampleSampleText", "exampleInserted"}, DiffOperation.Insertion);
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, false, diffLabelStyle, SampleDiffLabelStyle);
         }
 
@@ -251,13 +248,34 @@ namespace RedBlueGames.MulliganRenamer
                 DiffTextColor = preferences.DeletionTextColor,
             };
 
-            var renameResult = new RenameResult();
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleThisIs") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleSampleText"), DiffOperation.Deletion));
-            renameResult.Add(new Diff(" " + LocalizationManager.Instance.GetTranslation("exampleWithWords") + " ", DiffOperation.Equal));
-            renameResult.Add(new Diff(LocalizationManager.Instance.GetTranslation("exampleDeleted"), DiffOperation.Deletion));
-
+            var renameResult = CreateSampleTextForDiffOp(new string[] {"exampleSampleText", "exampleDeleted"}, DiffOperation.Deletion);
             MulliganEditorGUIUtilities.DrawDiffLabel(rect, renameResult, true, diffLabelStyle, SampleDiffLabelStyle);
+        }
+
+        private static RenameResult CreateSampleTextForDiffOp(string[] keys, DiffOperation diffOp)
+        {
+            var renameResult = new RenameResult();
+            string translatedText = LocalizationManager.Instance.GetTranslation("exampleTextWithInsertedWords");
+            Regex regex = new Regex(@"{+\d+}+");
+            MatchCollection matches = regex.Matches(translatedText);
+            List<Diff> subStrings = new List<Diff>();
+
+            for(int i = 0; i < matches.Count; i++)
+            {
+                var match = matches[i];
+                subStrings.Add(new Diff(translatedText.Substring(0, translatedText.IndexOf(match.Value)), DiffOperation.Equal));
+
+                var stringToInsert = i >= 0 && i < keys.Length ? LocalizationManager.Instance.GetTranslation(keys[i]) : "modified";
+                subStrings.Add(new Diff(stringToInsert, diffOp));
+                translatedText = translatedText.Remove(0, translatedText.IndexOf(match.Value) + match.Value.Length);
+            }
+
+            foreach (Diff currentString in subStrings)
+            {
+                renameResult.Add(currentString);
+            }
+
+            return renameResult;
         }
     }
 }
