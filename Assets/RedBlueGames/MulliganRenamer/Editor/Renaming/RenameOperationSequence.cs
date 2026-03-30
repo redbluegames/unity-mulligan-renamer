@@ -34,6 +34,7 @@ namespace RedBlueGames.MulliganRenamer
     /// RenameOperations are applied to a string to get a resultant name.
     /// </summary>
     /// <typeparam name="T">The type of RenameOperation contained in the sequence</typeparam>
+    [System.Serializable]
     public class RenameOperationSequence<T> : IList<T> where T : IRenameOperation
     {
         private const string VersionTag = "[Version = 1]";

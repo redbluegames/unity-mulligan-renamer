@@ -103,7 +103,11 @@ namespace RedBlueGames.MulliganRenamer
                     // Decrement progress bar count because we'll increment it later when we do the deferred objects.
                     --progressBarStep;
                     deferredRenames.Add(assetToRename);
+#if UNITY_6000_5_OR_NEWER
+                    newName = assetToRename.NamedObject.GetEntityId().ToString();
+#else
                     newName = assetToRename.NamedObject.GetInstanceID().ToString();
+#endif
                 }
                 else
                 {
