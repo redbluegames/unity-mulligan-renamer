@@ -68,12 +68,14 @@ To Add a language:
 1. Upload a new release to the GitHub page. (Duplicate the previous entry as needed.)
 
 ### Adding a Release to Unity Asset Store ###
-1. After adding the GitHub release, make a new branch for the asset store release.
-1. Open the new branch on Windows, inside Unity 5.5.5.
+1. After adding the GitHub release, make a new branch for the asset store release. (name ex: asset-store-v1.7.8-unity-2018.4.36)
+1. Open the new branch using Unity 2018.4.36 - This is the earliest version of Unity we will support, and it's recommended by Unity to submit a package from this release.
 1. Delete the Tests folders.
-1. Push to the asset store branch.
-1. Make a new release on the Asset Store page
-1. Publish using Asset Store tools inside Unity.
+3. Push to the asset store branch.
+4. Make a new release on the Asset Store page.
+5. Publish using Asset Store tools inside Unity. These tools are git-ignored. You will need to download them if you don't have them.
+<img width="576" alt="image" src="https://user-images.githubusercontent.com/398377/154988813-5cc84482-38d6-4330-a803-20ba282e6674.png">
+
 
 ## Debugging ##
 Left SHIFT is the general debug key
