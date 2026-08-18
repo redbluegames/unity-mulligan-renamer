@@ -905,11 +905,11 @@ namespace RedBlueGames.MulliganRenamer
                 color = new AddStringOperationDrawer().HighlightColor;
                 if (RBPackageSettings.IsGitHubRelease)
                 {
-                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForSupport"));
+                    reviewPrompt = string.Format("<color=white>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForSupport"));
                 }
                 else
                 {
-                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForReview"));
+                    reviewPrompt = string.Format("<color=white>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForReview"));
                 }
             }
             else
@@ -918,11 +918,11 @@ namespace RedBlueGames.MulliganRenamer
 
                 if (RBPackageSettings.IsGitHubRelease)
                 {
-                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForUsing"));
+                    reviewPrompt = string.Format("<color=white>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForUsing"));
                 }
                 else
                 {
-                    reviewPrompt = string.Format("<color=FFFFFFF>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForPurchasing"));
+                    reviewPrompt = string.Format("<color=white>{0}</color>", LocalizationManager.Instance.GetTranslation("thankYouForPurchasing"));
                 }
             }
 
