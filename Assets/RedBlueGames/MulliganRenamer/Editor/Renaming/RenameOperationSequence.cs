@@ -28,6 +28,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.Linq;
     using System.Text.RegularExpressions;
     using UnityEngine;
+    using Unity.Scripting.LifecycleManagement;
 
     /// <summary>
     /// RenameOperationSequences are a collection of RenameOperations where the order is the order in which
@@ -39,7 +40,9 @@ namespace RedBlueGames.MulliganRenamer
     {
         private const string VersionTag = "[Version = 1]";
 
+        [NoAutoStaticsCleanup]
         private static bool Initialized = false;
+        [NoAutoStaticsCleanup]
         private static Dictionary<string, System.Type> UnversionedOperationSerializedKeys;
 
 

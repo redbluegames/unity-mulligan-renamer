@@ -25,6 +25,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
+    using Unity.Scripting.LifecycleManagement;
     using System.Text.RegularExpressions;
     using System.Collections.Generic;
 
@@ -35,6 +36,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class MulliganUserPreferencesWindow : EditorWindow
     {
+        [NoAutoStaticsCleanup]
         private static GUIStyle sampleDiffLabelStyle;
 
         private const float LabelWidth = 200.0f;
