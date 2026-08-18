@@ -31,9 +31,9 @@ namespace RedBlueGames.MulliganRenamer
     /// <see cref="RenameResult"/> contains the diffs and helper functions to get string 
     /// results for string operations.
     /// </summary>
+    [NoAutoStaticsCleanup]
     public class RenameResult : ICollection<Diff>, IEnumerable<Diff>
     {
-        [NoAutoStaticsCleanup]
         public static readonly RenameResult Empty = new RenameResult();
 
         private List<Diff> diffs;

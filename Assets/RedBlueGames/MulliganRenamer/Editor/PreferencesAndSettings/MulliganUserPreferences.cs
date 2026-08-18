@@ -32,9 +32,9 @@ namespace RedBlueGames.MulliganRenamer
     /// Maintains serializable information about a user's session in Mulligan.
     /// </summary>
     [System.Serializable]
+    [NoAutoStaticsCleanup]
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
-        [NoAutoStaticsCleanup]
         private static MulliganUserPreferences LoadedPreferenceInstance;
 
         private const string UserPreferencesPrefKey = "RedBlueGames.MulliganRenamer.UserPreferences";

@@ -29,12 +29,12 @@ namespace RedBlueGames.MulliganRenamer
     /// <summary>
     /// Asset postprocessor events that are invoked by the AssetPostprocessorEventsDispatcher.
     /// </summary>
+    [NoAutoStaticsCleanup]
     public static class AssetPostprocessorEvents
     {
         /// <summary>
         /// Assets have been reimported
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static UnityEngine.Events.UnityEvent AssetsReimported;
 
         static AssetPostprocessorEvents()

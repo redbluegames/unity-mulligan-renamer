@@ -33,9 +33,9 @@ namespace RedBlueGames.MulliganRenamer
     /// RenameOperation used to replace substrings from the rename string.
     /// </summary>
     [System.Serializable]
+    [NoAutoStaticsCleanup]
     public class RemoveCharactersOperation : IRenameOperation
     {
-        [NoAutoStaticsCleanup]
         private static readonly RemoveCharactersOperation.RenameOptions Symbols = new RemoveCharactersOperation.RenameOptions()
         {
             CharactersToRemove = "^\\s\\w",
@@ -43,7 +43,6 @@ namespace RedBlueGames.MulliganRenamer
             IsCaseSensitive = false
         };
 
-        [NoAutoStaticsCleanup]
         private static readonly RemoveCharactersOperation.RenameOptions Numbers = new RemoveCharactersOperation.RenameOptions()
         {
             CharactersToRemove = "\\d",
@@ -51,7 +50,6 @@ namespace RedBlueGames.MulliganRenamer
             IsCaseSensitive = false
         };
 
-        [NoAutoStaticsCleanup]
         private static readonly RemoveCharactersOperation.RenameOptions Whitespace = new RemoveCharactersOperation.RenameOptions()
         {
             CharactersToRemove = "\\s",
@@ -59,7 +57,6 @@ namespace RedBlueGames.MulliganRenamer
             IsCaseSensitive = false
         };
 
-        [NoAutoStaticsCleanup]
         private static readonly Dictionary<PresetID, RenameOptions> optionsPresets = new Dictionary<PresetID, RenameOptions>()
         {
             {PresetID.Numbers, Numbers},
