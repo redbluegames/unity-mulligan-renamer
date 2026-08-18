@@ -24,6 +24,7 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using UnityEngine;
+    using Unity.Scripting.LifecycleManagement;
 
     /// <summary>
     /// Asset postprocessor events that are invoked by the AssetPostprocessorEventsDispatcher.
@@ -33,6 +34,7 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Assets have been reimported
         /// </summary>
+        [NoAutoStaticsCleanup]
         public static UnityEngine.Events.UnityEvent AssetsReimported;
 
         static AssetPostprocessorEvents()

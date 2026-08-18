@@ -25,6 +25,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using UnityEngine;
+    using Unity.Scripting.LifecycleManagement;
 
     /// <summary>
     /// <see cref="RenameResult"/> contains the diffs and helper functions to get string 
@@ -32,6 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class RenameResult : ICollection<Diff>, IEnumerable<Diff>
     {
+        [NoAutoStaticsCleanup]
         public static readonly RenameResult Empty = new RenameResult();
 
         private List<Diff> diffs;

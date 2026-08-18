@@ -29,6 +29,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
+    using Unity.Scripting.LifecycleManagement;
 
     /// <summary>
     /// Manages the loading and serving of languages. Use this to get translated strings
@@ -36,6 +37,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     public class LocalizationManager
     {
+        [NoAutoStaticsCleanup]
         private static LocalizationManager _Instance;
 
         private const string LanguageFoldername = "MulliganLanguages";

@@ -28,6 +28,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using UnityEditor;
+    using Unity.Scripting.LifecycleManagement;
 
     static class MulliganSettingsProvider
     {
@@ -41,9 +42,10 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-
+        [NoAutoStaticsCleanup]
         private static MulliganUserPreferences ActivePreferences;
 
+        [NoAutoStaticsCleanup]
         private static LanguageRetriever LanguageRetriever;
 
         [SettingsProvider]
