@@ -35,9 +35,9 @@ namespace RedBlueGames.MulliganRenamer
     /// Manages the loading and serving of languages. Use this to get translated strings
     /// for the user's current language.
     /// </summary>
+    [NoAutoStaticsCleanup]
     public class LocalizationManager
     {
-        [NoAutoStaticsCleanup]
         private static LocalizationManager _Instance;
 
         private const string LanguageFoldername = "MulliganLanguages";

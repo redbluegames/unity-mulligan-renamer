@@ -34,9 +34,9 @@ namespace RedBlueGames.MulliganRenamer
     /// SettingsProvider version of Preferences (native Unity Preferences menu), as well as
     /// a custom window for older versions.
     /// </summary>
+    [NoAutoStaticsCleanup]
     public class MulliganUserPreferencesWindow : EditorWindow
     {
-        [NoAutoStaticsCleanup]
         private static GUIStyle sampleDiffLabelStyle;
 
         private const float LabelWidth = 200.0f;

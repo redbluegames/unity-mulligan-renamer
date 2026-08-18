@@ -36,13 +36,12 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     /// <typeparam name="T">The type of RenameOperation contained in the sequence</typeparam>
     [System.Serializable]
+    [NoAutoStaticsCleanup]
     public class RenameOperationSequence<T> : IList<T> where T : IRenameOperation
     {
         private const string VersionTag = "[Version = 1]";
 
-        [NoAutoStaticsCleanup]
         private static bool Initialized = false;
-        [NoAutoStaticsCleanup]
         private static Dictionary<string, System.Type> UnversionedOperationSerializedKeys;
 
 

@@ -30,6 +30,7 @@ namespace RedBlueGames.MulliganRenamer
     using UnityEditor;
     using Unity.Scripting.LifecycleManagement;
 
+    [NoAutoStaticsCleanup]
     static class MulliganSettingsProvider
     {
         // Settings providers were added in 2018.3. No support for older versions for now.
@@ -42,10 +43,8 @@ namespace RedBlueGames.MulliganRenamer
             }
         }
 
-        [NoAutoStaticsCleanup]
         private static MulliganUserPreferences ActivePreferences;
 
-        [NoAutoStaticsCleanup]
         private static LanguageRetriever LanguageRetriever;
 
         [SettingsProvider]

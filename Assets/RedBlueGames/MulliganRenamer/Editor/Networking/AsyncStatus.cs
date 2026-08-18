@@ -30,6 +30,7 @@ namespace RedBlueGames.MulliganRenamer
     /// can be created to denote specific types of failure. A generic Failure status is
     /// also included below but note that it may not be the only type of failure assigned.
     /// </summary>
+    [NoAutoStaticsCleanup]
     public sealed class AsyncStatus
     {
         public AsyncStatus(string description) { this.Description = description; }
@@ -42,32 +43,27 @@ namespace RedBlueGames.MulliganRenamer
         /// <summary>
         /// Status result for async operations that have not completed.
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static readonly AsyncStatus Pending = new AsyncStatus("Pending");
 
         /// <summary>
         /// Status result for successfully completed async operations.
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static readonly AsyncStatus Success = new AsyncStatus("Success");
 
         /// <summary>
         /// Status result for canceled async operations.
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static readonly AsyncStatus Canceled = new AsyncStatus("Canceled");
 
         /// <summary>
         /// Status result for a timedout async operations.
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static readonly AsyncStatus Timeout = new AsyncStatus("Timeout");
 
         /// <summary>
         /// Status result for a failed async operations. Note that other custom failure
         /// types may be created, so *avoid* (op == AsyncOp.Failed) style checks.
         /// </summary>
-        [NoAutoStaticsCleanup]
         public static readonly AsyncStatus Failed = new AsyncStatus("Failed");
 
         public override string ToString()

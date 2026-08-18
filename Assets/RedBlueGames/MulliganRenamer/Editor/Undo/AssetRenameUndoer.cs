@@ -34,14 +34,12 @@ namespace RedBlueGames.MulliganRenamer
     /// Rename undoer handles undoing renames of Assets, since they are not added to the Undo stack natively.
     /// </summary>
     [InitializeOnLoad]
+    [NoAutoStaticsCleanup]
     public static class AssetRenameUndoer
     {
-        [NoAutoStaticsCleanup]
         private static readonly string MomentNameBeforeRename = "Before";
-        [NoAutoStaticsCleanup]
         private static readonly string MomentNameAfterRename = "After";
 
-        [NoAutoStaticsCleanup]
         private static List<AssetRenameUndoMoment> undoMoments;
 
         static AssetRenameUndoer()
