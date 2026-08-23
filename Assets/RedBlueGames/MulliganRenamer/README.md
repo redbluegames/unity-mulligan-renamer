@@ -97,6 +97,8 @@ Contributing to the project is welcome. You can do so by adding GitHub issues, o
 
 
 ## Contributors and Credits
+**Cleanup, Keeping the lights on** - [nnra6864](https://github.com/nnra6864/)
+
 **Portuguese Translation and Localization** - [Mukarillo](https://github.com/Mukarillo)
 
 **Spanish Translation** - [Jesús Dávalos](https://github.com/jesus-davalos)
