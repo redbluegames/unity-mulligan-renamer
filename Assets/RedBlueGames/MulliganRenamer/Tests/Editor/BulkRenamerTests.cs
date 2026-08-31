@@ -1,4 +1,4 @@
-﻿/* MIT License
+/* MIT License
 
 Copyright (c) 2016 Edward Rowe, RedBlueGames
 
@@ -613,7 +613,20 @@ namespace RedBlueGames.MulliganRenamer
             importer.isReadable = true;
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Multiple;
-            var spriteMetaData = new SpriteMetaData[config.CellsPerSide * config.CellsPerSide];
+
+            ApplySpriteDataToImporter(importer, config, cellSize);
+
+            importer.SaveAndReimport();
+
+            return textureWithSprites;
+        }
+
+        private void ApplySpriteDataToImporter(TextureImporter importer, SpriteSheetGenerationConfig config, int cellSize)
+        {
+            var cellCount = config.CellsPerSide * config.CellsPerSide;
+            var names = new string[cellCount];
+            var rects = new Rect[cellCount];
+
             for (int i = 0; i < config.CellsPerSide; ++i)
             {
                 for (int j = 0; j < config.CellsPerSide; ++j)
@@ -621,17 +634,28 @@ namespace RedBlueGames.MulliganRenamer
                     var cellIndex = i * config.CellsPerSide + j;
                     var x = i * cellSize;
                     var y = j * cellSize;
-                    spriteMetaData[cellIndex].rect = new Rect(x, y, cellSize, cellSize);
                     var spriteCount = config.UseZeroBasedIndexing ? cellIndex : cellIndex + 1;
-                    var name = string.Concat(config.NamePrefix, spriteCount.ToString());
-                    spriteMetaData[cellIndex].name = name;
+                    
+                    names[cellIndex] = string.Concat(config.NamePrefix, spriteCount.ToString());
+                    rects[cellIndex] = new Rect(x, y, cellSize, cellSize);
                 }
             }
 
-            importer.spritesheet = spriteMetaData;
-            importer.SaveAndReimport();
-
-            return textureWithSprites;
+            var factory = new UnityEditor.U2D.Sprites.SpriteDataProviderFactories();
+            factory.Init();
+            var dataProvider = factory.GetSpriteEditorDataProviderFromObject(importer);
+            dataProvider.InitSpriteEditorDataProvider();
+            
+            var spriteRects = new UnityEditor.SpriteRect[cellCount];
+            for (int i = 0; i < cellCount; ++i)
+            {
+                var spriteRect = new UnityEditor.SpriteRect();
+                spriteRect.rect = rects[i];
+                spriteRect.name = names[i];
+                spriteRects[i] = spriteRect;
+            }
+            dataProvider.SetSpriteRects(spriteRects);
+            dataProvider.Apply();
         }
 
         private class SpriteSheetGenerationConfig

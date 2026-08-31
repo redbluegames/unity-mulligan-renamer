@@ -1,7 +1,8 @@
 {
     "name": "RBG.Mulligan.Tests",
     "references": [
-        "RBG.Mulligan"
+        "RBG.Mulligan",
+        "Unity.2D.Sprite.Editor"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
