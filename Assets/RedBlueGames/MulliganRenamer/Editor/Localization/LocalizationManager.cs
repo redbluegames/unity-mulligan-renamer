@@ -29,13 +29,17 @@ namespace RedBlueGames.MulliganRenamer
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
 
     /// <summary>
     /// Manages the loading and serving of languages. Use this to get translated strings
     /// for the user's current language.
     /// </summary>
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     public class LocalizationManager
     {
         private static LocalizationManager _Instance;

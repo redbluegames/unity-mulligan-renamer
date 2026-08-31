@@ -28,9 +28,13 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using UnityEditor;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
 
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     static class MulliganSettingsProvider
     {
         // Settings providers were added in 2018.3. No support for older versions for now.

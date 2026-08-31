@@ -24,12 +24,16 @@ SOFTWARE.
 namespace RedBlueGames.MulliganRenamer
 {
     using UnityEngine;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
 
     /// <summary>
     /// Asset postprocessor events that are invoked by the AssetPostprocessorEventsDispatcher.
     /// </summary>
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     public static class AssetPostprocessorEvents
     {
         /// <summary>

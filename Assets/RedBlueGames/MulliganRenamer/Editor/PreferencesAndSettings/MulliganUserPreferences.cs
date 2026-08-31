@@ -26,13 +26,17 @@ namespace RedBlueGames.MulliganRenamer
     using System.Collections.Generic;
     using UnityEditor;
     using UnityEngine;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
 
     /// <summary>
     /// Maintains serializable information about a user's session in Mulligan.
     /// </summary>
     [System.Serializable]
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     public class MulliganUserPreferences : ISerializationCallbackReceiver
     {
         private static MulliganUserPreferences LoadedPreferenceInstance;

@@ -25,7 +25,9 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
     using System.Text.RegularExpressions;
     using System.Collections.Generic;
 
@@ -34,7 +36,9 @@ namespace RedBlueGames.MulliganRenamer
     /// SettingsProvider version of Preferences (native Unity Preferences menu), as well as
     /// a custom window for older versions.
     /// </summary>
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     public class MulliganUserPreferencesWindow : EditorWindow
     {
         private static GUIStyle sampleDiffLabelStyle;

@@ -27,13 +27,17 @@ namespace RedBlueGames.MulliganRenamer
     using System.Text.RegularExpressions;
     using UnityEditor;
     using UnityEngine;
+    #if UNITY_2023_1_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
+#endif
 
     /// <summary>
     /// RenameOperation used to replace substrings from the rename string.
     /// </summary>
     [System.Serializable]
+#if UNITY_2023_1_OR_NEWER
     [NoAutoStaticsCleanup]
+#endif
     public class RemoveCharactersOperation : IRenameOperation
     {
         private static readonly RemoveCharactersOperation.RenameOptions Symbols = new RemoveCharactersOperation.RenameOptions()
