@@ -6,6 +6,7 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 /Assets/AssetStoreTools*
+/Packages/com.unity.asset-store-tools/
 /.vs/
 
 # MacOS ignores
