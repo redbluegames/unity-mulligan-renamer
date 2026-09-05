@@ -28,7 +28,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.Linq;
     using System.Text.RegularExpressions;
     using UnityEngine;
-    #if UNITY_2023_1_OR_NEWER
+    #if UNITY_6000_5_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
 #endif
 
@@ -38,7 +38,7 @@ namespace RedBlueGames.MulliganRenamer
     /// </summary>
     /// <typeparam name="T">The type of RenameOperation contained in the sequence</typeparam>
     [System.Serializable]
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
     public class RenameOperationSequence<T> : IList<T> where T : IRenameOperation

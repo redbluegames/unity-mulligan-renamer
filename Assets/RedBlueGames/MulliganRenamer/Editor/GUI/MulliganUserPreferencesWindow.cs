@@ -25,7 +25,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using UnityEditor;
     using UnityEngine;
-    #if UNITY_2023_1_OR_NEWER
+    #if UNITY_6000_5_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
 #endif
     using System.Text.RegularExpressions;
@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
     /// SettingsProvider version of Preferences (native Unity Preferences menu), as well as
     /// a custom window for older versions.
     /// </summary>
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
     public class MulliganUserPreferencesWindow : EditorWindow

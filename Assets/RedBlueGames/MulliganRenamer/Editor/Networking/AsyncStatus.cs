@@ -23,7 +23,7 @@ SOFTWARE.
 
 namespace RedBlueGames.MulliganRenamer
 {
-    #if UNITY_2023_1_OR_NEWER
+    #if UNITY_6000_5_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
 #endif
 
@@ -32,7 +32,7 @@ namespace RedBlueGames.MulliganRenamer
     /// can be created to denote specific types of failure. A generic Failure status is
     /// also included below but note that it may not be the only type of failure assigned.
     /// </summary>
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
     public sealed class AsyncStatus

@@ -25,7 +25,7 @@ namespace RedBlueGames.MulliganRenamer
 {
     using System.Collections.Generic;
     using UnityEngine;
-    #if UNITY_2023_1_OR_NEWER
+    #if UNITY_6000_5_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
 #endif
 
@@ -33,7 +33,7 @@ namespace RedBlueGames.MulliganRenamer
     /// <see cref="RenameResult"/> contains the diffs and helper functions to get string 
     /// results for string operations.
     /// </summary>
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
     public class RenameResult : ICollection<Diff>, IEnumerable<Diff>

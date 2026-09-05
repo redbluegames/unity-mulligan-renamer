@@ -28,7 +28,7 @@ namespace RedBlueGames.MulliganRenamer
     using System.Linq;
     using UnityEditor;
     using UnityEngine;
-    #if UNITY_2023_1_OR_NEWER
+    #if UNITY_6000_5_OR_NEWER
     using Unity.Scripting.LifecycleManagement;
 #endif
 
@@ -36,7 +36,7 @@ namespace RedBlueGames.MulliganRenamer
     /// Rename undoer handles undoing renames of Assets, since they are not added to the Undo stack natively.
     /// </summary>
     [InitializeOnLoad]
-#if UNITY_2023_1_OR_NEWER
+#if UNITY_6000_5_OR_NEWER
     [NoAutoStaticsCleanup]
 #endif
     public static class AssetRenameUndoer
